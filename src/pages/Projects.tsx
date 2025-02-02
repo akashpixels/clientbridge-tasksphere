@@ -23,7 +23,7 @@ const Projects = () => {
         .select(`
           *,
           client:clients(business_name),
-          assignees_count:project_assignees(count)
+          assignees_count:project_assignees!inner(count)
         `)
         .order('created_at', { ascending: false });
 
@@ -32,8 +32,14 @@ const Projects = () => {
         throw error;
       }
       
-      console.log('Projects fetched:', data);
-      return data as Project[];
+      // Transform the data to match our type
+      const transformedData = data?.map(project => ({
+        ...project,
+        assignees_count: project.assignees_count?.[0]?.count || 0
+      }));
+      
+      console.log('Projects fetched:', transformedData);
+      return transformedData as Project[];
     },
   });
 
