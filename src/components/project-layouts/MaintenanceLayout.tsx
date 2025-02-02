@@ -19,6 +19,14 @@ interface MaintenanceLayoutProps {
 }
 
 const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
+  // Calculate renewal date (example: 10 days from now)
+  const renewalDate = new Date();
+  renewalDate.setDate(renewalDate.getDate() + 10);
+  const daysUntilRenewal = Math.ceil((renewalDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+
+  // Calculate hours percentage
+  const hoursPercentage = Math.min(Math.round((project.hours_spent / project.hours_allotted) * 100), 100);
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
@@ -41,40 +49,56 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
             </div>
           </div>
           
-          <div className="flex gap-6">
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-500">Subscription</p>
-              <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-                project.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-              }`}>
-                {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
-              </span>
+          <div className="flex gap-8">
+            {/* Subscription Status Card */}
+            <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all min-w-[200px]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-500">Subscription</span>
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                  project.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-500">Renews in {daysUntilRenewal} days</p>
             </div>
-            
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-500">Payment Status</p>
-              <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-                project.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 
-                project.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                project.payment_status === 'overdue' ? 'bg-red-100 text-red-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {project.payment_status.charAt(0).toUpperCase() + project.payment_status.slice(1)}
-              </span>
+
+            {/* Payment Status Card */}
+            <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all min-w-[200px]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-500">Payment</span>
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                  project.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 
+                  project.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {project.payment_status.charAt(0).toUpperCase() + project.payment_status.slice(1)}
+                </span>
+              </div>
+              <p className="text-xs text-gray-500">Next payment: {new Date().toLocaleDateString()}</p>
             </div>
-            
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-500">Due Date</p>
-              <span className="text-sm">
-                {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
-              </span>
-            </div>
-            
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-500">Hours</p>
-              <span className="text-sm">
-                {project.hours_spent} / {project.hours_allotted} hrs
-              </span>
+
+            {/* Hours Progress Card */}
+            <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all min-w-[200px]">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-500">Hours Used</span>
+                  <span className="text-sm font-semibold">{hoursPercentage}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full ${
+                      hoursPercentage > 90 ? 'bg-red-500' :
+                      hoursPercentage > 70 ? 'bg-yellow-500' :
+                      'bg-green-500'
+                    }`}
+                    style={{ width: `${hoursPercentage}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  {project.hours_spent} / {project.hours_allotted} hrs
+                </p>
+              </div>
             </div>
           </div>
         </div>
