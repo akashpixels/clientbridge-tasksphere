@@ -12,6 +12,7 @@ const ProjectDetails = () => {
   const { data: project, isLoading } = useQuery({
     queryKey: ['project', id],
     queryFn: async () => {
+      console.log('Fetching project details for ID:', id);
       const { data, error } = await supabase
         .from('projects')
         .select(`
@@ -24,12 +25,17 @@ const ProjectDetails = () => {
             )
           ),
           status:task_statuses(name, color_hex),
-          layout:project_layouts(id, name)
+          layout:project_layouts!projects_layout_id_fkey(id, name)
         `)
         .eq('id', id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching project:', error);
+        throw error;
+      }
+      
+      console.log('Fetched project data:', data);
       return data;
     },
   });
@@ -42,15 +48,17 @@ const ProjectDetails = () => {
     return <div className="container mx-auto p-6">Project not found</div>;
   }
 
-  // Render the appropriate layout based on the project's layout type
-  const layoutName = project.layout?.name?.toLowerCase() || 'default';
+  console.log('Project layout:', project.layout);
   
-  switch (layoutName) {
-    case 'maintenance':
+  // Render the appropriate layout based on the project's layout type
+  const layoutId = project.layout_id;
+  
+  switch (layoutId) {
+    case 1:
       return <MaintenanceLayout project={project} />;
-    case 'branding':
+    case 2:
       return <BrandingLayout project={project} />;
-    case 'development':
+    case 3:
       return <DevelopmentLayout project={project} />;
     default:
       return <DefaultLayout project={project} />;
