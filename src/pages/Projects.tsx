@@ -56,6 +56,7 @@ const Projects = () => {
   const renderProjectCard = (project: Project) => {
     const gradientStyle = {
       background: `linear-gradient(70deg, ${project.primary_color_hex || '#9b87f5'} 0%, ${project.secondary_color_hex || '#7E69AB'} 40%, #fcfcfc 70%)`,
+      transformOrigin: 'bottom right',
     };
 
     return (
@@ -78,11 +79,6 @@ const Projects = () => {
           <div className="flex-1">
             <div className="mb-4">
               <h3 className="text-lg font-semibold mb-1">{project.name}</h3>
-              <p className="text-sm text-gray-500">
-                {project.client?.user_profiles ? 
-                  `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
-                  : 'No Client'}
-              </p>
             </div>
             <div className="flex gap-2 flex-wrap">
               <span className={`inline-block px-2 py-1 rounded-full text-xs ${
@@ -104,8 +100,15 @@ const Projects = () => {
             </div>
           </div>
 
-          <div className="text-sm text-gray-500 mt-auto">
-            Due Date: {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
+          <div className="mt-auto space-y-2">
+            <p className="text-sm text-gray-500">
+              {project.client?.user_profiles ? 
+                `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
+                : 'No Client'}
+            </p>
+            <div className="text-sm text-gray-500">
+              Due Date: {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
+            </div>
           </div>
         </div>
       </Card>
