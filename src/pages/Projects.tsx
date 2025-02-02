@@ -4,11 +4,23 @@ import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { CalendarDays, Users } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
+
+type Project = Database['public']['Tables']['projects']['Row'] & {
+  client: Database['public']['Tables']['clients']['Row'] | null;
+  assignees: {
+    user: {
+      first_name: string;
+      last_name: string;
+    } | null;
+  }[] | null;
+};
 
 const Projects = () => {
-  const { data: projects, isLoading } = useQuery({
+  const { data: projects, isLoading, error } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
+      console.log('Fetching projects...');
       const { data, error } = await supabase
         .from('projects')
         .select(`
@@ -20,18 +32,23 @@ const Projects = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error('Error fetching projects:', error);
+        throw error;
+      }
+      
+      console.log('Projects fetched:', data);
+      return data as Project[];
     },
   });
 
-  const getProjectStatus = (project: any) => {
+  const getProjectStatus = (project: Project) => {
     if (!project.subscription_status || project.subscription_status === 'inactive') return 'Inactive';
-    if (project.progress >= 100) return 'Completed';
+    if (project.progress && project.progress >= 100) return 'Completed';
     return 'Active';
   };
 
-  const renderProjectCard = (project: any) => (
+  const renderProjectCard = (project: Project) => (
     <Card key={project.id} className="p-6 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-4">
         <div>
@@ -70,6 +87,15 @@ const Projects = () => {
     </Card>
   );
 
+  if (error) {
+    console.error('Error in projects component:', error);
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-red-500">Error loading projects. Please try again later.</div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -84,6 +110,8 @@ const Projects = () => {
         <TabsContent value="active" className="mt-6">
           {isLoading ? (
             <div className="text-center py-8">Loading projects...</div>
+          ) : projects?.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No active projects found.</div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {projects
@@ -95,6 +123,8 @@ const Projects = () => {
         <TabsContent value="completed" className="mt-6">
           {isLoading ? (
             <div className="text-center py-8">Loading projects...</div>
+          ) : projects?.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No completed projects found.</div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {projects
