@@ -1,11 +1,8 @@
 import { cn } from '@/lib/utils';
+import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-const Layout = ({ children }: LayoutProps) => {
+const Layout = () => {
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
       <div className="flex">
@@ -13,7 +10,7 @@ const Layout = ({ children }: LayoutProps) => {
         <main className={cn(
           'flex-1 p-8',
         )}>
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>
