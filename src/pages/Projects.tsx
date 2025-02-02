@@ -4,10 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List, ArrowUpDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 type Project = Database['public']['Tables']['projects']['Row'] & {
   client: {
@@ -23,11 +24,17 @@ type Project = Database['public']['Tables']['projects']['Row'] & {
   } | null;
 };
 
+type SortConfig = {
+  key: string;
+  direction: 'asc' | 'desc';
+} | null;
+
 const Projects = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [subscriptionFilter, setSubscriptionFilter] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortConfig, setSortConfig] = useState<SortConfig>(null);
 
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ['projects'],
@@ -63,6 +70,51 @@ const Projects = () => {
     const matchesStatus = statusFilter === "all" || project.status?.name === statusFilter;
     const matchesSubscription = subscriptionFilter === "all" || project.subscription_status === subscriptionFilter;
     return matchesSearch && matchesStatus && matchesSubscription;
+  });
+
+  const handleSort = (key: string) => {
+    setSortConfig(current => {
+      if (current?.key === key) {
+        if (current.direction === 'asc') {
+          return { key, direction: 'desc' };
+        }
+        return null;
+      }
+      return { key, direction: 'asc' };
+    });
+  };
+
+  const sortedProjects = [...(filteredProjects || [])].sort((a, b) => {
+    if (!sortConfig) return 0;
+
+    let aValue: any;
+    let bValue: any;
+
+    switch (sortConfig.key) {
+      case 'client':
+        aValue = a.client?.user_profiles ? `${a.client.user_profiles.first_name} ${a.client.user_profiles.last_name}` : '';
+        bValue = b.client?.user_profiles ? `${b.client.user_profiles.first_name} ${b.client.user_profiles.last_name}` : '';
+        break;
+      case 'status':
+        aValue = a.status?.name || '';
+        bValue = b.status?.name || '';
+        break;
+      case 'subscription':
+        aValue = a.subscription_status;
+        bValue = b.subscription_status;
+        break;
+      case 'dueDate':
+        aValue = a.due_date || '';
+        bValue = b.due_date || '';
+        break;
+      default:
+        return 0;
+    }
+
+    if (sortConfig.direction === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    }
+    return aValue < bValue ? 1 : -1;
   });
 
   const renderProjectCard = (project: Project) => {
@@ -133,14 +185,50 @@ const Projects = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Project</TableHead>
-            <TableHead>Client</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Subscription</TableHead>
-            <TableHead>Due Date</TableHead>
+            <TableHead>
+              <Button
+                variant="ghost"
+                onClick={() => handleSort('client')}
+                className="h-8 flex items-center gap-1"
+              >
+                Client
+                <ArrowUpDown className="h-4 w-4" />
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button
+                variant="ghost"
+                onClick={() => handleSort('status')}
+                className="h-8 flex items-center gap-1"
+              >
+                Status
+                <ArrowUpDown className="h-4 w-4" />
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button
+                variant="ghost"
+                onClick={() => handleSort('subscription')}
+                className="h-8 flex items-center gap-1"
+              >
+                Subscription
+                <ArrowUpDown className="h-4 w-4" />
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button
+                variant="ghost"
+                onClick={() => handleSort('dueDate')}
+                className="h-8 flex items-center gap-1"
+              >
+                Due Date
+                <ArrowUpDown className="h-4 w-4" />
+              </Button>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredProjects?.map((project) => (
+          {sortedProjects?.map((project) => (
             <TableRow key={project.id}>
               <TableCell className="font-medium">
                 <div className="flex items-center gap-3">
@@ -260,5 +348,3 @@ const Projects = () => {
     </div>
   );
 };
-
-export default Projects;
