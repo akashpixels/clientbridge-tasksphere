@@ -14,6 +14,7 @@ type Project = Database['public']['Tables']['projects']['Row'] & {
   } | null;
   status: {
     name: string;
+    color_hex: string;
   } | null;
 };
 
@@ -33,7 +34,7 @@ const Projects = () => {
               last_name
             )
           ),
-          status:task_statuses(name)
+          status:task_statuses(name, color_hex)
         `)
         .order('created_at', { ascending: false });
 
@@ -58,7 +59,11 @@ const Projects = () => {
     };
 
     return (
-      <Card key={project.id} className="p-6 hover:shadow-md transition-shadow overflow-hidden relative h-[420px] flex flex-col">
+      <Card 
+        key={project.id} 
+        className="p-6 hover:shadow-md transition-shadow overflow-hidden relative flex flex-col"
+        style={{ aspectRatio: '10/15', height: '420px' }}
+      >
         <div className="absolute inset-0 opacity-10" style={gradientStyle} />
         <div className="relative z-10 flex flex-col h-full">
           {project.logo_url && (
@@ -78,7 +83,6 @@ const Projects = () => {
                   `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
                   : 'No Client'}
               </p>
-              <p className="text-xs text-gray-400 mt-1">Status: {project.status?.name || 'Unknown'}</p>
             </div>
             <div className="flex gap-2 flex-wrap">
               <span className={`inline-block px-2 py-1 rounded-full text-xs ${
@@ -87,7 +91,13 @@ const Projects = () => {
                 {getProjectStatus(project)}
               </span>
               {project.status?.name && (
-                <span className="inline-block px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                <span 
+                  className="inline-block px-2 py-1 rounded-full text-xs"
+                  style={{
+                    backgroundColor: `${project.status.color_hex}15`,
+                    color: project.status.color_hex
+                  }}
+                >
                   {project.status.name}
                 </span>
               )}

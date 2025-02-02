@@ -802,6 +802,7 @@ export type Database = {
       }
       task_statuses: {
         Row: {
+          color_hex: string | null
           created_at: string
           description: string | null
           id: number
@@ -811,6 +812,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          color_hex?: string | null
           created_at?: string
           description?: string | null
           id?: number
@@ -820,6 +822,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          color_hex?: string | null
           created_at?: string
           description?: string | null
           id?: number
