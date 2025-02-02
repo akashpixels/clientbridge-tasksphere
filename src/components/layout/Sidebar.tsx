@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Briefcase, CheckSquare, Users, FileText, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ interface NavItem {
 const Sidebar = () => {
   const [isOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const [agencyLogo, setAgencyLogo] = useState('');
   const [agencyName, setAgencyName] = useState('');
 
@@ -75,27 +76,31 @@ const Sidebar = () => {
         </div>
 
         <nav className="space-y-2">
-          {navItems.map((item) => (
-            <button
-              key={item.href}
-              onClick={() => navigate(item.href)}
-              className={cn(
-                'w-full flex items-center gap-3 p-3 rounded-[6px] transition-all hover:bg-gray-100',
-                'text-gray-700 hover:text-gray-900'
-              )}
-            >
-              <div className="min-w-[20px]">
-                {item.icon}
-              </div>
-              <span className={cn(
-                "transition-all duration-300",
-                "opacity-0 w-0 overflow-hidden whitespace-nowrap",
-                "group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto"
-              )}>
-                {item.label}
-              </span>
-            </button>
-          ))}
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <button
+                key={item.href}
+                onClick={() => navigate(item.href)}
+                className={cn(
+                  'w-full flex items-center gap-3 p-3 rounded-[6px] transition-all',
+                  'text-gray-700 hover:text-gray-900 hover:bg-gray-100',
+                  isActive && 'bg-gray-100 text-gray-900'
+                )}
+              >
+                <div className="min-w-[20px]">
+                  {item.icon}
+                </div>
+                <span className={cn(
+                  "transition-all duration-300",
+                  "opacity-0 w-0 overflow-hidden whitespace-nowrap",
+                  "group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto"
+                )}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
         </nav>
 
         <div className="absolute bottom-6 left-4 right-4">
