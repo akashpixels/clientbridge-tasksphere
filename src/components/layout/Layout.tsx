@@ -10,7 +10,8 @@ const Layout = ({ children }: LayoutProps) => {
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
       <main className={cn(
-        'ml-20 lg:ml-64 p-8 transition-all duration-300',
+        'ml-20 p-8 transition-all duration-300',
+        'group-hover:ml-64',
         'animate-fadeIn'
       )}>
         {children}

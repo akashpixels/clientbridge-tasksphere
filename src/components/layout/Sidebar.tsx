@@ -25,6 +25,7 @@ const Sidebar = () => {
     <aside
       className={cn(
         'fixed left-0 top-0 z-40 h-screen transition-all duration-300',
+        'group hover:w-64',
         isOpen ? 'w-64' : 'w-20'
       )}
     >
@@ -32,7 +33,8 @@ const Sidebar = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className={cn(
             "font-display font-bold transition-all duration-300",
-            isOpen ? "text-xl" : "text-xs"
+            isOpen ? "text-xl" : "text-xs",
+            "group-hover:text-xl"
           )}>
             Portal
           </h1>
@@ -57,7 +59,8 @@ const Sidebar = () => {
               {item.icon}
               <span className={cn(
                 "transition-all duration-300",
-                isOpen ? "opacity-100" : "opacity-0 w-0"
+                isOpen ? "opacity-100" : "opacity-0 w-0",
+                "group-hover:opacity-100 group-hover:w-auto"
               )}>
                 {item.label}
               </span>
@@ -75,7 +78,8 @@ const Sidebar = () => {
             <LogOut size={20} />
             <span className={cn(
               "transition-all duration-300",
-              isOpen ? "opacity-100" : "opacity-0 w-0"
+              isOpen ? "opacity-100" : "opacity-0 w-0",
+              "group-hover:opacity-100 group-hover:w-auto"
             )}>
               Logout
             </span>
