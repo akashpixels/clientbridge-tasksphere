@@ -31,10 +31,10 @@ const Sidebar = () => {
         .single();
 
       if (logoData?.value) {
-        setAgencyLogo(logoData.value);
+        setAgencyLogo(logoData.value.toString());
       }
       if (nameData?.value) {
-        setAgencyName(nameData.value);
+        setAgencyName(nameData.value.toString());
       }
     };
 
@@ -56,8 +56,8 @@ const Sidebar = () => {
         'w-20 group hover:w-64'
       )}
     >
-      <div className="glass-card h-full rounded-r-lg px-4 py-6">
-        <div className="flex items-center mb-8">
+      <div className="glass-card h-full rounded-r-lg px-4 py-6 border-r border-white/20">
+        <div className="flex items-center mb-8 pl-3">
           {agencyLogo && (
             <img 
               src={agencyLogo} 
