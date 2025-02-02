@@ -10,7 +10,7 @@ interface NavItem {
 }
 
 const Sidebar = () => {
-  const [isOpen] = useState(true);
+  const [isOpen] = useState(false);
   const navigate = useNavigate();
 
   const navItems: NavItem[] = [
@@ -26,15 +26,15 @@ const Sidebar = () => {
       className={cn(
         'fixed left-0 top-0 z-40 h-screen transition-all duration-300',
         'group hover:w-64',
-        isOpen ? 'w-64' : 'w-20'
+        'w-20'
       )}
     >
       <div className="glass-card h-full rounded-r-lg px-4 py-6">
         <div className="flex items-center mb-8">
           <h1 className={cn(
             "font-display font-bold transition-all duration-300",
-            isOpen ? "text-xl" : "text-xl",
-            "group-hover:text-xl"
+            "text-xl",
+            "opacity-0 group-hover:opacity-100"
           )}>
             Portal
           </h1>
@@ -53,7 +53,7 @@ const Sidebar = () => {
               {item.icon}
               <span className={cn(
                 "transition-all duration-300",
-                isOpen ? "opacity-100" : "opacity-0 w-0",
+                "opacity-0 w-0",
                 "group-hover:opacity-100 group-hover:w-auto"
               )}>
                 {item.label}
@@ -72,7 +72,7 @@ const Sidebar = () => {
             <LogOut size={20} />
             <span className={cn(
               "transition-all duration-300",
-              isOpen ? "opacity-100" : "opacity-0 w-0",
+              "opacity-0 w-0",
               "group-hover:opacity-100 group-hover:w-auto"
             )}>
               Logout
