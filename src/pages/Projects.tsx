@@ -54,13 +54,22 @@ const Projects = () => {
 
   const renderProjectCard = (project: Project) => {
     const gradientStyle = {
-      background: `linear-gradient(45deg, ${project.primary_color_hex || '#9b87f5'} 0%, ${project.secondary_color_hex || '#7E69AB'} 40%, #fcfcfc 60%)`,
+      background: `linear-gradient(70deg, ${project.primary_color_hex || '#9b87f5'} 0%, ${project.secondary_color_hex || '#7E69AB'} 40%, #fcfcfc 70%)`,
     };
 
     return (
-      <Card key={project.id} className="p-6 hover:shadow-md transition-shadow overflow-hidden relative h-[320px] flex flex-col">
+      <Card key={project.id} className="p-6 hover:shadow-md transition-shadow overflow-hidden relative h-[420px] flex flex-col">
         <div className="absolute inset-0 opacity-10" style={gradientStyle} />
         <div className="relative z-10 flex flex-col h-full">
+          {project.logo_url && (
+            <div className="mb-4 flex justify-center">
+              <img 
+                src={project.logo_url} 
+                alt={`${project.name} logo`}
+                className="w-16 h-16 object-contain rounded-lg"
+              />
+            </div>
+          )}
           <div className="flex-1">
             <div className="mb-4">
               <h3 className="text-lg font-semibold mb-1">{project.name}</h3>
@@ -71,11 +80,18 @@ const Projects = () => {
               </p>
               <p className="text-xs text-gray-400 mt-1">Status: {project.status?.name || 'Unknown'}</p>
             </div>
-            <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-              getProjectStatus(project) === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-            }`}>
-              {getProjectStatus(project)}
-            </span>
+            <div className="flex gap-2 flex-wrap">
+              <span className={`inline-block px-2 py-1 rounded-full text-xs ${
+                getProjectStatus(project) === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+              }`}>
+                {getProjectStatus(project)}
+              </span>
+              {project.status?.name && (
+                <span className="inline-block px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                  {project.status.name}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="text-sm text-gray-500 mt-auto">
