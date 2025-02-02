@@ -14,19 +14,18 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const navItems: NavItem[] = [
-    { label: 'Dashboard', icon: <Home size={20} />, href: '/' },
-    { label: 'Projects', icon: <Briefcase size={20} />, href: '/projects' },
-    { label: 'Tasks', icon: <CheckSquare size={20} />, href: '/tasks' },
-    { label: 'Team', icon: <Users size={20} />, href: '/team' },
-    { label: 'Clients', icon: <FileText size={20} />, href: '/clients' },
+    { label: 'Dashboard', icon: <Home size={24} />, href: '/' },
+    { label: 'Projects', icon: <Briefcase size={24} />, href: '/projects' },
+    { label: 'Tasks', icon: <CheckSquare size={24} />, href: '/tasks' },
+    { label: 'Team', icon: <Users size={24} />, href: '/team' },
+    { label: 'Clients', icon: <FileText size={24} />, href: '/clients' },
   ];
 
   return (
     <aside
       className={cn(
         'fixed left-0 top-0 z-40 h-screen transition-all duration-300',
-        'group hover:w-64',
-        'w-20'
+        'w-20 group hover:w-64'
       )}
     >
       <div className="glass-card h-full rounded-r-lg px-4 py-6">
@@ -34,7 +33,7 @@ const Sidebar = () => {
           <h1 className={cn(
             "font-display font-bold transition-all duration-300",
             "text-xl",
-            "opacity-0 group-hover:opacity-100"
+            "opacity-0 group-hover:opacity-100 w-0 group-hover:w-auto"
           )}>
             Portal
           </h1>
@@ -50,10 +49,12 @@ const Sidebar = () => {
                 'text-gray-700 hover:text-gray-900'
               )}
             >
-              {item.icon}
+              <div className="min-w-[24px]">
+                {item.icon}
+              </div>
               <span className={cn(
                 "transition-all duration-300",
-                "opacity-0 w-0",
+                "opacity-0 w-0 overflow-hidden",
                 "group-hover:opacity-100 group-hover:w-auto"
               )}>
                 {item.label}
@@ -69,10 +70,12 @@ const Sidebar = () => {
               'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
             )}
           >
-            <LogOut size={20} />
+            <div className="min-w-[24px]">
+              <LogOut size={24} />
+            </div>
             <span className={cn(
               "transition-all duration-300",
-              "opacity-0 w-0",
+              "opacity-0 w-0 overflow-hidden",
               "group-hover:opacity-100 group-hover:w-auto"
             )}>
               Logout
