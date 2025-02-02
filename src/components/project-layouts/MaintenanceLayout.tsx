@@ -50,7 +50,7 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
           
           <div className="flex gap-6">
             {/* Subscription Status Card */}
-            <div className="bg-white rounded-[6px] p-4 shadow-sm hover:shadow-md transition-all min-w-[240px] border border-gray-100">
+            <div className="bg-white rounded-[6px] p-4 border border-gray-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-500">Subscription</span>
                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
@@ -66,7 +66,7 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
             </div>
 
             {/* Hours Progress Card */}
-            <div className="bg-white rounded-[6px] p-4 shadow-sm hover:shadow-md transition-all min-w-[240px] border border-gray-100">
+            <div className="bg-white rounded-[6px] p-4 border border-gray-100">
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-500">Hours Used</span>
@@ -91,14 +91,20 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="w-full">
+      <Tabs defaultValue="tasks" className="w-full">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="team">Team</TabsTrigger>
           <TabsTrigger value="credentials">Credentials</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="tasks">
+          <Card className="p-6">
+            <p>Tasks content coming soon...</p>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="overview">
           <Card className="p-6">
@@ -128,12 +134,6 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
                 </div>
               </div>
             </div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="tasks">
-          <Card className="p-6">
-            <p>Tasks content coming soon...</p>
           </Card>
         </TabsContent>
 
