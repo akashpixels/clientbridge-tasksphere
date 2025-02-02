@@ -78,7 +78,7 @@ const Projects = () => {
       <Tabs defaultValue="active" className="w-full">
         <TabsList>
           <TabsTrigger value="active">Active Projects</TabsTrigger>
-          <TabsTrigger value="completed">Completed Projects</TabsTrigger>
+          <TabsTrigger value="inactive">Inactive Projects</TabsTrigger>
         </TabsList>
         <TabsContent value="active" className="mt-6">
           {isLoading ? (
@@ -93,15 +93,15 @@ const Projects = () => {
             </div>
           )}
         </TabsContent>
-        <TabsContent value="completed" className="mt-6">
+        <TabsContent value="inactive" className="mt-6">
           {isLoading ? (
             <div className="text-center py-8">Loading projects...</div>
           ) : projects?.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No completed projects found.</div>
+            <div className="text-center py-8 text-gray-500">No inactive projects found.</div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {projects
-                ?.filter(p => getProjectStatus(p) === 'Completed')
+                ?.filter(p => getProjectStatus(p) === 'Inactive')
                 .map(renderProjectCard)}
             </div>
           )}
