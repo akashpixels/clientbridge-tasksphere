@@ -6,7 +6,11 @@ import { Database } from "@/integrations/supabase/types";
 
 type Project = Database['public']['Tables']['projects']['Row'] & {
   client: {
-    business_name: string;
+    id: string;
+    user: {
+      first_name: string;
+      last_name: string;
+    } | null;
   } | null;
 };
 
@@ -18,10 +22,14 @@ const Projects = () => {
       const { data, error } = await supabase
         .from('projects')
         .select(`
-          name,
-          due_date,
-          subscription_status,
-          client:clients(business_name)
+          *,
+          client:clients(
+            id,
+            user:user_profiles(
+              first_name,
+              last_name
+            )
+          )
         `)
         .order('created_at', { ascending: false });
 
@@ -40,25 +48,39 @@ const Projects = () => {
     return 'Active';
   };
 
-  const renderProjectCard = (project: Project) => (
-    <Card key={project.id} className="p-6 hover:shadow-md transition-shadow">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-lg font-semibold mb-1">{project.name}</h3>
-          <p className="text-sm text-gray-500">{project.client?.business_name || 'No Client'}</p>
-        </div>
-        <span className={`px-2 py-1 rounded-full text-xs ${
-          getProjectStatus(project) === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-        }`}>
-          {getProjectStatus(project)}
-        </span>
-      </div>
+  const renderProjectCard = (project: Project) => {
+    const gradientStyle = {
+      background: `linear-gradient(135deg, ${project.primary_color_hex || '#9b87f5'} 0%, ${project.secondary_color_hex || '#7E69AB'} 50%, #f1f1f1 100%)`,
+    };
 
-      <div className="text-sm text-gray-500">
-        Due Date: {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
-      </div>
-    </Card>
-  );
+    return (
+      <Card key={project.id} className="p-6 hover:shadow-md transition-shadow overflow-hidden relative">
+        <div className="absolute inset-0 opacity-10" style={gradientStyle} />
+        <div className="relative z-10">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-1">{project.name}</h3>
+              <p className="text-sm text-gray-500">
+                {project.client?.user ? 
+                  `${project.client.user.first_name} ${project.client.user.last_name}` 
+                  : 'No Client'}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">Status ID: {project.status_id || 'N/A'}</p>
+            </div>
+            <span className={`px-2 py-1 rounded-full text-xs ${
+              getProjectStatus(project) === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+            }`}>
+              {getProjectStatus(project)}
+            </span>
+          </div>
+
+          <div className="text-sm text-gray-500">
+            Due Date: {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
+          </div>
+        </div>
+      </Card>
+    );
+  };
 
   if (error) {
     console.error('Error in projects component:', error);
