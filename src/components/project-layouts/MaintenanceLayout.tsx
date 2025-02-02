@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 
-interface MaintenanceLayoutProps {
+interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
     client: {
       id: string;
@@ -18,11 +18,7 @@ interface MaintenanceLayoutProps {
   };
 }
 
-const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
-  // Calculate renewal date (example: 10 days from now)
-  const renewalDate = new Date();
-  renewalDate.setDate(renewalDate.getDate() + 10);
-
+const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   // Calculate hours percentage
   const hoursPercentage = Math.min(Math.round((project.hours_spent / project.hours_allotted) * 100), 100);
 
@@ -50,7 +46,7 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
           
           <div className="flex gap-6">
             {/* Subscription Status Card */}
-            <div className="bg-white rounded-[6px] p-4 border border-gray-100">
+            <div className="bg-white rounded-[6px] p-4 border border-gray-100 min-w-[280px]">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-500">Subscription</span>
                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
@@ -66,7 +62,7 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
             </div>
 
             {/* Hours Progress Card */}
-            <div className="bg-white rounded-[6px] p-4 border border-gray-100">
+            <div className="bg-white rounded-[6px] p-4 border border-gray-100 min-w-[280px]">
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-500">Hours Used</span>
@@ -102,7 +98,45 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
 
         <TabsContent value="tasks">
           <Card className="p-6">
-            <p>Tasks content coming soon...</p>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Project Tasks</h3>
+                <button className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md">
+                  New Task
+                </button>
+              </div>
+              
+              <div className="space-y-2">
+                {/* Sample tasks - these will be replaced with real data */}
+                <div className="p-4 border border-gray-100 rounded-md">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium">Update meta descriptions</h4>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Review and update meta descriptions for better SEO performance
+                      </p>
+                    </div>
+                    <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                      In Progress
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="p-4 border border-gray-100 rounded-md">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium">Optimize image alt tags</h4>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Add descriptive alt tags to all blog post images
+                      </p>
+                    </div>
+                    <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                      Todo
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </Card>
         </TabsContent>
 
