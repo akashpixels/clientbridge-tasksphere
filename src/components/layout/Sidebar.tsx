@@ -52,8 +52,8 @@ const Sidebar = () => {
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 z-40 h-screen transition-all duration-300',
-        'w-20 group hover:w-64'
+        'fixed h-screen transition-all duration-300',
+        'w-20 group/sidebar hover:w-64'
       )}
     >
       <div className="glass-card h-full px-4 py-6">
@@ -68,7 +68,7 @@ const Sidebar = () => {
           <h1 className={cn(
             "font-display font-bold transition-all duration-300 ml-3",
             "text-xl",
-            "opacity-0 group-hover:opacity-100 w-0 group-hover:w-auto overflow-hidden whitespace-nowrap"
+            "opacity-0 group-hover/sidebar:opacity-100 w-0 group-hover/sidebar:w-auto overflow-hidden whitespace-nowrap"
           )}>
             {agencyName}
           </h1>
@@ -90,7 +90,7 @@ const Sidebar = () => {
               <span className={cn(
                 "transition-all duration-300",
                 "opacity-0 w-0 overflow-hidden whitespace-nowrap",
-                "group-hover:opacity-100 group-hover:w-auto"
+                "group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto"
               )}>
                 {item.label}
               </span>
@@ -111,7 +111,7 @@ const Sidebar = () => {
             <span className={cn(
               "transition-all duration-300",
               "opacity-0 w-0 overflow-hidden whitespace-nowrap",
-              "group-hover:opacity-100 group-hover:w-auto"
+              "group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto"
             )}>
               Logout
             </span>

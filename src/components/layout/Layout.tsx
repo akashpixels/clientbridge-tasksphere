@@ -7,15 +7,16 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Sidebar />
-      <main className={cn(
-        'ml-20 p-8 transition-all duration-300',
-        'group-hover:ml-64',
-        'animate-fadeIn'
-      )}>
-        {children}
-      </main>
+    <div className="min-h-screen bg-[#f8f8f8]">
+      <div className="flex">
+        <Sidebar />
+        <main className={cn(
+          'flex-1 p-8 transition-all duration-300',
+          'ml-20 group-hover/sidebar:ml-64'
+        )}>
+          {children}
+        </main>
+      </div>
     </div>
   );
 };
