@@ -7,13 +7,10 @@ import { CalendarDays, Users } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 
 type Project = Database['public']['Tables']['projects']['Row'] & {
-  client: Database['public']['Tables']['clients']['Row'] | null;
-  assignees: {
-    user: {
-      first_name: string;
-      last_name: string;
-    } | null;
-  }[] | null;
+  client: {
+    business_name: string;
+  } | null;
+  assignees_count: number;
 };
 
 const Projects = () => {
@@ -26,9 +23,7 @@ const Projects = () => {
         .select(`
           *,
           client:clients(business_name),
-          assignees:project_assignees(
-            user:user_profiles(first_name, last_name)
-          )
+          assignees_count:project_assignees(count)
         `)
         .order('created_at', { ascending: false });
 
@@ -80,7 +75,7 @@ const Projects = () => {
           </div>
           <div className="flex items-center gap-2 text-gray-500">
             <Users className="w-4 h-4" />
-            <span>{project.assignees?.length || 0} members</span>
+            <span>{project.assignees_count || 0} members</span>
           </div>
         </div>
       </div>
