@@ -22,7 +22,6 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
   // Calculate renewal date (example: 10 days from now)
   const renewalDate = new Date();
   renewalDate.setDate(renewalDate.getDate() + 10);
-  const daysUntilRenewal = Math.ceil((renewalDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
 
   // Calculate hours percentage
   const hoursPercentage = Math.min(Math.round((project.hours_spent / project.hours_allotted) * 100), 100);
@@ -49,9 +48,9 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
             </div>
           </div>
           
-          <div className="flex gap-8">
+          <div className="flex gap-6">
             {/* Subscription Status Card */}
-            <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all min-w-[200px]">
+            <div className="bg-white rounded-[6px] p-4 shadow-sm hover:shadow-md transition-all min-w-[240px] border border-gray-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-500">Subscription</span>
                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
@@ -60,34 +59,22 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
                   {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
                 </span>
               </div>
-              <p className="text-xs text-gray-500">Renews in {daysUntilRenewal} days</p>
-            </div>
-
-            {/* Payment Status Card */}
-            <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all min-w-[200px]">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-500">Payment</span>
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                  project.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 
-                  project.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {project.payment_status.charAt(0).toUpperCase() + project.payment_status.slice(1)}
-                </span>
+              <div className="space-y-1">
+                <p className="text-xs text-gray-500">Renews on 1st April</p>
+                <p className="text-xs font-medium text-gray-600">Billing Cycle: Monthly</p>
               </div>
-              <p className="text-xs text-gray-500">Next payment: {new Date().toLocaleDateString()}</p>
             </div>
 
             {/* Hours Progress Card */}
-            <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all min-w-[200px]">
+            <div className="bg-white rounded-[6px] p-4 shadow-sm hover:shadow-md transition-all min-w-[240px] border border-gray-100">
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-500">Hours Used</span>
                   <span className="text-sm font-semibold">{hoursPercentage}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-gray-100 rounded-full h-2.5">
                   <div 
-                    className={`h-2 rounded-full ${
+                    className={`h-2.5 rounded-full ${
                       hoursPercentage > 90 ? 'bg-red-500' :
                       hoursPercentage > 70 ? 'bg-yellow-500' :
                       'bg-green-500'
@@ -95,7 +82,7 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
                     style={{ width: `${hoursPercentage}%` }}
                   />
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 mt-1">
                   {project.hours_spent} / {project.hours_allotted} hrs
                 </p>
               </div>
