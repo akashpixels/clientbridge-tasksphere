@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, Briefcase, CheckSquare, Users, FileText, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from "@/integrations/supabase/client";
 
 interface NavItem {
   label: string;
@@ -12,6 +13,33 @@ interface NavItem {
 const Sidebar = () => {
   const [isOpen] = useState(false);
   const navigate = useNavigate();
+  const [agencyLogo, setAgencyLogo] = useState('');
+  const [agencyName, setAgencyName] = useState('');
+
+  useEffect(() => {
+    const fetchAgencyDetails = async () => {
+      const { data: logoData } = await supabase
+        .from('agency_details')
+        .select('value')
+        .eq('key', 'logo_url')
+        .single();
+
+      const { data: nameData } = await supabase
+        .from('agency_details')
+        .select('value')
+        .eq('key', 'agency_shortname')
+        .single();
+
+      if (logoData?.value) {
+        setAgencyLogo(logoData.value);
+      }
+      if (nameData?.value) {
+        setAgencyName(nameData.value);
+      }
+    };
+
+    fetchAgencyDetails();
+  }, []);
 
   const navItems: NavItem[] = [
     { label: 'Dashboard', icon: <Home size={24} />, href: '/' },
@@ -30,12 +58,19 @@ const Sidebar = () => {
     >
       <div className="glass-card h-full rounded-r-lg px-4 py-6">
         <div className="flex items-center mb-8">
+          {agencyLogo && (
+            <img 
+              src={agencyLogo} 
+              alt="Agency Logo" 
+              className="h-8 w-8 min-w-[32px] object-contain"
+            />
+          )}
           <h1 className={cn(
-            "font-display font-bold transition-all duration-300",
+            "font-display font-bold transition-all duration-300 ml-3",
             "text-xl",
-            "opacity-0 group-hover:opacity-100 w-0 group-hover:w-auto"
+            "opacity-0 group-hover:opacity-100 w-0 group-hover:w-auto overflow-hidden whitespace-nowrap"
           )}>
-            Portal
+            {agencyName}
           </h1>
         </div>
 
@@ -54,7 +89,7 @@ const Sidebar = () => {
               </div>
               <span className={cn(
                 "transition-all duration-300",
-                "opacity-0 w-0 overflow-hidden",
+                "opacity-0 w-0 overflow-hidden whitespace-nowrap",
                 "group-hover:opacity-100 group-hover:w-auto"
               )}>
                 {item.label}
@@ -75,7 +110,7 @@ const Sidebar = () => {
             </div>
             <span className={cn(
               "transition-all duration-300",
-              "opacity-0 w-0 overflow-hidden",
+              "opacity-0 w-0 overflow-hidden whitespace-nowrap",
               "group-hover:opacity-100 group-hover:w-auto"
             )}>
               Logout
