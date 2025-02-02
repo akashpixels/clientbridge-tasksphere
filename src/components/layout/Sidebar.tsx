@@ -80,7 +80,7 @@ const Sidebar = () => {
               key={item.href}
               onClick={() => navigate(item.href)}
               className={cn(
-                'w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-gray-100',
+                'w-full flex items-center gap-3 p-3 rounded-[6px] transition-all hover:bg-gray-100',
                 'text-gray-700 hover:text-gray-900'
               )}
             >
@@ -101,7 +101,7 @@ const Sidebar = () => {
         <div className="absolute bottom-6 left-4 right-4">
           <button
             className={cn(
-              'w-full flex items-center gap-3 p-3 rounded-lg transition-all',
+              'w-full flex items-center gap-3 p-3 rounded-[6px] transition-all',
               'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
             )}
           >
