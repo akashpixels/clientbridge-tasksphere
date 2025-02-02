@@ -42,11 +42,11 @@ const Sidebar = () => {
   }, []);
 
   const navItems: NavItem[] = [
-    { label: 'Dashboard', icon: <Home size={24} />, href: '/' },
-    { label: 'Projects', icon: <Briefcase size={24} />, href: '/projects' },
-    { label: 'Tasks', icon: <CheckSquare size={24} />, href: '/tasks' },
-    { label: 'Team', icon: <Users size={24} />, href: '/team' },
-    { label: 'Clients', icon: <FileText size={24} />, href: '/clients' },
+    { label: 'Dashboard', icon: <Home size={20} />, href: '/' },
+    { label: 'Projects', icon: <Briefcase size={20} />, href: '/projects' },
+    { label: 'Tasks', icon: <CheckSquare size={20} />, href: '/tasks' },
+    { label: 'Team', icon: <Users size={20} />, href: '/team' },
+    { label: 'Clients', icon: <FileText size={20} />, href: '/clients' },
   ];
 
   return (
@@ -84,7 +84,7 @@ const Sidebar = () => {
                 'text-gray-700 hover:text-gray-900'
               )}
             >
-              <div className="min-w-[24px]">
+              <div className="min-w-[20px]">
                 {item.icon}
               </div>
               <span className={cn(
@@ -105,8 +105,8 @@ const Sidebar = () => {
               'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
             )}
           >
-            <div className="min-w-[24px]">
-              <LogOut size={24} />
+            <div className="min-w-[20px]">
+              <LogOut size={20} />
             </div>
             <span className={cn(
               "transition-all duration-300",
