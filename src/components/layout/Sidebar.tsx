@@ -52,7 +52,7 @@ const Sidebar = () => {
   return (
     <aside
       className={cn(
-        'fixed h-screen transition-all duration-300',
+        'h-screen transition-all duration-300',
         'w-20 group/sidebar hover:w-64'
       )}
     >

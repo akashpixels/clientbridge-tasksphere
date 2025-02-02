@@ -11,8 +11,7 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="flex">
         <Sidebar />
         <main className={cn(
-          'flex-1 p-8 transition-all duration-300',
-          'ml-20 group-hover/sidebar:ml-64'
+          'flex-1 p-8',
         )}>
           {children}
         </main>
