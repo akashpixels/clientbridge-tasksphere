@@ -33,7 +33,7 @@
   }
 
   body {
-    @apply bg-[#f8f8f8] text-foreground antialiased;
+    @apply bg-[#f3f1ee] text-foreground antialiased;
   }
 
   .glass-card {
