@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
+import { Monitor, Smartphone } from "lucide-react";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -109,30 +110,71 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
               <div className="space-y-2">
                 {/* Sample tasks - these will be replaced with real data */}
                 <div className="p-4 border border-gray-100 rounded-md">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-medium">Update meta descriptions</h4>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Review and update meta descriptions for better SEO performance
-                      </p>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium">Update meta descriptions</h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Review and update meta descriptions for better SEO performance
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                          In Progress
+                        </span>
+                        <span className="text-xs text-gray-500">High Priority</span>
+                      </div>
                     </div>
-                    <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
-                      In Progress
-                    </span>
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <div className="flex items-center gap-4">
+                        <span>ETA: Mar 15, 2024</span>
+                        <span>Hours: 2.5/4</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Monitor className="w-4 h-4" />
+                        <Smartphone className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      {/* Sample images */}
+                      <div className="w-12 h-12 bg-gray-100 rounded"></div>
+                      <div className="w-12 h-12 bg-gray-100 rounded"></div>
+                    </div>
+                    <div className="flex gap-2">
+                      <a href="#" className="text-xs text-blue-600 hover:underline">reference-link-1.com</a>
+                      <a href="#" className="text-xs text-blue-600 hover:underline">reference-link-2.com</a>
+                    </div>
                   </div>
                 </div>
                 
                 <div className="p-4 border border-gray-100 rounded-md">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-medium">Optimize image alt tags</h4>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Add descriptive alt tags to all blog post images
-                      </p>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium">Optimize image alt tags</h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Add descriptive alt tags to all blog post images
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                          Todo
+                        </span>
+                        <span className="text-xs text-gray-500">Medium Priority</span>
+                      </div>
                     </div>
-                    <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                      Todo
-                    </span>
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <div className="flex items-center gap-4">
+                        <span>ETA: Mar 20, 2024</span>
+                        <span>Hours: 0/3</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Monitor className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <a href="#" className="text-xs text-blue-600 hover:underline">documentation.com</a>
+                    </div>
                   </div>
                 </div>
               </div>
