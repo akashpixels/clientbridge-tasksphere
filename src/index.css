@@ -37,7 +37,7 @@
   }
 
   .glass-card {
-    @apply bg-[#fcfcfc] border border-black shadow-lg;
+    @apply bg-[#fcfcfc] border-r border-border shadow-lg rounded-md;
   }
 
   .hover-card {
