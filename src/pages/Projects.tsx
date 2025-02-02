@@ -2,6 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 import { useState } from "react";
@@ -24,6 +27,7 @@ const Projects = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [subscriptionFilter, setSubscriptionFilter] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ['projects'],
@@ -63,7 +67,7 @@ const Projects = () => {
 
   const renderProjectCard = (project: Project) => {
     const gradientStyle = {
-      background: `linear-gradient(70deg, ${project.primary_color_hex || '#9b87f5'} 0%, ${project.secondary_color_hex || '#7E69AB'} 40%, #fcfcfc 70%)`,
+      background: `linear-gradient(135deg, ${project.primary_color_hex || '#9b87f5'} 0%, ${project.secondary_color_hex || '#7E69AB'} 40%, #fcfcfc 70%)`,
       transformOrigin: 'bottom right',
     };
 
@@ -123,6 +127,68 @@ const Projects = () => {
     );
   };
 
+  const renderProjectList = () => (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Project</TableHead>
+            <TableHead>Client</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Subscription</TableHead>
+            <TableHead>Due Date</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredProjects?.map((project) => (
+            <TableRow key={project.id}>
+              <TableCell className="font-medium">
+                <div className="flex items-center gap-3">
+                  {project.logo_url && (
+                    <img 
+                      src={project.logo_url} 
+                      alt={`${project.name} logo`}
+                      className="w-8 h-8 object-contain rounded"
+                    />
+                  )}
+                  {project.name}
+                </div>
+              </TableCell>
+              <TableCell>
+                {project.client?.user_profiles ? 
+                  `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
+                  : 'No Client'}
+              </TableCell>
+              <TableCell>
+                {project.status?.name && (
+                  <span 
+                    className="inline-block px-2 py-1 rounded-full text-xs"
+                    style={{
+                      backgroundColor: `${project.status.color_hex}15`,
+                      color: project.status.color_hex
+                    }}
+                  >
+                    {project.status.name}
+                  </span>
+                )}
+              </TableCell>
+              <TableCell>
+                <span className={`inline-block px-2 py-1 rounded-full text-xs ${
+                  project.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
+                </span>
+              </TableCell>
+              <TableCell>
+                {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+
   if (error) {
     console.error('Error in projects component:', error);
     return (
@@ -136,6 +202,14 @@ const Projects = () => {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Projects</h1>
+        <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as "grid" | "list")}>
+          <ToggleGroupItem value="grid" aria-label="Grid view">
+            <LayoutGrid className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="list" aria-label="List view">
+            <List className="h-4 w-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
       </div>
 
       <div className="flex gap-4 mb-6">
@@ -176,10 +250,12 @@ const Projects = () => {
         <div className="text-center py-8">Loading projects...</div>
       ) : filteredProjects?.length === 0 ? (
         <div className="text-center py-8 text-gray-500">No projects found.</div>
-      ) : (
+      ) : viewMode === "grid" ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredProjects?.map(renderProjectCard)}
         </div>
+      ) : (
+        renderProjectList()
       )}
     </div>
   );
