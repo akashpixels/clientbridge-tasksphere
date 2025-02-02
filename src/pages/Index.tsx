@@ -2,6 +2,7 @@ import Layout from '@/components/layout/Layout';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const Index = () => {
   const stats = [
