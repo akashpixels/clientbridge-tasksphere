@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, Home, Briefcase, CheckSquare, Users, FileText, LogOut } from 'lucide-react';
+import { Home, Briefcase, CheckSquare, Users, FileText, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -10,7 +10,7 @@ interface NavItem {
 }
 
 const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen] = useState(true);
   const navigate = useNavigate();
 
   const navItems: NavItem[] = [
@@ -30,20 +30,14 @@ const Sidebar = () => {
       )}
     >
       <div className="glass-card h-full rounded-r-lg px-4 py-6">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center mb-8">
           <h1 className={cn(
             "font-display font-bold transition-all duration-300",
-            isOpen ? "text-xl" : "text-xs",
+            isOpen ? "text-xl" : "text-xl",
             "group-hover:text-xl"
           )}>
             Portal
           </h1>
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            {isOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
         </div>
 
         <nav className="space-y-2">
