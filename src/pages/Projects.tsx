@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
+import { useState } from "react";
 
 type Project = Database['public']['Tables']['projects']['Row'] & {
   client: {
@@ -19,6 +21,10 @@ type Project = Database['public']['Tables']['projects']['Row'] & {
 };
 
 const Projects = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [subscriptionFilter, setSubscriptionFilter] = useState<string>("all");
+
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
@@ -48,10 +54,12 @@ const Projects = () => {
     },
   });
 
-  const getProjectStatus = (project: Project) => {
-    if (!project.subscription_status || project.subscription_status === 'inactive') return 'Inactive';
-    return 'Active';
-  };
+  const filteredProjects = projects?.filter(project => {
+    const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || project.status?.name === statusFilter;
+    const matchesSubscription = subscriptionFilter === "all" || project.subscription_status === subscriptionFilter;
+    return matchesSearch && matchesStatus && matchesSubscription;
+  });
 
   const renderProjectCard = (project: Project) => {
     const gradientStyle = {
@@ -82,9 +90,9 @@ const Projects = () => {
             </div>
             <div className="flex gap-2 flex-wrap">
               <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-                getProjectStatus(project) === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                project.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
               }`}>
-                {getProjectStatus(project)}
+                {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
               </span>
               {project.status?.name && (
                 <span 
@@ -130,38 +138,49 @@ const Projects = () => {
         <h1 className="text-2xl font-semibold">Projects</h1>
       </div>
 
-      <Tabs defaultValue="active" className="w-full">
-        <TabsList>
-          <TabsTrigger value="active">Active Projects</TabsTrigger>
-          <TabsTrigger value="inactive">Inactive Projects</TabsTrigger>
-        </TabsList>
-        <TabsContent value="active" className="mt-6">
-          {isLoading ? (
-            <div className="text-center py-8">Loading projects...</div>
-          ) : projects?.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No active projects found.</div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {projects
-                ?.filter(p => getProjectStatus(p) === 'Active')
-                .map(renderProjectCard)}
-            </div>
-          )}
-        </TabsContent>
-        <TabsContent value="inactive" className="mt-6">
-          {isLoading ? (
-            <div className="text-center py-8">Loading projects...</div>
-          ) : projects?.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No inactive projects found.</div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {projects
-                ?.filter(p => getProjectStatus(p) === 'Inactive')
-                .map(renderProjectCard)}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+      <div className="flex gap-4 mb-6">
+        <Input
+          placeholder="Search projects..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-xs"
+        />
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="Open">Open</SelectItem>
+            <SelectItem value="In Progress">In Progress</SelectItem>
+            <SelectItem value="Review">Review</SelectItem>
+            <SelectItem value="Feedback">Feedback</SelectItem>
+            <SelectItem value="Done">Done</SelectItem>
+            <SelectItem value="Blocked">Blocked</SelectItem>
+            <SelectItem value="Cancelled">Cancelled</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={subscriptionFilter} onValueChange={setSubscriptionFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by subscription" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Projects</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-8">Loading projects...</div>
+      ) : filteredProjects?.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">No projects found.</div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredProjects?.map(renderProjectCard)}
+        </div>
+      )}
     </div>
   );
 };
