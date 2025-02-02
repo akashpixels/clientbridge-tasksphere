@@ -37,11 +37,11 @@
   }
 
   .glass-card {
-    @apply bg-[#fcfcfc] border-r border-border shadow-lg;
+    @apply bg-[#fcfcfc] border-r border-border;
   }
 
   .hover-card {
-    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1 rounded-[6px];
+    @apply transition-all duration-300 hover:shadow-sm hover:-translate-y-1 rounded-[6px];
   }
 
   .fade-in {

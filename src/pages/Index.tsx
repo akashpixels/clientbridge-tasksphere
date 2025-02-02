@@ -39,7 +39,7 @@ const Index = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {stats.map((stat, index) => (
-            <Card key={index} className="p-6 hover-card">
+            <Card key={index} className="p-6 hover-card shadow-sm">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-500">{stat.label}</p>
@@ -62,7 +62,7 @@ const Index = () => {
           ))}
         </div>
 
-        <Card className="p-6 hover-card">
+        <Card className="p-6 hover-card shadow-sm">
           <h2 className="font-display text-xl font-semibold mb-4">Recent Activity</h2>
           <div className="space-y-4">
             {[1, 2, 3].map((_, index) => (
