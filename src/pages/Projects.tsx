@@ -2,15 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Progress } from "@/components/ui/progress";
-import { CalendarDays, Users } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 
 type Project = Database['public']['Tables']['projects']['Row'] & {
   client: {
     business_name: string;
   } | null;
-  assignees_count: number;
 };
 
 const Projects = () => {
@@ -21,9 +18,10 @@ const Projects = () => {
       const { data, error } = await supabase
         .from('projects')
         .select(`
-          *,
-          client:clients(business_name),
-          assignees_count:project_assignees!inner(count)
+          name,
+          due_date,
+          subscription_status,
+          client:clients(business_name)
         `)
         .order('created_at', { ascending: false });
 
@@ -32,20 +30,13 @@ const Projects = () => {
         throw error;
       }
       
-      // Transform the data to match our type
-      const transformedData = data?.map(project => ({
-        ...project,
-        assignees_count: project.assignees_count?.[0]?.count || 0
-      }));
-      
-      console.log('Projects fetched:', transformedData);
-      return transformedData as Project[];
+      console.log('Projects fetched:', data);
+      return data as Project[];
     },
   });
 
   const getProjectStatus = (project: Project) => {
     if (!project.subscription_status || project.subscription_status === 'inactive') return 'Inactive';
-    if (project.progress && project.progress >= 100) return 'Completed';
     return 'Active';
   };
 
@@ -57,33 +48,14 @@ const Projects = () => {
           <p className="text-sm text-gray-500">{project.client?.business_name || 'No Client'}</p>
         </div>
         <span className={`px-2 py-1 rounded-full text-xs ${
-          getProjectStatus(project) === 'Active' ? 'bg-green-100 text-green-800' :
-          getProjectStatus(project) === 'Completed' ? 'bg-blue-100 text-blue-800' :
-          'bg-gray-100 text-gray-800'
+          getProjectStatus(project) === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
         }`}>
           {getProjectStatus(project)}
         </span>
       </div>
 
-      <div className="space-y-4">
-        <div>
-          <div className="flex justify-between text-sm text-gray-500 mb-1">
-            <span>Progress</span>
-            <span>{project.progress || 0}%</span>
-          </div>
-          <Progress value={project.progress || 0} className="h-2" />
-        </div>
-
-        <div className="flex justify-between text-sm">
-          <div className="flex items-center gap-2 text-gray-500">
-            <CalendarDays className="w-4 h-4" />
-            <span>{new Date(project.created_at).toLocaleDateString()}</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-500">
-            <Users className="w-4 h-4" />
-            <span>{project.assignees_count || 0} members</span>
-          </div>
-        </div>
+      <div className="text-sm text-gray-500">
+        Due Date: {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
       </div>
     </Card>
   );
