@@ -7,7 +7,7 @@ import { Database } from "@/integrations/supabase/types";
 type Project = Database['public']['Tables']['projects']['Row'] & {
   client: {
     id: string;
-    user: {
+    user_profiles: {
       first_name: string;
       last_name: string;
     } | null;
@@ -25,7 +25,7 @@ const Projects = () => {
           *,
           client:clients(
             id,
-            user:user_profiles(
+            user_profiles!clients_id_fkey(
               first_name,
               last_name
             )
@@ -50,31 +50,31 @@ const Projects = () => {
 
   const renderProjectCard = (project: Project) => {
     const gradientStyle = {
-      background: `linear-gradient(135deg, ${project.primary_color_hex || '#9b87f5'} 0%, ${project.secondary_color_hex || '#7E69AB'} 50%, #f1f1f1 100%)`,
+      background: `linear-gradient(135deg, ${project.primary_color_hex || '#9b87f5'} 0%, ${project.secondary_color_hex || '#7E69AB'} 50%, #fcfcfc 100%)`,
     };
 
     return (
-      <Card key={project.id} className="p-6 hover:shadow-md transition-shadow overflow-hidden relative">
+      <Card key={project.id} className="p-6 hover:shadow-md transition-shadow overflow-hidden relative h-[320px] flex flex-col">
         <div className="absolute inset-0 opacity-10" style={gradientStyle} />
-        <div className="relative z-10">
-          <div className="flex justify-between items-start mb-4">
-            <div>
+        <div className="relative z-10 flex flex-col h-full">
+          <div className="flex-1">
+            <div className="mb-4">
               <h3 className="text-lg font-semibold mb-1">{project.name}</h3>
               <p className="text-sm text-gray-500">
-                {project.client?.user ? 
-                  `${project.client.user.first_name} ${project.client.user.last_name}` 
+                {project.client?.user_profiles ? 
+                  `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
                   : 'No Client'}
               </p>
               <p className="text-xs text-gray-400 mt-1">Status ID: {project.status_id || 'N/A'}</p>
             </div>
-            <span className={`px-2 py-1 rounded-full text-xs ${
+            <span className={`inline-block px-2 py-1 rounded-full text-xs ${
               getProjectStatus(project) === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
             }`}>
               {getProjectStatus(project)}
             </span>
           </div>
 
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 mt-auto">
             Due Date: {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
           </div>
         </div>
