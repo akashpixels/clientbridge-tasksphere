@@ -12,6 +12,9 @@ type Project = Database['public']['Tables']['projects']['Row'] & {
       last_name: string;
     } | null;
   } | null;
+  status: {
+    name: string;
+  } | null;
 };
 
 const Projects = () => {
@@ -29,7 +32,8 @@ const Projects = () => {
               first_name,
               last_name
             )
-          )
+          ),
+          status:task_statuses(name)
         `)
         .order('created_at', { ascending: false });
 
@@ -50,7 +54,7 @@ const Projects = () => {
 
   const renderProjectCard = (project: Project) => {
     const gradientStyle = {
-      background: `linear-gradient(135deg, ${project.primary_color_hex || '#9b87f5'} 0%, ${project.secondary_color_hex || '#7E69AB'} 50%, #fcfcfc 100%)`,
+      background: `linear-gradient(45deg, ${project.primary_color_hex || '#9b87f5'} 0%, ${project.secondary_color_hex || '#7E69AB'} 40%, #fcfcfc 60%)`,
     };
 
     return (
@@ -65,7 +69,7 @@ const Projects = () => {
                   `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
                   : 'No Client'}
               </p>
-              <p className="text-xs text-gray-400 mt-1">Status ID: {project.status_id || 'N/A'}</p>
+              <p className="text-xs text-gray-400 mt-1">Status: {project.status?.name || 'Unknown'}</p>
             </div>
             <span className={`inline-block px-2 py-1 rounded-full text-xs ${
               getProjectStatus(project) === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
