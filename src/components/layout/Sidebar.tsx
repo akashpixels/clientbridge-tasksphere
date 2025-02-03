@@ -10,11 +10,11 @@ const Sidebar = () => {
   return (
     <aside
       className={cn(
-        'fixed top-0 left-0 h-screen bg-background',
+        'fixed top-0 left-0 h-screen bg-background border-r border-border/40',
         'w-20 group/sidebar hover:w-64 transition-all duration-300 ease-in-out'
       )}
     >
-      <div className="h-full flex flex-col px-4 py-6 border-r border-border/40">
+      <div className="h-full flex flex-col px-4 py-6">
         <SidebarHeader />
         <div className="flex-1 overflow-y-auto">
           <SidebarNavigation />

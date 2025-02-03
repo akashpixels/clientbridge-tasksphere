@@ -7,14 +7,14 @@ const Layout = () => {
     <div className="min-h-screen bg-[#f8f8f8]">
       <div className="flex">
         <Sidebar />
-        <div className={cn(
+        <main className={cn(
           'flex-1 transition-all duration-300 ease-in-out',
-          'ml-20 group-hover/sidebar:ml-64'
+          'pl-20 group-hover/sidebar:pl-64'
         )}>
-          <main className="p-8">
+          <div className="p-8">
             <Outlet />
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
     </div>
   );
