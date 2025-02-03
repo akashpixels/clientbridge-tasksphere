@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
-import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize } from "lucide-react";
+import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, ArrowLeft, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -40,6 +40,8 @@ type SortConfig = {
 const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'created_at', direction: 'desc' });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   
   // Calculate hours percentage
   const hoursPercentage = Math.min(Math.round((project.hours_spent / project.hours_allotted) * 100), 100);
@@ -79,6 +81,34 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     }));
   };
 
+  const handleImageClick = (image: string, images: string[]) => {
+    setSelectedTaskImages(images);
+    setSelectedImage(image);
+    setCurrentImageIndex(images.indexOf(image));
+  };
+
+  const handlePreviousImage = () => {
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(prev => prev - 1);
+      setSelectedImage(selectedTaskImages[currentImageIndex - 1]);
+    }
+  };
+
+  const handleNextImage = () => {
+    if (currentImageIndex < selectedTaskImages.length - 1) {
+      setCurrentImageIndex(prev => prev + 1);
+      setSelectedImage(selectedTaskImages[currentImageIndex + 1]);
+    }
+  };
+
+  const roundToNearestHalfHour = (hours: number) => {
+    return Math.ceil(hours * 2) / 2;
+  };
+
+  const formatETA = (date: string) => {
+    return format(new Date(date), "h.mmaaa do MMM");
+  };
+
   const sortedTasks = tasks ? [...tasks].sort((a, b) => {
     const aValue = a[sortConfig.key as keyof typeof a];
     const bValue = b[sortConfig.key as keyof typeof b];
@@ -89,14 +119,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
     return sortConfig.direction === 'asc' ? comparison : -comparison;
   }) : [];
-
-  const roundToNearestHalfHour = (hours: number) => {
-    return Math.ceil(hours * 2) / 2;
-  };
-
-  const formatETA = (date: string) => {
-    return format(new Date(date), "h.mmaaa do MMM");
-  };
 
   return (
     <div className="container mx-auto p-6">
@@ -229,7 +251,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                       {sortedTasks.map((task) => (
                         <TableRow key={task.id}>
                           <TableCell>
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                               <span 
                                 className="px-2 py-1 text-xs rounded-full block w-fit"
                                 style={{
@@ -240,8 +262,8 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                                 {task.status?.name}
                               </span>
                               {task.task_completed_at && task.hours_spent && (
-                                <span className="text-xs text-gray-500 block">
-                                  {roundToNearestHalfHour(task.hours_spent)} hours
+                                <span className="text-xs text-gray-500 text-center block">
+                                  {roundToNearestHalfHour(task.hours_spent)} hrs
                                 </span>
                               )}
                             </div>
@@ -273,7 +295,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                                     <div
                                       key={index}
                                       className="w-8 h-8 relative cursor-pointer"
-                                      onClick={() => setSelectedImage(image as string)}
+                                      onClick={() => handleImageClick(image as string, task.images as string[])}
                                     >
                                       <img 
                                         src={image as string}
@@ -369,14 +391,32 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
       </Tabs>
 
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-3xl">
-          {selectedImage && (
-            <img 
-              src={selectedImage} 
-              alt="Task image"
-              className="w-full h-auto object-contain"
-            />
-          )}
+        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+          <div className="relative flex-1 min-h-0">
+            {selectedImage && (
+              <div className="flex items-center justify-center h-full">
+                <button
+                  onClick={handlePreviousImage}
+                  className="absolute left-4 p-2 bg-white/80 rounded-full"
+                  disabled={currentImageIndex === 0}
+                >
+                  <ArrowLeft className="w-6 h-6" />
+                </button>
+                <img 
+                  src={selectedImage} 
+                  alt="Task image"
+                  className="max-w-full max-h-[70vh] object-contain"
+                />
+                <button
+                  onClick={handleNextImage}
+                  className="absolute right-4 p-2 bg-white/80 rounded-full"
+                  disabled={currentImageIndex === selectedTaskImages.length - 1}
+                >
+                  <ArrowRight className="w-6 h-6" />
+                </button>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
