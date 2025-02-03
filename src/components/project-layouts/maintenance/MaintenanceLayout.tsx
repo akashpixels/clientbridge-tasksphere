@@ -193,7 +193,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
             <p>Files content coming soon...</p>
           </Card>
         </TabsContent>
-
       </Tabs>
 
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
