@@ -344,7 +344,7 @@ const Projects = () => {
         ) : filteredProjects?.length === 0 ? (
           <div className="text-center py-8 text-gray-500">No projects found.</div>
         ) : viewMode === "grid" ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-start">
             {filteredProjects?.map(renderProjectCard)}
           </div>
         ) : (
