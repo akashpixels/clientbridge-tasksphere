@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
-import { Monitor, Smartphone, ArrowUp, ArrowDown } from "lucide-react";
+import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -38,6 +39,7 @@ type SortConfig = {
 
 const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'created_at', direction: 'desc' });
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
   // Calculate hours percentage
   const hoursPercentage = Math.min(Math.round((project.hours_spent / project.hours_allotted) * 100), 100);
@@ -54,6 +56,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
           task_type:task_types(name, category),
           status:task_statuses!tasks_current_status_id_fkey(name, color_hex),
           priority:priority_levels(name, color),
+          complexity:complexity_levels(name, multiplier),
           assigned_user:user_profiles!tasks_assigned_user_id_fkey(first_name, last_name)
         `)
         .eq('project_id', project.id)
@@ -208,15 +211,15 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                         </TableHead>
                         <TableHead 
                           className="cursor-pointer"
-                          onClick={() => handleSort('eta')}
+                          onClick={() => handleSort('complexity_level_id')}
                         >
-                          ETA
+                          Complexity
                         </TableHead>
                         <TableHead 
                           className="cursor-pointer"
-                          onClick={() => handleSort('hours_spent')}
+                          onClick={() => handleSort('eta')}
                         >
-                          Hours
+                          ETA
                         </TableHead>
                         <TableHead>Assets</TableHead>
                         <TableHead>Device</TableHead>
@@ -226,15 +229,22 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                       {sortedTasks.map((task) => (
                         <TableRow key={task.id}>
                           <TableCell>
-                            <span 
-                              className="px-2 py-1 text-xs rounded-full"
-                              style={{
-                                backgroundColor: `${task.status?.color_hex}15`,
-                                color: task.status?.color_hex
-                              }}
-                            >
-                              {task.status?.name}
-                            </span>
+                            <div className="space-y-2">
+                              <span 
+                                className="px-2 py-1 text-xs rounded-full block w-fit"
+                                style={{
+                                  backgroundColor: `${task.status?.color_hex}15`,
+                                  color: task.status?.color_hex
+                                }}
+                              >
+                                {task.status?.name}
+                              </span>
+                              {task.task_completed_at && task.hours_spent && (
+                                <span className="text-xs text-gray-500 block">
+                                  {roundToNearestHalfHour(task.hours_spent)} hours
+                                </span>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div>
@@ -248,22 +258,30 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                             </span>
                           </TableCell>
                           <TableCell>
-                            {task.eta ? formatETA(task.eta) : 'Not set'}
+                            <span className="text-xs text-gray-600">
+                              {task.complexity?.name}
+                            </span>
                           </TableCell>
                           <TableCell>
-                            {task.hours_spent ? roundToNearestHalfHour(task.hours_spent) : 0}
+                            {task.eta ? formatETA(task.eta) : 'Not set'}
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
                               {task.images && Array.isArray(task.images) && task.images.length > 0 && (
                                 <div className="flex -space-x-2">
                                   {task.images.map((image, index) => (
-                                    <img 
+                                    <div
                                       key={index}
-                                      src={image as string}
-                                      alt={`Task image ${index + 1}`}
-                                      className="w-8 h-8 rounded-full border-2 border-white object-cover"
-                                    />
+                                      className="w-8 h-8 relative cursor-pointer"
+                                      onClick={() => setSelectedImage(image as string)}
+                                    >
+                                      <img 
+                                        src={image as string}
+                                        alt={`Task image ${index + 1}`}
+                                        className="w-8 h-8 rounded-lg border-2 border-white object-cover"
+                                      />
+                                      <Maximize className="w-3 h-3 absolute top-0 right-0 text-gray-600 bg-white rounded-full p-0.5" />
+                                    </div>
                                   ))}
                                 </div>
                               )}
@@ -349,6 +367,18 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-3xl">
+          {selectedImage && (
+            <img 
+              src={selectedImage} 
+              alt="Task image"
+              className="w-full h-auto object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
