@@ -10,7 +10,7 @@ const ProjectStats = ({ project }: ProjectStatsProps) => {
   return (
     <div className="flex gap-6">
       {/* Subscription Status Card */}
-      <div className="backdrop-blur-sm bg-[#F1F0FB]/30 rounded-lg p-4 border border-[#aaadb0] min-w-[280px] hover:shadow-sm transition-all duration-300">
+      <div className="glass-card backdrop-blur-sm bg-[#fcfcfc] rounded-lg p-4 min-w-[280px] hover-card">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-600">Subscription</span>
           <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold ${
@@ -26,7 +26,7 @@ const ProjectStats = ({ project }: ProjectStatsProps) => {
       </div>
 
       {/* Hours Progress Card */}
-      <div className="backdrop-blur-sm bg-[#F1F0FB]/30 rounded-lg p-4 border border-[#aaadb0] min-w-[280px] hover:shadow-sm transition-all duration-300">
+      <div className="glass-card backdrop-blur-sm bg-[#fcfcfc] rounded-lg p-4 min-w-[280px] hover-card">
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-gray-600">Hours Used</span>

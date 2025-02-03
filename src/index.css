@@ -37,7 +37,7 @@
   }
 
   .glass-card {
-    @apply bg-[#fcfcfc] border-r border-border;
+    @apply bg-[#fcfcfc] border-r border-[#aaadb0];
   }
 
   .hover-card {
