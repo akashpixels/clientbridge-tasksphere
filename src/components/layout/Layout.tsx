@@ -9,7 +9,7 @@ const Layout = () => {
         <Sidebar />
         <main className={cn(
           'flex-1 transition-all duration-300 ease-in-out',
-          'pl-20 group-hover/sidebar:pl-64'
+          'pl-64' // Fixed padding for expanded sidebar
         )}>
           <div className="p-8">
             <Outlet />

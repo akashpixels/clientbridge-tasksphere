@@ -11,7 +11,7 @@ const Sidebar = () => {
     <aside
       className={cn(
         'fixed top-0 left-0 h-screen bg-background border-r border-border/40',
-        'w-20 group/sidebar hover:w-64 transition-all duration-300 ease-in-out'
+        'w-64' // Fixed width for expanded sidebar
       )}
     >
       <div className="h-full flex flex-col px-4 py-6">

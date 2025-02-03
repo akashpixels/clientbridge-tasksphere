@@ -477,6 +477,7 @@ export type Database = {
           progress: number | null
           project_id: string
           status_id: number | null
+          tasks: Json | null
           updated_at: string
         }
         Insert: {
@@ -491,6 +492,7 @@ export type Database = {
           progress?: number | null
           project_id: string
           status_id?: number | null
+          tasks?: Json | null
           updated_at?: string
         }
         Update: {
@@ -505,6 +507,7 @@ export type Database = {
           progress?: number | null
           project_id?: string
           status_id?: number | null
+          tasks?: Json | null
           updated_at?: string
         }
         Relationships: [
