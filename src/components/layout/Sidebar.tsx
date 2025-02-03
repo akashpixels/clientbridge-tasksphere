@@ -10,8 +10,8 @@ const Sidebar = () => {
   return (
     <aside
       className={cn(
-        'fixed top-0 left-0 h-screen z-40 transition-all duration-300',
-        'w-20 group/sidebar hover:w-64'
+        'fixed top-0 left-0 h-screen z-40',
+        'w-20 group/sidebar hover:w-64 transition-[width] duration-300 ease-in-out'
       )}
     >
       <div className="glass-card h-full flex flex-col px-4 py-6">
