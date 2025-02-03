@@ -1,9 +1,18 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
-import { Monitor, Smartphone } from "lucide-react";
+import { Monitor, Smartphone, ArrowUp, ArrowDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -21,7 +30,14 @@ interface DevelopmentLayoutProps {
   };
 }
 
+type SortConfig = {
+  key: string;
+  direction: 'asc' | 'desc';
+};
+
 const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'created_at', direction: 'desc' });
+  
   // Calculate hours percentage
   const hoursPercentage = Math.min(Math.round((project.hours_spent / project.hours_allotted) * 100), 100);
 
@@ -51,6 +67,24 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
       return data;
     },
   });
+
+  const handleSort = (key: string) => {
+    setSortConfig(current => ({
+      key,
+      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const sortedTasks = tasks ? [...tasks].sort((a, b) => {
+    const aValue = a[sortConfig.key as keyof typeof a];
+    const bValue = b[sortConfig.key as keyof typeof b];
+    
+    if (aValue === null) return 1;
+    if (bValue === null) return -1;
+    
+    const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    return sortConfig.direction === 'asc' ? comparison : -comparison;
+  }) : [];
 
   return (
     <div className="container mx-auto p-6">
@@ -136,21 +170,53 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                 </button>
               </div>
               
-              <div className="space-y-2">
-                {isLoadingTasks ? (
-                  <p>Loading tasks...</p>
-                ) : tasks && tasks.length > 0 ? (
-                  tasks.map((task) => (
-                    <div key={task.id} className="p-4 border border-gray-100 rounded-md">
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium">{task.task_type?.name}</h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                              {task.details}
-                            </p>
-                          </div>
-                          <div className="flex flex-col items-end gap-2">
+              {isLoadingTasks ? (
+                <p>Loading tasks...</p>
+              ) : tasks && tasks.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead 
+                          className="cursor-pointer"
+                          onClick={() => handleSort('status')}
+                        >
+                          Status {sortConfig.key === 'status' && (
+                            sortConfig.direction === 'asc' ? <ArrowUp className="inline w-4 h-4" /> : <ArrowDown className="inline w-4 h-4" />
+                          )}
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer"
+                          onClick={() => handleSort('details')}
+                        >
+                          Details
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer"
+                          onClick={() => handleSort('priority_level_id')}
+                        >
+                          Priority
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer"
+                          onClick={() => handleSort('eta')}
+                        >
+                          ETA
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer"
+                          onClick={() => handleSort('hours_spent')}
+                        >
+                          Hours
+                        </TableHead>
+                        <TableHead>Assets</TableHead>
+                        <TableHead>Device</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sortedTasks.map((task) => (
+                        <TableRow key={task.id}>
+                          <TableCell>
                             <span 
                               className="px-2 py-1 text-xs rounded-full"
                               style={{
@@ -160,61 +226,67 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                             >
                               {task.status?.name}
                             </span>
-                            <span className="text-xs text-gray-500">
-                              {task.priority?.name} Priority
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{task.task_type?.name}</p>
+                              <p className="text-sm text-gray-500">{task.details}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-xs" style={{ color: task.priority?.color }}>
+                              {task.priority?.name}
                             </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between text-sm text-gray-500">
-                          <div className="flex items-center gap-4">
-                            <span>ETA: {task.eta ? new Date(task.eta).toLocaleDateString() : 'Not set'}</span>
-                            <span>Hours: {task.hours_spent || 0}/{task.hours_needed || 0}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {task.target_device === 'Desktop' && <Monitor className="w-4 h-4" />}
-                            {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4" />}
-                            {task.target_device === 'Both' && (
-                              <>
-                                <Monitor className="w-4 h-4" />
-                                <Smartphone className="w-4 h-4" />
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        {task.images && Array.isArray(task.images) && task.images.length > 0 && (
-                          <div className="flex gap-2">
-                            {task.images.map((image, index) => (
-                              <div key={index} className="w-12 h-12 bg-gray-100 rounded">
-                                <img src={image as string} alt={`Task image ${index + 1}`} className="w-full h-full object-cover rounded" />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {task.reference_links && Array.isArray(task.reference_links) && task.reference_links.length > 0 && (
-                          <div className="flex gap-2">
-                            {task.reference_links.map((link, index) => {
-                              const linkStr = typeof link === 'string' ? link : String(link);
-                              return (
-                                <a 
-                                  key={index}
-                                  href={linkStr}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-blue-600 hover:underline"
-                                >
-                                  {linkStr}
-                                </a>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p>No tasks found for this project.</p>
-                )}
-              </div>
+                          </TableCell>
+                          <TableCell>
+                            {task.eta ? new Date(task.eta).toLocaleDateString() : 'Not set'}
+                          </TableCell>
+                          <TableCell>
+                            {task.hours_spent || 0}/{task.hours_needed || 0}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              {task.images && Array.isArray(task.images) && task.images.length > 0 && (
+                                <div className="flex -space-x-2">
+                                  {task.images.map((image, index) => (
+                                    <img 
+                                      key={index}
+                                      src={image as string}
+                                      alt={`Task image ${index + 1}`}
+                                      className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                              {task.reference_links && Array.isArray(task.reference_links) && task.reference_links.length > 0 && (
+                                <div className="flex items-center">
+                                  <span className="text-xs text-blue-600">
+                                    {task.reference_links.length} link{task.reference_links.length > 1 ? 's' : ''}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {task.target_device === 'Desktop' && <Monitor className="w-4 h-4" />}
+                              {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4" />}
+                              {task.target_device === 'Both' && (
+                                <>
+                                  <Monitor className="w-4 h-4" />
+                                  <Smartphone className="w-4 h-4" />
+                                </>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <p>No tasks found for this project.</p>
+              )}
             </div>
           </Card>
         </TabsContent>
