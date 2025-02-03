@@ -1,15 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LayoutGrid, List, ArrowUpDown } from "lucide-react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { ProjectFilters } from "@/components/projects/ProjectFilters";
+import { ProjectGrid } from "@/components/projects/ProjectGrid";
+import { ProjectList } from "@/components/projects/ProjectList";
 
 type Project = Database['public']['Tables']['projects']['Row'] & {
   client: {
@@ -118,167 +113,6 @@ const Projects = () => {
     return aValue < bValue ? 1 : -1;
   });
 
-  const renderProjectCard = (project: Project) => {
-    const gradientStyle = {
-      background: `linear-gradient(135deg, ${project.primary_color_hex || '#9b87f5'} 0%, ${project.secondary_color_hex || '#7E69AB'} 40%, #fcfcfc 70%)`,
-      transformOrigin: 'bottom right',
-    };
-
-    return (
-      <Link to={`/projects/${project.id}`} key={project.id}>
-        <Card 
-          className="p-6 hover:shadow-md transition-shadow overflow-hidden relative flex flex-col"
-          style={{ aspectRatio: '10/15', height: '420px' }}
-        >
-          <div className="absolute inset-0 opacity-10" style={gradientStyle} />
-          <div className="relative z-10 flex flex-col h-full">
-            {project.logo_url && (
-              <div className="mb-4 flex justify-center">
-                <img 
-                  src={project.logo_url} 
-                  alt={`${project.name} logo`}
-                  className="w-16 h-16 object-contain rounded-lg"
-                />
-              </div>
-            )}
-            <div className="flex-1">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold mb-1">{project.name}</h3>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-                  project.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                }`}>
-                  {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
-                </span>
-                {project.status?.name && (
-                  <span 
-                    className="inline-block px-2 py-1 rounded-full text-xs"
-                    style={{
-                      backgroundColor: `${project.status.color_hex}15`,
-                      color: project.status.color_hex
-                    }}
-                  >
-                    {project.status.name}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-auto space-y-2">
-              <p className="text-sm text-gray-500">
-                {project.client?.user_profiles ? 
-                  `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
-                  : 'No Client'}
-              </p>
-              <div className="text-sm text-gray-500">
-                Due Date: {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
-              </div>
-            </div>
-          </div>
-        </Card>
-      </Link>
-    );
-  };
-
-  const renderProjectList = () => (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Project</TableHead>
-            <TableHead>
-              <Button
-                variant="ghost"
-                onClick={() => handleSort('client')}
-                className="h-8 flex items-center gap-1"
-              >
-                Client
-                <ArrowUpDown className="h-4 w-4" />
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button
-                variant="ghost"
-                onClick={() => handleSort('status')}
-                className="h-8 flex items-center gap-1"
-              >
-                Status
-                <ArrowUpDown className="h-4 w-4" />
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button
-                variant="ghost"
-                onClick={() => handleSort('subscription')}
-                className="h-8 flex items-center gap-1"
-              >
-                Subscription
-                <ArrowUpDown className="h-4 w-4" />
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button
-                variant="ghost"
-                onClick={() => handleSort('dueDate')}
-                className="h-8 flex items-center gap-1"
-              >
-                Due Date
-                <ArrowUpDown className="h-4 w-4" />
-              </Button>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedProjects?.map((project) => (
-            <TableRow key={project.id}>
-              <TableCell className="font-medium">
-                <div className="flex items-center gap-3">
-                  {project.logo_url && (
-                    <img 
-                      src={project.logo_url} 
-                      alt={`${project.name} logo`}
-                      className="w-8 h-8 object-contain rounded"
-                    />
-                  )}
-                  {project.name}
-                </div>
-              </TableCell>
-              <TableCell>
-                {project.client?.user_profiles ? 
-                  `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
-                  : 'No Client'}
-              </TableCell>
-              <TableCell>
-                {project.status?.name && (
-                  <span 
-                    className="inline-block px-2 py-1 rounded-full text-xs"
-                    style={{
-                      backgroundColor: `${project.status.color_hex}15`,
-                      color: project.status.color_hex
-                    }}
-                  >
-                    {project.status.name}
-                  </span>
-                )}
-              </TableCell>
-              <TableCell>
-                <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-                  project.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                }`}>
-                  {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
-                </span>
-              </TableCell>
-              <TableCell>
-                {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
-
   if (error) {
     console.error('Error in projects component:', error);
     return (
@@ -295,60 +129,25 @@ const Projects = () => {
           <h1 className="text-2xl font-semibold">Projects</h1>
         </div>
 
-        <div className="flex items-center gap-4">
-          <Input
-            placeholder="Search projects..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-xs"
-          />
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px] bg-white">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="Open">Open</SelectItem>
-              <SelectItem value="In Progress">In Progress</SelectItem>
-              <SelectItem value="Review">Review</SelectItem>
-              <SelectItem value="Feedback">Feedback</SelectItem>
-              <SelectItem value="Done">Done</SelectItem>
-              <SelectItem value="Blocked">Blocked</SelectItem>
-              <SelectItem value="Cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={subscriptionFilter} onValueChange={setSubscriptionFilter}>
-            <SelectTrigger className="w-[180px] bg-white">
-              <SelectValue placeholder="Filter by subscription" />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="all">All Projects</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="ml-auto">
-            <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as "grid" | "list")}>
-              <ToggleGroupItem value="grid" aria-label="Grid view">
-                <LayoutGrid className="h-4 w-4" />
-              </ToggleGroupItem>
-              <ToggleGroupItem value="list" aria-label="List view">
-                <List className="h-4 w-4" />
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-        </div>
+        <ProjectFilters
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          subscriptionFilter={subscriptionFilter}
+          setSubscriptionFilter={setSubscriptionFilter}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+        />
 
         {isLoading ? (
           <div className="text-center py-8">Loading projects...</div>
         ) : filteredProjects?.length === 0 ? (
           <div className="text-center py-8 text-gray-500">No projects found.</div>
         ) : viewMode === "grid" ? (
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-start">
-            {filteredProjects?.map(renderProjectCard)}
-          </div>
+          <ProjectGrid projects={sortedProjects} />
         ) : (
-          renderProjectList()
+          <ProjectList projects={sortedProjects} onSort={handleSort} />
         )}
       </div>
     </div>
