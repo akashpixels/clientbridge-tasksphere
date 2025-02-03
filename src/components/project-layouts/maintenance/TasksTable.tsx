@@ -51,7 +51,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
       return { bg: '#F3F4F6', text: '#374151' };
     }
 
-    // Create a darker version of the color for text by reducing the lightness
+    // Create a darker version of the color for text
     const darkerHex = status.color_hex.replace('#', '');
     const r = parseInt(darkerHex.substring(0, 2), 16);
     const g = parseInt(darkerHex.substring(2, 4), 16);
@@ -65,7 +65,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
     const darkerColor = `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
 
     return {
-      bg: `${status.color_hex}15`, // 15 is the hex for 10% opacity
+      bg: status.color_hex, // Use the full color without opacity
       text: darkerColor
     };
   };
