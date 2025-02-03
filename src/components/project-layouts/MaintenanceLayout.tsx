@@ -192,17 +192,20 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                         )}
                         {task.reference_links && Array.isArray(task.reference_links) && task.reference_links.length > 0 && (
                           <div className="flex gap-2">
-                            {task.reference_links.map((link, index) => (
-                              <a 
-                                key={index}
-                                href={link as string}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-blue-600 hover:underline"
-                              >
-                                {link}
-                              </a>
-                            ))}
+                            {task.reference_links.map((link, index) => {
+                              const linkStr = typeof link === 'string' ? link : String(link);
+                              return (
+                                <a 
+                                  key={index}
+                                  href={linkStr}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-blue-600 hover:underline"
+                                >
+                                  {linkStr}
+                                </a>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
