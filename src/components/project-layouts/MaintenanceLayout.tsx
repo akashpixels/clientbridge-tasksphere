@@ -35,7 +35,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         .select(`
           *,
           task_type:task_types(name, category),
-          status:task_statuses(name, color_hex),
+          status:task_statuses!tasks_current_status_id_fkey(name, color_hex),
           priority:priority_levels(name, color),
           assigned_user:user_profiles(first_name, last_name)
         `)
@@ -181,21 +181,21 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                             )}
                           </div>
                         </div>
-                        {task.images && task.images.length > 0 && (
+                        {task.images && Array.isArray(task.images) && task.images.length > 0 && (
                           <div className="flex gap-2">
-                            {(task.images as string[]).map((image, index) => (
+                            {task.images.map((image, index) => (
                               <div key={index} className="w-12 h-12 bg-gray-100 rounded">
-                                <img src={image} alt={`Task image ${index + 1}`} className="w-full h-full object-cover rounded" />
+                                <img src={image as string} alt={`Task image ${index + 1}`} className="w-full h-full object-cover rounded" />
                               </div>
                             ))}
                           </div>
                         )}
-                        {task.reference_links && task.reference_links.length > 0 && (
+                        {task.reference_links && Array.isArray(task.reference_links) && task.reference_links.length > 0 && (
                           <div className="flex gap-2">
-                            {(task.reference_links as string[]).map((link, index) => (
+                            {task.reference_links.map((link, index) => (
                               <a 
                                 key={index}
-                                href={link}
+                                href={link as string}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-xs text-blue-600 hover:underline"
