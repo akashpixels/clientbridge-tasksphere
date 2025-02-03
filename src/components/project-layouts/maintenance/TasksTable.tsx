@@ -65,7 +65,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
     const darkerColor = `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
 
     return {
-      bg: status.color_hex, // Use the full color without opacity
+      bg: status.color_hex,
       text: darkerColor
     };
   };
@@ -115,7 +115,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
             <TableCell>
               <div className="flex flex-col items-start gap-1">
                 <span 
-                  className="px-2 py-1 text-xs rounded-full"
+                  className="px-2 py-1 text-xs rounded-full font-semibold"
                   style={{
                     backgroundColor: getStatusColor(task.status || { name: null, color_hex: null }).bg,
                     color: getStatusColor(task.status || { name: null, color_hex: null }).text
