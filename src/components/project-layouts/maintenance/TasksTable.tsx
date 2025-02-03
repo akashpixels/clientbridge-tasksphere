@@ -51,18 +51,27 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
       return { bg: '#F3F4F6', text: '#374151' };
     }
 
-    // Convert hex to RGB
+    // Split the color_hex string into background and text colors
+    const [bgColor, textColor] = status.color_hex.split(',').map(color => color.trim());
+    
+    // If both colors are provided, use them directly
+    if (bgColor && textColor) {
+      return {
+        bg: bgColor,
+        text: textColor
+      };
+    }
+    
+    // Fallback to the old logic if the format is not as expected
     const hex = status.color_hex.replace('#', '');
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
     const b = parseInt(hex.substring(4, 6), 16);
     
-    // Find the dominant color channel
     const max = Math.max(r, g, b);
     
-    // Create a darker but more saturated version
-    const saturationMultiplier = 1.3; // Increase saturation
-    const darkenFactor = 0.8; // Make it slightly darker
+    const saturationMultiplier = 1.3;
+    const darkenFactor = 0.8;
     
     const newR = r === max ? Math.min(255, r * saturationMultiplier * darkenFactor) : r * darkenFactor;
     const newG = g === max ? Math.min(255, g * saturationMultiplier * darkenFactor) : g * darkenFactor;
