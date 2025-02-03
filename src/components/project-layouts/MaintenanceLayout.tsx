@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { format } from "date-fns";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -85,6 +86,14 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
     return sortConfig.direction === 'asc' ? comparison : -comparison;
   }) : [];
+
+  const roundToNearestHalfHour = (hours: number) => {
+    return Math.ceil(hours * 2) / 2;
+  };
+
+  const formatETA = (date: string) => {
+    return format(new Date(date), "h.mmaaa do MMM");
+  };
 
   return (
     <div className="container mx-auto p-6">
@@ -239,10 +248,10 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                             </span>
                           </TableCell>
                           <TableCell>
-                            {task.eta ? new Date(task.eta).toLocaleDateString() : 'Not set'}
+                            {task.eta ? formatETA(task.eta) : 'Not set'}
                           </TableCell>
                           <TableCell>
-                            {task.hours_spent || 0}/{task.hours_needed || 0}
+                            {task.hours_spent ? roundToNearestHalfHour(task.hours_spent) : 0}
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
