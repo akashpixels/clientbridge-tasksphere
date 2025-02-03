@@ -20,7 +20,7 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
     >
       <button
         onClick={onToggle}
-        className="absolute -right-3 top-6 hover:text-gray-900"
+        className="absolute -right-3 top-6 bg-background border border-border/40 rounded-full p-1.5 hover:bg-gray-100"
       >
         <ChevronLeft className={cn(
           "h-4 w-4 text-gray-600 transition-transform",
