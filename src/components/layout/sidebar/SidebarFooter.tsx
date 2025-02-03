@@ -4,7 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 
-const SidebarFooter = () => {
+interface SidebarFooterProps {
+  isOpen: boolean;
+}
+
+const SidebarFooter = ({ isOpen }: SidebarFooterProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -40,9 +44,11 @@ const SidebarFooter = () => {
         <div className="min-w-[20px]">
           <LogOut size={20} />
         </div>
-        <span className="text-sm font-medium">
-          Logout
-        </span>
+        {isOpen && (
+          <span className="text-sm font-medium truncate">
+            Logout
+          </span>
+        )}
       </button>
     </div>
   );

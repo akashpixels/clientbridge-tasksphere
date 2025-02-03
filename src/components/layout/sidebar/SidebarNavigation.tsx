@@ -8,6 +8,10 @@ interface NavItem {
   href: string;
 }
 
+interface SidebarNavigationProps {
+  isOpen: boolean;
+}
+
 const navItems: NavItem[] = [
   { label: 'Dashboard', icon: <Home size={20} />, href: '/' },
   { label: 'Projects', icon: <Briefcase size={20} />, href: '/projects' },
@@ -16,7 +20,7 @@ const navItems: NavItem[] = [
   { label: 'Clients', icon: <FileText size={20} />, href: '/clients' },
 ];
 
-const SidebarNavigation = () => {
+const SidebarNavigation = ({ isOpen }: SidebarNavigationProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -37,9 +41,11 @@ const SidebarNavigation = () => {
             <div className="min-w-[20px]">
               {item.icon}
             </div>
-            <span className="text-sm font-medium">
-              {item.label}
-            </span>
+            {isOpen && (
+              <span className="text-sm font-medium truncate">
+                {item.label}
+              </span>
+            )}
           </button>
         );
       })}

@@ -1,13 +1,15 @@
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronLeft } from 'lucide-react';
 import SidebarHeader from './sidebar/SidebarHeader';
 import SidebarNavigation from './sidebar/SidebarNavigation';
 import SidebarFooter from './sidebar/SidebarFooter';
 
-const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(true);
+interface SidebarProps {
+  isOpen: boolean;
+  onToggle: () => void;
+}
 
+const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
   return (
     <aside
       className={cn(
@@ -17,7 +19,7 @@ const Sidebar = () => {
       )}
     >
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={onToggle}
         className="absolute -right-3 top-6 bg-background border border-border/40 rounded-full p-1.5 hover:bg-gray-100"
       >
         <ChevronLeft className={cn(
@@ -26,11 +28,11 @@ const Sidebar = () => {
         )} />
       </button>
       <div className="h-full flex flex-col px-4 py-6">
-        <SidebarHeader />
+        <SidebarHeader isOpen={isOpen} />
         <div className="flex-1 overflow-y-auto">
-          <SidebarNavigation />
+          <SidebarNavigation isOpen={isOpen} />
         </div>
-        <SidebarFooter />
+        <SidebarFooter isOpen={isOpen} />
       </div>
     </aside>
   );

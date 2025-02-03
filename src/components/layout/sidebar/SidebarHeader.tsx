@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { supabase } from "@/integrations/supabase/client";
 
-const SidebarHeader = () => {
+interface SidebarHeaderProps {
+  isOpen: boolean;
+}
+
+const SidebarHeader = ({ isOpen }: SidebarHeaderProps) => {
   const [agencyLogo, setAgencyLogo] = useState('');
   const [agencyName, setAgencyName] = useState('');
 
@@ -40,9 +44,11 @@ const SidebarHeader = () => {
           className="h-8 w-8 min-w-[32px] object-contain"
         />
       )}
-      <h1 className="font-display font-bold text-xl ml-3">
-        {agencyName}
-      </h1>
+      {isOpen && (
+        <h1 className="font-display font-bold text-xl ml-3 truncate">
+          {agencyName}
+        </h1>
+      )}
     </div>
   );
 };
