@@ -101,10 +101,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     }
   };
 
-  const roundToNearestHalfHour = (hours: number) => {
-    return Math.ceil(hours * 2) / 2;
-  };
-
   const formatETA = (date: string) => {
     return format(new Date(date), "h.mmaaa do MMM");
   };
@@ -251,9 +247,9 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                       {sortedTasks.map((task) => (
                         <TableRow key={task.id}>
                           <TableCell>
-                            <div className="space-y-1">
+                            <div className="flex flex-col items-start gap-1">
                               <span 
-                                className="px-2 py-1 text-xs rounded-full block w-fit"
+                                className="px-2 py-1 text-xs rounded-full"
                                 style={{
                                   backgroundColor: `${task.status?.color_hex}15`,
                                   color: task.status?.color_hex
@@ -261,9 +257,9 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                               >
                                 {task.status?.name}
                               </span>
-                              {task.task_completed_at && task.hours_spent && (
-                                <span className="text-xs text-gray-500 text-center block">
-                                  {roundToNearestHalfHour(task.hours_spent)} hrs
+                              {task.task_completed_at && task.actual_hours_spent && (
+                                <span className="text-xs text-gray-500 pl-2">
+                                  {task.actual_hours_spent} hrs
                                 </span>
                               )}
                             </div>
@@ -391,10 +387,10 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
       </Tabs>
 
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
-          <div className="relative flex-1 min-h-0">
+        <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
+          <div className="relative flex-1 min-h-0 flex items-center justify-center">
             {selectedImage && (
-              <div className="flex items-center justify-center h-full">
+              <>
                 <button
                   onClick={handlePreviousImage}
                   className="absolute left-4 p-2 bg-white/80 rounded-full"
@@ -405,7 +401,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                 <img 
                   src={selectedImage} 
                   alt="Task image"
-                  className="max-w-full max-h-[70vh] object-contain"
+                  className="max-w-full max-h-[calc(80vh-4rem)] object-contain"
                 />
                 <button
                   onClick={handleNextImage}
@@ -414,7 +410,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                 >
                   <ArrowRight className="w-6 h-6" />
                 </button>
-              </div>
+              </>
             )}
           </div>
         </DialogContent>
