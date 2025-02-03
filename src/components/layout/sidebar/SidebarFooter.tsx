@@ -13,7 +13,6 @@ const SidebarFooter = () => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      // Navigate to auth page after successful logout
       navigate('/auth');
       
       toast({
@@ -41,11 +40,7 @@ const SidebarFooter = () => {
         <div className="min-w-[20px]">
           <LogOut size={20} />
         </div>
-        <span className={cn(
-          "transition-all duration-300",
-          "opacity-0 w-0 overflow-hidden whitespace-nowrap",
-          "group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto"
-        )}>
+        <span className="text-sm font-medium">
           Logout
         </span>
       </button>

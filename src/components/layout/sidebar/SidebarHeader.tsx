@@ -40,11 +40,7 @@ const SidebarHeader = () => {
           className="h-8 w-8 min-w-[32px] object-contain"
         />
       )}
-      <h1 className={cn(
-        "font-display font-bold transition-all duration-300 ml-3",
-        "text-xl",
-        "opacity-0 group-hover/sidebar:opacity-100 w-0 group-hover/sidebar:w-auto overflow-hidden whitespace-nowrap"
-      )}>
+      <h1 className="font-display font-bold text-xl ml-3">
         {agencyName}
       </h1>
     </div>
