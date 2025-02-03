@@ -264,21 +264,21 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="space-y-1">
-                              <div className="flex items-start gap-3">
-                                <div className="flex flex-col gap-1">
-                                  {task.target_device === 'Desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
-                                  {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
-                                  {task.target_device === 'Both' && (
-                                    <>
-                                      <Monitor className="w-4 h-4 text-gray-500" />
-                                      <Smartphone className="w-4 h-4 text-gray-500" />
-                                    </>
-                                  )}
-                                </div>
-                                <p className="text-sm">{task.details}</p>
+                            <div className="flex items-start gap-3">
+                              <div className="flex flex-col gap-1 shrink-0">
+                                {task.target_device === 'Desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
+                                {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
+                                {task.target_device === 'Both' && (
+                                  <>
+                                    <Monitor className="w-4 h-4 text-gray-500" />
+                                    <Smartphone className="w-4 h-4 text-gray-500" />
+                                  </>
+                                )}
                               </div>
-                              <p className="text-xs text-gray-500 ml-7">{task.task_type?.name}</p>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm">{task.details}</p>
+                                <p className="text-xs text-gray-500 mt-1">{task.task_type?.name}</p>
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell>
