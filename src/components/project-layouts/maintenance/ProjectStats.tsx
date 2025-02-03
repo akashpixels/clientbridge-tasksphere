@@ -13,8 +13,8 @@ const ProjectStats = ({ project }: ProjectStatsProps) => {
       <div className="bg-white rounded-[6px] p-4 border border-gray-100 min-w-[280px]">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-500">Subscription</span>
-          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-            project.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold ${
+            project.subscription_status === 'active' ? 'bg-green-600 text-white' : 'bg-gray-600 text-white'
           }`}>
             {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
           </span>
@@ -30,14 +30,14 @@ const ProjectStats = ({ project }: ProjectStatsProps) => {
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-gray-500">Hours Used</span>
-            <span className="text-sm font-semibold">{hoursPercentage}%</span>
+            <span className="text-sm font-bold">{hoursPercentage}%</span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-2.5">
             <div 
               className={`h-2.5 rounded-full ${
-                hoursPercentage > 90 ? 'bg-red-500' :
-                hoursPercentage > 70 ? 'bg-yellow-500' :
-                'bg-green-500'
+                hoursPercentage > 90 ? 'bg-red-600' :
+                hoursPercentage > 70 ? 'bg-yellow-600' :
+                'bg-green-600'
               }`}
               style={{ width: `${hoursPercentage}%` }}
             />

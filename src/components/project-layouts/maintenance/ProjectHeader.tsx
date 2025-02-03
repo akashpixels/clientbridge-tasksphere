@@ -1,4 +1,5 @@
 import { Tables } from "@/integrations/supabase/types";
+import ProjectStats from "./ProjectStats";
 
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
@@ -14,7 +15,7 @@ interface ProjectHeaderProps {
 
 const ProjectHeader = ({ project }: ProjectHeaderProps) => {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex items-center justify-between w-full gap-4">
       <div className="flex items-center gap-4">
         {project.logo_url && (
           <img 
@@ -32,6 +33,7 @@ const ProjectHeader = ({ project }: ProjectHeaderProps) => {
           </p>
         </div>
       </div>
+      <ProjectStats project={project} />
     </div>
   );
 };
