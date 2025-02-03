@@ -46,6 +46,16 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
     return format(new Date(date), "h.mmaaa do MMM");
   };
 
+  const getStatusColor = (statusName: string | null) => {
+    const colors: { [key: string]: { bg: string, text: string } } = {
+      'Done': { bg: '#F2FCE2', text: '#2E7D32' },
+      'Open': { bg: '#FEF7CD', text: '#B45309' },
+      'Pending': { bg: '#FEC6A1', text: '#9A3412' },
+      'In Progress': { bg: '#D3E4FD', text: '#1E40AF' }
+    };
+    return colors[statusName || ''] || { bg: '#F3F4F6', text: '#374151' };
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -93,8 +103,8 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 <span 
                   className="px-2 py-1 text-xs rounded-full"
                   style={{
-                    backgroundColor: `${task.status?.color_hex}15`,
-                    color: task.status?.color_hex
+                    backgroundColor: getStatusColor(task.status?.name).bg,
+                    color: getStatusColor(task.status?.name).text
                   }}
                 >
                   {task.status?.name}
