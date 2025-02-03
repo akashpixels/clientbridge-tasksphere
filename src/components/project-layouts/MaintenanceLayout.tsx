@@ -7,7 +7,6 @@ import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ProjectHeader from "./maintenance/ProjectHeader";
-import ProjectStats from "./maintenance/ProjectStats";
 import TasksTable from "./maintenance/TasksTable";
 
 interface DevelopmentLayoutProps {
@@ -37,7 +36,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
 
-  // Fetch tasks for this project
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['tasks', project.id],
     queryFn: async () => {
@@ -107,7 +105,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     <div className="container mx-auto p-6">
       <div className="mb-6">
         <ProjectHeader project={project} />
-        <ProjectStats project={project} />
       </div>
 
       <Tabs defaultValue="tasks" className="w-full">
