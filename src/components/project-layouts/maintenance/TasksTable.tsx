@@ -51,22 +51,25 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
       return { bg: '#F3F4F6', text: '#374151' };
     }
 
-    // Create a darker version of the color for text
-    const darkerHex = status.color_hex.replace('#', '');
-    const r = parseInt(darkerHex.substring(0, 2), 16);
-    const g = parseInt(darkerHex.substring(2, 4), 16);
-    const b = parseInt(darkerHex.substring(4, 6), 16);
+    // Create a more vibrant version of the color for text
+    const hex = status.color_hex.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
     
-    // Darken the color by reducing RGB values by 40%
-    const darkerR = Math.floor(r * 0.6);
-    const darkerG = Math.floor(g * 0.6);
-    const darkerB = Math.floor(b * 0.6);
+    // Increase saturation by increasing the dominant color channel
+    const max = Math.max(r, g, b);
+    const multiplier = 1.2; // Increase vibrancy
     
-    const darkerColor = `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
+    const newR = r === max ? Math.min(255, r * multiplier) : r;
+    const newG = g === max ? Math.min(255, g * multiplier) : g;
+    const newB = b === max ? Math.min(255, b * multiplier) : b;
+    
+    const vibrantColor = `#${Math.round(newR).toString(16).padStart(2, '0')}${Math.round(newG).toString(16).padStart(2, '0')}${Math.round(newB).toString(16).padStart(2, '0')}`;
 
     return {
       bg: status.color_hex,
-      text: darkerColor
+      text: vibrantColor
     };
   };
 

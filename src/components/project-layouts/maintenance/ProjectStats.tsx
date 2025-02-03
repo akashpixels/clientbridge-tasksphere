@@ -14,7 +14,7 @@ const ProjectStats = ({ project }: ProjectStatsProps) => {
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-600">Subscription</span>
           <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold ${
-            project.subscription_status === 'active' ? 'bg-green-600 text-white' : 'bg-gray-600 text-white'
+            project.subscription_status === 'active' ? 'bg-[#F2FCE2] text-[#2E7D32]' : 'bg-gray-600 text-white'
           }`}>
             {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
           </span>
@@ -43,7 +43,7 @@ const ProjectStats = ({ project }: ProjectStatsProps) => {
             />
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            {project.hours_spent} / {project.hours_allotted} hrs
+            {project.hours_spent.toFixed(1)} / {project.hours_allotted} hrs
           </p>
         </div>
       </div>
