@@ -36,6 +36,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
 
+  // Fetch tasks for this project
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['tasks', project.id],
     queryFn: async () => {
@@ -192,6 +193,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
             <p>Files content coming soon...</p>
           </Card>
         </TabsContent>
+
       </Tabs>
 
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
