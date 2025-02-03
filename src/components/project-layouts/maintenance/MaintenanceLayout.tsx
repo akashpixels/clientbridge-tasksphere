@@ -7,7 +7,6 @@ import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ProjectHeader from "./ProjectHeader";
-import ProjectStats from "./ProjectStats";
 import TasksTable from "./TasksTable";
 
 interface DevelopmentLayoutProps {
