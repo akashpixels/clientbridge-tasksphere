@@ -20,6 +20,8 @@ const Sidebar = () => {
           <SidebarNavigation />
         </div>
         <SidebarFooter />
+      </div>
+    </aside>
   );
 };
 
