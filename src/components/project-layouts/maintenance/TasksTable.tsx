@@ -46,14 +46,28 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
     return format(new Date(date), "h.mmaaa do MMM");
   };
 
-  const getStatusColor = (statusName: string | null) => {
-    const colors: { [key: string]: { bg: string, text: string } } = {
-      'Done': { bg: '#F2FCE2', text: '#2E7D32' },
-      'Open': { bg: '#FEF7CD', text: '#B45309' },
-      'Pending': { bg: '#FEC6A1', text: '#9A3412' },
-      'In Progress': { bg: '#D3E4FD', text: '#1E40AF' }
+  const getStatusColor = (status: { name: string | null, color_hex: string | null }) => {
+    if (!status?.color_hex) {
+      return { bg: '#F3F4F6', text: '#374151' };
+    }
+
+    // Create a darker version of the color for text by reducing the lightness
+    const darkerHex = status.color_hex.replace('#', '');
+    const r = parseInt(darkerHex.substring(0, 2), 16);
+    const g = parseInt(darkerHex.substring(2, 4), 16);
+    const b = parseInt(darkerHex.substring(4, 6), 16);
+    
+    // Darken the color by reducing RGB values by 40%
+    const darkerR = Math.floor(r * 0.6);
+    const darkerG = Math.floor(g * 0.6);
+    const darkerB = Math.floor(b * 0.6);
+    
+    const darkerColor = `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
+
+    return {
+      bg: `${status.color_hex}15`, // 15 is the hex for 10% opacity
+      text: darkerColor
     };
-    return colors[statusName || ''] || { bg: '#F3F4F6', text: '#374151' };
   };
 
   return (
@@ -103,8 +117,8 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 <span 
                   className="px-2 py-1 text-xs rounded-full"
                   style={{
-                    backgroundColor: getStatusColor(task.status?.name).bg,
-                    color: getStatusColor(task.status?.name).text
+                    backgroundColor: getStatusColor(task.status || { name: null, color_hex: null }).bg,
+                    color: getStatusColor(task.status || { name: null, color_hex: null }).text
                   }}
                 >
                   {task.status?.name}
