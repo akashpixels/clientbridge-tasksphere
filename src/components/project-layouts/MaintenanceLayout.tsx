@@ -2,6 +2,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -22,6 +24,33 @@ interface DevelopmentLayoutProps {
 const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   // Calculate hours percentage
   const hoursPercentage = Math.min(Math.round((project.hours_spent / project.hours_allotted) * 100), 100);
+
+  // Fetch tasks for this project
+  const { data: tasks, isLoading: isLoadingTasks } = useQuery({
+    queryKey: ['tasks', project.id],
+    queryFn: async () => {
+      console.log('Fetching tasks for project:', project.id);
+      const { data, error } = await supabase
+        .from('tasks')
+        .select(`
+          *,
+          task_type:task_types(name, category),
+          status:task_statuses(name, color_hex),
+          priority:priority_levels(name, color),
+          assigned_user:user_profiles(first_name, last_name)
+        `)
+        .eq('project_id', project.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching tasks:', error);
+        throw error;
+      }
+      
+      console.log('Fetched tasks:', data);
+      return data;
+    },
+  });
 
   return (
     <div className="container mx-auto p-6">
@@ -108,75 +137,80 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
               </div>
               
               <div className="space-y-2">
-                {/* Sample tasks - these will be replaced with real data */}
-                <div className="p-4 border border-gray-100 rounded-md">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium">Update meta descriptions</h4>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Review and update meta descriptions for better SEO performance
-                        </p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
-                          In Progress
-                        </span>
-                        <span className="text-xs text-gray-500">High Priority</span>
+                {isLoadingTasks ? (
+                  <p>Loading tasks...</p>
+                ) : tasks && tasks.length > 0 ? (
+                  tasks.map((task) => (
+                    <div key={task.id} className="p-4 border border-gray-100 rounded-md">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium">{task.task_type?.name}</h4>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {task.details}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span 
+                              className="px-2 py-1 text-xs rounded-full"
+                              style={{
+                                backgroundColor: `${task.status?.color_hex}15`,
+                                color: task.status?.color_hex
+                              }}
+                            >
+                              {task.status?.name}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {task.priority?.name} Priority
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <div className="flex items-center gap-4">
+                            <span>ETA: {task.eta ? new Date(task.eta).toLocaleDateString() : 'Not set'}</span>
+                            <span>Hours: {task.hours_spent || 0}/{task.hours_needed || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {task.target_device === 'Desktop' && <Monitor className="w-4 h-4" />}
+                            {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4" />}
+                            {task.target_device === 'Both' && (
+                              <>
+                                <Monitor className="w-4 h-4" />
+                                <Smartphone className="w-4 h-4" />
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        {task.images && task.images.length > 0 && (
+                          <div className="flex gap-2">
+                            {(task.images as string[]).map((image, index) => (
+                              <div key={index} className="w-12 h-12 bg-gray-100 rounded">
+                                <img src={image} alt={`Task image ${index + 1}`} className="w-full h-full object-cover rounded" />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {task.reference_links && task.reference_links.length > 0 && (
+                          <div className="flex gap-2">
+                            {(task.reference_links as string[]).map((link, index) => (
+                              <a 
+                                key={index}
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-600 hover:underline"
+                              >
+                                {link}
+                              </a>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div className="flex items-center gap-4">
-                        <span>ETA: Mar 15, 2024</span>
-                        <span>Hours: 2.5/4</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Monitor className="w-4 h-4" />
-                        <Smartphone className="w-4 h-4" />
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      {/* Sample images */}
-                      <div className="w-12 h-12 bg-gray-100 rounded"></div>
-                      <div className="w-12 h-12 bg-gray-100 rounded"></div>
-                    </div>
-                    <div className="flex gap-2">
-                      <a href="#" className="text-xs text-blue-600 hover:underline">reference-link-1.com</a>
-                      <a href="#" className="text-xs text-blue-600 hover:underline">reference-link-2.com</a>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="p-4 border border-gray-100 rounded-md">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium">Optimize image alt tags</h4>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Add descriptive alt tags to all blog post images
-                        </p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                          Todo
-                        </span>
-                        <span className="text-xs text-gray-500">Medium Priority</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div className="flex items-center gap-4">
-                        <span>ETA: Mar 20, 2024</span>
-                        <span>Hours: 0/3</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Monitor className="w-4 h-4" />
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <a href="#" className="text-xs text-blue-600 hover:underline">documentation.com</a>
-                    </div>
-                  </div>
-                </div>
+                  ))
+                ) : (
+                  <p>No tasks found for this project.</p>
+                )}
               </div>
             </div>
           </Card>
