@@ -240,7 +240,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                           ETA
                         </TableHead>
                         <TableHead>Assets</TableHead>
-                        <TableHead>Device</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -265,9 +264,19 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div>
-                              <p className="font-medium">{task.task_type?.name}</p>
-                              <p className="text-sm text-gray-500">{task.details}</p>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                {task.target_device === 'Desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
+                                {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
+                                {task.target_device === 'Both' && (
+                                  <>
+                                    <Monitor className="w-4 h-4 text-gray-500" />
+                                    <Smartphone className="w-4 h-4 text-gray-500" />
+                                  </>
+                                )}
+                                <p className="text-sm">{task.details}</p>
+                              </div>
+                              <p className="text-xs text-gray-500">{task.task_type?.name}</p>
                             </div>
                           </TableCell>
                           <TableCell>
@@ -309,18 +318,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                                     {task.reference_links.length} link{task.reference_links.length > 1 ? 's' : ''}
                                   </span>
                                 </div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {task.target_device === 'Desktop' && <Monitor className="w-4 h-4" />}
-                              {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4" />}
-                              {task.target_device === 'Both' && (
-                                <>
-                                  <Monitor className="w-4 h-4" />
-                                  <Smartphone className="w-4 h-4" />
-                                </>
                               )}
                             </div>
                           </TableCell>
