@@ -20,8 +20,8 @@ const ProjectStats = ({ project }: ProjectStatsProps) => {
           </span>
         </div>
         <div className="space-y-1">
-          <p className="text-xs text-gray-500">Renews on 1st April</p>
-          <p className="text-xs font-medium text-gray-600">Billing Cycle: Monthly</p>
+          <p className="text-xs text-gray-500 font-medium">Renews on 1st April</p>
+          <p className="text-xs text-gray-500 font-medium">Billing Cycle: Monthly</p>
         </div>
       </div>
 
