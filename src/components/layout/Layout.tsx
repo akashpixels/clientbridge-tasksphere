@@ -8,8 +8,8 @@ const Layout = () => {
       <div className="flex">
         <Sidebar />
         <div className={cn(
-          'flex-1 transition-[margin] duration-300 ease-in-out',
-          'ml-20 group-hover/sidebar:ml-64'
+          'flex-1 ml-20 transition-[margin-left] duration-300 ease-in-out',
+          'group-hover/sidebar:ml-64'
         )}>
           <main className="p-8">
             <Outlet />

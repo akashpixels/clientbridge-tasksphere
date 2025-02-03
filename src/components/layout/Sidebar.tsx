@@ -10,7 +10,7 @@ const Sidebar = () => {
   return (
     <aside
       className={cn(
-        'fixed top-0 left-0 h-screen z-40',
+        'fixed top-0 left-0 h-screen z-40 bg-background',
         'w-20 group/sidebar hover:w-64 transition-[width] duration-300 ease-in-out'
       )}
     >
