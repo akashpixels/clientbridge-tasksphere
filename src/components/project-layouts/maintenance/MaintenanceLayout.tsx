@@ -6,9 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import ProjectHeader from "./maintenance/ProjectHeader";
-import ProjectStats from "./maintenance/ProjectStats";
-import TasksTable from "./maintenance/TasksTable";
+import ProjectHeader from "./ProjectHeader";
+import ProjectStats from "./ProjectStats";
+import TasksTable from "./TasksTable";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
