@@ -37,7 +37,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
           task_type:task_types(name, category),
           status:task_statuses!tasks_current_status_id_fkey(name, color_hex),
           priority:priority_levels(name, color),
-          assigned_user:user_profiles(first_name, last_name)
+          assigned_user:user_profiles!tasks_assigned_user_id_fkey(first_name, last_name)
         `)
         .eq('project_id', project.id)
         .order('created_at', { ascending: false });
