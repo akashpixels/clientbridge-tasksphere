@@ -15,9 +15,10 @@ interface ProjectHeaderProps {
   };
   selectedMonth: string;
   onMonthChange: (month: string) => void;
+  monthlyHours: number;
 }
 
-const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderProps) => {
+const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: ProjectHeaderProps) => {
   // Generate last 6 months options (current month + 5 previous months)
   const monthOptions = Array.from({ length: 6 }, (_, i) => {
     const date = subMonths(new Date(), i);
@@ -64,7 +65,11 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
             </SelectContent>
           </Select>
         </div>
-        <ProjectStats project={project} selectedMonth={selectedMonth} />
+        <ProjectStats 
+          project={project} 
+          selectedMonth={selectedMonth}
+          monthlyHours={monthlyHours}
+        />
       </div>
     </div>
   );

@@ -7,7 +7,6 @@ import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ProjectHeader from "./ProjectHeader";
-import ProjectStats from "./ProjectStats";
 import TasksTable from "./TasksTable";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 
@@ -120,13 +119,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
           project={project} 
           selectedMonth={selectedMonth}
           onMonthChange={setSelectedMonth}
-        />
-      </div>
-
-      <div className="mb-6">
-        <ProjectStats 
-          project={project}
-          selectedMonth={selectedMonth}
           monthlyHours={monthlyHours}
         />
       </div>
