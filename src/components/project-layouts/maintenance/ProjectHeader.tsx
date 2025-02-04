@@ -1,7 +1,7 @@
 import { Tables } from "@/integrations/supabase/types";
 import ProjectStats from "./ProjectStats";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format } from "date-fns";
+import { format, subMonths } from "date-fns";
 
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
@@ -18,13 +18,12 @@ interface ProjectHeaderProps {
 }
 
 const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderProps) => {
-  // Generate last 12 months options
-  const monthOptions = Array.from({ length: 12 }, (_, i) => {
-    const date = new Date();
-    date.setMonth(date.getMonth() - i);
+  // Generate last 6 months options (current month + 5 previous months)
+  const monthOptions = Array.from({ length: 6 }, (_, i) => {
+    const date = subMonths(new Date(), i);
     return {
       value: format(date, 'yyyy-MM'),
-      label: format(date, 'MMMM yyyy')
+      label: format(date, 'MMM yyyy') // Using MMM for short month names (Jan, Feb, etc.)
     };
   });
 
@@ -48,21 +47,23 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
         </div>
       </div>
       <div className="flex items-center gap-6">
-        <Select
-          value={selectedMonth}
-          onValueChange={onMonthChange}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select month" />
-          </SelectTrigger>
-          <SelectContent>
-            {monthOptions.map((month) => (
-              <SelectItem key={month.value} value={month.value}>
-                {month.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border rounded-md">
+          <Select
+            value={selectedMonth}
+            onValueChange={onMonthChange}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select month" />
+            </SelectTrigger>
+            <SelectContent>
+              {monthOptions.map((month) => (
+                <SelectItem key={month.value} value={month.value}>
+                  {month.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <ProjectStats project={project} selectedMonth={selectedMonth} />
       </div>
     </div>
