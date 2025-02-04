@@ -55,9 +55,9 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
             onValueChange={onMonthChange}
           >
             <SelectTrigger className="w-[120px] h-[120px] flex flex-col items-center justify-between p-4 border-0 bg-transparent">
-              <SelectValue placeholder="Select month" className="text-center flex flex-col items-center">
+              <SelectValue placeholder="Select month">
                 {selectedMonth && (
-                  <>
+                  <div className="flex flex-col items-center">
                     <span className="text-2xl font-semibold">
                       {format(new Date(selectedMonth), 'MMM')}
                     </span>
@@ -65,7 +65,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
                       {format(new Date(selectedMonth), 'yyyy')}
                     </span>
                     <ChevronDown className="h-4 w-4 mt-2 opacity-50" />
-                  </>
+                  </div>
                 )}
               </SelectValue>
             </SelectTrigger>
