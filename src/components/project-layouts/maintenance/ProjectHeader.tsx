@@ -2,6 +2,7 @@ import { Tables } from "@/integrations/supabase/types";
 import ProjectStats from "./ProjectStats";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subMonths } from "date-fns";
+import { ChevronDown } from "lucide-react";
 
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
@@ -53,8 +54,20 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
             value={selectedMonth}
             onValueChange={onMonthChange}
           >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select month" />
+            <SelectTrigger className="w-[120px] h-[120px] flex flex-col items-center justify-between p-4">
+              <SelectValue placeholder="Select month" className="text-center flex flex-col items-center">
+                {selectedMonth && (
+                  <>
+                    <span className="text-2xl font-semibold">
+                      {format(new Date(selectedMonth), 'MMM')}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {format(new Date(selectedMonth), 'yyyy')}
+                    </span>
+                    <ChevronDown className="h-4 w-4 mt-2 opacity-50" />
+                  </>
+                )}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent className="bg-[#fcfcfc]">
               {monthOptions.map((month) => (
