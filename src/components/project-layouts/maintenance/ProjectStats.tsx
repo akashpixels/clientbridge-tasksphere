@@ -25,7 +25,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
     100
   );
 
-  // Renewal Status Logic
+  // Renewal Status Logic.
   const renewalDate = subscription?.next_renewal_date ? new Date(subscription.next_renewal_date) : new Date();
   const daysUntilRenewal = differenceInDays(renewalDate, new Date());
 
