@@ -49,21 +49,33 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
       </div>
       <div className="flex items-center gap-6">
         <div className="bg-white border border-gray-200 rounded-md shadow-sm">
+
+          
           <Select
-            value={selectedMonth}
-            onValueChange={onMonthChange}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select month" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#fcfcfc]">
-              {monthOptions.map((month) => (
-                <SelectItem key={month.value} value={month.value}>
-                  {month.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+  value={selectedMonth}
+  onValueChange={onMonthChange}
+>
+  {/* Customizing the SelectTrigger */}
+  <SelectTrigger className="w-[200px] h-10 px-4 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-md hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+    <SelectValue placeholder="Select month" />
+  </SelectTrigger>
+
+  {/* Customizing the SelectContent */}
+  <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 w-[200px] max-h-[250px] overflow-y-auto">
+    {monthOptions.map((month) => (
+      <SelectItem 
+        key={month.value} 
+        value={month.value} 
+        className="px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white rounded-md transition cursor-pointer"
+      >
+        {month.label}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
+
+
+          
         </div>
         <ProjectStats 
           project={project} 
