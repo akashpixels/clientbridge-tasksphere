@@ -4,10 +4,9 @@ import { Tables } from "@/integrations/supabase/types";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import ProjectHeader from "./ProjectHeader";
-import TasksTable from "./TasksTable";
+import TasksTabContent from "./TasksTabContent";
+import ImageViewerDialog from "./ImageViewerDialog";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 
 interface DevelopmentLayoutProps {
@@ -133,31 +132,13 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         </TabsList>
 
         <TabsContent value="tasks">
-          <Card className="p-6">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Project Tasks</h3>
-                <button className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md">
-                  New Task
-                </button>
-              </div>
-              
-              {isLoadingTasks ? (
-                <p>Loading tasks...</p>
-              ) : tasks && tasks.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <TasksTable 
-                    tasks={sortedTasks}
-                    sortConfig={sortConfig}
-                    onSort={handleSort}
-                    onImageClick={handleImageClick}
-                  />
-                </div>
-              ) : (
-                <p>No tasks found for this project.</p>
-              )}
-            </div>
-          </Card>
+          <TasksTabContent
+            isLoadingTasks={isLoadingTasks}
+            tasks={sortedTasks}
+            sortConfig={sortConfig}
+            onSort={handleSort}
+            onImageClick={handleImageClick}
+          />
         </TabsContent>
 
         <TabsContent value="overview">
@@ -210,35 +191,14 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         </TabsContent>
       </Tabs>
 
-      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
-          <div className="relative flex-1 min-h-0 flex items-center justify-center">
-            {selectedImage && (
-              <>
-                <button
-                  onClick={handlePreviousImage}
-                  className="absolute left-4 p-2 bg-white/80 rounded-full"
-                  disabled={currentImageIndex === 0}
-                >
-                  <ArrowLeft className="w-6 h-6" />
-                </button>
-                <img 
-                  src={selectedImage} 
-                  alt="Task image"
-                  className="max-w-full max-h-[calc(80vh-4rem)] object-contain"
-                />
-                <button
-                  onClick={handleNextImage}
-                  className="absolute right-4 p-2 bg-white/80 rounded-full"
-                  disabled={currentImageIndex === selectedTaskImages.length - 1}
-                >
-                  <ArrowRight className="w-6 h-6" />
-                </button>
-              </>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ImageViewerDialog
+        selectedImage={selectedImage}
+        selectedTaskImages={selectedTaskImages}
+        currentImageIndex={currentImageIndex}
+        onClose={() => setSelectedImage(null)}
+        onPrevious={handlePreviousImage}
+        onNext={handleNextImage}
+      />
     </div>
   );
 };
