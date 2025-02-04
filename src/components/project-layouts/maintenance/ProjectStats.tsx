@@ -47,28 +47,17 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
 <div 
   className="relative w-[160px] h-[108px] border border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 overflow-hidden text-gray-900"
   style={{
-    background: `#fcfcfc`
+    background: `linear-gradient(to right, #333333 ${hoursPercentage}%, #fcfcfc ${hoursPercentage}%)`,
+    transition: "background 0.5s ease"
   }}
->
-  {/* Progress Zig-Zag Overlay */}
-  <div 
-    className="absolute top-0 left-0 h-full"
-    style={{
-      width: `${hoursPercentage}%`,
-      background: "#333333",
-      maskImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 10\"><path d=\"M0,5 L5,0 L10,5 L15,0 L20,5 L25,0 L30,5 L35,0 L40,5 L45,0 L50,5 L55,0 L60,5 L65,0 L70,5 L75,0 L80,5 L85,0 L90,5 L95,0 L100,5 V10 H0 Z\" fill=\"white\"/></svg>')",
-      WebkitMaskImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 10\"><path d=\"M0,5 L5,0 L10,5 L15,0 L20,5 L25,0 L30,5 L35,0 L40,5 L45,0 L50,5 L55,0 L60,5 L65,0 L70,5 L75,0 L80,5 L85,0 L90,5 L95,0 L100,5 V10 H0 Z\" fill=\"white\"/></svg>')",
-      transition: "width 0.5s ease"
-    }}
-  />
   {/* Hours Label */}
-  <p className="text-[11px] font-medium">Hours Used</p>
+  <p className="text-[11px] font-medium text-gray-500">Hours Used</p>
 
   {/* Percentage Display */}
   <p className="text-xl font-semibold">{monthlyHours?.toFixed(1) || "0"} / {hoursAllotted}</p>
 
   {/* Hours Spent & Total */}
-  <p className="text-[11px]">{hoursPercentage}%</p>
+  <p className="text-[11px] text-gray-400 ">{hoursPercentage}%</p>
 </div>
 
 
@@ -76,7 +65,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
 
       
  {/* Subscription Status Card */}
-<div className="relative w-[108px] h-[108px] border border-gray-200 rounded-lg flex flex-col items-center justify-center bg-[#fcfcfc] space-y-1">
+<div className="relative w-[108px] h-[108px] border border-gray-200 rounded-lg flex flex-col items-center justify-center bg-[#fcfcfc] gap-2">
   {/* Status Dot with Tooltip (Top-Right) */}
   <div
     className="absolute top-2 right-2"
