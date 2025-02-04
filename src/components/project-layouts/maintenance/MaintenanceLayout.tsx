@@ -8,6 +8,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ProjectHeader from "./ProjectHeader";
 import TasksTable from "./TasksTable";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -35,12 +36,15 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
 
-  // Fetch tasks for this project
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
-    queryKey: ['tasks', project.id],
+    queryKey: ['tasks', project.id, selectedMonth],
     queryFn: async () => {
       console.log('Fetching tasks for project:', project.id);
+      const startDate = startOfMonth(new Date(selectedMonth));
+      const endDate = endOfMonth(new Date(selectedMonth));
+      
       const { data, error } = await supabase
         .from('tasks')
         .select(`
@@ -52,6 +56,8 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
           assigned_user:user_profiles!tasks_assigned_user_id_fkey(first_name, last_name)
         `)
         .eq('project_id', project.id)
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString())
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -105,7 +111,11 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
-        <ProjectHeader project={project} />
+        <ProjectHeader 
+          project={project} 
+          selectedMonth={selectedMonth}
+          onMonthChange={setSelectedMonth}
+        />
       </div>
 
       <Tabs defaultValue="tasks" className="w-full">
