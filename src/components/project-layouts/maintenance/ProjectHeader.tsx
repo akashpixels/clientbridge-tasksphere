@@ -1,7 +1,7 @@
 import { Tables } from "@/integrations/supabase/types";
 import ProjectStats from "./ProjectStats";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subMonths } from "date-fns";
+import { useState } from "react";
 
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
@@ -18,17 +18,19 @@ interface ProjectHeaderProps {
 }
 
 const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderProps) => {
-  // Generate last 6 months options (current month + 5 previous months)
+  // Generate last 6 months options
   const monthOptions = Array.from({ length: 6 }, (_, i) => {
     const date = subMonths(new Date(), i);
     return {
-      value: format(date, 'yyyy-MM'),
-      label: format(date, 'MMM yyyy') // Using MMM for short month names (Jan, Feb, etc.)
+      value: format(date, 'yyyy-MM'), // Format for internal value
+      label: format(date, 'MMM yyyy') // Display as "Jan 2025"
     };
   });
 
   return (
     <div className="flex items-center justify-between w-full gap-4">
+      
+      {/* Left: Project Details */}
       <div className="flex items-center gap-4">
         {project.logo_url && (
           <img 
@@ -40,32 +42,36 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
         <div>
           <h1 className="text-2xl font-semibold">{project.name}</h1>
           <p className="text-gray-500">
-            {project.client?.user_profiles ? 
-              `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
+            {project.client?.user_profiles 
+              ? `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
               : 'No Client'}
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-6">
-        <div className="bg-white border border-gray-200 rounded-md shadow-sm">
-          <Select
-            value={selectedMonth}
-            onValueChange={onMonthChange}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select month" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#fcfcfc]">
-              {monthOptions.map((month) => (
-                <SelectItem key={month.value} value={month.value}>
-                  {month.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
+      {/* Right: Calendar-Like Month Selection */}
+      <div className="flex flex-col gap-6">
+        
+        {/* Month Grid */}
+        <div className="grid grid-cols-3 gap-3 p-2 bg-[#fcfcfc] border border-gray-200 rounded-lg shadow-md">
+          {monthOptions.map((month) => (
+            <button
+              key={month.value}
+              className={`w-20 h-24 flex flex-col items-center justify-center border rounded-lg transition-all
+                ${selectedMonth === month.value ? "bg-gray-800 text-white font-semibold" : "bg-white text-gray-600"}
+                hover:bg-gray-300`}
+              onClick={() => onMonthChange(month.value)}
+            >
+              <span className="text-lg">{month.label.split(" ")[0]}</span>
+              <span className="text-sm">{month.label.split(" ")[1]}</span>
+            </button>
+          ))}
         </div>
+
+        {/* Project Stats */}
         <ProjectStats project={project} selectedMonth={selectedMonth} />
       </div>
+
     </div>
   );
 };
