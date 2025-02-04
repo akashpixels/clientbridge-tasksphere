@@ -173,9 +173,21 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 {task.complexity?.name}
               </span>
             </TableCell>
-            <TableCell>
-              {task.eta ? formatETA(task.eta) : 'Not set'}
-            </TableCell>
+
+            
+          <TableCell>
+  {task.eta ? (
+    <span className="text-sm text-gray-700 text-center block">
+      {format(new Date(task.eta), "h.mmaaa")} <br />
+      {format(new Date(task.eta), "do MMM")}
+    </span>
+  ) : (
+    <span className="text-sm text-gray-400">Not set</span>
+  )}
+</TableCell>
+
+
+            
             <TableCell>
               <div className="flex gap-2">
                 {task.images && Array.isArray(task.images) && task.images.length > 0 && (
