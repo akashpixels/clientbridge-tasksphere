@@ -55,7 +55,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select month" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#fcfcfc]">
               {monthOptions.map((month) => (
                 <SelectItem key={month.value} value={month.value}>
                   {month.label}
