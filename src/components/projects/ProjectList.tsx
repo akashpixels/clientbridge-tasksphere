@@ -27,7 +27,7 @@ export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
   const navigate = useNavigate();
 
   return (
-    <div className="rounded-md border bg-[#F8F9FA]">
+    <div className="rounded-md border border-gray-200 bg-[#F8F9FA]">
       <Table>
         <TableHeader>
           <TableRow className="border-b border-gray-200">
@@ -93,12 +93,12 @@ export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
                   {project.name}
                 </div>
               </TableCell>
-              <TableCell className="text-left">
+              <TableCell>
                 {project.client?.user_profiles ? 
                   `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
                   : 'No Client'}
               </TableCell>
-              <TableCell className="text-left">
+              <TableCell>
                 {project.status?.name && (
                   <span 
                     className="inline-block px-2 py-1 rounded-full text-xs"
@@ -111,14 +111,14 @@ export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
                   </span>
                 )}
               </TableCell>
-              <TableCell className="text-left">
+              <TableCell>
                 <span className={`inline-block px-2 py-1 rounded-full text-xs ${
                   project.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                 }`}>
                   {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
                 </span>
               </TableCell>
-              <TableCell className="text-left">
+              <TableCell>
                 {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
               </TableCell>
             </TableRow>
