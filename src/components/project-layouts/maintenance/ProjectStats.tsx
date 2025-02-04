@@ -55,7 +55,7 @@ const ProjectStats = ({ project, selectedMonth }: ProjectStatsProps) => {
   return (
     <div className="flex gap-6">
       {/* Subscription Status Card */}
-      <div className="border border-gray-200 rounded-lg p-4 min-w-[280px] flex items-center justify-between">
+      <div className="border border-gray-200 rounded-lg p-4 min-w-[280px] flex items-center justify-between bg-[#fcfcfc]">
         <div>
           <p className="text-xs text-gray-500">Renews in</p>
           <p className="text-2xl font-semibold">
@@ -80,7 +80,7 @@ const ProjectStats = ({ project, selectedMonth }: ProjectStatsProps) => {
       </div>
 
       {/* Hours Progress Card */}
-      <div className="border border-gray-200 rounded-lg p-4 min-w-[280px]">
+      <div className="border border-gray-200 rounded-lg p-4 min-w-[280px] bg-[#fcfcfc]">
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium text-gray-600">Hours Spent</span>
           <span className="text-sm font-bold">{hoursPercentage}%</span>
