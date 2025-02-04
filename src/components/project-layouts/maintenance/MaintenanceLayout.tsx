@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ProjectHeader from "./ProjectHeader";
+import ProjectStats from "./ProjectStats";
 import TasksTable from "./TasksTable";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 
@@ -38,6 +39,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
 
+  // Fetch tasks for the selected month
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['tasks', project.id, selectedMonth],
     queryFn: async () => {
@@ -69,6 +71,9 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
       return data;
     },
   });
+
+  // Calculate monthly hours from tasks
+  const monthlyHours = tasks?.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) || 0;
 
   const handleSort = (key: string) => {
     setSortConfig(current => ({
@@ -115,6 +120,14 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
           project={project} 
           selectedMonth={selectedMonth}
           onMonthChange={setSelectedMonth}
+        />
+      </div>
+
+      <div className="mb-6">
+        <ProjectStats 
+          project={project}
+          selectedMonth={selectedMonth}
+          monthlyHours={monthlyHours}
         />
       </div>
 
