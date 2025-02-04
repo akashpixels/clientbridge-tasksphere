@@ -42,6 +42,32 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
 
   return (
     <div className="flex gap-6">
+
+  {/* Hours Progress Card */}
+      <div className="border border-gray-200 rounded-lg p-4 min-w-[280px] bg-[#fcfcfc]">
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-medium text-gray-600">Hours Spent</span>
+          <span className="text-sm font-bold">{hoursPercentage}%</span>
+        </div>
+        <div className="w-full bg-gray-100 rounded-full h-2.5 mt-2">
+          <div
+            className={`h-2.5 rounded-full ${
+              hoursPercentage > 90
+                ? "bg-red-600"
+                : hoursPercentage > 70
+                ? "bg-yellow-600"
+                : "bg-green-600"
+            }`}
+            style={{ width: `${hoursPercentage}%` }}
+          />
+        </div>
+        <p className="text-lg text-gray-500 text-center mt-2">
+          {monthlyHours?.toFixed(1) || "0"} / {hoursAllotted}
+        </p>
+      </div>
+
+
+      
       {/* Subscription Status Card */}
       <div className="border border-gray-200 rounded-lg p-4 min-w-[280px] flex items-center justify-between bg-[#fcfcfc]">
         <div>
@@ -67,28 +93,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
         </div>
       </div>
 
-      {/* Hours Progress Card */}
-      <div className="border border-gray-200 rounded-lg p-4 min-w-[280px] bg-[#fcfcfc]">
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium text-gray-600">Hours Spent</span>
-          <span className="text-sm font-bold">{hoursPercentage}%</span>
-        </div>
-        <div className="w-full bg-gray-100 rounded-full h-2.5 mt-2">
-          <div
-            className={`h-2.5 rounded-full ${
-              hoursPercentage > 90
-                ? "bg-red-600"
-                : hoursPercentage > 70
-                ? "bg-yellow-600"
-                : "bg-green-600"
-            }`}
-            style={{ width: `${hoursPercentage}%` }}
-          />
-        </div>
-        <p className="text-lg text-gray-500 text-center mt-2">
-          {monthlyHours?.toFixed(1) || "0"} / {hoursAllotted}
-        </p>
-      </div>
+    
     </div>
   );
 };
