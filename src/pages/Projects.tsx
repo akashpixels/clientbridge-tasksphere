@@ -17,6 +17,9 @@ type Project = Database['public']['Tables']['projects']['Row'] & {
     name: string;
     color_hex: string;
   } | null;
+  project_subscriptions?: {
+    subscription_status: string;
+  }[];
 };
 
 type SortConfig = {
@@ -45,7 +48,8 @@ const Projects = () => {
               last_name
             )
           ),
-          status:task_statuses(name, color_hex)
+          status:task_statuses(name, color_hex),
+          project_subscriptions(subscription_status)
         `)
         .order('created_at', { ascending: false });
 
@@ -62,7 +66,7 @@ const Projects = () => {
   const filteredProjects = projects?.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || project.status?.name === statusFilter;
-    const matchesSubscription = subscriptionFilter === "all" || project.subscription_status === subscriptionFilter;
+    const matchesSubscription = subscriptionFilter === "all" || project.project_subscriptions?.[0]?.subscription_status === subscriptionFilter;
     return matchesSearch && matchesStatus && matchesSubscription;
   });
 
@@ -94,8 +98,8 @@ const Projects = () => {
         bValue = b.status?.name || '';
         break;
       case 'subscription':
-        aValue = a.subscription_status;
-        bValue = b.subscription_status;
+        aValue = a.project_subscriptions?.[0]?.subscription_status || '';
+        bValue = b.project_subscriptions?.[0]?.subscription_status || '';
         break;
       case 'dueDate':
         aValue = a.due_date || '';

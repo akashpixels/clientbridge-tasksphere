@@ -25,7 +25,13 @@ const ProjectDetails = () => {
             )
           ),
           status:task_statuses(name, color_hex),
-          layout:project_layouts!projects_layout_id_fkey(id, name)
+          layout:project_layouts!projects_layout_id_fkey(id, name),
+          project_subscriptions(
+            subscription_status,
+            hours_allotted,
+            hours_spent,
+            next_renewal_date
+          )
         `)
         .eq('id', id)
         .single();

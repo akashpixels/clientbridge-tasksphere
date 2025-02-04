@@ -3,7 +3,13 @@ import { differenceInDays } from "date-fns";
 import { useState } from "react";
 
 interface ProjectStatsProps {
-  project: Tables<"projects">;
+  project: Tables<"projects"> & {
+    project_subscriptions?: {
+      hours_allotted: number;
+      subscription_status: string;
+      next_renewal_date: string;
+    }[];
+  };
   selectedMonth: string;
   monthlyHours: number;
 }
@@ -11,13 +17,16 @@ interface ProjectStatsProps {
 const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProps) => {
   const [hovered, setHovered] = useState(false);
 
+  const subscription = project.project_subscriptions?.[0];
+  const hoursAllotted = subscription?.hours_allotted || 0;
+
   const hoursPercentage = Math.min(
-    Math.round((monthlyHours / project.hours_allotted) * 100),
+    Math.round((monthlyHours / hoursAllotted) * 100),
     100
   );
 
   // Renewal Status Logic
-  const renewalDate = new Date("2024-04-01"); // Replace with dynamic renewal date
+  const renewalDate = subscription?.next_renewal_date ? new Date(subscription.next_renewal_date) : new Date();
   const daysUntilRenewal = differenceInDays(renewalDate, new Date());
 
   let statusColor = "bg-green-600"; // Default Active (Green)
@@ -26,7 +35,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
   if (daysUntilRenewal <= 5 && daysUntilRenewal > 0) {
     statusColor = "bg-orange-500"; // Warning (Orange)
     statusText = "Renew Soon";
-  } else if (project.subscription_status !== "active") {
+  } else if (subscription?.subscription_status !== "active") {
     statusColor = "bg-red-600"; // Inactive (Red)
     statusText = "Inactive";
   }
@@ -77,7 +86,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
           />
         </div>
         <p className="text-lg text-gray-500 text-center mt-2">
-          {monthlyHours?.toFixed(1) || "0"} / {project.hours_allotted}
+          {monthlyHours?.toFixed(1) || "0"} / {hoursAllotted}
         </p>
       </div>
     </div>

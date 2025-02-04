@@ -533,6 +533,7 @@ export type Database = {
           billing_cycle: Database["public"]["Enums"]["billing_cycle_enum"]
           created_at: string
           hours_allotted: number
+          hours_spent: number | null
           id: string
           next_renewal_date: string
           project_id: string
@@ -545,6 +546,7 @@ export type Database = {
           billing_cycle?: Database["public"]["Enums"]["billing_cycle_enum"]
           created_at?: string
           hours_allotted?: number
+          hours_spent?: number | null
           id?: string
           next_renewal_date: string
           project_id: string
@@ -557,6 +559,7 @@ export type Database = {
           billing_cycle?: Database["public"]["Enums"]["billing_cycle_enum"]
           created_at?: string
           hours_allotted?: number
+          hours_spent?: number | null
           id?: string
           next_renewal_date?: string
           project_id?: string
@@ -604,7 +607,6 @@ export type Database = {
           created_at: string
           details: string | null
           due_date: string | null
-          hours_spent: number | null
           id: string
           layout_id: number | null
           logo_url: string | null
@@ -626,7 +628,6 @@ export type Database = {
           created_at?: string
           details?: string | null
           due_date?: string | null
-          hours_spent?: number | null
           id?: string
           layout_id?: number | null
           logo_url?: string | null
@@ -648,7 +649,6 @@ export type Database = {
           created_at?: string
           details?: string | null
           due_date?: string | null
-          hours_spent?: number | null
           id?: string
           layout_id?: number | null
           logo_url?: string | null

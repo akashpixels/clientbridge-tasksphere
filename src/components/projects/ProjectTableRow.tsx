@@ -14,6 +14,9 @@ type Project = Database['public']['Tables']['projects']['Row'] & {
     name: string;
     color_hex: string;
   } | null;
+  project_subscriptions?: {
+    subscription_status: string;
+  }[];
 };
 
 interface ProjectTableRowProps {
@@ -22,6 +25,7 @@ interface ProjectTableRowProps {
 
 export const ProjectTableRow = ({ project }: ProjectTableRowProps) => {
   const navigate = useNavigate();
+  const subscription = project.project_subscriptions?.[0];
 
   return (
     <TableRow 
@@ -60,9 +64,9 @@ export const ProjectTableRow = ({ project }: ProjectTableRowProps) => {
       </TableCell>
       <TableCell>
         <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-          project.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          subscription?.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
         }`}>
-          {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
+          {subscription?.subscription_status === 'active' ? 'Active' : 'Inactive'}
         </span>
       </TableCell>
       <TableCell>
