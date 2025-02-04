@@ -3,7 +3,6 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 import { ProjectFilters } from "@/components/projects/ProjectFilters";
-import { ProjectGrid } from "@/components/projects/ProjectGrid";
 import { ProjectList } from "@/components/projects/ProjectList";
 
 type Project = Database['public']['Tables']['projects']['Row'] & {
@@ -29,7 +28,6 @@ const Projects = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [subscriptionFilter, setSubscriptionFilter] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
 
   const { data: projects, isLoading, error } = useQuery({
@@ -136,16 +134,12 @@ const Projects = () => {
           setStatusFilter={setStatusFilter}
           subscriptionFilter={subscriptionFilter}
           setSubscriptionFilter={setSubscriptionFilter}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
         />
 
         {isLoading ? (
           <div className="text-center py-8">Loading projects...</div>
         ) : filteredProjects?.length === 0 ? (
           <div className="text-center py-8 text-gray-500">No projects found.</div>
-        ) : viewMode === "grid" ? (
-          <ProjectGrid projects={sortedProjects} />
         ) : (
           <ProjectList projects={sortedProjects} onSort={handleSort} />
         )}

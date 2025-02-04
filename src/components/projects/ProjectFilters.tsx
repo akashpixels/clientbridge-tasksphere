@@ -1,7 +1,5 @@
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { LayoutGrid, List } from "lucide-react";
 
 interface ProjectFiltersProps {
   searchQuery: string;
@@ -10,8 +8,6 @@ interface ProjectFiltersProps {
   setStatusFilter: (value: string) => void;
   subscriptionFilter: string;
   setSubscriptionFilter: (value: string) => void;
-  viewMode: "grid" | "list";
-  setViewMode: (value: "grid" | "list") => void;
 }
 
 export const ProjectFilters = ({
@@ -21,8 +17,6 @@ export const ProjectFilters = ({
   setStatusFilter,
   subscriptionFilter,
   setSubscriptionFilter,
-  viewMode,
-  setViewMode,
 }: ProjectFiltersProps) => {
   return (
     <div className="flex items-center gap-4">
@@ -57,16 +51,6 @@ export const ProjectFilters = ({
           <SelectItem value="inactive">Inactive</SelectItem>
         </SelectContent>
       </Select>
-      <div className="ml-auto">
-        <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as "grid" | "list")}>
-          <ToggleGroupItem value="grid" aria-label="Grid view">
-            <LayoutGrid className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem value="list" aria-label="List view">
-            <List className="h-4 w-4" />
-          </ToggleGroupItem>
-        </ToggleGroup>
-      </div>
     </div>
   );
 };
