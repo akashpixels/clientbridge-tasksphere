@@ -37,9 +37,9 @@ const ProjectStats = ({ project, selectedMonth }: ProjectStatsProps) => {
       <div className="glass-card backdrop-blur-sm rounded-lg p-4 min-w-[280px] hover-card">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-600">Subscription</span>
-          <span className={inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold ${
+          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold ${
             project.subscription_status === 'active' ? 'bg-[#F2FCE2] text-[#2E7D32]' : 'bg-gray-600 text-white'
-          }}>
+          }`}>
             {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
           </span>
         </div>
@@ -58,12 +58,12 @@ const ProjectStats = ({ project, selectedMonth }: ProjectStatsProps) => {
           </div>
           <div className="w-full bg-gray-100 rounded-full h-2.5">
             <div 
-              className={h-2.5 rounded-full ${
+              className={`h-2.5 rounded-full ${
                 hoursPercentage > 90 ? 'bg-red-600' :
                 hoursPercentage > 70 ? 'bg-yellow-600' :
                 'bg-green-600'
-              }}
-              style={{ width: ${hoursPercentage}% }}
+              }`}
+              style={{ width: `${hoursPercentage}%` }}
             />
           </div>
           <p className="text-xs text-gray-500 mt-1">
