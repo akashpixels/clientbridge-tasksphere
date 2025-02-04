@@ -48,7 +48,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         
 <ProjectStats 
           project={project} 
