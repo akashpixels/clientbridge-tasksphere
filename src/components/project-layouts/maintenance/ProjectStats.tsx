@@ -43,7 +43,20 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
   return (
     <div className="flex gap-4">
       
-     
+     {/* Hours Progress Card */}
+<div 
+  className="relative w-[160px] h-[108px] border border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 overflow-hidden text-gray-900 bg-transparent"
+>
+  {/* Slanted Progress Bar */}
+  <div 
+    className="absolute top-0 left-0 h-full"
+    style={{
+      width: `${hoursPercentage}%`,
+      background: "#fcfcfc",
+      clipPath: "polygon(0% 100%, 100% 0%, 100% 100%, 0% 100%)",
+      transition: "width 0.5s ease"
+    }}
+  />
         {/* Hours Label */}
         <p className="text-[11px] font-medium text-gray-500">Hours Used</p>
 
