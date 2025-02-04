@@ -51,10 +51,10 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
         </div>
       </div>
 
-      {/* Middle: Month Selection Box (Dropdown inside Box) */}
+      {/* Middle: Month Selection Box (Dropdown inside Square Box) */}
       <div className="relative">
         <Select value={selectedMonth} onValueChange={onMonthChange}>
-          <SelectTrigger className="w-[120px] h-[80px] flex flex-col items-center justify-center bg-white border border-gray-300 rounded-lg shadow-md cursor-pointer">
+          <SelectTrigger className="w-[80px] h-[80px] flex flex-col items-center justify-center bg-white border border-gray-300 rounded-md cursor-pointer">
             <span className="text-lg font-semibold">
               {format(new Date(selectedMonth), "MMM")}
             </span>
@@ -75,7 +75,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
       {/* Right: Subscription & Hours Used */}
       <div className="flex items-center gap-4">
         {/* Subscription Card */}
-        <div className="border border-gray-200 rounded-md p-3 shadow-sm">
+        <div className="border border-gray-200 rounded-md p-3">
           <p className="text-xs text-gray-500">Subscription</p>
           <p className="text-sm text-gray-700">Renews on 1st April</p>
           <p className="text-xs text-gray-400">Billing Cycle: Monthly</p>
@@ -85,7 +85,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
         </div>
 
         {/* Hours Used Card */}
-        <div className="border border-gray-200 rounded-md p-3 shadow-sm">
+        <div className="border border-gray-200 rounded-md p-3">
           <p className="text-xs text-gray-500">Hours Used (This Month)</p>
           <div className="w-32 h-2 bg-gray-300 rounded-full overflow-hidden mt-1">
             <div className="h-full bg-red-500" style={{ width: "100%" }}></div>
