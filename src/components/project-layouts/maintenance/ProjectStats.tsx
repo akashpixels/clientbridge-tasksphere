@@ -43,28 +43,24 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
   return (
     <div className="flex gap-6">
 
-  {/* Hours Progress Card */}
-      <div className="border border-gray-200 rounded-lg p-4 min-w-[280px] bg-[#fcfcfc]">
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium text-gray-600">Hours Spent</span>
-          <span className="text-sm font-bold">{hoursPercentage}%</span>
-        </div>
-        <div className="w-full bg-gray-100 rounded-full h-2.5 mt-2">
-          <div
-            className={`h-2.5 rounded-full ${
-              hoursPercentage > 90
-                ? "bg-red-600"
-                : hoursPercentage > 70
-                ? "bg-yellow-600"
-                : "bg-green-600"
-            }`}
-            style={{ width: `${hoursPercentage}%` }}
-          />
-        </div>
-        <p className="text-lg text-gray-500 text-center mt-2">
-          {monthlyHours?.toFixed(1) || "0"} / {hoursAllotted}
-        </p>
-      </div>
+{/* Hours Progress Card */}
+<div 
+  className="relative w-[108px] h-[108px] border border-gray-200 rounded-lg flex flex-col items-center justify-center overflow-hidden"
+  style={{
+    background: `linear-gradient(to top, ${hoursPercentage > 90 ? "#dc2626" : hoursPercentage > 70 ? "#d97706" : "#16a34a"} ${hoursPercentage}%, #fcfcfc ${hoursPercentage}%)`,
+    transition: "background 0.5s ease"
+  }}
+>
+  {/* Hours Label */}
+  <p className="text-[11px] text-gray-800 font-medium">Hours Used</p>
+
+  {/* Percentage Display */}
+  <p className="text-xl font-semibold">{hoursPercentage}%</p>
+
+  {/* Hours Spent & Total */}
+  <p className="text-[11px] text-gray-700">{monthlyHours?.toFixed(1) || "0"} / {hoursAllotted}</p>
+</div>
+
 
 
       
