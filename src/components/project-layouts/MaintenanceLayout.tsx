@@ -8,6 +8,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ProjectHeader from "./maintenance/ProjectHeader";
 import TasksTable from "./maintenance/TasksTable";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { startOfMonth, endOfMonth, format } from "date-fns";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -35,11 +37,15 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
 
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
-    queryKey: ['tasks', project.id],
+    queryKey: ['tasks', project.id, selectedMonth],
     queryFn: async () => {
       console.log('Fetching tasks for project:', project.id);
+      const startDate = startOfMonth(new Date(selectedMonth));
+      const endDate = endOfMonth(new Date(selectedMonth));
+      
       const { data, error } = await supabase
         .from('tasks')
         .select(`
@@ -51,6 +57,8 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
           assigned_user:user_profiles!tasks_assigned_user_id_fkey(first_name, last_name)
         `)
         .eq('project_id', project.id)
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString())
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -61,6 +69,16 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
       console.log('Fetched tasks:', data);
       return data;
     },
+  });
+
+  // Generate last 12 months options
+  const monthOptions = Array.from({ length: 12 }, (_, i) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    return {
+      value: format(date, 'yyyy-MM'),
+      label: format(date, 'MMMM yyyy')
+    };
   });
 
   const handleSort = (key: string) => {
@@ -120,7 +138,24 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
           <Card className="p-6">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Project Tasks</h3>
+                <div className="flex items-center gap-4">
+                  <h3 className="text-lg font-medium">Project Tasks</h3>
+                  <Select
+                    value={selectedMonth}
+                    onValueChange={setSelectedMonth}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {monthOptions.map((month) => (
+                        <SelectItem key={month.value} value={month.value}>
+                          {month.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <button className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md">
                   New Task
                 </button>
@@ -138,7 +173,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                   />
                 </div>
               ) : (
-                <p>No tasks found for this project.</p>
+                <p>No tasks found for this month.</p>
               )}
             </div>
           </Card>
