@@ -54,8 +54,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
             value={selectedMonth}
             onValueChange={onMonthChange}
           >
-           <SelectTrigger className="w-[120px] h-[120px] flex flex-col items-center justify-between p-4 border-[4px] border-gray-300 focus:ring-0 focus:border-gray-300 bg-transparent">
-
+            <SelectTrigger className="w-[108px] h-[108px] flex flex-col items-center justify-between p-4 border-0 bg-transparent">
               <SelectValue placeholder="Select month">
                 {selectedMonth && (
                   <div className="flex flex-col items-center">
