@@ -34,7 +34,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
         {project.logo_url && (
           <img 
             src={project.logo_url} 
-            alt={${project.name} logo}
+            alt={`${project.name} logo`}
             className="w-16 h-16 object-contain rounded-lg"
           />
         )}
@@ -42,7 +42,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
           <h1 className="text-2xl font-semibold">{project.name}</h1>
           <p className="text-gray-500">
             {project.client?.user_profiles ? 
-              ${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name} 
+              `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
               : 'No Client'}
           </p>
         </div>
@@ -75,4 +75,4 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
   );
 };
 
-export default ProjectHeader;"
+export default ProjectHeader;
