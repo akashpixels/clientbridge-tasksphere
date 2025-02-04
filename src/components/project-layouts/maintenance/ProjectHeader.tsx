@@ -49,45 +49,21 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
       </div>
       <div className="flex items-center gap-6">
         <div className="bg-white border border-gray-200 rounded-md shadow-sm">
-
-          
-<Select value={selectedMonth} onValueChange={onMonthChange}>
-  {/* Dropdown Button (Trigger) */}
-  <SelectTrigger className="w-[80px] h-[80px] flex flex-col items-center justify-center bg-white border border-gray-300 shadow-sm rounded-md text-gray-700 text-lg font-medium relative">
-    <SelectValue>
-      <div className="text-center">
-        <span className="block text-xl font-bold uppercase">
-          {selectedMonth ? format(new Date(selectedMonth), "MMM") : "Select"}
-        </span>
-        <span className="block text-gray-500 text-sm">
-          {selectedMonth ? format(new Date(selectedMonth), "yyyy") : ""}
-        </span>
-      </div>
-    </SelectValue>
-    
-    {/* Dropdown Indicator at Bottom */}
-    <div className="absolute bottom-2">
-      <ChevronDown className="w-4 h-4 text-gray-500" />
-    </div>
-  </SelectTrigger>
-
-  {/* Dropdown Items */}
-  <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-lg w-[100px] max-h-[250px] overflow-y-auto">
-    {monthOptions.map((month) => (
-      <SelectItem
-        key={month.value}
-        value={month.value}
-        className="p-3 text-gray-800 flex flex-col items-center hover:bg-gray-100 transition cursor-pointer"
-      >
-        <span className="text-xl font-bold uppercase">{format(new Date(month.value), "MMM")}</span>
-        <span className="text-gray-500 text-sm">{format(new Date(month.value), "yyyy")}</span>
-      </SelectItem>
-    ))}
-  </SelectContent>
-</Select>
-
-
-          
+          <Select
+            value={selectedMonth}
+            onValueChange={onMonthChange}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select month" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#fcfcfc]">
+              {monthOptions.map((month) => (
+                <SelectItem key={month.value} value={month.value}>
+                  {month.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <ProjectStats 
           project={project} 
@@ -99,4 +75,4 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
   );
 };
 
-export default ProjectHeader;
+export default ProjectHeader;"
