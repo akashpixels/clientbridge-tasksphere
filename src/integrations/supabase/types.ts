@@ -527,6 +527,53 @@ export type Database = {
           },
         ]
       }
+      project_subscriptions: {
+        Row: {
+          auto_renew: boolean
+          billing_cycle: Database["public"]["Enums"]["billing_cycle_enum"]
+          created_at: string
+          hours_allotted: number
+          id: string
+          next_renewal_date: string
+          project_id: string
+          start_date: string
+          subscription_status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+        }
+        Insert: {
+          auto_renew?: boolean
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle_enum"]
+          created_at?: string
+          hours_allotted?: number
+          id?: string
+          next_renewal_date: string
+          project_id: string
+          start_date?: string
+          subscription_status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+        }
+        Update: {
+          auto_renew?: boolean
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle_enum"]
+          created_at?: string
+          hours_allotted?: number
+          id?: string
+          next_renewal_date?: string
+          project_id?: string
+          start_date?: string
+          subscription_status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_subscriptions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_types: {
         Row: {
           created_at: string
@@ -557,7 +604,6 @@ export type Database = {
           created_at: string
           details: string | null
           due_date: string | null
-          hours_allotted: number | null
           hours_spent: number | null
           id: string
           layout_id: number | null
@@ -570,7 +616,6 @@ export type Database = {
           secondary_color_hex: string | null
           status_id: number | null
           status_options: Json
-          subscription_status: Database["public"]["Enums"]["subscription_status"]
           task_fields: Json
           types: Json | null
           updated_at: string
@@ -581,7 +626,6 @@ export type Database = {
           created_at?: string
           details?: string | null
           due_date?: string | null
-          hours_allotted?: number | null
           hours_spent?: number | null
           id?: string
           layout_id?: number | null
@@ -594,7 +638,6 @@ export type Database = {
           secondary_color_hex?: string | null
           status_id?: number | null
           status_options?: Json
-          subscription_status?: Database["public"]["Enums"]["subscription_status"]
           task_fields?: Json
           types?: Json | null
           updated_at?: string
@@ -605,7 +648,6 @@ export type Database = {
           created_at?: string
           details?: string | null
           due_date?: string | null
-          hours_allotted?: number | null
           hours_spent?: number | null
           id?: string
           layout_id?: number | null
@@ -618,7 +660,6 @@ export type Database = {
           secondary_color_hex?: string | null
           status_id?: number | null
           status_options?: Json
-          subscription_status?: Database["public"]["Enums"]["subscription_status"]
           task_fields?: Json
           types?: Json | null
           updated_at?: string
@@ -1115,6 +1156,7 @@ export type Database = {
       }
     }
     Enums: {
+      billing_cycle_enum: "monthly" | "quarterly" | "yearly" | "half yearly"
       device_type: "Mobile" | "Desktop" | "Both"
       gender_enum: "Male" | "Female" | "Other"
       input_status: "requested" | "submitted" | "approved" | "re-requested"
