@@ -45,9 +45,9 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
 
 {/* Hours Progress Card */}
 <div 
-  className="relative w-[160px] h-[108px] border border-gray-200 rounded-lg flex flex-col items-center justify-center overflow-hidden text-white"
+  className="relative w-[160px] h-[108px] border border-gray-200 rounded-lg flex flex-col items-center justify-center overflow-hidden text-gray-900"
   style={{
-    background: `linear-gradient(to right, #333333 ${hoursPercentage}%, #000000 ${hoursPercentage}%)`,
+    background: `linear-gradient(to right, #333333 ${hoursPercentage}%, #fcfcfc ${hoursPercentage}%)`,
     transition: "background 0.5s ease"
   }}
 >
@@ -55,10 +55,10 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
   <p className="text-[11px] font-medium">Hours Used</p>
 
   {/* Percentage Display */}
-  <p className="text-xl font-semibold">{hoursPercentage}%</p>
+  <p className="text-xl font-semibold"> {monthlyHours?.toFixed(1) || "0"} / {hoursAllotted}</p>
 
   {/* Hours Spent & Total */}
-  <p className="text-[11px]">{monthlyHours?.toFixed(1) || "0"} / {hoursAllotted}</p>
+  <p className="text-[11px]">{hoursPercentage}%</p>
 </div>
 
 
