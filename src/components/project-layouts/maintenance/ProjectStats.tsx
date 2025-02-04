@@ -57,7 +57,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
   <p className="text-xl font-semibold">{monthlyHours?.toFixed(1) || "0"} / {hoursAllotted}</p>
 
   {/* Hours Spent & Total */}
-  <p className="text-[11px] text-gray-400 ">{hoursPercentage}%</p>
+  <p className="text-[11px] text-gray-400">{hoursPercentage}%</p>
 </div>
 
 
