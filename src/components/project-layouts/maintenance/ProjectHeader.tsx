@@ -2,6 +2,8 @@ import { Tables } from "@/integrations/supabase/types";
 import ProjectStats from "./ProjectStats";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subMonths } from "date-fns";
+import { ChevronDown } from "lucide-react"; // Import icon for dropdown arrow
+
 
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
@@ -50,20 +52,44 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
       <div className="flex items-center gap-6">
         <div className="bg-white border border-gray-200 rounded-md shadow-sm">
           <Select
-            value={selectedMonth}
-            onValueChange={onMonthChange}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select month" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#fcfcfc]">
-              {monthOptions.map((month) => (
-                <SelectItem key={month.value} value={month.value}>
-                  {month.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+  value={selectedMonth}
+  onValueChange={onMonthChange}
+>
+  {/* Custom Trigger to match the image */}
+  <SelectTrigger className="w-24 h-24 flex flex-col items-center justify-center bg-white border border-gray-300 shadow-sm rounded-lg relative text-gray-600 text-lg font-medium">
+    <SelectValue>
+      <div className="text-center">
+        <span className="block text-xl font-bold uppercase">
+          {selectedMonth ? format(new Date(selectedMonth), "MMM") : "Select"}
+        </span>
+        <span className="block text-gray-500 text-lg">
+          {selectedMonth ? format(new Date(selectedMonth), "yyyy") : ""}
+        </span>
+      </div>
+    </SelectValue>
+    
+    {/* Dropdown Arrow at the Bottom */}
+    <div className="absolute bottom-2">
+      <ChevronDown className="w-5 h-5 text-gray-500" />
+    </div>
+  </SelectTrigger>
+
+  {/* Dropdown Content */}
+  <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-md p-2 w-32 max-h-[250px] overflow-y-auto">
+    {monthOptions.map((month) => (
+      <SelectItem 
+        key={month.value} 
+        value={month.value} 
+        className="px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-md transition cursor-pointer"
+      >
+        <div className="text-center">
+          <span className="block text-xl font-bold uppercase">{format(new Date(month.value), "MMM")}</span>
+          <span className="block text-gray-500 text-lg">{format(new Date(month.value), "yyyy")}</span>
+        </div>
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
         </div>
         <ProjectStats 
           project={project} 
