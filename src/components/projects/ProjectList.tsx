@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
+import { useNavigate } from "react-router-dom";
 
 type Project = Database['public']['Tables']['projects']['Row'] & {
   client: {
@@ -23,13 +24,15 @@ interface ProjectListProps {
 }
 
 export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
+  const navigate = useNavigate();
+
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Project</TableHead>
-            <TableHead>
+            <TableHead className="w-[40%]">Project</TableHead>
+            <TableHead className="w-[20%]">
               <Button
                 variant="ghost"
                 onClick={() => onSort('client')}
@@ -39,7 +42,7 @@ export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
                 <ArrowUpDown className="h-4 w-4" />
               </Button>
             </TableHead>
-            <TableHead>
+            <TableHead className="w-[15%]">
               <Button
                 variant="ghost"
                 onClick={() => onSort('status')}
@@ -49,7 +52,7 @@ export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
                 <ArrowUpDown className="h-4 w-4" />
               </Button>
             </TableHead>
-            <TableHead>
+            <TableHead className="w-[15%]">
               <Button
                 variant="ghost"
                 onClick={() => onSort('subscription')}
@@ -59,7 +62,7 @@ export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
                 <ArrowUpDown className="h-4 w-4" />
               </Button>
             </TableHead>
-            <TableHead>
+            <TableHead className="w-[10%]">
               <Button
                 variant="ghost"
                 onClick={() => onSort('dueDate')}
@@ -73,7 +76,11 @@ export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
         </TableHeader>
         <TableBody>
           {projects.map((project) => (
-            <TableRow key={project.id}>
+            <TableRow 
+              key={project.id}
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => navigate(`/projects/${project.id}`)}
+            >
               <TableCell className="font-medium">
                 <div className="flex items-center gap-3">
                   {project.logo_url && (
