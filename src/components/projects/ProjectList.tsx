@@ -24,7 +24,7 @@ interface ProjectListProps {
 
 export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
   return (
-    <div className="rounded-md border border-gray-200 bg-[#F8F9FA]">
+    <div className="rounded-md border border-gray-200 bg-[#fcfcfc]">
       <Table>
         <ProjectTableHeader onSort={onSort} />
         <TableBody>

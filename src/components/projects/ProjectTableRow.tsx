@@ -28,7 +28,7 @@ export const ProjectTableRow = ({ project }: ProjectTableRowProps) => {
       className="cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-200"
       onClick={() => navigate(`/projects/${project.id}`)}
     >
-      <TableCell className="font-medium pl-4">
+      <TableCell className="pl-4">
         <div className="flex items-center gap-3">
           {project.logo_url && (
             <img 
