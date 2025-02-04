@@ -25,7 +25,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
     const date = subMonths(new Date(), i);
     return {
       value: format(date, 'yyyy-MM'),
-      label: format(date, 'MMM yyyy') // Using MMM for short month names (Jan, Feb, etc.)
+      label: format(date, 'MMM yyyy')
     };
   });
 
@@ -49,12 +49,12 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
         </div>
       </div>
       <div className="flex items-center gap-6">
-        <div className="bg-white border border-gray-200 rounded-md shadow-sm">
+        <div className="glass-card hover-card">
           <Select
             value={selectedMonth}
             onValueChange={onMonthChange}
           >
-            <SelectTrigger className="w-[120px] h-[120px] flex flex-col items-center justify-between p-4">
+            <SelectTrigger className="w-[120px] h-[120px] flex flex-col items-center justify-between p-4 border-0 bg-transparent">
               <SelectValue placeholder="Select month" className="text-center flex flex-col items-center">
                 {selectedMonth && (
                   <>
