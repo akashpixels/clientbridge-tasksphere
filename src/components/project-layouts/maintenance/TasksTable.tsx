@@ -175,12 +175,13 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
             </TableCell>
 
             
-          <TableCell>
+  {/* ETA Column */}
+<TableCell className="text-left">
   {task.eta ? (
-    <span className="text-sm text-gray-700 text-center block">
-      {format(new Date(task.eta), "h.mmaaa")} <br />
-      {format(new Date(task.eta), "do MMM")}
-    </span>
+    <div className="flex flex-col">
+      <span className="text-sm text-gray-700">{format(new Date(task.eta), "h.mmaaa")}</span>
+      <span className="text-sm text-gray-500">{format(new Date(task.eta), "do MMM")}</span>
+    </div>
   ) : (
     <span className="text-sm text-gray-400">Not set</span>
   )}
