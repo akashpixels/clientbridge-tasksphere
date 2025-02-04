@@ -15,10 +15,17 @@ interface DevelopmentLayoutProps {
       name: string;
       color_hex: string | null;
     } | null;
+    project_subscriptions: {
+      hours_spent: number | null;
+      hours_allotted: number;
+    }[];
   };
 }
 
 const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
+  // Get the latest subscription
+  const currentSubscription = project.project_subscriptions?.[0];
+  
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
@@ -75,7 +82,11 @@ const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
                 
                 <div>
                   <h4 className="font-medium">Hours</h4>
-                  <p className="text-gray-500 mt-1">{project.hours_spent} / {project.hours_allotted} hours</p>
+                  <p className="text-gray-500 mt-1">
+                    {currentSubscription ? 
+                      `${currentSubscription.hours_spent || 0} / ${currentSubscription.hours_allotted} hours` 
+                      : 'No subscription data'}
+                  </p>
                 </div>
               </div>
             </div>
