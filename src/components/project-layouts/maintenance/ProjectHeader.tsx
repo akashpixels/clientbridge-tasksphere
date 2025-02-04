@@ -1,7 +1,6 @@
-import { Tables } from "@/integrations/supabase/types";
-import ProjectStats from "./ProjectStats";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subMonths } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tables } from "@/integrations/supabase/types";
 
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
@@ -12,29 +11,34 @@ interface ProjectHeaderProps {
         last_name: string;
       } | null;
     } | null;
+    status: {
+      name: string;
+      color_hex: string | null;
+    } | null;
   };
   selectedMonth: string;
-  onMonthChange: (month: string) => void;
+  onMonthChange: (value: string) => void;
 }
 
 const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderProps) => {
-  // Generate last 6 months options (current month + 5 previous months)
-  const monthOptions = Array.from({ length: 6 }, (_, i) => {
-    const date = subMonths(new Date(), i);
+  // Get current date and generate last 5 months
+  const currentDate = new Date();
+  const months = Array.from({ length: 6 }, (_, i) => {
+    const date = subMonths(currentDate, i);
     return {
       value: format(date, 'yyyy-MM'),
-      label: format(date, 'MMM yyyy') // Using MMM for short month names (Jan, Feb, etc.)
+      label: format(date, 'MMM yyyy')
     };
   });
 
   return (
-    <div className="flex items-center justify-between w-full gap-4">
+    <div className="flex justify-between items-center">
       <div className="flex items-center gap-4">
         {project.logo_url && (
-          <img 
-            src={project.logo_url} 
+          <img
+            src={project.logo_url}
             alt={`${project.name} logo`}
-            className="w-16 h-16 object-contain rounded-lg"
+            className="w-12 h-12 object-contain rounded"
           />
         )}
         <div>
@@ -47,7 +51,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
         </div>
       </div>
       <div className="flex items-center gap-6">
-        <div className="bg-white border border-gray-200 rounded-md shadow-sm">
+        <div className="bg-[#fcfcfc] border border-gray-200 rounded-md shadow-sm">
           <Select
             value={selectedMonth}
             onValueChange={onMonthChange}
@@ -56,15 +60,14 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
               <SelectValue placeholder="Select month" />
             </SelectTrigger>
             <SelectContent>
-              {monthOptions.map((month) => (
-                <SelectItem key={month.value} value={month.value}>
-                  {month.label}
+              {months.map(({ value, label }) => (
+                <SelectItem key={value} value={value}>
+                  {label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <ProjectStats project={project} selectedMonth={selectedMonth} />
       </div>
     </div>
   );
