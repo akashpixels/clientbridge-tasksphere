@@ -41,7 +41,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
   }
 
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-4">
 
 {/* Hours Progress Card */}
 <div 
