@@ -68,30 +68,19 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
 
 
       
-      {/* Subscription Status Card */}
-      <div className="border border-gray-200 rounded-lg p-4 min-w-[280px] flex items-center justify-between bg-[#fcfcfc]">
-        <div>
-          <p className="text-xs text-gray-500">Renews in</p>
-          <p className="text-2xl font-semibold">
-            {daysUntilRenewal > 0 ? `${daysUntilRenewal} Days` : "Expired"}
-          </p>
-          <p className="text-xs text-gray-400">Cycle : Monthly</p>
-        </div>
+   {/* Subscription Status Card */}
+<div className="relative w-[108px] h-[108px] border border-gray-200 rounded-lg flex flex-col items-center justify-center bg-[#fcfcfc]">
+  {/* Status Dot in Top-Right Corner */}
+  <div className={`absolute top-2 right-2 w-3 h-3 rounded-full ${statusColor}`} />
 
-        {/* Status Dot with Tooltip */}
-        <div
-          className="relative flex items-center"
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-        >
-          <div className={`w-3 h-3 rounded-full ${statusColor}`} />
-          {hovered && (
-            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded-md">
-              {statusText}
-            </div>
-          )}
-        </div>
-      </div>
+  {/* Days Until Renewal */}
+  <p className="text-[10px] text-gray-500">Renews in</p>
+  <p className="text-xl font-semibold">
+    {daysUntilRenewal > 0 ? `${daysUntilRenewal} Days` : "Expired"}
+  </p>
+  <p className="text-[10px] text-gray-400">Cycle: Monthly</p>
+</div>
+
 
     
     </div>
