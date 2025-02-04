@@ -47,7 +47,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
         </div>
       </div>
       <div className="flex items-center gap-6">
-        <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border rounded-md">
+        <div className="bg-white border border-gray-200 rounded-md shadow-sm">
           <Select
             value={selectedMonth}
             onValueChange={onMonthChange}
