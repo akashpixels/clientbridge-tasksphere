@@ -6,10 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import ProjectHeader from "./maintenance/ProjectHeader";
-import TasksTable from "./maintenance/TasksTable";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { startOfMonth, endOfMonth, format } from "date-fns";
+import ProjectHeader from "./ProjectHeader";
+import TasksTable from "./TasksTable";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -71,16 +70,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     },
   });
 
-  // Generate last 12 months options
-  const monthOptions = Array.from({ length: 12 }, (_, i) => {
-    const date = new Date();
-    date.setMonth(date.getMonth() - i);
-    return {
-      value: format(date, 'yyyy-MM'),
-      label: format(date, 'MMMM yyyy')
-    };
-  });
-
   const handleSort = (key: string) => {
     setSortConfig(current => ({
       key,
@@ -122,7 +111,11 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
-        <ProjectHeader project={project} />
+        <ProjectHeader 
+          project={project} 
+          selectedMonth={selectedMonth}
+          onMonthChange={setSelectedMonth}
+        />
       </div>
 
       <Tabs defaultValue="tasks" className="w-full">
@@ -138,24 +131,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
           <Card className="p-6">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                  <h3 className="text-lg font-medium">Project Tasks</h3>
-                  <Select
-                    value={selectedMonth}
-                    onValueChange={setSelectedMonth}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select month" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {monthOptions.map((month) => (
-                        <SelectItem key={month.value} value={month.value}>
-                          {month.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <h3 className="text-lg font-medium">Project Tasks</h3>
                 <button className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md">
                   New Task
                 </button>
@@ -173,7 +149,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
                   />
                 </div>
               ) : (
-                <p>No tasks found for this month.</p>
+                <p>No tasks found for this project.</p>
               )}
             </div>
           </Card>
