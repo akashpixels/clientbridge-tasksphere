@@ -49,7 +49,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
         </div>
       </div>
       <div className="flex items-center gap-6">
-        <div className="glass-card hover-card">
+        <div className="glass-card ">
           <Select
             value={selectedMonth}
             onValueChange={onMonthChange}
@@ -64,7 +64,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
                     <span className="text-sm text-gray-500">
                       {format(new Date(selectedMonth), 'yyyy')}
                     </span>
-                    <ChevronDown className="h-4 w-4 mt-2 opacity-50" />
+                   
                   </div>
                 )}
               </SelectValue>
