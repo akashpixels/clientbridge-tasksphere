@@ -2,6 +2,7 @@ import { Tables } from "@/integrations/supabase/types";
 import ProjectStats from "./ProjectStats";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subMonths } from "date-fns";
+import { Calendar } from "lucide-react";
 
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
@@ -23,7 +24,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
     const date = subMonths(new Date(), i);
     return {
       value: format(date, 'yyyy-MM'),
-      label: format(date, 'MMM yyyy') // Using MMM for short month names (Jan, Feb, etc.)
+      label: format(date, 'MMM yyyy')
     };
   });
 
@@ -47,17 +48,24 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
         </div>
       </div>
       <div className="flex items-center gap-6">
-        <div className="bg-white border border-gray-200 rounded-md shadow-sm">
+        <div className="glass-card rounded-md">
           <Select
             value={selectedMonth}
             onValueChange={onMonthChange}
           >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select month" />
+            <SelectTrigger className="w-[180px] bg-[#fcfcfc] border-gray-200">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 opacity-50" />
+                <SelectValue placeholder="Select month" />
+              </div>
             </SelectTrigger>
-            <SelectContent className="bg-[#fcfcfc]">
+            <SelectContent className="bg-[#fcfcfc] border border-gray-200 shadow-sm">
               {monthOptions.map((month) => (
-                <SelectItem key={month.value} value={month.value}>
+                <SelectItem 
+                  key={month.value} 
+                  value={month.value}
+                  className="hover:bg-gray-50"
+                >
                   {month.label}
                 </SelectItem>
               ))}
