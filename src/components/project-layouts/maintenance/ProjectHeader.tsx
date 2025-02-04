@@ -56,7 +56,7 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
           monthlyHours={monthlyHours}
         />
         
-        <div className="">
+        <div className="bg-[#fcfcfc]">
           <Select
             value={selectedMonth}
             onValueChange={onMonthChange}
