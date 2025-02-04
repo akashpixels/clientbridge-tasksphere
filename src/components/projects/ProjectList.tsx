@@ -27,46 +27,46 @@ export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
   const navigate = useNavigate();
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border bg-[#F8F9FA]">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead className="w-[40%]">Project</TableHead>
-            <TableHead className="w-[20%]">
+          <TableRow className="border-b border-gray-200">
+            <TableHead className="w-[40%] text-left pl-4">Project</TableHead>
+            <TableHead className="w-[20%] text-left">
               <Button
                 variant="ghost"
                 onClick={() => onSort('client')}
-                className="h-8 flex items-center gap-1"
+                className="h-8 flex items-center gap-1 hover:bg-gray-100"
               >
                 Client
                 <ArrowUpDown className="h-4 w-4" />
               </Button>
             </TableHead>
-            <TableHead className="w-[15%]">
+            <TableHead className="w-[15%] text-left">
               <Button
                 variant="ghost"
                 onClick={() => onSort('status')}
-                className="h-8 flex items-center gap-1"
+                className="h-8 flex items-center gap-1 hover:bg-gray-100"
               >
                 Status
                 <ArrowUpDown className="h-4 w-4" />
               </Button>
             </TableHead>
-            <TableHead className="w-[15%]">
+            <TableHead className="w-[15%] text-left">
               <Button
                 variant="ghost"
                 onClick={() => onSort('subscription')}
-                className="h-8 flex items-center gap-1"
+                className="h-8 flex items-center gap-1 hover:bg-gray-100"
               >
                 Subscription
                 <ArrowUpDown className="h-4 w-4" />
               </Button>
             </TableHead>
-            <TableHead className="w-[10%]">
+            <TableHead className="w-[10%] text-left">
               <Button
                 variant="ghost"
                 onClick={() => onSort('dueDate')}
-                className="h-8 flex items-center gap-1"
+                className="h-8 flex items-center gap-1 hover:bg-gray-100"
               >
                 Due Date
                 <ArrowUpDown className="h-4 w-4" />
@@ -78,10 +78,10 @@ export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
           {projects.map((project) => (
             <TableRow 
               key={project.id}
-              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              className="cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-200"
               onClick={() => navigate(`/projects/${project.id}`)}
             >
-              <TableCell className="font-medium">
+              <TableCell className="font-medium pl-4">
                 <div className="flex items-center gap-3">
                   {project.logo_url && (
                     <img 
@@ -93,12 +93,12 @@ export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
                   {project.name}
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="text-left">
                 {project.client?.user_profiles ? 
                   `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
                   : 'No Client'}
               </TableCell>
-              <TableCell>
+              <TableCell className="text-left">
                 {project.status?.name && (
                   <span 
                     className="inline-block px-2 py-1 rounded-full text-xs"
@@ -111,14 +111,14 @@ export const ProjectList = ({ projects, onSort }: ProjectListProps) => {
                   </span>
                 )}
               </TableCell>
-              <TableCell>
+              <TableCell className="text-left">
                 <span className={`inline-block px-2 py-1 rounded-full text-xs ${
                   project.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                 }`}>
                   {project.subscription_status === 'active' ? 'Active' : 'Inactive'}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell className="text-left">
                 {project.due_date ? new Date(project.due_date).toLocaleDateString() : 'Not set'}
               </TableCell>
             </TableRow>
