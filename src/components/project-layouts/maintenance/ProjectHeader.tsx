@@ -1,7 +1,7 @@
 import { Tables } from "@/integrations/supabase/types";
 import ProjectStats from "./ProjectStats";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subMonths } from "date-fns";
-import { useState } from "react";
 
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
@@ -18,19 +18,19 @@ interface ProjectHeaderProps {
 }
 
 const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderProps) => {
-  // Generate last 6 months
+  // Generate last 6 months options
   const monthOptions = Array.from({ length: 6 }, (_, i) => {
     const date = subMonths(new Date(), i);
     return {
-      value: format(date, "yyyy-MM"), // Internal value format
-      label: format(date, "MMM yyyy"), // Display format "Jan 2025"
+      value: format(date, "yyyy-MM"), // Format for value
+      label: format(date, "MMM yyyy"), // Display as "Jan 2025"
     };
   });
 
   return (
     <div className="flex items-center justify-between w-full gap-6 p-4">
       
-      {/* Left: Project Info */}
+      {/* Left: Project Details */}
       <div className="flex items-center gap-4">
         {/* Project Logo */}
         {project.logo_url && (
@@ -51,23 +51,25 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
         </div>
       </div>
 
-      {/* Middle: Month Selection Grid (Replaces Dropdown) */}
-      <div className="flex flex-col items-center bg-[#fcfcfc] border border-gray-200 rounded-lg shadow-md p-2">
-        <p className="text-sm text-gray-500">Select Month</p>
-        <div className="grid grid-cols-3 gap-2 mt-1">
-          {monthOptions.map((month) => (
-            <button
-              key={month.value}
-              className={`w-16 h-20 flex flex-col items-center justify-center rounded-md text-sm transition-all 
-                ${selectedMonth === month.value ? "bg-gray-800 text-white font-semibold" : "bg-white text-gray-600"}
-                hover:bg-gray-300`}
-              onClick={() => onMonthChange(month.value)}
-            >
-              <span>{month.label.split(" ")[0]}</span>
-              <span className="text-xs">{month.label.split(" ")[1]}</span>
-            </button>
-          ))}
-        </div>
+      {/* Middle: Month Selection Box (Dropdown inside Box) */}
+      <div className="relative">
+        <Select value={selectedMonth} onValueChange={onMonthChange}>
+          <SelectTrigger className="w-[120px] h-[80px] flex flex-col items-center justify-center bg-white border border-gray-300 rounded-lg shadow-md cursor-pointer">
+            <span className="text-lg font-semibold">
+              {format(new Date(selectedMonth), "MMM")}
+            </span>
+            <span className="text-sm text-gray-500">
+              {format(new Date(selectedMonth), "yyyy")}
+            </span>
+          </SelectTrigger>
+          <SelectContent className="bg-[#fcfcfc]">
+            {monthOptions.map((month) => (
+              <SelectItem key={month.value} value={month.value}>
+                {month.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Right: Subscription & Hours Used */}
