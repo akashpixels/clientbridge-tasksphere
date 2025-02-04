@@ -49,6 +49,13 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
         </div>
       </div>
       <div className="flex items-center gap-6">
+        
+<ProjectStats 
+          project={project} 
+          selectedMonth={selectedMonth}
+          monthlyHours={monthlyHours}
+        />
+        
         <div className="">
           <Select
             value={selectedMonth}
@@ -79,11 +86,8 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
             </SelectContent>
           </Select>
         </div>
-        <ProjectStats 
-          project={project} 
-          selectedMonth={selectedMonth}
-          monthlyHours={monthlyHours}
-        />
+       
+        
       </div>
     </div>
   );
