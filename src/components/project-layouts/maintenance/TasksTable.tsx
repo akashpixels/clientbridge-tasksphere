@@ -168,12 +168,25 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 {task.priority?.name}
               </span>
             </TableCell>
+
+<TableCell>
+  <div className="flex items-center gap-2 w-32">
+    <div className="flex space-x-1">
+      {Array.from({ length: task.complexity?.id || 1 }).map((_, index) => (
+        <div key={index} className="w-3 h-3 bg-blue-500 rounded-sm"></div>
+      ))}
+    </div>
+    <span className="text-xs text-gray-600">{task.complexity?.name}</span>
+  </div>
+</TableCell>
+
+            {/* 
             <TableCell>
               <span className="text-xs text-gray-600">
                 {task.complexity?.name}
               </span>
             </TableCell>
-
+           */}
             
   {/* ETA Column */}
 <TableCell className="text-left">
