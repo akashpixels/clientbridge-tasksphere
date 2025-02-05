@@ -168,32 +168,12 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 {task.priority?.name}
               </span>
             </TableCell>
-
-<TableCell>
-  <div className="flex items-center gap-2 relative group">
-    {/* Complexity Bar Representation */}
-    <div className="flex space-x-1">
-      {Array.from({ length: task.complexity?.id || 1 }).map((_, index) => (
-        <div key={index} className="w-2 h-4 bg-blue-500 rounded-md"></div>
-      ))}
-    </div>
-
-    {/* Tooltip on Hover */}
-    <div className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs py-1 px-2 rounded-md whitespace-nowrap">
-      {task.complexity?.name}
-    </div>
-  </div>
-</TableCell>
-
-
-
-            {/* 
             <TableCell>
               <span className="text-xs text-gray-600">
                 {task.complexity?.name}
               </span>
             </TableCell>
-           */}
+
             
   {/* ETA Column */}
 <TableCell className="text-left">
