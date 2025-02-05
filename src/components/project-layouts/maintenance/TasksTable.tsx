@@ -206,7 +206,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                       ))}
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="bg-[#fcfcfc]">
                     <p>{task.complexity?.name || 'Not set'}</p>
                   </TooltipContent>
                 </Tooltip>
