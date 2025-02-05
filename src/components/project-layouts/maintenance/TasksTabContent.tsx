@@ -43,29 +43,20 @@ const TasksTabContent = ({
 }: TasksTabContentProps) => {
   return (
     <Card className="p-6">
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Project Tasks</h3>
-          <button className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md">
-            New Task
-          </button>
+      {isLoadingTasks ? (
+        <p>Loading tasks...</p>
+      ) : tasks && tasks.length > 0 ? (
+        <div className="overflow-x-auto">
+          <TasksTable 
+            tasks={tasks}
+            sortConfig={sortConfig}
+            onSort={onSort}
+            onImageClick={onImageClick}
+          />
         </div>
-        
-        {isLoadingTasks ? (
-          <p>Loading tasks...</p>
-        ) : tasks && tasks.length > 0 ? (
-          <div className="overflow-x-auto">
-            <TasksTable 
-              tasks={tasks}
-              sortConfig={sortConfig}
-              onSort={onSort}
-              onImageClick={onImageClick}
-            />
-          </div>
-        ) : (
-          <p>No tasks found for this project.</p>
-        )}
-      </div>
+      ) : (
+        <p>No tasks found for this project.</p>
+      )}
     </Card>
   );
 };
