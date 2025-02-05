@@ -104,19 +104,20 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
   };
 
   const getPriorityColor = (priority: { name: string, color: string } | null) => {
-    if (!priority) return '#9CA3AF'; // Default gray color
-    
-    switch (priority.name.toLowerCase()) {
-      case 'low':
-        return '#22C55E'; // Green
-      case 'normal':
-        return '#F59E0B'; // Yellow/Orange
-      case 'high':
-        return '#EA384C'; // Red
-      default:
-        return priority.color || '#9CA3AF';
-    }
+  if (!priority) return '#9CA3AF'; // Default gray color if priority is missing
+
+  const priorityColors: { [key: string]: string } = {
+    'Very Low': '#6EE7B7',  // Light Green
+    'Low': '#22C55E',       // Green
+    'Normal': '#FBBF24',    // Yellow/Orange
+    'Medium': '#F97316',    // Orange
+    'High': '#EF4444',      // Red
+    'Critical': '#B91C1C'   // Dark Red
   };
+
+  return priorityColors[priority.name] || priority.color || '#9CA3AF'; 
+};
+
 
   return (
     <Table>
@@ -201,18 +202,23 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                   </>
                 )}
               </div>
-            </TableCell>      
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <div 
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: getPriorityColor(task.priority) }}
-                />
-                <span className="text-xs text-gray-700">
-                  {task.priority?.name || 'Not set'}
-                </span>
-              </div>
-            </TableCell>
+            </TableCell>  
+            
+         <TableCell>
+  <div className="flex items-center gap-2">
+    {/* Colored Dot */}
+    <div 
+      className="w-2 h-2 rounded-full"
+      style={{ backgroundColor: getPriorityColor(task.priority) }}
+    />
+    {/* Priority Text */}
+    <span className="text-xs text-gray-700">
+      {task.priority?.name || 'Not set'}
+    </span>
+  </div>
+</TableCell>
+
+            
             <TableCell>
               <TooltipProvider>
                 <Tooltip>
