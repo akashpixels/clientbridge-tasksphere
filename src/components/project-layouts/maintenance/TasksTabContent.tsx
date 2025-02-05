@@ -42,7 +42,7 @@ const TasksTabContent = ({
   onImageClick,
 }: TasksTabContentProps) => {
   return (
-    <Card className="p-6">
+    <Card className="p-0">
       {isLoadingTasks ? (
         <p>Loading tasks...</p>
       ) : tasks && tasks.length > 0 ? (
