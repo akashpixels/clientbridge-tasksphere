@@ -194,10 +194,14 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 <Tooltip>
                   <TooltipTrigger>
                     <div className="flex gap-0.5">
-                      {[...Array(getComplexityBars(task.complexity))].map((_, index) => (
+                      {[...Array(6)].map((_, index) => (
                         <div
                           key={index}
-                          className="w-1 h-4 bg-gray-600 rounded-sm"
+                          className={`w-1 h-4 rounded-sm ${
+                            index < getComplexityBars(task.complexity)
+                              ? 'bg-gray-600'  // Dark bars for active complexity level
+                              : 'bg-gray-200'  // Light grey for inactive bars
+                          }`}
                         />
                       ))}
                     </div>
