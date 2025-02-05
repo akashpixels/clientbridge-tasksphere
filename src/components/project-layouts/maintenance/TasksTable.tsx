@@ -57,10 +57,8 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
       return { bg: '#F3F4F6', text: '#374151' };
     }
 
-    // Split the color_hex string into background and text colors
     const [bgColor, textColor] = status.color_hex.split(',').map(color => color.trim());
     
-    // If both colors are provided, use them directly
     if (bgColor && textColor) {
       return {
         bg: bgColor,
@@ -68,7 +66,6 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
       };
     }
     
-    // Fallback to the old logic if the format is not as expected
     const hex = status.color_hex.replace('#', '');
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
@@ -106,6 +103,21 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
     return complexityMap[complexity.name] || 1;
   };
 
+  const getPriorityColor = (priority: { name: string, color: string } | null) => {
+    if (!priority) return '#9CA3AF'; // Default gray color
+    
+    switch (priority.name.toLowerCase()) {
+      case 'low':
+        return '#22C55E'; // Green
+      case 'normal':
+        return '#F59E0B'; // Yellow/Orange
+      case 'high':
+        return '#EA384C'; // Red
+      default:
+        return priority.color || '#9CA3AF';
+    }
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -124,15 +136,12 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
           >
             Details
           </TableHead>
-
-
           <TableHead 
-  className="cursor-pointer"
-  onClick={() => onSort('target_device')}
->
-  Device
-</TableHead>
-
+            className="cursor-pointer"
+            onClick={() => onSort('target_device')}
+          >
+            Device
+          </TableHead>
           <TableHead 
             className="cursor-pointer"
             onClick={() => onSort('priority_level_id')}
@@ -175,32 +184,34 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 )}
               </div>
             </TableCell>
-  {/* Details Column (Now without Device Icons) */}
-  <TableCell>
-    <div className="flex-1 min-w-0 max-w-[350px]">
-      <p className="text-sm break-words">{task.details}</p>
-      <p className="text-xs text-gray-500 mt-1">{task.task_type?.name}</p>
-    </div>
-  </TableCell>
-
-       {/* Device Column (Newly Added) */}
-  <TableCell>
-    <div className="flex gap-1">
-      {task.target_device === 'Desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
-      {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
-      {task.target_device === 'Both' && (
-        <>
-          <Monitor className="w-4 h-4 text-gray-500" />
-          <Smartphone className="w-4 h-4 text-gray-500" />
-        </>
-      )}
-    </div>
-  </TableCell>      
-            
             <TableCell>
-              <span className="text-xs" style={{ color: task.priority?.color }}>
-                {task.priority?.name}
-              </span>
+              <div className="flex-1 min-w-0 max-w-[350px]">
+                <p className="text-sm break-words">{task.details}</p>
+                <p className="text-xs text-gray-500 mt-1">{task.task_type?.name}</p>
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="flex gap-1">
+                {task.target_device === 'Desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
+                {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
+                {task.target_device === 'Both' && (
+                  <>
+                    <Monitor className="w-4 h-4 text-gray-500" />
+                    <Smartphone className="w-4 h-4 text-gray-500" />
+                  </>
+                )}
+              </div>
+            </TableCell>      
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: getPriorityColor(task.priority) }}
+                />
+                <span className="text-xs text-gray-700">
+                  {task.priority?.name || 'Not set'}
+                </span>
+              </div>
             </TableCell>
             <TableCell>
               <TooltipProvider>
@@ -212,8 +223,8 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                           key={index}
                           className={`w-1 h-4 rounded-sm ${
                             index < getComplexityBars(task.complexity)
-                              ? 'bg-gray-600'  // Dark bars for active complexity level
-                              : 'bg-gray-200'  // Light grey for inactive bars
+                              ? 'bg-gray-600'
+                              : 'bg-gray-200'
                           }`}
                         />
                       ))}
