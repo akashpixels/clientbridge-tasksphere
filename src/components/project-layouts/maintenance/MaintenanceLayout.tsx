@@ -125,11 +125,41 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
       <Tabs defaultValue="tasks" className="w-full">
         <div className="flex justify-between items-center mb-4">
           <TabsList>
-            <TabsTrigger value="tasks">Tasks</TabsTrigger>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
-            <TabsTrigger value="credentials">Credentials</TabsTrigger>
-            <TabsTrigger value="files">Files</TabsTrigger>
+           <TabsTrigger
+  value="tasks"
+  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
+>
+  Tasks
+</TabsTrigger>
+
+<TabsTrigger
+  value="overview"
+  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
+>
+  Overview
+</TabsTrigger>
+
+<TabsTrigger
+  value="team"
+  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
+>
+  Team
+</TabsTrigger>
+
+<TabsTrigger
+  value="credentials"
+  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
+>
+  Credentials
+</TabsTrigger>
+
+<TabsTrigger
+  value="files"
+  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
+>
+  Files
+</TabsTrigger>
+
           </TabsList>
           <button className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md">
             New Task
