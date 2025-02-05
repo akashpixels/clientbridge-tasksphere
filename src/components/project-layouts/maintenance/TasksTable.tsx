@@ -242,9 +242,11 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 </Tooltip>
               </TooltipProvider>
             </TableCell>
+
+            
             <TableCell className="text-left">
               {task.eta ? (
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-2">
                   <span className="text-xs text-gray-600">{format(new Date(task.eta), "h.mmaaa")}</span>
                   <span className="text-xs text-gray-700">{format(new Date(task.eta), "do MMM")}</span>
                 </div>
@@ -252,6 +254,8 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 <span className="text-xs text-gray-700">Not set</span>
               )}
             </TableCell>
+
+            
             <TableCell>
               <div className="flex gap-2">
                 {task.images && Array.isArray(task.images) && task.images.length > 0 && (
