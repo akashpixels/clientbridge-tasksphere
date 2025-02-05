@@ -9,6 +9,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
@@ -83,6 +89,21 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
       bg: status.color_hex,
       text: enhancedColor
     };
+  };
+
+  const getComplexityBars = (complexity: { name: string, multiplier: number } | null) => {
+    if (!complexity) return 1;
+    
+    const complexityMap: { [key: string]: number } = {
+      'Basic': 1,
+      'Standard': 2,
+      'Advanced': 3,
+      'Complex': 4,
+      'Very Complex': 5,
+      'Extreme': 6
+    };
+
+    return complexityMap[complexity.name] || 1;
   };
 
   return (
@@ -169,26 +190,34 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
               </span>
             </TableCell>
             <TableCell>
-              <span className="text-xs text-gray-600">
-                {task.complexity?.name}
-              </span>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <div className="flex gap-0.5">
+                      {[...Array(getComplexityBars(task.complexity))].map((_, index) => (
+                        <div
+                          key={index}
+                          className="w-1 h-4 bg-gray-600 rounded-sm"
+                        />
+                      ))}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{task.complexity?.name || 'Not set'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </TableCell>
-
-            
-  {/* ETA Column */}
-<TableCell className="text-left">
-  {task.eta ? (
-    <div className="flex flex-col">
-      <span className="text-xs text-gray-600">{format(new Date(task.eta), "h.mmaaa")}</span>
-      <span className="text-xs text-gray-700">{format(new Date(task.eta), "do MMM")}</span>
-    </div>
-  ) : (
-    <span className="text-xs text-gray-700">Not set</span>
-  )}
-</TableCell>
-
-
-            
+            <TableCell className="text-left">
+              {task.eta ? (
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-600">{format(new Date(task.eta), "h.mmaaa")}</span>
+                  <span className="text-xs text-gray-700">{format(new Date(task.eta), "do MMM")}</span>
+                </div>
+              ) : (
+                <span className="text-xs text-gray-700">Not set</span>
+              )}
+            </TableCell>
             <TableCell>
               <div className="flex gap-2">
                 {task.images && Array.isArray(task.images) && task.images.length > 0 && (
