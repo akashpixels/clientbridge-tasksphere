@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -22,29 +23,31 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
+const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route element={<ProtectedRoute />}>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/projects/:id" element={<ProjectDetails />} />
-                <Route path="/tasks" element={<Tasks />} />
-                <Route path="/team" element={<Team />} />
-                <Route path="/clients" element={<Clients />} />
-                <Route path="*" element={<NotFound />} />
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Router>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route element={<ProtectedRoute />}>
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/projects/:id" element={<ProjectDetails />} />
+                  <Route path="/tasks" element={<Tasks />} />
+                  <Route path="/team" element={<Team />} />
+                  <Route path="/clients" element={<Clients />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
               </Route>
-            </Route>
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </QueryClientProvider>
+            </Routes>
+          </Router>
+        </AuthProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
   );
-}
+};
 
 export default App;
