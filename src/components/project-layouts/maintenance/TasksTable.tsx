@@ -246,7 +246,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
             
             <TableCell className="text-left">
               {task.eta ? (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   <span className="text-xs text-gray-600">{format(new Date(task.eta), "h.mmaaa")}</span>
                   <span className="text-xs text-gray-700">{format(new Date(task.eta), "do MMM")}</span>
                 </div>
