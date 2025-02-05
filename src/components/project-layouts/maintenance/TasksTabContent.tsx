@@ -55,7 +55,7 @@ const TasksTabContent = ({
           />
         </div>
       ) : (
-        <p>No tasks found for this project.</p>
+        <p className="p-6">No tasks found for this project.</p>
       )}
     </Card>
   );
