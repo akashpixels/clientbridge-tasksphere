@@ -1,5 +1,5 @@
 import { Tables } from "@/integrations/supabase/types";
-import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize } from "lucide-react";
+import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link as LinkIcon } from "lucide-react";
 import { format } from "date-fns";
 import {
   Table,
@@ -104,20 +104,36 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
   };
 
   const getPriorityColor = (priority: { name: string, color: string } | null) => {
-  if (!priority) return '#9CA3AF'; // Default gray color if priority is missing
+    if (!priority) return '#9CA3AF'; // Default gray color if priority is missing
 
-  const priorityColors: { [key: string]: string } = {
-    'Very Low': '#6EE7B7',  // Light Green
-    'Low': '#22C55E',       // Green
-    'Normal': '#FBBF24',    // Yellow/Orange
-    'Medium': '#F97316',    // Orange
-    'High': '#EF4444',      // Red
-    'Critical': '#B91C1C'   // Dark Red
+    const priorityColors: { [key: string]: string } = {
+      'Very Low': '#6EE7B7',  // Light Green
+      'Low': '#22C55E',       // Green
+      'Normal': '#FBBF24',    // Yellow/Orange
+      'Medium': '#F97316',    // Orange
+      'High': '#EF4444',      // Red
+      'Critical': '#B91C1C'   // Dark Red
+    };
+
+    return priorityColors[priority.name] || priority.color || '#9CA3AF'; 
   };
 
-  return priorityColors[priority.name] || priority.color || '#9CA3AF'; 
-};
-
+  const renderReferenceLinks = (links: Record<string, string> | null) => {
+    if (!links) return null;
+    
+    return Object.entries(links).map(([text, url], index) => (
+      <a
+        key={index}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
+      >
+        <LinkIcon className="w-3 h-3" />
+        {text}
+      </a>
+    ));
+  };
 
   return (
     <Table>
@@ -204,21 +220,20 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
               </div>
             </TableCell>  
             
-         <TableCell>
-  <div className="flex items-center gap-2">
-    {/* Colored Dot */}
-    <div 
-      className="w-2 h-2 rounded-full"
-      style={{ backgroundColor: getPriorityColor(task.priority) }}
-    />
-    {/* Priority Text */}
-    <span className="text-xs text-gray-700">
-      {task.priority?.name || 'Not set'}
-    </span>
-  </div>
-</TableCell>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                {/* Colored Dot */}
+                <div 
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: getPriorityColor(task.priority) }}
+                />
+                {/* Priority Text */}
+                <span className="text-xs text-gray-700">
+                  {task.priority?.name || 'Not set'}
+                </span>
+              </div>
+            </TableCell>
 
-            
             <TableCell>
               <TooltipProvider>
                 <Tooltip>
@@ -243,7 +258,6 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
               </TooltipProvider>
             </TableCell>
 
-            
             <TableCell className="text-left">
               {task.eta ? (
                 <div className="flex flex-col gap-1.5">
@@ -255,9 +269,8 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
               )}
             </TableCell>
 
-            
             <TableCell>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
                 {task.images && Array.isArray(task.images) && task.images.length > 0 && (
                   <div className="flex -space-x-2">
                     {task.images.map((image, index) => (
@@ -276,11 +289,9 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                     ))}
                   </div>
                 )}
-                {task.reference_links && Array.isArray(task.reference_links) && task.reference_links.length > 0 && (
-                  <div className="flex items-center">
-                    <span className="text-xs text-blue-600">
-                      {task.reference_links.length} link{task.reference_links.length > 1 ? 's' : ''}
-                    </span>
+                {task.reference_links && (
+                  <div className="flex flex-col gap-1">
+                    {renderReferenceLinks(task.reference_links as Record<string, string>)}
                   </div>
                 )}
               </div>
