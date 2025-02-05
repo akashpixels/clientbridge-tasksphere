@@ -134,7 +134,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
             className="cursor-pointer"
             onClick={() => onSort('complexity_level_id')}
           >
-            Complexity
+            Level
           </TableHead>
           <TableHead 
             className="cursor-pointer"
