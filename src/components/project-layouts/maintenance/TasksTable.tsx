@@ -1,5 +1,5 @@
 import { Tables } from "@/integrations/supabase/types";
-import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link as LinkIcon } from "lucide-react";
+import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
 import {
   Table,
@@ -127,9 +127,9 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
+        className="flex items-center gap-1 text-xs text-gray-800 hover:text-gray-600"
       >
-        <LinkIcon className="w-3 h-3" />
+        <Link2 className="w-3 h-3" />
         {text}
       </a>
     ));
@@ -177,6 +177,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
           >
             ETA
           </TableHead>
+          <TableHead>Links</TableHead>
           <TableHead>Assets</TableHead>
         </TableRow>
       </TableHeader>
@@ -219,7 +220,6 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 )}
               </div>
             </TableCell>  
-            
             <TableCell>
               <div className="flex items-center gap-2">
                 {/* Colored Dot */}
@@ -233,7 +233,6 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 </span>
               </div>
             </TableCell>
-
             <TableCell>
               <TooltipProvider>
                 <Tooltip>
@@ -257,7 +256,6 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 </Tooltip>
               </TooltipProvider>
             </TableCell>
-
             <TableCell className="text-left">
               {task.eta ? (
                 <div className="flex flex-col gap-1.5">
@@ -268,31 +266,30 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 <span className="text-xs text-gray-700">Not set</span>
               )}
             </TableCell>
+            
+            <TableCell>
+              <div className="flex flex-col gap-1">
+                {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
+              </div>
+            </TableCell>
 
             <TableCell>
-              <div className="flex flex-col gap-2">
+              <div className="flex -space-x-2">
                 {task.images && Array.isArray(task.images) && task.images.length > 0 && (
-                  <div className="flex -space-x-2">
-                    {task.images.map((image, index) => (
-                      <div
-                        key={index}
-                        className="w-8 h-8 relative cursor-pointer"
-                        onClick={() => onImageClick(image as string, task.images as string[])}
-                      >
-                        <img 
-                          src={image as string}
-                          alt={`Task image ${index + 1}`}
-                          className="w-8 h-8 rounded-lg border-2 border-white object-cover"
-                        />
-                        <Maximize className="w-3 h-3 absolute top-0 right-0 text-gray-600 bg-white rounded-full p-0.5" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {task.reference_links && (
-                  <div className="flex flex-col gap-1">
-                    {renderReferenceLinks(task.reference_links as Record<string, string>)}
-                  </div>
+                  task.images.map((image, index) => (
+                    <div
+                      key={index}
+                      className="w-8 h-8 relative cursor-pointer"
+                      onClick={() => onImageClick(image as string, task.images as string[])}
+                    >
+                      <img 
+                        src={image as string}
+                        alt={`Task image ${index + 1}`}
+                        className="w-8 h-8 rounded-lg border-2 border-white object-cover"
+                      />
+                      <Maximize className="w-3 h-3 absolute top-0 right-0 text-gray-600 bg-white rounded-full p-0.5" />
+                    </div>
+                  ))
                 )}
               </div>
             </TableCell>
