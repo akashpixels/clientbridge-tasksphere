@@ -157,7 +157,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
   className="cursor-pointer text-center"
   onClick={() => onSort('target_device')}
 >
-  Device
+
 </TableHead>
 
 
