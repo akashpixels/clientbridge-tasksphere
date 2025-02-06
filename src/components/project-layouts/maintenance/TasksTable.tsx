@@ -154,11 +154,12 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
             Details
           </TableHead>
           <TableHead 
-            className="cursor-pointer"
-            onClick={() => onSort('target_device')}
-          >
-            Device
-          </TableHead>
+  className="cursor-pointer text-center"
+  onClick={() => onSort('target_device')}
+>
+  Device
+</TableHead>
+
           <TableHead 
             className="cursor-pointer"
             onClick={() => onSort('priority_level_id')}
