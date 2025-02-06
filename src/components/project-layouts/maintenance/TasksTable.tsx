@@ -153,12 +153,13 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
           >
             Details
           </TableHead>
-          <TableHead 
+      <TableHead 
   className="cursor-pointer text-center"
   onClick={() => onSort('target_device')}
 >
   Device
 </TableHead>
+
 
           <TableHead 
             className="cursor-pointer"
@@ -209,18 +210,25 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 <p className="text-xs text-gray-500 mt-1">{task.task_type?.name}</p>
               </div>
             </TableCell>
-         <TableCell className="text-center">
-  <div className="flex justify-center gap-1">
-                {task.target_device === 'Desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
-                {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
-                {task.target_device === 'Both' && (
-                  <>
-                    <Monitor className="w-4 h-4 text-gray-500" />
-                    <Smartphone className="w-4 h-4 text-gray-500" />
-                  </>
-                )}
-              </div>
-            </TableCell>  
+
+
+<TableCell className="text-center">
+  <div className="flex justify-center gap-1 items-center">
+    {task.target_device === 'Desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
+    {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
+    {task.target_device === 'Both' && (
+      <>
+        <Monitor className="w-4 h-4 text-gray-500" />
+        <Smartphone className="w-4 h-4 text-gray-500" />
+      </>
+    )}
+  </div>
+</TableCell>
+
+
+
+
+            
             <TableCell>
               <div className="flex items-center gap-2">
                 {/* Colored Dot */}
