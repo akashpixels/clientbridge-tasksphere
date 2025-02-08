@@ -1,7 +1,8 @@
 
 import { cn } from '@/lib/utils';
 import { Outlet } from 'react-router-dom';
-import LeftSidebar from './left-sidebar/LeftSidebar';
+import LeftSidebar from './LeftSidebar';
+import RightSidebar from './RightSidebar';
 import { useState, createContext, useContext, ReactNode } from 'react';
 
 type LayoutContext = {
@@ -42,7 +43,8 @@ const Layout = () => {
           <main 
             className={cn(
               'flex-1 transition-all duration-300 ease-in-out',
-              isLeftSidebarOpen ? 'ml-64' : 'ml-20'
+              isLeftSidebarOpen ? 'ml-64' : 'ml-20',
+              rightSidebarContent ? 'mr-[400px]' : ''
             )}
           >
             <div className="p-8">
@@ -50,11 +52,7 @@ const Layout = () => {
             </div>
           </main>
 
-          {rightSidebarContent && (
-            <aside className="w-[400px] bg-background border-l border-border/40 overflow-y-auto">
-              {rightSidebarContent}
-            </aside>
-          )}
+          <RightSidebar content={rightSidebarContent} />
         </div>
       </div>
     </LayoutContext.Provider>
