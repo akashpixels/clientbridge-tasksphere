@@ -1,7 +1,7 @@
 
 import { cn } from '@/lib/utils';
 import { Outlet } from 'react-router-dom';
-import LeftSidebar from './LeftSidebar';
+import LeftSidebar from './left-sidebar/LeftSidebar';
 import { useState, createContext, useContext, ReactNode } from 'react';
 
 type LayoutContext = {
