@@ -2,7 +2,6 @@
 import { cn } from '@/lib/utils';
 import { Outlet } from 'react-router-dom';
 import LeftSidebar from './left-sidebar/LeftSidebar';
-import RightSidebar from './right-sidebar/RightSidebar';
 import { useState, createContext, useContext, ReactNode } from 'react';
 
 type LayoutContext = {
@@ -33,28 +32,30 @@ const Layout = () => {
 
   return (
     <LayoutContext.Provider value={context}>
-      <div className="min-h-screen h-screen flex bg-[#f8f8f8] overflow-hidden">
-        <LeftSidebar 
-          isOpen={isLeftSidebarOpen} 
-          onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
-        />
-        
-        <div className={cn(
-          'flex-1 transition-all duration-300 ease-in-out',
-          isLeftSidebarOpen ? 'ml-64' : 'ml-20',
-          rightSidebarContent ? 'mr-[400px]' : ''
-        )}>
-          <main className="h-full overflow-auto">
+      <div className="min-h-screen bg-[#f8f8f8]">
+        <div className="flex">
+          <LeftSidebar 
+            isOpen={isLeftSidebarOpen} 
+            onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
+          />
+          
+          <main 
+            className={cn(
+              'flex-1 transition-all duration-300 ease-in-out',
+              isLeftSidebarOpen ? 'ml-64' : 'ml-20'
+            )}
+          >
             <div className="p-8">
               <Outlet />
             </div>
           </main>
-        </div>
 
-        <RightSidebar 
-          content={rightSidebarContent}
-          isOpen={!!rightSidebarContent}
-        />
+          {rightSidebarContent && (
+            <aside className="w-[400px] bg-background border-l border-border/40 overflow-y-auto">
+              {rightSidebarContent}
+            </aside>
+          )}
+        </div>
       </div>
     </LayoutContext.Provider>
   );

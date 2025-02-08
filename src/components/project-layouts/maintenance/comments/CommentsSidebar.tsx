@@ -96,7 +96,7 @@ const CommentsSidebar = ({ taskId, onClose, onCommentClick }: CommentsSidebarPro
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="fixed right-0 top-0 h-screen w-96 bg-background border-l border-border shadow-lg z-50">
       <div className="flex items-center justify-between p-4 border-b">
         <h2 className="text-lg font-semibold">Comments</h2>
         <Button variant="ghost" size="icon" onClick={onClose}>
@@ -104,7 +104,7 @@ const CommentsSidebar = ({ taskId, onClose, onCommentClick }: CommentsSidebarPro
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="h-[calc(100vh-180px)] overflow-y-auto p-4">
         {isLoading ? (
           <p>Loading comments...</p>
         ) : comments && comments.length > 0 ? (
@@ -124,7 +124,7 @@ const CommentsSidebar = ({ taskId, onClose, onCommentClick }: CommentsSidebarPro
         )}
       </div>
 
-      <div className="border-t p-4 bg-background">
+      <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t">
         <div className="flex flex-col gap-2">
           <Textarea
             value={newComment}
@@ -160,6 +160,7 @@ const CommentsSidebar = ({ taskId, onClose, onCommentClick }: CommentsSidebarPro
           </div>
         </div>
       </div>
+    </div>
   );
 };
 
