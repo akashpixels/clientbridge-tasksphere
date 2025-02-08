@@ -50,9 +50,10 @@ interface TasksTableProps {
   };
   onSort: (key: string) => void;
   onImageClick: (image: string, images: string[]) => void;
+  setIsCommentsSidebarOpen: (isOpen: boolean) => void;
 }
 
-const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps) => {
+const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, setIsCommentsSidebarOpen }: TasksTableProps) => {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const { data: commentCounts } = useQuery({
