@@ -1,14 +1,12 @@
 
 import React from 'react';
 import { Tables } from "@/integrations/supabase/types";
-import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2, MessageSquare } from "lucide-react";
+import { Link2, MessageSquare, Maximize } from "lucide-react";
 import { format } from "date-fns";
 import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
@@ -17,6 +15,8 @@ import { CommentsSidebar } from "./CommentsSidebar";
 import { TaskStatusCell } from "./table/TaskStatusCell";
 import { TaskComplexityCell } from "./table/TaskComplexityCell";
 import { TaskPriorityCell } from "./table/TaskPriorityCell";
+import { TasksTableHeader } from "./table/TasksTableHeader";
+import { TaskDeviceCell } from "./table/TaskDeviceCell";
 
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
@@ -91,51 +91,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
   return (
     <>
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead 
-              className="cursor-pointer"
-              onClick={() => onSort('status')}
-            >
-              Status {sortConfig.key === 'status' && (
-                sortConfig.direction === 'asc' ? <ArrowUp className="inline w-4 h-4" /> : <ArrowDown className="inline w-4 h-4" />
-              )}
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer"
-              onClick={() => onSort('details')}
-            >
-              Details
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer"
-              onClick={() => onSort('target_device')}
-            >
-              Device
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer"
-              onClick={() => onSort('priority_level_id')}
-            >
-              Priority
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer"
-              onClick={() => onSort('complexity_level_id')}
-            >
-              Level
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer"
-              onClick={() => onSort('eta')}
-            >
-              ETA
-            </TableHead>
-            <TableHead>Links</TableHead>
-            <TableHead>Assets</TableHead>
-            <TableHead>Comments</TableHead>
-          </TableRow>
-        </TableHeader>
+        <TasksTableHeader sortConfig={sortConfig} onSort={onSort} />
         <TableBody>
           {tasks.map((task) => (
             <TableRow key={task.id}>
@@ -152,18 +108,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                   <p className="text-xs text-gray-500 mt-1">{task.task_type?.name}</p>
                 </div>
               </TableCell>
-              <TableCell>
-                <div className="flex gap-1">
-                  {task.target_device === 'Desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
-                  {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
-                  {task.target_device === 'Both' && (
-                    <>
-                      <Monitor className="w-4 h-4 text-gray-500" />
-                      <Smartphone className="w-4 h-4 text-gray-500" />
-                    </>
-                  )}
-                </div>
-              </TableCell>
+              <TaskDeviceCell device={task.target_device} />
               <TableCell>
                 <TaskPriorityCell priority={task.priority} />
               </TableCell>
