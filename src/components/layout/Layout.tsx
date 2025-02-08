@@ -31,34 +31,34 @@ const Layout = () => {
 
   return (
     <LayoutContext.Provider value={context}>
-      <div className="min-h-screen bg-[#f8f8f8] flex">
-        {/* Left Sidebar */}
-        <LeftSidebar 
-          isOpen={isLeftSidebarOpen} 
-          onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
-        />
-
-        {/* Main Layout Wrapper (Main Content + Right Sidebar) */}
-        <div className={cn(
-          "flex flex-1 transition-all duration-300 ease-in-out",
-          rightSidebarContent ? "mr-[400px]" : "mr-0"
-        )}>
-          {/* Main Content (Adjusted Dynamically) */}
-          <main className={cn(
-            "flex-1 transition-all duration-300 ease-in-out min-w-0",
-            isLeftSidebarOpen ? "ml-64" : "ml-20"
+      <div className="min-h-screen bg-[#f8f8f8]">
+        <div className="flex w-full">
+          <LeftSidebar 
+            isOpen={isLeftSidebarOpen} 
+            onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
+          />
+          
+          <div className={cn(
+            'flex-1 transition-all duration-300 ease-in-out',
+            isLeftSidebarOpen ? 'ml-64' : 'ml-20'
           )}>
-            <div className="p-8">
-              <Outlet />
-            </div>
-          </main>
+            <div className="flex">
+              <main className={cn(
+                'flex-1 transition-all duration-300 ease-in-out',
+                rightSidebarContent ? 'mr-[400px]' : ''
+              )}>
+                <div className="p-8">
+                  <Outlet />
+                </div>
+              </main>
 
-          {/* Right Sidebar (Pushes Content Instead of Overlapping) */}
-          {rightSidebarContent && (
-            <aside className="w-[400px] bg-background border-l border-border/40 overflow-y-auto shrink-0">
-              {rightSidebarContent}
-            </aside>
-          )}
+              {rightSidebarContent && (
+                <aside className="w-[400px] bg-background border-l border-border/40 overflow-y-auto">
+                  {rightSidebarContent}
+                </aside>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </LayoutContext.Provider>
