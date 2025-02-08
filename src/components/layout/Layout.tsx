@@ -24,7 +24,7 @@ const Layout = () => {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [rightSidebarContent, setRightSidebarContent] = useState<ReactNode | null>(null);
 
-   const setRightSidebar = (content: ReactNode) => {
+  const setRightSidebar = (content: ReactNode) => {
     setRightSidebarContent(content);
     if (content) {
       setIsLeftSidebarOpen(false); // Collapse left sidebar when right sidebar is opened
@@ -34,7 +34,7 @@ const Layout = () => {
   const closeRightSidebar = () => setRightSidebarContent(null);
 
   const context: LayoutContext = {
-    setRightSidebarContent,
+    setRightSidebarContent: setRightSidebar, // Ensure correct function is used
     closeRightSidebar,
   };
 
@@ -57,3 +57,4 @@ const Layout = () => {
 };
 
 export default Layout;
+
