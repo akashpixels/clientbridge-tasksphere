@@ -1,7 +1,7 @@
 
 import { cn } from '@/lib/utils';
 import { Outlet } from 'react-router-dom';
-import LeftSidebar from './Sidebar';
+import LeftSidebar from './LeftSidebar';
 import { useState, createContext, useContext, ReactNode } from 'react';
 
 type LayoutContext = {
@@ -33,7 +33,7 @@ const Layout = () => {
   return (
     <LayoutContext.Provider value={context}>
       <div className="min-h-screen bg-[#f8f8f8]">
-        <div className="flex">
+        <div className="flex relative">
           <LeftSidebar 
             isOpen={isLeftSidebarOpen} 
             onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
@@ -52,7 +52,7 @@ const Layout = () => {
           </main>
 
           {rightSidebarContent && (
-            <aside className="fixed top-0 right-0 h-screen w-[400px] bg-background border-l border-border/40">
+            <aside className="fixed top-0 right-0 bottom-0 h-screen w-[400px] bg-background border-l border-border/40 overflow-y-auto z-10">
               {rightSidebarContent}
             </aside>
           )}

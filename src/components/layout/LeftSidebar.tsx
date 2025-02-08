@@ -1,9 +1,9 @@
 
 import { cn } from '@/lib/utils';
 import { ChevronLeft } from 'lucide-react';
-import SidebarHeader from './sidebar/SidebarHeader';
-import SidebarNavigation from './sidebar/SidebarNavigation';
-import SidebarFooter from './sidebar/SidebarFooter';
+import SidebarHeader from './left-sidebar/SidebarHeader';
+import SidebarNavigation from './left-sidebar/SidebarNavigation';
+import SidebarFooter from './left-sidebar/SidebarFooter';
 
 interface LeftSidebarProps {
   isOpen: boolean;
