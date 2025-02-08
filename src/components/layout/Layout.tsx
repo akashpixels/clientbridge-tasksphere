@@ -16,14 +16,11 @@ const Layout = () => {
     onToggle={() => setIsOpen(!isOpen)} 
   />
 
-  {/* Main Content Wrapper */}
-  <div className={cn(
-    "flex transition-all duration-300 ease-in-out w-full",
-    isCommentsSidebarOpen ? "mr-96" : "mr-0"
-  )}>
+  {/* Main Layout Wrapper */}
+  <div className="flex flex-1 transition-all duration-300 ease-in-out">
     {/* Main Content */}
     <main className={cn(
-      "transition-all duration-300 ease-in-out flex-1",
+      "flex-1 transition-all duration-300 ease-in-out min-w-0",  // Ensure flex-1 behaves correctly
       isOpen && !isCommentsSidebarOpen ? "ml-64" : "ml-20"
     )}>
       <div className="p-8">
@@ -32,13 +29,19 @@ const Layout = () => {
     </main>
 
     {/* Right Sidebar (Comments Panel) */}
-    {isCommentsSidebarOpen && (
-      <div className="w-96 bg-white h-screen border-l fixed right-0 top-0">
-        {/* Your comments UI here */}
-      </div>
-    )}
+    <div className={cn(
+      "transition-all duration-300 ease-in-out bg-white border-l h-screen",
+      isCommentsSidebarOpen ? "w-96" : "w-0"
+    )}>
+      {isCommentsSidebarOpen && (
+        <div className="w-96 h-full">
+          {/* Your comments UI */}
+        </div>
+      )}
+    </div>
   </div>
 </div>
+
 
   );
 };
