@@ -9,10 +9,11 @@ interface MainContentAreaProps {
 const MainContentArea = ({ isLeftSidebarOpen }: MainContentAreaProps) => {
   return (
     <main 
-      className={cn(
-        'flex-1 transition-all duration-300 ease-in-out',
-        isLeftSidebarOpen ? 'ml-64' : 'ml-20'
-      )}
+            className={cn(
+              'flex-1 transition-all duration-300 ease-in-out',
+              isLeftSidebarOpen ? 'ml-64' : 'ml-20',
+              rightSidebarContent ? 'mr-[300px]' : ''
+            )}
     >
       <div className="p-8">
         <Outlet />
