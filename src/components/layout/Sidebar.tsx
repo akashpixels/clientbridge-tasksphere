@@ -1,15 +1,16 @@
+
 import { cn } from '@/lib/utils';
 import { ChevronLeft } from 'lucide-react';
 import SidebarHeader from './sidebar/SidebarHeader';
 import SidebarNavigation from './sidebar/SidebarNavigation';
 import SidebarFooter from './sidebar/SidebarFooter';
 
-interface SidebarProps {
+interface LeftSidebarProps {
   isOpen: boolean;
   onToggle: () => void;
 }
 
-const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
+const LeftSidebar = ({ isOpen, onToggle }: LeftSidebarProps) => {
   return (
     <aside
       className={cn(
@@ -38,4 +39,4 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
   );
 };
 
-export default Sidebar;
+export default LeftSidebar;
