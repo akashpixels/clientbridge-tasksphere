@@ -40,12 +40,11 @@ const Layout = () => {
             onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
           />
           
-          <main 
-            className={cn(
-              'flex-1 transition-all duration-300 ease-in-out',
-              isLeftSidebarOpen ? 'ml-64' : 'ml-20',
-              rightSidebarContent ? 'mr-[400px]' : ''
-            )}
+         <main 
+  className={cn(
+    'flex-1 transition-all duration-300 ease-in-out',
+    isLeftSidebarOpen ? 'ml-64' : 'ml-20'
+  )}
           >
             <div className="p-8">
               <Outlet />
