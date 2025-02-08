@@ -16,9 +16,9 @@ const Layout = () => {
           onToggle={() => setIsOpen(!isOpen)} 
         />
         <main className={cn(
-          'flex-1 transition-all duration-300 ease-in-out relative',
-          isOpen && !isCommentsSidebarOpen ? 'ml-64' : 'ml-20',
-          isCommentsSidebarOpen && 'mr-96'
+          'flex-1 transition-all duration-300 ease-in-out',
+          isOpen && !isCommentsSidebarOpen ? 'pl-64' : 'pl-20',
+          isCommentsSidebarOpen && 'pr-96'
         )}>
           <div className="p-8">
             <Outlet context={{ setIsCommentsSidebarOpen }} />
