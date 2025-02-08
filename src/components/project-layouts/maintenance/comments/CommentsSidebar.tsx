@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ChevronRight, Paperclip, Send } from "lucide-react";
@@ -13,9 +12,10 @@ import { useToast } from "@/components/ui/use-toast";
 interface CommentsSidebarProps {
   taskId: string;
   onClose: () => void;
+  onCommentClick?: (taskId: string) => void; // Added prop with optional modifier
 }
 
-const CommentsSidebar = ({ taskId, onClose }: CommentsSidebarProps) => {
+const CommentsSidebar = ({ taskId, onClose, onCommentClick }: CommentsSidebarProps) => {
   const [newComment, setNewComment] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
