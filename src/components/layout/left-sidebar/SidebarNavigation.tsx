@@ -1,3 +1,4 @@
+
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, Briefcase, CheckSquare, Users, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
