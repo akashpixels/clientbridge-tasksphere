@@ -33,27 +33,32 @@ const Layout = () => {
   return (
     <LayoutContext.Provider value={context}>
       <div className="min-h-screen bg-[#f8f8f8]">
-        <div className="flex w-full">
+        <div className="flex">
           <LeftSidebar 
             isOpen={isLeftSidebarOpen} 
             onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
           />
           
           <div className={cn(
-            'flex flex-1 transition-all duration-300 ease-in-out',
+            'flex-1 transition-all duration-300 ease-in-out',
             isLeftSidebarOpen ? 'ml-64' : 'ml-20'
           )}>
-            <main className="flex-1">
-              <div className="p-8">
-                <Outlet />
-              </div>
-            </main>
+            <div className="flex">
+              <main className={cn(
+                'flex-1 transition-all duration-300 ease-in-out',
+                rightSidebarContent ? 'mr-[400px]' : 'mr-0'
+              )}>
+                <div className="p-8">
+                  <Outlet />
+                </div>
+              </main>
 
-            {rightSidebarContent && (
-              <aside className="w-[400px] bg-background border-l border-border/40 overflow-y-auto shrink-0">
-                {rightSidebarContent}
-              </aside>
-            )}
+              {rightSidebarContent && (
+                <aside className="fixed top-0 right-0 w-[400px] h-screen bg-background border-l border-border/40 overflow-y-auto">
+                  {rightSidebarContent}
+                </aside>
+              )}
+            </div>
           </div>
         </div>
       </div>
