@@ -4,8 +4,6 @@ import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useLayout } from "@/context/layout";
-import { CommentsSidebar } from "@/components/ui/comments-sidebar";
 
 interface TasksTabContentProps {
   isLoadingTasks: boolean;
@@ -48,8 +46,6 @@ const TasksTabContent = ({
   onImageClick,
   onCommentClick,
 }: TasksTabContentProps) => {
-  const { setRightSidebarContent, closeRightSidebar } = useLayout();
-
   useEffect(() => {
     const channel = supabase
       .channel('comments-changes')
@@ -71,15 +67,6 @@ const TasksTabContent = ({
     };
   }, []);
 
-  const handleCommentClick = (taskId: string) => {
-    setRightSidebarContent(
-      <CommentsSidebar 
-        taskId={taskId} 
-        onClose={closeRightSidebar}
-      />
-    );
-  };
-
   return (
     <Card className="p-0">
       {isLoadingTasks ? (
@@ -91,7 +78,7 @@ const TasksTabContent = ({
             sortConfig={sortConfig}
             onSort={onSort}
             onImageClick={onImageClick}
-            onCommentClick={handleCommentClick}
+            onCommentClick={onCommentClick}
           />
         </div>
       ) : (
