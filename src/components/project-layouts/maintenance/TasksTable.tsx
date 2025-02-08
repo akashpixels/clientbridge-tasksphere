@@ -1,3 +1,5 @@
+
+import React from 'react';
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
@@ -17,6 +19,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { CommentsSidebar } from "./CommentsSidebar";
 
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
