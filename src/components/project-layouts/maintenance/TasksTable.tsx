@@ -11,15 +11,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CommentsSidebar } from "./CommentsSidebar";
+import { TaskStatusCell } from "./table/TaskStatusCell";
+import { TaskComplexityCell } from "./table/TaskComplexityCell";
+import { TaskPriorityCell } from "./table/TaskPriorityCell";
 
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
@@ -73,76 +70,6 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
       return counts;
     },
   });
-
-  const formatETA = (date: string) => {
-    return format(new Date(date), "h.mmaaa do MMM");
-  };
-
-  const getStatusColor = (status: { name: string | null, color_hex: string | null }) => {
-    if (!status?.color_hex) {
-      return { bg: '#F3F4F6', text: '#374151' };
-    }
-
-    const [bgColor, textColor] = status.color_hex.split(',').map(color => color.trim());
-    
-    if (bgColor && textColor) {
-      return {
-        bg: bgColor,
-        text: textColor
-      };
-    }
-    
-    const hex = status.color_hex.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    
-    const max = Math.max(r, g, b);
-    
-    const saturationMultiplier = 1.3;
-    const darkenFactor = 0.8;
-    
-    const newR = r === max ? Math.min(255, r * saturationMultiplier * darkenFactor) : r * darkenFactor;
-    const newG = g === max ? Math.min(255, g * saturationMultiplier * darkenFactor) : g * darkenFactor;
-    const newB = b === max ? Math.min(255, b * saturationMultiplier * darkenFactor) : b * darkenFactor;
-    
-    const enhancedColor = `#${Math.round(newR).toString(16).padStart(2, '0')}${Math.round(newG).toString(16).padStart(2, '0')}${Math.round(newB).toString(16).padStart(2, '0')}`;
-
-    return {
-      bg: status.color_hex,
-      text: enhancedColor
-    };
-  };
-
-  const getComplexityBars = (complexity: { name: string, multiplier: number } | null) => {
-    if (!complexity) return 1;
-    
-    const complexityMap: { [key: string]: number } = {
-      'Basic': 1,
-      'Standard': 2,
-      'Advanced': 3,
-      'Complex': 4,
-      'Very Complex': 5,
-      'Extreme': 6
-    };
-
-    return complexityMap[complexity.name] || 1;
-  };
-
-  const getPriorityColor = (priority: { name: string, color: string } | null) => {
-    if (!priority) return '#9CA3AF'; // Default gray color if priority is missing
-
-    const priorityColors: { [key: string]: string } = {
-      'Very Low': '#6EE7B7',  // Light Green
-      'Low': '#22C55E',       // Green
-      'Normal': '#FBBF24',    // Yellow/Orange
-      'Medium': '#F97316',    // Orange
-      'High': '#EF4444',      // Red
-      'Critical': '#B91C1C'   // Dark Red
-    };
-
-    return priorityColors[priority.name] || priority.color || '#9CA3AF'; 
-  };
 
   const renderReferenceLinks = (links: Record<string, string> | null) => {
     if (!links) return null;
@@ -213,22 +140,11 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
           {tasks.map((task) => (
             <TableRow key={task.id}>
               <TableCell>
-                <div className="flex flex-col items-start gap-1">
-                  <span 
-                    className="px-2 py-1 text-xs rounded-full font-semibold"
-                    style={{
-                      backgroundColor: getStatusColor(task.status || { name: null, color_hex: null }).bg,
-                      color: getStatusColor(task.status || { name: null, color_hex: null }).text
-                    }}
-                  >
-                    {task.status?.name}
-                  </span>
-                  {task.task_completed_at && task.actual_hours_spent && (
-                    <span className="text-xs text-gray-500 pl-2">
-                      {task.actual_hours_spent} hrs
-                    </span>
-                  )}
-                </div>
+                <TaskStatusCell 
+                  status={task.status}
+                  completedAt={task.task_completed_at}
+                  hoursSpent={task.actual_hours_spent}
+                />
               </TableCell>
               <TableCell>
                 <div className="flex-1 min-w-0 max-w-[350px]">
@@ -247,42 +163,12 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                     </>
                   )}
                 </div>
-              </TableCell>  
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  {/* Colored Dot */}
-                  <div 
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: getPriorityColor(task.priority) }}
-                  />
-                  {/* Priority Text */}
-                  <span className="text-xs text-gray-700">
-                    {task.priority?.name || 'Not set'}
-                  </span>
-                </div>
               </TableCell>
               <TableCell>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <div className="flex gap-0.5">
-                        {[...Array(6)].map((_, index) => (
-                          <div
-                            key={index}
-                            className={`w-1 h-4 rounded-sm ${
-                              index < getComplexityBars(task.complexity)
-                                ? 'bg-gray-600'
-                                : 'bg-gray-200'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-[#fcfcfc]">
-                      <p>{task.complexity?.name || 'Not set'}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <TaskPriorityCell priority={task.priority} />
+              </TableCell>
+              <TableCell>
+                <TaskComplexityCell complexity={task.complexity} />
               </TableCell>
               <TableCell className="text-left">
                 {task.eta ? (
@@ -294,13 +180,11 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                   <span className="text-xs text-gray-700">Not set</span>
                 )}
               </TableCell>
-              
               <TableCell>
                 <div className="flex flex-col gap-1">
                   {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
                 </div>
               </TableCell>
-
               <TableCell>
                 <div className="flex -space-x-2">
                   {task.images && Array.isArray(task.images) && task.images.length > 0 && (
@@ -318,6 +202,19 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                         <Maximize className="w-3 h-3 absolute top-0 right-0 text-gray-600 bg-white rounded-full p-0.5" />
                       </div>
                     ))
+                  )}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div 
+                  className="cursor-pointer flex items-center gap-1 text-gray-600 hover:text-gray-900"
+                  onClick={() => setSelectedTaskId(task.id)}
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  {commentCounts?.[task.id] && (
+                    <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded-full">
+                      {commentCounts[task.id]}
+                    </span>
                   )}
                 </div>
               </TableCell>
