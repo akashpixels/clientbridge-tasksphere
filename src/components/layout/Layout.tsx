@@ -15,11 +15,12 @@ const Layout = () => {
           isOpen={isOpen && !isCommentsSidebarOpen} 
           onToggle={() => setIsOpen(!isOpen)} 
         />
-        <main className={cn(
-          'flex-1 transition-all duration-300 ease-in-out',
-          isOpen && !isCommentsSidebarOpen ? 'pl-64' : 'pl-20',
-          isCommentsSidebarOpen && 'pr-96'
-        )}>
+     <main className={cn(
+  'transition-all duration-300 ease-in-out',
+  isOpen && !isCommentsSidebarOpen ? 'ml-64' : 'ml-20',  // Adjust left margin instead of padding
+  isCommentsSidebarOpen ? 'mr-96' : 'mr-0'  // Push content instead of overlapping
+)}>
+
           <div className="p-8">
             <Outlet context={{ setIsCommentsSidebarOpen }} />
           </div>
