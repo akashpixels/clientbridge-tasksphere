@@ -1,21 +1,18 @@
 
 import { cn } from '@/lib/utils';
 import { Outlet } from 'react-router-dom';
-import { ReactNode } from 'react';
 
 interface MainContentAreaProps {
   isLeftSidebarOpen: boolean;
-  rightSidebarContent: ReactNode | null;
 }
 
-const MainContentArea = ({ isLeftSidebarOpen, rightSidebarContent }: MainContentAreaProps) => {
+const MainContentArea = ({ isLeftSidebarOpen }: MainContentAreaProps) => {
   return (
     <main 
-            className={cn(
-              'flex-1 transition-all duration-300 ease-in-out',
-              isLeftSidebarOpen ? 'ml-64' : 'ml-20',
-              rightSidebarContent ? 'mr-[300px]' : ''
-            )}
+      className={cn(
+        'flex-1 transition-all duration-300 ease-in-out',
+        isLeftSidebarOpen ? 'ml-64' : 'ml-20'
+      )}
     >
       <div className="p-8">
         <Outlet />

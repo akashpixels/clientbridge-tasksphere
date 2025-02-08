@@ -26,38 +26,24 @@ const Layout = () => {
 
   const closeRightSidebar = () => setRightSidebarContent(null);
 
-  const openRightSidebar = (content: ReactNode) => {
-    setRightSidebarContent(content);
-    setIsLeftSidebarOpen(false); // ✅ Collapse Left Sidebar when Right Sidebar Opens
-  };
-
   const context: LayoutContext = {
-    setRightSidebarContent: openRightSidebar,
+    setRightSidebarContent,
     closeRightSidebar,
   };
 
   return (
     <LayoutContext.Provider value={context}>
-      <div className="min-h-screen bg-[#f8f8f8] flex">
-        {/* Left Sidebar */}
-        <LeftSidebar 
-          isOpen={isLeftSidebarOpen} 
-          onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
-        />
+      <div className="min-h-screen bg-[#f8f8f8]">
+        <div className="flex">
+          <LeftSidebar 
+            isOpen={isLeftSidebarOpen} 
+            onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
+          />
+          
+          <MainContentArea isLeftSidebarOpen={isLeftSidebarOpen} />
 
-        {/* Main Content Area */}
-        <main 
-          className={cn(
-            "flex-1 transition-all duration-300 ease-in-out p-8",
-            isLeftSidebarOpen ? "ml-64" : "ml-20",  // ✅ Collapse when Right Sidebar opens
-            rightSidebarContent ? "mr-[300px]" : "" // ✅ Push content when Right Sidebar opens
-          )}
-        >
-          <MainContentArea />
-        </main>
-
-        {/* Right Sidebar */}
-        <RightSidebar content={rightSidebarContent} />
+          <RightSidebar content={rightSidebarContent} />
+        </div>
       </div>
     </LayoutContext.Provider>
   );
