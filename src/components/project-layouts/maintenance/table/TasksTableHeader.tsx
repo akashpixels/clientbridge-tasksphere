@@ -45,7 +45,7 @@ export const TasksTableHeader = ({ sortConfig, onSort }: TasksTableHeaderProps) 
           className="cursor-pointer"
           onClick={() => onSort('complexity_level_id')}
         >
-          Level
+      Complexity
         </TableHead>
         <TableHead 
           className="cursor-pointer"
