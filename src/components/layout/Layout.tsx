@@ -43,9 +43,11 @@ const Layout = () => {
           <main 
             className={cn(
               'flex-1 transition-all duration-300 ease-in-out',
-              isLeftSidebarOpen ? 'ml-64' : 'ml-20',
-              rightSidebarContent ? 'mr-[400px]' : ''
+              isLeftSidebarOpen ? 'ml-64' : 'ml-20'
             )}
+            style={{
+              marginRight: rightSidebarContent ? '400px' : '0'
+            }}
           >
             <div className="p-8">
               <Outlet />
