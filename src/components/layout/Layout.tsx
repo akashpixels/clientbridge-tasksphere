@@ -2,6 +2,7 @@
 import { cn } from '@/lib/utils';
 import { Outlet } from 'react-router-dom';
 import LeftSidebar from './left-sidebar/LeftSidebar';
+import RightSidebar from './right-sidebar/RightSidebar';
 import { useState, createContext, useContext, ReactNode } from 'react';
 
 type LayoutContext = {
@@ -33,7 +34,7 @@ const Layout = () => {
   return (
     <LayoutContext.Provider value={context}>
       <div className="min-h-screen bg-[#f8f8f8]">
-        <div className="flex">
+        <div className="flex h-screen">
           <LeftSidebar 
             isOpen={isLeftSidebarOpen} 
             onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
@@ -41,8 +42,9 @@ const Layout = () => {
           
           <main 
             className={cn(
-              'flex-1 transition-all duration-300 ease-in-out',
-              isLeftSidebarOpen ? 'ml-64' : 'ml-20'
+              'flex-1 overflow-y-auto transition-all duration-300 ease-in-out',
+              isLeftSidebarOpen ? 'ml-64' : 'ml-20',
+              rightSidebarContent ? 'mr-[400px]' : 'mr-0'
             )}
           >
             <div className="p-8">
@@ -50,11 +52,9 @@ const Layout = () => {
             </div>
           </main>
 
-          {rightSidebarContent && (
-            <aside className="w-[400px] bg-background border-l border-border/40 overflow-y-auto">
-              {rightSidebarContent}
-            </aside>
-          )}
+          <RightSidebar isOpen={!!rightSidebarContent}>
+            {rightSidebarContent}
+          </RightSidebar>
         </div>
       </div>
     </LayoutContext.Provider>
