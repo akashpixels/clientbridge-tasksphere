@@ -8,6 +8,8 @@ import ProjectHeader from "./ProjectHeader";
 import TasksTabContent from "./TasksTabContent";
 import ImageViewerDialog from "./ImageViewerDialog";
 import { format, startOfMonth, endOfMonth } from "date-fns";
+import { CommentsSidebar } from "@/components/ui/comments-sidebar";
+import { useLayout } from "@/context/layout";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -36,6 +38,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
+  const { setRightSidebarContent, closeRightSidebar } = useLayout();
 
   // Fetch tasks for the selected month
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
@@ -112,7 +115,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   }) : [];
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto">
       <div className="mb-6">
         <ProjectHeader 
           project={project} 
@@ -125,41 +128,11 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
       <Tabs defaultValue="tasks" className="w-full">
         <div className="flex justify-between items-center mb-4">
           <TabsList>
-           <TabsTrigger
-  value="tasks"
-  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
->
-  Tasks
-</TabsTrigger>
-
-<TabsTrigger
-  value="overview"
-  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
->
-  Overview
-</TabsTrigger>
-
-<TabsTrigger
-  value="team"
-  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
->
-  Team
-</TabsTrigger>
-
-<TabsTrigger
-  value="credentials"
-  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
->
-  Credentials
-</TabsTrigger>
-
-<TabsTrigger
-  value="files"
-  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
->
-  Files
-</TabsTrigger>
-
+            <TabsTrigger value="tasks">Tasks</TabsTrigger>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="team">Team</TabsTrigger>
+            <TabsTrigger value="credentials">Credentials</TabsTrigger>
+            <TabsTrigger value="files">Files</TabsTrigger>
           </TabsList>
           <button className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md">
             New Task
@@ -173,6 +146,14 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
             sortConfig={sortConfig}
             onSort={handleSort}
             onImageClick={handleImageClick}
+            onCommentClick={(taskId: string) => {
+              setRightSidebarContent(
+                <CommentsSidebar 
+                  taskId={taskId} 
+                  onClose={closeRightSidebar}
+                />
+              );
+            }}
           />
         </TabsContent>
 

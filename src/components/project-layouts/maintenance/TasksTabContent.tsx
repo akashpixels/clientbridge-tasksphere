@@ -35,6 +35,7 @@ interface TasksTabContentProps {
   };
   onSort: (key: string) => void;
   onImageClick: (image: string, images: string[]) => void;
+  onCommentClick: (taskId: string) => void;
 }
 
 const TasksTabContent = ({
@@ -43,9 +44,9 @@ const TasksTabContent = ({
   sortConfig,
   onSort,
   onImageClick,
+  onCommentClick,
 }: TasksTabContentProps) => {
   useEffect(() => {
-    // Subscribe to realtime updates for comments
     const channel = supabase
       .channel('comments-changes')
       .on(
@@ -77,6 +78,7 @@ const TasksTabContent = ({
             sortConfig={sortConfig}
             onSort={onSort}
             onImageClick={onImageClick}
+            onCommentClick={onCommentClick}
           />
         </div>
       ) : (
