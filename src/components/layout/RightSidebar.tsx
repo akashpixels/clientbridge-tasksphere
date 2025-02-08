@@ -9,7 +9,7 @@ const RightSidebar = ({ content }: RightSidebarProps) => {
   if (!content) return null;
 
   return (
-    <aside className="w-[300px] bg-background border-l border-border/40 overflow-y-auto">
+    <aside className="fixed top-0 right-0 h-full w-[300px] bg-background border-l border-border/40 overflow-y-auto">
       {content}
     </aside>
   );
