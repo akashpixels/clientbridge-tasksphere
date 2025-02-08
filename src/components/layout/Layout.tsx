@@ -40,7 +40,10 @@ const Layout = () => {
             onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
           />
           
-          <MainContentArea isLeftSidebarOpen={isLeftSidebarOpen} />
+          <MainContentArea 
+            isLeftSidebarOpen={isLeftSidebarOpen}
+            rightSidebarContent={rightSidebarContent}
+          />
 
           <RightSidebar content={rightSidebarContent} />
         </div>

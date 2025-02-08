@@ -1,12 +1,14 @@
 
 import { cn } from '@/lib/utils';
 import { Outlet } from 'react-router-dom';
+import { ReactNode } from 'react';
 
 interface MainContentAreaProps {
   isLeftSidebarOpen: boolean;
+  rightSidebarContent: ReactNode | null;
 }
 
-const MainContentArea = ({ isLeftSidebarOpen }: MainContentAreaProps) => {
+const MainContentArea = ({ isLeftSidebarOpen, rightSidebarContent }: MainContentAreaProps) => {
   return (
     <main 
             className={cn(
