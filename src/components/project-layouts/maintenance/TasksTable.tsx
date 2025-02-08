@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { Tables } from "@/integrations/supabase/types";
-import { Link2, MessageSquare, Maximize } from "lucide-react";
-import { format } from "date-fns";
+import { Link2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -17,6 +16,9 @@ import { TaskComplexityCell } from "./table/TaskComplexityCell";
 import { TaskPriorityCell } from "./table/TaskPriorityCell";
 import { TasksTableHeader } from "./table/TasksTableHeader";
 import { TaskDeviceCell } from "./table/TaskDeviceCell";
+import { TaskEtaCell } from "./table/TaskEtaCell";
+import { TaskImagesCell } from "./table/TaskImagesCell";
+import { TaskCommentsCell } from "./table/TaskCommentsCell";
 
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
@@ -95,13 +97,11 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
         <TableBody>
           {tasks.map((task) => (
             <TableRow key={task.id}>
-              <TableCell>
-                <TaskStatusCell 
-                  status={task.status}
-                  completedAt={task.task_completed_at}
-                  hoursSpent={task.actual_hours_spent}
-                />
-              </TableCell>
+              <TaskStatusCell 
+                status={task.status}
+                completedAt={task.task_completed_at}
+                hoursSpent={task.actual_hours_spent}
+              />
               <TableCell>
                 <div className="flex-1 min-w-0 max-w-[350px]">
                   <p className="text-sm break-words">{task.details}</p>
@@ -109,60 +109,23 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
                 </div>
               </TableCell>
               <TaskDeviceCell device={task.target_device} />
-              <TableCell>
-                <TaskPriorityCell priority={task.priority} />
-              </TableCell>
-              <TableCell>
-                <TaskComplexityCell complexity={task.complexity} />
-              </TableCell>
-              <TableCell className="text-left">
-                {task.eta ? (
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-xs text-gray-600">{format(new Date(task.eta), "h.mmaaa")}</span>
-                    <span className="text-xs text-gray-700">{format(new Date(task.eta), "do MMM")}</span>
-                  </div>
-                ) : (
-                  <span className="text-xs text-gray-700">Not set</span>
-                )}
-              </TableCell>
+              <TaskPriorityCell priority={task.priority} />
+              <TaskComplexityCell complexity={task.complexity} />
+              <TaskEtaCell eta={task.eta} />
               <TableCell>
                 <div className="flex flex-col gap-1">
                   {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
                 </div>
               </TableCell>
-              <TableCell>
-                <div className="flex -space-x-2">
-                  {task.images && Array.isArray(task.images) && task.images.length > 0 && (
-                    task.images.map((image, index) => (
-                      <div
-                        key={index}
-                        className="w-8 h-8 relative cursor-pointer"
-                        onClick={() => onImageClick(image as string, task.images as string[])}
-                      >
-                        <img 
-                          src={image as string}
-                          alt={`Task image ${index + 1}`}
-                          className="w-8 h-8 rounded-lg border-2 border-white object-cover"
-                        />
-                        <Maximize className="w-3 h-3 absolute top-0 right-0 text-gray-600 bg-white rounded-full p-0.5" />
-                      </div>
-                    ))
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <div 
-                  className="cursor-pointer flex items-center gap-1 text-gray-600 hover:text-gray-900"
-                  onClick={() => setSelectedTaskId(task.id)}
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  {commentCounts?.[task.id] && (
-                    <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded-full">
-                      {commentCounts[task.id]}
-                    </span>
-                  )}
-                </div>
-              </TableCell>
+              <TaskImagesCell 
+                images={task.images as string[]} 
+                onImageClick={onImageClick}
+              />
+              <TaskCommentsCell
+                taskId={task.id}
+                commentCount={commentCounts?.[task.id]}
+                onCommentClick={setSelectedTaskId}
+              />
             </TableRow>
           ))}
         </TableBody>
