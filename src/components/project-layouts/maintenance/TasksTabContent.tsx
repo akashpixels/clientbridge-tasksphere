@@ -35,7 +35,6 @@ interface TasksTabContentProps {
   };
   onSort: (key: string) => void;
   onImageClick: (image: string, images: string[]) => void;
-  setIsCommentsSidebarOpen: (isOpen: boolean) => void;
 }
 
 const TasksTabContent = ({
@@ -44,7 +43,6 @@ const TasksTabContent = ({
   sortConfig,
   onSort,
   onImageClick,
-  setIsCommentsSidebarOpen,
 }: TasksTabContentProps) => {
   useEffect(() => {
     // Subscribe to realtime updates for comments
@@ -79,7 +77,6 @@ const TasksTabContent = ({
             sortConfig={sortConfig}
             onSort={onSort}
             onImageClick={onImageClick}
-            setIsCommentsSidebarOpen={setIsCommentsSidebarOpen}
           />
         </div>
       ) : (

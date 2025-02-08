@@ -8,7 +8,6 @@ import ProjectHeader from "./ProjectHeader";
 import TasksTabContent from "./TasksTabContent";
 import ImageViewerDialog from "./ImageViewerDialog";
 import { format, startOfMonth, endOfMonth } from "date-fns";
-import { useOutletContext } from "react-router-dom";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -31,12 +30,7 @@ type SortConfig = {
   direction: 'asc' | 'desc';
 };
 
-type ContextType = {
-  setIsCommentsSidebarOpen: (isOpen: boolean) => void;
-};
-
 const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
-  const { setIsCommentsSidebarOpen } = useOutletContext<ContextType>();
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'created_at', direction: 'desc' });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
@@ -131,21 +125,41 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
       <Tabs defaultValue="tasks" className="w-full">
         <div className="flex justify-between items-center mb-4">
           <TabsList>
-            <TabsTrigger value="tasks" className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md">
-              Tasks
-            </TabsTrigger>
-            <TabsTrigger value="overview" className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md">
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="team" className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md">
-              Team
-            </TabsTrigger>
-            <TabsTrigger value="credentials" className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md">
-              Credentials
-            </TabsTrigger>
-            <TabsTrigger value="files" className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md">
-              Files
-            </TabsTrigger>
+           <TabsTrigger
+  value="tasks"
+  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
+>
+  Tasks
+</TabsTrigger>
+
+<TabsTrigger
+  value="overview"
+  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
+>
+  Overview
+</TabsTrigger>
+
+<TabsTrigger
+  value="team"
+  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
+>
+  Team
+</TabsTrigger>
+
+<TabsTrigger
+  value="credentials"
+  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
+>
+  Credentials
+</TabsTrigger>
+
+<TabsTrigger
+  value="files"
+  className="data-[state=active]:bg-[#fcfcfc] data-[state=active]:rounded-md"
+>
+  Files
+</TabsTrigger>
+
           </TabsList>
           <button className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md">
             New Task
@@ -159,7 +173,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
             sortConfig={sortConfig}
             onSort={handleSort}
             onImageClick={handleImageClick}
-            setIsCommentsSidebarOpen={setIsCommentsSidebarOpen}
           />
         </TabsContent>
 
