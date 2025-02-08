@@ -33,7 +33,7 @@ const Layout = () => {
   return (
     <LayoutContext.Provider value={context}>
       <div className="min-h-screen bg-[#f8f8f8]">
-        <div className="flex relative">
+        <div className="flex">
           <LeftSidebar 
             isOpen={isLeftSidebarOpen} 
             onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
@@ -42,8 +42,7 @@ const Layout = () => {
           <main 
             className={cn(
               'flex-1 transition-all duration-300 ease-in-out',
-              isLeftSidebarOpen ? 'ml-64' : 'ml-20',
-              rightSidebarContent ? 'mr-[400px]' : ''
+              isLeftSidebarOpen ? 'ml-64' : 'ml-20'
             )}
           >
             <div className="p-8">
@@ -52,7 +51,7 @@ const Layout = () => {
           </main>
 
           {rightSidebarContent && (
-            <aside className="fixed top-0 right-0 bottom-0 h-screen w-[400px] bg-background border-l border-border/40 overflow-y-auto z-10">
+            <aside className="w-[400px] bg-background border-l border-border/40 overflow-y-auto">
               {rightSidebarContent}
             </aside>
           )}
