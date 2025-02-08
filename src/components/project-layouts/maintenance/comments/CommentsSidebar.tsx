@@ -96,7 +96,8 @@ const CommentsSidebar = ({ taskId, onClose, onCommentClick }: CommentsSidebarPro
   };
 
   return (
-    <div className="fixed right-0 top-0 h-screen w-96 bg-background border-l border-border shadow-lg z-50">
+    <div className="h-screen w-96 bg-background border-l border-border shadow-lg">
+  
       <div className="flex items-center justify-between p-4 border-b">
         <h2 className="text-lg font-semibold">Comments</h2>
         <Button variant="ghost" size="icon" onClick={onClose}>
