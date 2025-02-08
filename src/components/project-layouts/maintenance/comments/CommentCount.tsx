@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface CommentCountProps {
   taskId: string;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
 }
 
 export const CommentCount = ({ taskId, onClick }: CommentCountProps) => {
@@ -43,16 +43,14 @@ export const CommentCount = ({ taskId, onClick }: CommentCountProps) => {
     enabled: Boolean(taskId),
   });
 
-  if (!data?.total) return null;
-
   return (
     <button
       onClick={onClick}
       className="flex items-center gap-1 text-gray-600 hover:text-gray-800"
     >
       <MessageCircle className="w-4 h-4" />
-      <span className="text-sm">{data.total}</span>
-      {data.new > 0 && (
+      <span className="text-sm">{data?.total || 0}</span>
+      {data?.new > 0 && (
         <span className="bg-blue-500 text-white text-xs px-1.5 rounded-full">
           {data.new}
         </span>

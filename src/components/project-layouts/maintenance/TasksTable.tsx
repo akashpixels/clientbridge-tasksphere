@@ -190,7 +190,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
         </TableHeader>
         <TableBody>
           {tasks.map((task) => (
-            <TableRow key={task.id}>
+            <TableRow key={task.id} className="cursor-pointer hover:bg-gray-50" onClick={() => setSelectedTaskId(task.id)}>
               <TableCell>
                 <div className="flex flex-col items-start gap-1">
                   <span 
