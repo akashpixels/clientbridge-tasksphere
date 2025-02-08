@@ -31,34 +31,30 @@ const Layout = () => {
 
   return (
     <LayoutContext.Provider value={context}>
-      <div className="min-h-screen bg-[#f8f8f8]">
-        <div className="flex w-full">
-          <LeftSidebar 
-            isOpen={isLeftSidebarOpen} 
-            onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
-          />
-          
-          <div className={cn(
-            'flex-1 transition-all duration-300 ease-in-out',
-            isLeftSidebarOpen ? 'ml-64' : 'ml-20'
+      <div className="min-h-screen h-screen flex bg-[#f8f8f8] overflow-hidden">
+        <LeftSidebar 
+          isOpen={isLeftSidebarOpen} 
+          onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
+        />
+        
+        <div className={cn(
+          'flex-1 flex transition-all duration-300 ease-in-out relative',
+          isLeftSidebarOpen ? 'ml-64' : 'ml-20'
+        )}>
+          <main className={cn(
+            'flex-1 overflow-auto transition-all duration-300 ease-in-out',
+            rightSidebarContent ? 'mr-[400px]' : ''
           )}>
-            <div className="flex">
-              <main className={cn(
-                'flex-1 transition-all duration-300 ease-in-out',
-                rightSidebarContent ? 'mr-[400px]' : ''
-              )}>
-                <div className="p-8">
-                  <Outlet />
-                </div>
-              </main>
-
-              {rightSidebarContent && (
-                <aside className="w-[400px] bg-background border-l border-border/40 overflow-y-auto">
-                  {rightSidebarContent}
-                </aside>
-              )}
+            <div className="p-8">
+              <Outlet />
             </div>
-          </div>
+          </main>
+
+          {rightSidebarContent && (
+            <aside className="fixed top-0 right-0 w-[400px] h-full bg-background border-l border-border/40">
+              {rightSidebarContent}
+            </aside>
+          )}
         </div>
       </div>
     </LayoutContext.Provider>
