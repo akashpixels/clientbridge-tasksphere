@@ -25,6 +25,12 @@ interface TasksTabContentProps {
       first_name: string;
       last_name: string;
     } | null;
+    comments?: {
+      id: string;
+      content: string;
+      created_at: string;
+      user_id: string;
+    }[];
   })[];
   sortConfig: {
     key: string;
