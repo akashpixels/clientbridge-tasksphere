@@ -36,6 +36,9 @@ export const CommentPanel = ({ taskId, isOpen, onClose }: CommentPanelProps) => 
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ['comments', taskId],
     queryFn: async () => {
+      // Only fetch if we have a valid taskId
+      if (!taskId) return [];
+      
       const { data, error } = await supabase
         .from('task_comments')
         .select(`
@@ -48,10 +51,14 @@ export const CommentPanel = ({ taskId, isOpen, onClose }: CommentPanelProps) => 
       if (error) throw error;
       return data as Comment[];
     },
+    // Disable the query if there's no taskId
+    enabled: Boolean(taskId),
   });
 
   const addCommentMutation = useMutation({
     mutationFn: async (commentData: { content: string; parent_id: string | null }) => {
+      if (!taskId) throw new Error('No task ID provided');
+      
       const { data, error } = await supabase
         .from('task_comments')
         .insert([
@@ -146,7 +153,7 @@ export const CommentPanel = ({ taskId, isOpen, onClose }: CommentPanelProps) => 
 
   // Update last viewed timestamp
   React.useEffect(() => {
-    if (isOpen) {
+    if (isOpen && taskId) {
       supabase
         .from('task_comment_views')
         .upsert(
@@ -176,7 +183,7 @@ export const CommentPanel = ({ taskId, isOpen, onClose }: CommentPanelProps) => 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {isLoading ? (
               <div className="text-center text-gray-500">Loading comments...</div>
-            ) : commentThreads.rootComments.length === 0 ? (
+            ) : comments.length === 0 ? (
               <div className="text-center text-gray-500">No comments yet</div>
             ) : (
               commentThreads.rootComments.map(comment => renderComment(comment))

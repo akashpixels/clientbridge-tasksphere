@@ -13,6 +13,8 @@ export const CommentCount = ({ taskId, onClick }: CommentCountProps) => {
   const { data } = useQuery({
     queryKey: ['commentCount', taskId],
     queryFn: async () => {
+      if (!taskId) return { total: 0, new: 0 };
+
       const [{ count: total }, { data: views }] = await Promise.all([
         supabase
           .from('task_comments')
@@ -38,6 +40,7 @@ export const CommentCount = ({ taskId, onClick }: CommentCountProps) => {
         new: newCount || 0
       };
     },
+    enabled: Boolean(taskId),
   });
 
   if (!data?.total) return null;
