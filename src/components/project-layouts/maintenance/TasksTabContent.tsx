@@ -1,6 +1,9 @@
+
 import { Card } from "@/components/ui/card";
 import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TasksTabContentProps {
   isLoadingTasks: boolean;
@@ -41,6 +44,28 @@ const TasksTabContent = ({
   onSort,
   onImageClick,
 }: TasksTabContentProps) => {
+  useEffect(() => {
+    // Subscribe to realtime updates for comments
+    const channel = supabase
+      .channel('comments-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'task_comments'
+        },
+        (payload) => {
+          console.log('Comment change received:', payload);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   return (
     <Card className="p-0">
       {isLoadingTasks ? (
