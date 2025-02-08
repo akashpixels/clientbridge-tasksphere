@@ -50,9 +50,10 @@ interface TasksTableProps {
   };
   onSort: (key: string) => void;
   onImageClick: (image: string, images: string[]) => void;
+  onCommentClick: (taskId: string) => void;
 }
 
-const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps) => {
+const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }: TasksTableProps) => {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const { data: commentCounts } = useQuery({
@@ -333,6 +334,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick }: TasksTableProps
         <CommentsSidebar
           taskId={selectedTaskId}
           onClose={() => setSelectedTaskId(null)}
+          onCommentClick={onCommentClick}
         />
       )}
     </>

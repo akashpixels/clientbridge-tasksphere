@@ -1,6 +1,8 @@
+
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./components/auth/AuthProvider";
+import { LayoutProvider } from "./context/layout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
@@ -28,22 +30,24 @@ const App: React.FC = () => {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <Router>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route element={<ProtectedRoute />}>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/projects" element={<Projects />} />
-                  <Route path="/projects/:id" element={<ProjectDetails />} />
-                  <Route path="/tasks" element={<Tasks />} />
-                  <Route path="/team" element={<Team />} />
-                  <Route path="/clients" element={<Clients />} />
-                  <Route path="*" element={<NotFound />} />
+          <LayoutProvider>
+            <Router>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<Layout />}>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/projects" element={<Projects />} />
+                    <Route path="/projects/:id" element={<ProjectDetails />} />
+                    <Route path="/tasks" element={<Tasks />} />
+                    <Route path="/team" element={<Team />} />
+                    <Route path="/clients" element={<Clients />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Route>
                 </Route>
-              </Route>
-            </Routes>
-          </Router>
+              </Routes>
+            </Router>
+          </LayoutProvider>
         </AuthProvider>
       </QueryClientProvider>
     </React.StrictMode>
