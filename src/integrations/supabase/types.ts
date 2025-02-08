@@ -1156,7 +1156,6 @@ export type Database = {
       }
     }
     Enums: {
-      attachment_type: "image" | "document" | "other"
       billing_cycle_enum: "monthly" | "quarterly" | "yearly" | "half yearly"
       device_type: "Mobile" | "Desktop" | "Both"
       gender_enum: "Male" | "Female" | "Other"
