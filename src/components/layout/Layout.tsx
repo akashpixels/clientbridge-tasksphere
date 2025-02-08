@@ -52,7 +52,7 @@ const Layout = () => {
           </main>
 
           {rightSidebarContent && (
-            <aside className="fixed top-0 right-0 h-screen w-[400px] bg-background border-l border-border/40 overflow-y-auto">
+            <aside className=" w-[400px] bg-background border-l border-border/40 overflow-y-auto">
               {rightSidebarContent}
             </aside>
           )}
