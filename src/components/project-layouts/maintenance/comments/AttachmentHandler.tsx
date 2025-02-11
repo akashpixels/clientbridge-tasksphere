@@ -21,7 +21,7 @@ const AttachmentHandler = ({ selectedFiles, setSelectedFiles }: AttachmentHandle
   return (
       <div className="flex items-center justify-between gap-2 w-full">
 
-         {/* Hidden File Input */}
+         {/* Hidden File Input.. */}
       <input
         type="file"
         multiple
