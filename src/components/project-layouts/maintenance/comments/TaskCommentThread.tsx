@@ -263,25 +263,18 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
             </Popover>
           </div>
           
-        <div className="flex justify-between items-center">
-  <input
-    type="file"
-    multiple
-    onChange={handleFileChange}
-    className="hidden"
-    id="comment-attachments"
-    accept="image/*"
-  />
 
+<div className="flex justify-between items-center">
+  {/* File count indicator, but hidden if no files are selected */}
   {selectedFiles.length > 0 && (
-    <span className="text-sm text-gray-500 my-auto">
+    <span className="text-sm text-gray-500">
       {selectedFiles.length} file(s) selected
     </span>
   )}
 
-  {/* Right-aligned buttons: Attachment + Send */}
-  <div className="flex gap-2">
-    {/* Attachment Icon Button (Moved Next to Send) */}
+  {/* Right-aligned buttons */}
+  <div className="flex gap-2 ml-auto">
+    {/* Attachment Icon Button */}
     <Button
       variant="outline"
       size="sm"
@@ -291,15 +284,19 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       <Paperclip className="h-4 w-4" />
     </Button>
 
-    {/* Send Button without Icon */}
+    {/* Send Button */}
     <Button
       onClick={handleSubmit}
       disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
     >
-      {isSubmitting ? "Sending..." : "Send"} {/* Remove Send Icon */}
+      {isSubmitting ? "Sending..." : "Send"}
     </Button>
   </div>
 </div>
+
+
+
+          
 
         </div>
       </div>
