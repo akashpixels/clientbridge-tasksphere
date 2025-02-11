@@ -96,78 +96,87 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     };
   }, [taskId, queryClient]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setSelectedFiles(Array.from(e.target.files));
-    }
-  };
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (e.target.files) {
+    setSelectedFiles((prevFiles) => [...prevFiles, ...Array.from(e.target.files)]); // Append new files
+  }
+};
+
+const handleRemoveFile = (index: number) => {
+  setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index)); // Remove file from list
+};
+
 
   const handleUserTag = (user: UserProfile) => {
     setNewComment(prev => `${prev}@${user.first_name} `);
     setShowTagPopover(false);
   };
 
-  const handleSubmit = async () => {
-    if (!newComment.trim() && selectedFiles.length === 0) return;
-    if (!session?.user?.id) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to post comments",
-        variant: "destructive",
-      });
-      return;
+const handleSubmit = async () => {
+  if (!newComment.trim() && selectedFiles.length === 0) return;
+  if (!session?.user?.id) {
+    toast({
+      title: "Error",
+      description: "You must be logged in to post comments",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  setIsSubmitting(true);
+  try {
+    const uploadedFiles: string[] = [];
+
+    // Upload each selected file
+    for (const file of selectedFiles) {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${taskId}/${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('comment_attachments')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL for the uploaded file
+      const { data: { publicUrl } } = supabase.storage
+        .from('comment_attachments')
+        .getPublicUrl(filePath);
+
+      uploadedFiles.push(publicUrl);
     }
-    
-    setIsSubmitting(true);
-    try {
-      const uploadedImages: string[] = [];
 
-      for (const file of selectedFiles) {
-        const fileExt = file.name.split('.').pop();
-        const filePath = `${taskId}/${crypto.randomUUID()}.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('comment_attachments')
-          .upload(filePath, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('comment_attachments')
-          .getPublicUrl(filePath);
-
-        uploadedImages.push(publicUrl);
-      }
-
-      const { error: commentError } = await supabase
-        .from('task_comments')
-        .insert({
-          task_id: taskId,
-          content: newComment,
-          images: uploadedImages,
-          user_id: session.user.id,
-        });
-
-      if (commentError) throw commentError;
-
-      setNewComment("");
-      setSelectedFiles([]);
-      
-      toast({
-        title: "Comment posted successfully",
-        duration: 3000,
+    // Insert comment with attachments
+    const { error: commentError } = await supabase
+      .from('task_comments')
+      .insert({
+        task_id: taskId,
+        content: newComment,
+        images: uploadedFiles, // Now supports all file types
+        user_id: session.user.id,
       });
-    } catch (error) {
-      console.error('Error posting comment:', error);
-      toast({
-        title: "Error posting comment",
-        variant: "destructive",
-        duration: 3000,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+
+    if (commentError) throw commentError;
+
+    setNewComment("");
+    setSelectedFiles([]);
+
+    toast({
+      title: "Comment posted successfully",
+      duration: 3000,
+    });
+  } catch (error) {
+    console.error('Error posting comment:', error);
+    toast({
+      title: "Error posting comment",
+      variant: "destructive",
+      duration: 3000,
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   if (isLoading) {
     return (
@@ -266,21 +275,32 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
 <div className="flex justify-between items-center">
   {/* Hidden File Input Field (Always Exists) */}
-  <input
-    type="file"
-    multiple
-    onChange={handleFileChange}
-    className="hidden"
-    id="comment-attachments"
-    accept="image/*"
-  />
+  {/* Hidden File Input */}
+<input
+  type="file"
+  multiple
+  onChange={handleFileChange}
+  className="hidden"
+  id="comment-attachments"
+  accept="image/*, .pdf, .doc, .docx, .xls, .xlsx"
+/>
 
-  {/* File count indicator (Only shown when files are selected) */}
-  {selectedFiles.length > 0 && (
-    <span className="text-sm text-gray-500">
-      {selectedFiles.length} file(s) selected
-    </span>
-  )}
+
+{/* Display Selected Files List */}
+{selectedFiles.length > 0 && (
+  <div className="border p-2 rounded-md space-y-2">
+    <p className="text-sm font-medium">Attached Files:</p>
+    {selectedFiles.map((file, index) => (
+      <div key={index} className="flex justify-between items-center border-b pb-1">
+        <span className="text-sm truncate">{file.name}</span>
+        <Button variant="ghost" size="sm" onClick={() => handleRemoveFile(index)}>
+          ❌
+        </Button>
+      </div>
+    ))}
+  </div>
+)}
+
 
   {/* Right-aligned buttons */}
   <div className="flex gap-2 ml-auto">
