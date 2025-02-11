@@ -1,5 +1,5 @@
 import { Tables } from "@/integrations/supabase/types";
-import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2, MessageSquare } from "lucide-react";
+import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
 import {
   Table,
@@ -19,8 +19,6 @@ import { useLayout } from "@/components/layout/Layout";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import CommentsSidebar from "./comments/CommentsSidebar";
 
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
@@ -55,7 +53,7 @@ interface TasksTableProps {
 }
 
 const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }: TasksTableProps) => {
-  const { setRightSidebarContent, closeRightSidebar } = useLayout();
+  const { setRightSidebarContent } = useLayout();
 
   const { data: commentCounts } = useQuery({
     queryKey: ['comment-counts'],
@@ -214,6 +212,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
           <TableRow 
             key={task.id}
             className="cursor-pointer hover:bg-muted/50"
+            onClick={() => setRightSidebarContent(<div className="p-4">Task ID: {task.id}</div>)}
           >
             <TableCell>
               <div className="flex flex-col items-start gap-1">
@@ -303,51 +302,25 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
                 {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
               </div>
             </TableCell>
+
             <TableCell>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setRightSidebarContent(
-                      <CommentsSidebar 
-                        taskId={task.id} 
-                        onClose={closeRightSidebar}
-                        onCommentClick={onCommentClick}
+              <div className="flex -space-x-2">
+                {task.images && Array.isArray(task.images) && task.images.length > 0 && (
+                  task.images.map((image, index) => (
+                    <div
+                      key={index}
+                      className="w-8 h-8 relative cursor-pointer"
+                      onClick={() => onImageClick(image as string, task.images as string[])}
+                    >
+                      <img 
+                        src={image as string}
+                        alt={`Task image ${index + 1}`}
+                        className="w-8 h-8 rounded-lg border-2 border-white object-cover"
                       />
-                    );
-                  }}
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  {commentCounts?.[task.id] && (
-                    <span className="ml-1 text-xs">
-                      {commentCounts[task.id]}
-                    </span>
-                  )}
-                </Button>
-                {/* Images section */}
-                <div className="flex -space-x-2">
-                  {task.images && Array.isArray(task.images) && task.images.length > 0 && (
-                    task.images.map((image, index) => (
-                      <div
-                        key={index}
-                        className="w-8 h-8 relative cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onImageClick(image as string, task.images as string[]);
-                        }}
-                      >
-                        <img 
-                          src={image as string}
-                          alt={`Task image ${index + 1}`}
-                          className="w-8 h-8 rounded-lg border-2 border-white object-cover"
-                        />
-                        <Maximize className="w-3 h-3 absolute top-0 right-0 text-gray-600 bg-white rounded-full p-0.5" />
-                      </div>
-                    ))
-                  )}
-                </div>
+                      <Maximize className="w-3 h-3 absolute top-0 right-0 text-gray-600 bg-white rounded-full p-0.5" />
+                    </div>
+                  ))
+                )}
               </div>
             </TableCell>
           </TableRow>
