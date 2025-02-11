@@ -1,15 +1,15 @@
-
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Loader2, Paperclip, Send, AtSign } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface TaskCommentThreadProps {
   taskId: string;
@@ -38,6 +38,8 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showTagPopover, setShowTagPopover] = useState(false);
   const { toast } = useToast();
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: comments, isLoading } = useQuery({
     queryKey: ['taskComments', taskId],
@@ -71,6 +73,29 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     },
   });
 
+  useEffect(() => {
+    const channel = supabase
+      .channel('comments-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'task_comments',
+          filter: `task_id=eq.${taskId}`
+        },
+        (payload) => {
+          console.log('Comment change received:', payload);
+          queryClient.invalidateQueries({ queryKey: ['taskComments', taskId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [taskId, queryClient]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setSelectedFiles(Array.from(e.target.files));
@@ -84,12 +109,19 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
   const handleSubmit = async () => {
     if (!newComment.trim() && selectedFiles.length === 0) return;
+    if (!session?.user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to post comments",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     try {
       const uploadedImages: string[] = [];
 
-      // Upload files if any
       for (const file of selectedFiles) {
         const fileExt = file.name.split('.').pop();
         const filePath = `${taskId}/${crypto.randomUUID()}.${fileExt}`;
@@ -107,13 +139,13 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
         uploadedImages.push(publicUrl);
       }
 
-      // Insert comment
       const { error: commentError } = await supabase
         .from('task_comments')
         .insert({
           task_id: taskId,
           content: newComment,
           images: uploadedImages,
+          user_id: session.user.id,
         });
 
       if (commentError) throw commentError;
