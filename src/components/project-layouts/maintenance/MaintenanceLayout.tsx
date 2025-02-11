@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
@@ -8,7 +9,6 @@ import ProjectHeader from "./ProjectHeader";
 import TasksTabContent from "./TasksTabContent";
 import ImageViewerDialog from "./ImageViewerDialog";
 import { format, startOfMonth, endOfMonth } from "date-fns";
-import { CommentsSidebar } from "@/components/ui/comments-sidebar";
 import { useLayout } from "@/context/layout";
 
 interface DevelopmentLayoutProps {
@@ -147,12 +147,8 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
             onSort={handleSort}
             onImageClick={handleImageClick}
             onCommentClick={(taskId: string) => {
-              setRightSidebarContent(
-                <CommentsSidebar 
-                  taskId={taskId} 
-                  onClose={closeRightSidebar}
-                />
-              );
+              // Temporarily removing comment functionality
+              console.log('Comment click handler for task:', taskId);
             }}
           />
         </TabsContent>
