@@ -1,4 +1,3 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -18,6 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useLayout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
+import TaskCommentThread from "./comments/TaskCommentThread";
 
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
@@ -192,7 +192,10 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
           <TableRow 
             key={task.id}
             className="cursor-pointer hover:bg-muted/50"
-            onClick={() => setRightSidebarContent(<div className="p-4">Task ID: {task.id}</div>)}
+            onClick={() => {
+              onCommentClick(task.id);
+              setRightSidebarContent(<TaskCommentThread taskId={task.id} />);
+            }}
           >
             <TableCell>
               <div className="flex flex-col items-start gap-1">
