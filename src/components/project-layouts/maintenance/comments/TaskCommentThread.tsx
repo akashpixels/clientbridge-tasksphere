@@ -1,3 +1,4 @@
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -21,11 +22,13 @@ interface Comment {
   content: string;
   created_at: string;
   user_id: string;
-  files: Array<{
-    url: string;
-    type: string;
-    name: string;
-  }> | null;
+  file_url: string | null;
+  images: string[] | null;
+  is_input_request: boolean | null;
+  is_input_response: boolean | null;
+  parent_id: string | null;
+  task_id: string | null;
+  updated_at: string;
   user_profiles: {
     first_name: string;
     last_name: string;
@@ -133,6 +136,11 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const onUserTag = (user: UserProfile) => {
+    setNewComment(prev => `${prev}@${user.first_name} `);
+    setShowTagPopover(false);
+  };
+
   const handleSubmit = async () => {
     if (!newComment.trim() && selectedFiles.length === 0) return;
     if (!session?.user?.id) {
@@ -146,7 +154,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     
     setIsSubmitting(true);
     try {
-      const uploadedFiles: Array<{ url: string; type: string; name: string }> = [];
+      const uploadedImages: string[] = [];
 
       for (const file of selectedFiles) {
         const fileExt = file.name.split('.').pop();
@@ -163,11 +171,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
           .from('comment_attachments')
           .getPublicUrl(filePath);
 
-        uploadedFiles.push({
-          url: publicUrl,
-          type: file.type,
-          name: file.name
-        });
+        uploadedImages.push(publicUrl);
       }
 
       const { error: commentError } = await supabase
@@ -175,7 +179,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
         .insert({
           task_id: taskId,
           content: newComment,
-          files: uploadedFiles,
+          images: uploadedImages,
           user_id: session.user.id,
         });
 
@@ -236,18 +240,22 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
                 
                 <p className="mt-1 text-sm text-gray-700">{comment.content}</p>
                 
-                {comment.files && comment.files.length > 0 && (
+                {comment.images && comment.images.length > 0 && (
                   <div className="mt-2 grid grid-cols-4 gap-2">
-                    {comment.files.map((file, index) => (
+                    {comment.images.map((url, index) => (
                       <div
                         key={index}
                         className="relative group cursor-pointer border rounded-lg p-2 hover:bg-gray-50"
-                        onClick={() => setSelectedFilePreview(file)}
+                        onClick={() => setSelectedFilePreview({
+                          url,
+                          type: url.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/*',
+                          name: url.split('/').pop() || ''
+                        })}
                       >
                         <div className="flex flex-col items-center">
-                          {getFileIcon(file.type)}
+                          {getFileIcon(url.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/*')}
                           <span className="text-xs text-gray-500 mt-1 truncate w-full text-center">
-                            {file.name}
+                            {url.split('/').pop()}
                           </span>
                         </div>
                       </div>
@@ -289,7 +297,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
                         key={user.id}
                         variant="ghost"
                         className="w-full justify-start"
-                        onClick={() => handleUserTag(user)}
+                        onClick={() => onUserTag(user)}
                       >
                         @{user.first_name}
                       </Button>
