@@ -27,6 +27,10 @@ interface Comment {
   } | null;
 }
 
+interface CommentWithReplies extends Comment {
+  replies: CommentWithReplies[];
+}
+
 const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   const [newComment, setNewComment] = useState("");
   const [replyToId, setReplyToId] = useState<string | null>(null);
@@ -117,9 +121,9 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     }
   };
 
-  const organizeComments = (comments: Comment[]) => {
-    const commentMap = new Map();
-    const topLevelComments: Comment[] = [];
+  const organizeComments = (comments: Comment[]): CommentWithReplies[] => {
+    const commentMap = new Map<string, CommentWithReplies>();
+    const topLevelComments: CommentWithReplies[] = [];
 
     comments?.forEach(comment => {
       commentMap.set(comment.id, { ...comment, replies: [] });
@@ -127,16 +131,16 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
     comments?.forEach(comment => {
       if (comment.parent_id && commentMap.has(comment.parent_id)) {
-        commentMap.get(comment.parent_id).replies.push(commentMap.get(comment.id));
+        commentMap.get(comment.parent_id)?.replies.push(commentMap.get(comment.id)!);
       } else {
-        topLevelComments.push(commentMap.get(comment.id));
+        topLevelComments.push(commentMap.get(comment.id)!);
       }
     });
 
     return topLevelComments;
   };
 
-  const CommentComponent = ({ comment, level = 0 }: { comment: Comment & { replies: any[] }, level: number }) => (
+  const CommentComponent = ({ comment, level = 0 }: { comment: CommentWithReplies, level: number }) => (
     <div className={`flex gap-3 ${level > 0 ? 'ml-8' : ''}`}>
       <Avatar className="w-8 h-8">
         <AvatarFallback>
@@ -183,7 +187,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
           </div>
         )}
 
-        {comment.replies?.map((reply: Comment & { replies: any[] }) => (
+        {comment.replies?.map((reply) => (
           <CommentComponent key={reply.id} comment={reply} level={level + 1} />
         ))}
       </div>
