@@ -2,13 +2,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { Loader2, Reply, Paperclip, Send } from "lucide-react";
+import { Loader2, Paperclip, Send, AtSign } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface TaskCommentThreadProps {
   taskId: string;
@@ -19,7 +20,6 @@ interface Comment {
   content: string;
   created_at: string;
   user_id: string;
-  parent_id: string | null;
   images: string[] | null;
   user_profiles: {
     first_name: string;
@@ -27,15 +27,16 @@ interface Comment {
   } | null;
 }
 
-interface CommentWithReplies extends Comment {
-  replies: CommentWithReplies[];
+interface UserProfile {
+  id: string;
+  first_name: string;
 }
 
 const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   const [newComment, setNewComment] = useState("");
-  const [replyToId, setReplyToId] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showTagPopover, setShowTagPopover] = useState(false);
   const { toast } = useToast();
 
   const { data: comments, isLoading } = useQuery({
@@ -58,10 +59,27 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     },
   });
 
+  const { data: users } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('id, first_name');
+
+      if (error) throw error;
+      return data as UserProfile[];
+    },
+  });
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setSelectedFiles(Array.from(e.target.files));
     }
+  };
+
+  const handleUserTag = (user: UserProfile) => {
+    setNewComment(prev => `${prev}@${user.first_name} `);
+    setShowTagPopover(false);
   };
 
   const handleSubmit = async () => {
@@ -95,7 +113,6 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
         .insert({
           task_id: taskId,
           content: newComment,
-          parent_id: replyToId,
           images: uploadedImages,
         });
 
@@ -103,7 +120,6 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
       setNewComment("");
       setSelectedFiles([]);
-      setReplyToId(null);
       
       toast({
         title: "Comment posted successfully",
@@ -121,79 +137,6 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     }
   };
 
-  const organizeComments = (comments: Comment[]): CommentWithReplies[] => {
-    const commentMap = new Map<string, CommentWithReplies>();
-    const topLevelComments: CommentWithReplies[] = [];
-
-    comments?.forEach(comment => {
-      commentMap.set(comment.id, { ...comment, replies: [] });
-    });
-
-    comments?.forEach(comment => {
-      if (comment.parent_id && commentMap.has(comment.parent_id)) {
-        commentMap.get(comment.parent_id)?.replies.push(commentMap.get(comment.id)!);
-      } else {
-        topLevelComments.push(commentMap.get(comment.id)!);
-      }
-    });
-
-    return topLevelComments;
-  };
-
-  const CommentComponent = ({ comment, level = 0 }: { comment: CommentWithReplies, level: number }) => (
-    <div className={`flex gap-3 ${level > 0 ? 'ml-8' : ''}`}>
-      <Avatar className="w-8 h-8">
-        <AvatarFallback>
-          {comment.user_profiles?.first_name?.[0]}
-          {comment.user_profiles?.last_name?.[0]}
-        </AvatarFallback>
-      </Avatar>
-      
-      <div className="flex-1">
-        <div className="flex items-baseline gap-2 justify-between">
-          <div>
-            <span className="font-medium text-sm">
-              {comment.user_profiles?.first_name} {comment.user_profiles?.last_name}
-            </span>
-            <span className="text-xs text-gray-500 ml-2">
-              {format(new Date(comment.created_at), 'MMM d, h:mmaaa')}
-            </span>
-          </div>
-          {level === 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 text-gray-500 hover:text-gray-700"
-              onClick={() => setReplyToId(replyToId === comment.id ? null : comment.id)}
-            >
-              <Reply className="h-4 w-4 mr-1" />
-              Reply
-            </Button>
-          )}
-        </div>
-        
-        <p className="mt-1 text-sm text-gray-700">{comment.content}</p>
-        
-        {comment.images && comment.images.length > 0 && (
-          <div className="mt-2 flex gap-2">
-            {comment.images.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`Comment attachment ${index + 1}`}
-                className="w-20 h-20 object-cover rounded-md"
-              />
-            ))}
-          </div>
-        )}
-
-        {comment.replies?.map((reply) => (
-          <CommentComponent key={reply.id} comment={reply} level={level + 1} />
-        ))}
-      </div>
-    </div>
-  );
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
@@ -202,43 +145,91 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     );
   }
 
-  const organizedComments = organizeComments(comments || []);
-
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
       <div className="px-4 py-3 border-b">
         <h3 className="font-semibold">Comments</h3>
       </div>
       
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 mb-[200px]">
         <div className="p-4 space-y-4">
-          {organizedComments.map((comment) => (
-            <CommentComponent key={comment.id} comment={comment} level={0} />
+          {comments?.map((comment) => (
+            <div key={comment.id} className="flex gap-3">
+              <Avatar className="w-8 h-8">
+                <AvatarFallback>
+                  {comment.user_profiles?.first_name?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="flex-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="font-medium text-sm">
+                    {comment.user_profiles?.first_name}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {format(new Date(comment.created_at), 'MMM d, h:mmaaa')}
+                  </span>
+                </div>
+                
+                <p className="mt-1 text-sm text-gray-700">{comment.content}</p>
+                
+                {comment.images && comment.images.length > 0 && (
+                  <div className="mt-2 flex gap-2">
+                    {comment.images.map((image, index) => (
+                      <img
+                        key={index}
+                        src={image}
+                        alt={`Comment attachment ${index + 1}`}
+                        className="w-20 h-20 object-cover rounded-md"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       </ScrollArea>
 
-      <div className="border-t p-4">
-        {replyToId && (
-          <div className="flex justify-between items-center mb-2 text-sm text-gray-500 bg-muted p-2 rounded">
-            <span>Replying to comment</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setReplyToId(null)}
-            >
-              Cancel
-            </Button>
-          </div>
-        )}
-        
+      <div className="absolute bottom-0 left-0 right-0 border-t bg-white p-4">
         <div className="space-y-2">
-          <Textarea
-            placeholder="Write a comment..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            className="min-h-[100px]"
-          />
+          <div className="relative">
+            <Textarea
+              placeholder="Write a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="min-h-[100px]"
+            />
+            
+            <Popover open={showTagPopover} onOpenChange={setShowTagPopover}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="absolute top-2 right-2"
+                  onClick={() => setShowTagPopover(true)}
+                >
+                  <AtSign className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-0" align="end">
+                <ScrollArea className="h-64">
+                  <div className="p-2">
+                    {users?.map((user) => (
+                      <Button
+                        key={user.id}
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => handleUserTag(user)}
+                      >
+                        @{user.first_name}
+                      </Button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </PopoverContent>
+            </Popover>
+          </div>
           
           <div className="flex justify-between items-center">
             <div className="flex gap-2">
