@@ -146,12 +146,12 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   }
 
   return (
-    <div className="flex flex-col h-full relative">
+    <div className="flex flex-col h-full">
       <div className="px-4 py-3 border-b">
         <h3 className="font-semibold">Comments</h3>
       </div>
       
-      <ScrollArea className="flex-1 mb-[200px]">
+      <ScrollArea className="flex-1">
         <div className="p-4 space-y-4">
           {comments?.map((comment) => (
             <div key={comment.id} className="flex gap-3">
@@ -191,8 +191,8 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
         </div>
       </ScrollArea>
 
-      <div className="absolute bottom-0 left-0 right-0 border-t bg-white p-4">
-        <div className="space-y-2">
+      <div className="border-t bg-white mt-auto">
+        <div className="p-4 space-y-2">
           <div className="relative">
             <Textarea
               placeholder="Write a comment..."
