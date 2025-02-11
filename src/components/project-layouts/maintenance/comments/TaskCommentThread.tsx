@@ -82,7 +82,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     placeholder="Write a comment..." 
   />
   
-  <div className="flex items-center mt-2 justify-end gap-2">
+<div className="flex items-center mt-2 justify-end gap-2">
   {/* Attachment Button Next to Send */}
   <AttachmentHandler selectedFiles={selectedFiles} setSelectedFiles={setSelectedFiles} />
   
@@ -96,6 +96,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     onCommentPosted={() => queryClient.invalidateQueries(['taskComments', taskId])} 
   />
 </div>
+
 
 </div>
 
