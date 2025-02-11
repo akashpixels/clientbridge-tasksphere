@@ -265,7 +265,17 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
           
 
 <div className="flex justify-between items-center">
-  {/* File count indicator, but hidden if no files are selected */}
+  {/* Hidden File Input Field (Always Exists) */}
+  <input
+    type="file"
+    multiple
+    onChange={handleFileChange}
+    className="hidden"
+    id="comment-attachments"
+    accept="image/*"
+  />
+
+  {/* File count indicator (Only shown when files are selected) */}
   {selectedFiles.length > 0 && (
     <span className="text-sm text-gray-500">
       {selectedFiles.length} file(s) selected
@@ -274,7 +284,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
   {/* Right-aligned buttons */}
   <div className="flex gap-2 ml-auto">
-    {/* Attachment Icon Button */}
+    {/* Attachment Icon Button (Ensure input exists) */}
     <Button
       variant="outline"
       size="sm"
