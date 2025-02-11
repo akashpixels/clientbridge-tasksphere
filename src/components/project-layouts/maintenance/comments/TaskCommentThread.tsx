@@ -75,11 +75,29 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
           </div>
         ))}
       </ScrollArea>
-      <div className="border-t p-4">
-        <Textarea value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Write a comment..." />
-        <AttachmentHandler selectedFiles={selectedFiles} setSelectedFiles={setSelectedFiles} />
-        <CommentSender taskId={taskId} newComment={newComment} setNewComment={setNewComment} selectedFiles={selectedFiles} setSelectedFiles={setSelectedFiles} onCommentPosted={() => queryClient.invalidateQueries(['taskComments', taskId])} />
-      </div>
+     <div className="border-t p-4">
+  <Textarea 
+    value={newComment} 
+    onChange={(e) => setNewComment(e.target.value)} 
+    placeholder="Write a comment..." 
+  />
+  
+  <div className="flex items-center justify-between mt-2">
+    {/* Left: Attachments */}
+    <AttachmentHandler selectedFiles={selectedFiles} setSelectedFiles={setSelectedFiles} />
+    
+    {/* Right: Send Button */}
+    <CommentSender 
+      taskId={taskId} 
+      newComment={newComment} 
+      setNewComment={setNewComment} 
+      selectedFiles={selectedFiles} 
+      setSelectedFiles={setSelectedFiles} 
+      onCommentPosted={() => queryClient.invalidateQueries(['taskComments', taskId])} 
+    />
+  </div>
+</div>
+
     </div>
   );
 };
