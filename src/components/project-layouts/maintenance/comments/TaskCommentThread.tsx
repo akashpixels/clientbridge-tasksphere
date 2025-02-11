@@ -273,14 +273,15 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
                 id="comment-attachments"
                 accept="image/*"
               />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => document.getElementById('comment-attachments')?.click()}
-              >
-                <Paperclip className="h-4 w-4 mr-1" />
-                Attach files
-              </Button>
+            <Button
+  variant="outline"
+  size="sm"
+  className="p-2"
+  onClick={() => document.getElementById('comment-attachments')?.click()}
+>
+  <Paperclip className="h-4 w-4" />
+</Button>
+
               {selectedFiles.length > 0 && (
                 <span className="text-sm text-gray-500 my-auto">
                   {selectedFiles.length} file(s) selected
