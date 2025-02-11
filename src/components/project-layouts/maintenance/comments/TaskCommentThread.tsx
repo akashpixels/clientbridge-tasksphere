@@ -286,20 +286,12 @@ const handleSubmit = async () => {
 />
 
 
-{/* Display Selected Files List */}
 {selectedFiles.length > 0 && (
-  <div className="border p-2 rounded-md space-y-2">
-    <p className="text-sm font-medium">Attached Files:</p>
-    {selectedFiles.map((file, index) => (
-      <div key={index} className="flex justify-between items-center border-b pb-1">
-        <span className="text-sm truncate">{file.name}</span>
-        <Button variant="ghost" size="sm" onClick={() => handleRemoveFile(index)}>
-          ❌
-        </Button>
-      </div>
-    ))}
-  </div>
+  <span className="text-sm text-gray-500">
+    {selectedFiles.length} file(s) selected
+  </span>
 )}
+
 
 
   {/* Right-aligned buttons */}
