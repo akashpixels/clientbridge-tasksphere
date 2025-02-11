@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { Loader2, Paperclip, Send, AtSign } from "lucide-react";
+import { Loader2, Paperclip, Send, AtSign, File, FileText, FileImage, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface TaskCommentThreadProps {
   taskId: string;
@@ -20,7 +21,11 @@ interface Comment {
   content: string;
   created_at: string;
   user_id: string;
-  images: string[] | null;
+  files: Array<{
+    url: string;
+    type: string;
+    name: string;
+  }> | null;
   user_profiles: {
     first_name: string;
     last_name: string;
@@ -32,11 +37,18 @@ interface UserProfile {
   first_name: string;
 }
 
+interface FilePreview {
+  url: string;
+  type: string;
+  name: string;
+}
+
 const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   const [newComment, setNewComment] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showTagPopover, setShowTagPopover] = useState(false);
+  const [selectedFilePreview, setSelectedFilePreview] = useState<FilePreview | null>(null);
   const { toast } = useToast();
   const { session } = useAuth();
   const queryClient = useQueryClient();
@@ -96,15 +108,29 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     };
   }, [taskId, queryClient]);
 
+  const getFileIcon = (type: string) => {
+    if (type.startsWith('image/')) return <FileImage className="h-8 w-8" />;
+    if (type.includes('pdf')) return <FileText className="h-8 w-8" />;
+    return <File className="h-8 w-8" />;
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setSelectedFiles(Array.from(e.target.files));
+      const files = Array.from(e.target.files);
+      if (files.length > 10) {
+        toast({
+          title: "Too many files",
+          description: "You can only upload up to 10 files at once",
+          variant: "destructive",
+        });
+        return;
+      }
+      setSelectedFiles(files);
     }
   };
 
-  const handleUserTag = (user: UserProfile) => {
-    setNewComment(prev => `${prev}@${user.first_name} `);
-    setShowTagPopover(false);
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
@@ -120,11 +146,12 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     
     setIsSubmitting(true);
     try {
-      const uploadedImages: string[] = [];
+      const uploadedFiles: Array<{ url: string; type: string; name: string }> = [];
 
       for (const file of selectedFiles) {
         const fileExt = file.name.split('.').pop();
-        const filePath = `${taskId}/${crypto.randomUUID()}.${fileExt}`;
+        const fileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const filePath = `${taskId}/${crypto.randomUUID()}-${fileName}`;
         
         const { error: uploadError } = await supabase.storage
           .from('comment_attachments')
@@ -136,7 +163,11 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
           .from('comment_attachments')
           .getPublicUrl(filePath);
 
-        uploadedImages.push(publicUrl);
+        uploadedFiles.push({
+          url: publicUrl,
+          type: file.type,
+          name: file.name
+        });
       }
 
       const { error: commentError } = await supabase
@@ -144,7 +175,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
         .insert({
           task_id: taskId,
           content: newComment,
-          images: uploadedImages,
+          files: uploadedFiles,
           user_id: session.user.id,
         });
 
@@ -205,15 +236,21 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
                 
                 <p className="mt-1 text-sm text-gray-700">{comment.content}</p>
                 
-                {comment.images && comment.images.length > 0 && (
-                  <div className="mt-2 flex gap-2">
-                    {comment.images.map((image, index) => (
-                      <img
+                {comment.files && comment.files.length > 0 && (
+                  <div className="mt-2 grid grid-cols-4 gap-2">
+                    {comment.files.map((file, index) => (
+                      <div
                         key={index}
-                        src={image}
-                        alt={`Comment attachment ${index + 1}`}
-                        className="w-20 h-20 object-cover rounded-md"
-                      />
+                        className="relative group cursor-pointer border rounded-lg p-2 hover:bg-gray-50"
+                        onClick={() => setSelectedFilePreview(file)}
+                      >
+                        <div className="flex flex-col items-center">
+                          {getFileIcon(file.type)}
+                          <span className="text-xs text-gray-500 mt-1 truncate w-full text-center">
+                            {file.name}
+                          </span>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -262,54 +299,92 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
               </PopoverContent>
             </Popover>
           </div>
+
+          {selectedFiles.length > 0 && (
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              {selectedFiles.map((file, index) => (
+                <div key={index} className="relative group border rounded-lg p-2">
+                  <button
+                    onClick={() => removeSelectedFile(index)}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <div className="flex flex-col items-center">
+                    {getFileIcon(file.type)}
+                    <span className="text-xs text-gray-500 mt-1 truncate w-full text-center">
+                      {file.name}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           
-
-<div className="flex justify-between items-center">
-  {/* Hidden File Input Field (Always Exists) */}
-  <input
-    type="file"
-    multiple
-    onChange={handleFileChange}
-    className="hidden"
-    id="comment-attachments"
-    accept="image/*"
-  />
-
-  {/* File count indicator (Only shown when files are selected) */}
-  {selectedFiles.length > 0 && (
-    <span className="text-sm text-gray-500">
-      {selectedFiles.length} file(s) selected
-    </span>
-  )}
-
-  {/* Right-aligned buttons */}
-  <div className="flex gap-2 ml-auto">
-    {/* Attachment Icon Button (Ensure input exists) */}
-    <Button
-      variant="outline"
-      size="sm"
-      className="p-2"
-      onClick={() => document.getElementById('comment-attachments')?.click()}
-    >
-      <Paperclip className="h-4 w-4" />
-    </Button>
-
-    {/* Send Button */}
-    <Button
-      onClick={handleSubmit}
-      disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
-    >
-      {isSubmitting ? "Sending..." : "Send"}
-    </Button>
-  </div>
-</div>
-
-
-
-          
-
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+                id="comment-attachments"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById('comment-attachments')?.click()}
+              >
+                <Paperclip className="h-4 w-4 mr-1" />
+                Attach files
+              </Button>
+              {selectedFiles.length > 0 && (
+                <span className="text-sm text-gray-500 my-auto">
+                  {selectedFiles.length} file(s) selected
+                </span>
+              )}
+            </div>
+            
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-1" />
+                  Send
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* File Preview Dialog */}
+      <Dialog open={!!selectedFilePreview} onOpenChange={() => setSelectedFilePreview(null)}>
+        <DialogContent className="max-w-4xl">
+          <div className="w-full h-[80vh] flex items-center justify-center bg-gray-50">
+            {selectedFilePreview && (
+              selectedFilePreview.type.startsWith('image/') ? (
+                <img
+                  src={selectedFilePreview.url}
+                  alt={selectedFilePreview.name}
+                  className="max-w-full max-h-full object-contain"
+                />
+              ) : (
+                <iframe
+                  src={selectedFilePreview.url}
+                  title={selectedFilePreview.name}
+                  className="w-full h-full"
+                />
+              )
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
