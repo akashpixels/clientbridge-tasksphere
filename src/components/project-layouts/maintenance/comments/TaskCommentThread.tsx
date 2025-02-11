@@ -10,10 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/components/auth/AuthProvider";
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
 
 interface TaskCommentThreadProps {
   taskId: string;
@@ -40,8 +36,6 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   const [newComment, setNewComment] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
-
   const [showTagPopover, setShowTagPopover] = useState(false);
   const { toast } = useToast();
   const { session } = useAuth();
@@ -104,12 +98,8 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setSelectedFiles((prevFiles) => [...prevFiles, ...Array.from(e.target.files)]); // Append new files
+      setSelectedFiles(Array.from(e.target.files));
     }
-  };
-
-  const handleRemoveFile = (index: number) => {
-    setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index)); // Remove file from list
   };
 
   const handleUserTag = (user: UserProfile) => {
@@ -127,37 +117,34 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       });
       return;
     }
-
+    
     setIsSubmitting(true);
     try {
-      const uploadedFiles: string[] = [];
+      const uploadedImages: string[] = [];
 
-      // Upload each selected file
       for (const file of selectedFiles) {
         const fileExt = file.name.split('.').pop();
         const filePath = `${taskId}/${crypto.randomUUID()}.${fileExt}`;
-
+        
         const { error: uploadError } = await supabase.storage
           .from('comment_attachments')
           .upload(filePath, file);
 
         if (uploadError) throw uploadError;
 
-        // Get public URL for the uploaded file
         const { data: { publicUrl } } = supabase.storage
           .from('comment_attachments')
           .getPublicUrl(filePath);
 
-        uploadedFiles.push(publicUrl);
+        uploadedImages.push(publicUrl);
       }
 
-      // Insert comment with attachments
       const { error: commentError } = await supabase
         .from('task_comments')
         .insert({
           task_id: taskId,
           content: newComment,
-          images: uploadedFiles, // Now supports all file types
+          images: uploadedImages,
           user_id: session.user.id,
         });
 
@@ -165,7 +152,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
       setNewComment("");
       setSelectedFiles([]);
-
+      
       toast({
         title: "Comment posted successfully",
         duration: 3000,
@@ -279,66 +266,21 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
 <div className="flex justify-between items-center">
   {/* Hidden File Input Field (Always Exists) */}
-  {/* Hidden File Input */}
-<input
-  type="file"
-  multiple
-  onChange={handleFileChange}
-  className="hidden"
-  id="comment-attachments"
-  accept="image/*, .pdf, .doc, .docx, .xls, .xlsx"
-/>
+  <input
+    type="file"
+    multiple
+    onChange={handleFileChange}
+    className="hidden"
+    id="comment-attachments"
+    accept="image/*"
+  />
 
-
-{/* Display Attached Files with Clickable Preview */}
-{selectedFiles.length > 0 && (
-  <div className="border p-2 rounded-md space-y-2">
-    <p className="text-sm font-medium">Attached Files:</p>
-    {selectedFiles.map((file, index) => {
-      const fileExt = file.name.split('.').pop()?.toLowerCase();
-      const isImage = ["png", "jpg", "jpeg", "gif", "webp"].includes(fileExt || "");
-      const isPDF = fileExt === "pdf";
-      const isDoc = ["doc", "docx"].includes(fileExt || "");
-      const isExcel = ["xls", "xlsx"].includes(fileExt || "");
-
-      return (
-        <div key={index} className="flex items-center justify-between border-b pb-1">
-          {/* Clickable Preview for Images */}
-          {isImage ? (
-            <img
-              src={URL.createObjectURL(file)}
-              alt={file.name}
-              className="w-16 h-16 object-cover rounded-md cursor-pointer"
-              onClick={() => setSelectedFile(URL.createObjectURL(file))}
-            />
-          ) : (
-            // Clickable Link for PDFs, Docs, and Excel
-            <a
-              href={URL.createObjectURL(file)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-blue-500 hover:underline"
-            >
-              {/* File Type Icon */}
-              {isPDF && "📄 PDF"}
-              {isDoc && "📝 Word Document"}
-              {isExcel && "📊 Excel File"}
-              {!isImage && !isPDF && !isDoc && !isExcel && "📁 Other File"}
-              <span className="text-sm truncate">{file.name}</span>
-            </a>
-          )}
-
-          {/* Remove File Button */}
-          <Button variant="ghost" size="sm" onClick={() => handleRemoveFile(index)}>
-            ❌
-          </Button>
-        </div>
-      );
-    })}
-  </div>
-)}
-
-
+  {/* File count indicator (Only shown when files are selected) */}
+  {selectedFiles.length > 0 && (
+    <span className="text-sm text-gray-500">
+      {selectedFiles.length} file(s) selected
+    </span>
+  )}
 
   {/* Right-aligned buttons */}
   <div className="flex gap-2 ml-auto">
@@ -368,19 +310,6 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
         </div>
       </div>
-      {/* Lightbox Modal for Viewing Images */}
-      <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
-        <DialogContent className="max-w-3xl flex flex-col">
-          {selectedFile && (
-            <img
-              src={selectedFile}
-              alt="Preview"
-              className="w-full h-auto max-h-[80vh] object-contain"
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
     </div>
   );
 };
