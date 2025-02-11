@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -16,8 +17,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useLayout } from "@/components/layout/Layout";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 
 interface TasksTableProps {
@@ -54,25 +53,6 @@ interface TasksTableProps {
 
 const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }: TasksTableProps) => {
   const { setRightSidebarContent } = useLayout();
-
-  const { data: commentCounts } = useQuery({
-    queryKey: ['comment-counts'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('task_comments')
-        .select('task_id, id')
-        .in('task_id', tasks.map(task => task.id));
-
-      if (error) throw error;
-
-      const counts: Record<string, number> = {};
-      data.forEach(comment => {
-        counts[comment.task_id] = (counts[comment.task_id] || 0) + 1;
-      });
-
-      return counts;
-    },
-  });
 
   const formatETA = (date: string) => {
     return format(new Date(date), "h.mmaaa do MMM");
@@ -252,12 +232,10 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
             </TableCell>  
             <TableCell>
               <div className="flex items-center gap-2">
-                {/* Colored Dot */}
                 <div 
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: getPriorityColor(task.priority) }}
                 />
-                {/* Priority Text */}
                 <span className="text-xs text-gray-700">
                   {task.priority?.name || 'Not set'}
                 </span>
