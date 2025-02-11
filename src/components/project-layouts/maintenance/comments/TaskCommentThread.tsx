@@ -263,46 +263,44 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
             </Popover>
           </div>
           
-          <div className="flex justify-between items-center">
-            <div className="flex gap-2">
-              <input
-                type="file"
-                multiple
-                onChange={handleFileChange}
-                className="hidden"
-                id="comment-attachments"
-                accept="image/*"
-              />
-            <Button
-  variant="outline"
-  size="sm"
-  className="p-2"
-  onClick={() => document.getElementById('comment-attachments')?.click()}
->
-  <Paperclip className="h-4 w-4" />
-</Button>
+        <div className="flex justify-between items-center">
+  <input
+    type="file"
+    multiple
+    onChange={handleFileChange}
+    className="hidden"
+    id="comment-attachments"
+    accept="image/*"
+  />
 
-              {selectedFiles.length > 0 && (
-                <span className="text-sm text-gray-500 my-auto">
-                  {selectedFiles.length} file(s) selected
-                </span>
-              )}
-            </div>
-            
-            <Button
-              onClick={handleSubmit}
-              disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
-            >
-              {isSubmitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <Send className="h-4 w-4 mr-1" />
-                  Send
-                </>
-              )}
-            </Button>
-          </div>
+  {selectedFiles.length > 0 && (
+    <span className="text-sm text-gray-500 my-auto">
+      {selectedFiles.length} file(s) selected
+    </span>
+  )}
+
+  {/* Right-aligned buttons: Attachment + Send */}
+  <div className="flex gap-2">
+    {/* Attachment Icon Button (Moved Next to Send) */}
+    <Button
+      variant="outline"
+      size="sm"
+      className="p-2"
+      onClick={() => document.getElementById('comment-attachments')?.click()}
+    >
+      <Paperclip className="h-4 w-4" />
+    </Button>
+
+    {/* Send Button without Icon */}
+    <Button
+      onClick={handleSubmit}
+      disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
+    >
+      {isSubmitting ? "Sending..." : "Send"} {/* Remove Send Icon */}
+    </Button>
+  </div>
+</div>
+
         </div>
       </div>
     </div>
