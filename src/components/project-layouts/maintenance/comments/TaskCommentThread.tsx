@@ -82,21 +82,20 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     placeholder="Write a comment..." 
   />
   
-<div className="flex items-center mt-2 justify-end gap-2">
-  {/* Attachment Button Next to Send */}
-  <AttachmentHandler selectedFiles={selectedFiles} setSelectedFiles={setSelectedFiles} />
-  
-  {/* Send Button */}
-  <CommentSender 
-    taskId={taskId} 
-    newComment={newComment} 
-    setNewComment={setNewComment} 
-    selectedFiles={selectedFiles} 
-    setSelectedFiles={setSelectedFiles} 
-    onCommentPosted={() => queryClient.invalidateQueries(['taskComments', taskId])} 
-  />
-</div>
-
+  <div className="flex items-center justify-between mt-2">
+    {/* Left: Attachments */}
+    <AttachmentHandler selectedFiles={selectedFiles} setSelectedFiles={setSelectedFiles} />
+    
+    {/* Right: Send Button */}
+    <CommentSender 
+      taskId={taskId} 
+      newComment={newComment} 
+      setNewComment={setNewComment} 
+      selectedFiles={selectedFiles} 
+      setSelectedFiles={setSelectedFiles} 
+      onCommentPosted={() => queryClient.invalidateQueries(['taskComments', taskId])} 
+    />
+  </div>
 </div>
 
     </div>
