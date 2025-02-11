@@ -149,7 +149,9 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
             setNewComment={setNewComment} 
             selectedFiles={selectedFiles} 
             setSelectedFiles={setSelectedFiles} 
-            onCommentPosted={() => queryClient.invalidateQueries({ queryKey: ['taskComments', taskId] })} 
+            onCommentPosted={() => {
+              queryClient.invalidateQueries({ queryKey: ['taskComments', taskId] });
+            }} 
           />
         </div>
       </div>
