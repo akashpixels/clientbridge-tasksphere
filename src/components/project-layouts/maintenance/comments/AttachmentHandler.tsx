@@ -33,7 +33,7 @@ const AttachmentHandler = ({ selectedFiles, setSelectedFiles }: AttachmentHandle
 
  {/* Right: File Count */}
       {selectedFiles.length > 0 && (
-        <span className="text-sm text-gray-500 ml-auto">{selectedFiles.length} file(s) selected</span>
+        <span className="text-sm text-gray-500 ">{selectedFiles.length} file(s) selected</span>
       )}
 
         
