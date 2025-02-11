@@ -36,8 +36,6 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   const [newComment, setNewComment] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
-
   const [showTagPopover, setShowTagPopover] = useState(false);
   const { toast } = useToast();
   const { session } = useAuth();
@@ -288,52 +286,10 @@ const handleSubmit = async () => {
 />
 
 
-{/* Display Attached Files with Clickable Preview */}
 {selectedFiles.length > 0 && (
-  <div className="border p-2 rounded-md space-y-2">
-    <p className="text-sm font-medium">Attached Files:</p>
-    {selectedFiles.map((file, index) => {
-      const fileExt = file.name.split('.').pop()?.toLowerCase();
-      const isImage = ["png", "jpg", "jpeg", "gif", "webp"].includes(fileExt || "");
-      const isPDF = fileExt === "pdf";
-      const isDoc = ["doc", "docx"].includes(fileExt || "");
-      const isExcel = ["xls", "xlsx"].includes(fileExt || "");
-
-      return (
-        <div key={index} className="flex items-center justify-between border-b pb-1">
-          {/* Clickable Preview for Images */}
-          {isImage ? (
-            <img
-              src={URL.createObjectURL(file)}
-              alt={file.name}
-              className="w-16 h-16 object-cover rounded-md cursor-pointer"
-              onClick={() => setSelectedFile(URL.createObjectURL(file))}
-            />
-          ) : (
-            // Clickable Link for PDFs, Docs, and Excel
-            <a
-              href={URL.createObjectURL(file)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-blue-500 hover:underline"
-            >
-              {/* File Type Icon */}
-              {isPDF && "📄 PDF"}
-              {isDoc && "📝 Word Document"}
-              {isExcel && "📊 Excel File"}
-              {!isImage && !isPDF && !isDoc && !isExcel && "📁 Other File"}
-              <span className="text-sm truncate">{file.name}</span>
-            </a>
-          )}
-
-          {/* Remove File Button */}
-          <Button variant="ghost" size="sm" onClick={() => handleRemoveFile(index)}>
-            ❌
-          </Button>
-        </div>
-      );
-    })}
-  </div>
+  <span className="text-sm text-gray-500">
+    {selectedFiles.length} file(s) selected
+  </span>
 )}
 
 
@@ -366,19 +322,6 @@ const handleSubmit = async () => {
 
         </div>
       </div>
-      {/* Lightbox Modal for Viewing Images */}
-<Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
-  <DialogContent className="max-w-3xl flex flex-col">
-    {selectedFile && (
-      <img
-        src={selectedFile}
-        alt="Preview"
-        className="w-full h-auto max-h-[80vh] object-contain"
-      />
-    )}
-  </DialogContent>
-</Dialog>
-
     </div>
   );
 };
