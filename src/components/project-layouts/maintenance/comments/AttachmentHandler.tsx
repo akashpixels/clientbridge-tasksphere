@@ -30,6 +30,13 @@ const AttachmentHandler = ({ selectedFiles, setSelectedFiles }: AttachmentHandle
         id="comment-attachments"
         accept="image/*, .pdf, .doc, .docx, .xls, .xlsx"
       />
+
+ {/* Right: File Count */}
+      {selectedFiles.length > 0 && (
+        <span className="text-sm text-gray-500 ml-auto">{selectedFiles.length} file(s) selected</span>
+      )}
+
+        
       {/* Left: Attachment Button */}
       <Button
         variant="outline"
@@ -40,10 +47,7 @@ const AttachmentHandler = ({ selectedFiles, setSelectedFiles }: AttachmentHandle
         <Paperclip className="h-4 w-4" />
       </Button>
 
-      {/* Right: File Count */}
-      {selectedFiles.length > 0 && (
-        <span className="text-sm text-gray-500 ml-auto">{selectedFiles.length} file(s) selected</span>
-      )}
+     
 
      
     </div>
