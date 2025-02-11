@@ -20,6 +20,16 @@ const AttachmentHandler = ({ selectedFiles, setSelectedFiles }: AttachmentHandle
 
   return (
       <div className="flex items-center justify-between gap-2 w-full">
+
+         {/* Hidden File Input */}
+      <input
+        type="file"
+        multiple
+        onChange={handleFileChange}
+        className="hidden"
+        id="comment-attachments"
+        accept="image/*, .pdf, .doc, .docx, .xls, .xlsx"
+      />
       {/* Left: Attachment Button */}
       <Button
         variant="outline"
@@ -35,15 +45,7 @@ const AttachmentHandler = ({ selectedFiles, setSelectedFiles }: AttachmentHandle
         <span className="text-sm text-gray-500 ml-auto">{selectedFiles.length} file(s) selected</span>
       )}
 
-      {/* Hidden File Input */}
-      <input
-        type="file"
-        multiple
-        onChange={handleFileChange}
-        className="hidden"
-        id="comment-attachments"
-        accept="image/*, .pdf, .doc, .docx, .xls, .xlsx"
-      />
+     
     </div>
   );
 };
