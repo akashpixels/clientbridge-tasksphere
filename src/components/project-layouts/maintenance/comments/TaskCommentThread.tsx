@@ -12,6 +12,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import AttachmentHandler from "./AttachmentHandler";
 import CommentSender from "./CommentSender";
 import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
+import { Download } from "lucide-react";
 
 interface TaskCommentThreadProps {
   taskId: string;
@@ -188,7 +189,18 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
   <DialogContent className="max-w-4xl" >
 
-
+ {/* Header Row for Download Button */}
+  <div className="w-full flex justify-start px-4 py-2 border-b">
+    {/* Download Button (Left Corner) */}
+    <a
+      href={selectedImage || "#"}
+      download
+      className="text-gray-600 hover:text-gray-900 transition text-xl"
+      title="Download"
+    >
+      <Download className="w-6 h-6" />
+    </a>
+  </div>
  
           
           <div className="w-full h-[80vh] flex items-center justify-center bg-gray-50">
