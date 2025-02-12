@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { Send } from "lucide-react"; // Import Send icon
 
 interface CommentSenderProps {
   taskId: string;
@@ -75,8 +76,16 @@ const CommentSender = ({
   };
 
   return (
-    <Button onClick={handleSubmit} disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}>
-      {isSubmitting ? "Sending..." : "Send"}
+    <Button 
+      onClick={handleSubmit} 
+      disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
+      size="icon" // Ensures square button size
+    >
+      {isSubmitting ? (
+        <span className="animate-spin">⏳</span> // Loader effect
+      ) : (
+        <Send className="h-5 w-5" /> // Send Icon
+      )}
     </Button>
   );
 };
