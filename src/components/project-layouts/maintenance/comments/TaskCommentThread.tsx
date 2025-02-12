@@ -92,7 +92,7 @@ const getFileName = (url: string) => {
   const fileName = decodeURIComponent(url.split('/').pop() || '');
   const nameWithoutExt = fileName.slice(0, fileName.lastIndexOf('.')) || fileName; // Handle files with no extension
 
-  return nameWithoutExt.length <= 25 ? nameWithoutExt : `${nameWithoutExt.slice(0, 25)}...`;
+  return nameWithoutExt.length <= 20 ? nameWithoutExt : `${nameWithoutExt.slice(0, 20)}...`;
 };
 
 
