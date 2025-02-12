@@ -187,7 +187,24 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
       {/* Image Preview Dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-4xl">
+
+        
+     <DialogContent className="max-w-4xl relative flex flex-col">
+  {/* Header Row for Close Button */}
+  <div className="w-full flex justify-end px-4 py-2 border-b">
+    <button
+      onClick={() => setSelectedImage(null)}
+      className="text-gray-600 hover:text-gray-900 transition text-xl"
+      title="Close"
+    >
+      ✕
+    </button>
+  </div>
+
+
+
+
+          
           <div className="w-full h-[80vh] flex items-center justify-center bg-gray-50">
             {selectedImage && (
               <div className="flex items-center justify-center w-full h-full">
