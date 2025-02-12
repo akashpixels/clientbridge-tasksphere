@@ -112,37 +112,58 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
               <p className="text-sm mt-1">{comment.content}</p>
               
               {comment.images && comment.images.length > 0 && (
-                <div className="mt-2 space-y-2">
-                  {comment.images.map((url, index) => {
-                    const fileExtension = url.split('.').pop()?.toLowerCase();
-                    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension || '');
-                    
-                    return (
-                      <div
-                        key={index}
-                        onClick={() => handleFileClick(url)}
-                        className="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                      >
-                        {isImage ? (
-                         <div className="relative w-12 h-12">
-                            <img
-                              src={url}
-                              alt="Attachment"
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-3 p-2 border rounded-lg">
-                            {getFileIcon(url)}
-                            <span className="text-sm text-gray-700">
-                              {getFileName(url)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+
+
+            
+            <div className="mt-2">
+  {/* IMAGE PREVIEW: Display in a row with overlap */}
+  <div className="flex items-center">
+    {comment.images
+      .filter((url) => {
+        const fileExtension = url.split('.').pop()?.toLowerCase();
+        return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension || '');
+      })
+      .map((url, index) => (
+        <div
+          key={index}
+          onClick={() => handleFileClick(url)}
+          className="relative w-12 h-12 cursor-pointer transition-transform hover:scale-105"
+          style={{ marginLeft: index === 0 ? "0" : "-8px" }} // Overlap effect
+        >
+          <img
+            src={url}
+            alt="Attachment"
+            className="w-full h-full object-cover rounded-lg border"
+          />
+        </div>
+      ))}
+  </div>
+
+  {/* FILES PREVIEW: Display inline */}
+  <div className="mt-2 flex flex-col space-y-2">
+    {comment.images
+      .filter((url) => {
+        const fileExtension = url.split('.').pop()?.toLowerCase();
+        return !['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension || '');
+      })
+      .map((url, index) => (
+        <div
+          key={index}
+          onClick={() => handleFileClick(url)}
+          className="flex items-center gap-3 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+        >
+          {getFileIcon(url)}
+          <span className="text-sm text-gray-700">
+            {getFileName(url)}
+          </span>
+        </div>
+      ))}
+  </div>
+</div>
+
+
+
+            
               )}
             </div>
           </div>
