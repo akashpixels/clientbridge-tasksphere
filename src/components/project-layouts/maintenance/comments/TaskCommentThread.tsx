@@ -200,7 +200,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
                 ) : selectedImage.endsWith('.pdf') ? (
                 
 <embed
-  src={selectedImage}
+  src={`${selectedImage}#toolbar=0&navpanes=0&scrollbar=0`}
   type="application/pdf"
   className="w-full h-[80vh]"
 />
