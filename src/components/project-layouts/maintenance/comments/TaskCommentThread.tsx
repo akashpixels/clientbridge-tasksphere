@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-import { TaskCommentThreadProps } from './types';
+import { TaskCommentThreadProps, Comment } from './types';
 import { handleDownload } from './utils/fileUtils';
 import CommentList from './components/CommentList';
 import CommentInput from './components/CommentInput';
@@ -25,7 +25,14 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      return data;
+
+      // Transform the data to ensure images is always string[] | null
+      return (data || []).map(comment => ({
+        ...comment,
+        images: Array.isArray(comment.images) ? comment.images : 
+                typeof comment.images === 'string' ? [comment.images] : 
+                null
+      })) as Comment[];
     },
   });
 
