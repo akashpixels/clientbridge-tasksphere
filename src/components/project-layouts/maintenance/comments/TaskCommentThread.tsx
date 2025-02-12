@@ -198,10 +198,13 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
                     className="max-w-full max-h-full"
                   />
                 ) : selectedImage.endsWith('.pdf') ? (
-                  <iframe
-                    src={`${selectedImage}#toolbar=0&view=fitH`}
-                    className="w-full h-[80vh]"
-                  />
+                
+                <iframe
+  src={`https://docs.google.com/gview?url=${encodeURIComponent(selectedImage)}&embedded=true`}
+  className="w-full h-[80vh]"
+/>
+
+                
                 ) : ['doc', 'docx', 'xls', 'xlsx'].some(ext => selectedImage.endsWith(`.${ext}`)) ? (
                   <iframe
                     src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(selectedImage)}`}
