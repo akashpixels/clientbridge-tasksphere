@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { Loader2, FileText, File } from "lucide-react";
+import { Loader2, FileText, File, X, Download } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,9 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import AttachmentHandler from "./AttachmentHandler";
 import CommentSender from "./CommentSender";
-import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
-import { Download } from "lucide-react";
-import { X, Download } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface TaskCommentThreadProps {
   taskId: string;
