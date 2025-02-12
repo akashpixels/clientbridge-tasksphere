@@ -187,54 +187,63 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
       {/* Image Preview Dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-  <DialogContent className="max-w-4xl" >
-
- {/* Header Row for Download Button */}
-  <div className="w-full flex justify-start px-4 py-2 border-b">
+ <DialogContent className="max-w-4xl">
+  {/* Header Row for Download and Close Buttons */}
+  <div className="w-full flex justify-between items-center px-4 py-2 border-b">
     {/* Download Button (Left Corner) */}
     <a
       href={selectedImage || "#"}
       download
-      className="text-gray-600 hover:text-gray-900 transition text-xl"
+      className="text-gray-600 hover:text-gray-900 transition"
       title="Download"
     >
       <Download className="w-6 h-6" />
     </a>
+
+    {/* Close Button (Right Corner) */}
+    <DialogClose asChild>
+      <button className="text-gray-600 hover:text-gray-900 transition" title="Close">
+        ✕
+      </button>
+    </DialogClose>
   </div>
- 
-          
-          <div className="w-full h-[80vh] flex items-center justify-center bg-gray-50">
-            {selectedImage && (
-              <div className="flex items-center justify-center w-full h-full">
-                {selectedImage.endsWith('.svg') ? (
-                  <object
-                    data={selectedImage}
-                    type="image/svg+xml"
-                    className="max-w-full max-h-full"
-                  />
-                ) : selectedImage.endsWith('.pdf') ? (
-                  <embed
-                    src={`${selectedImage}#toolbar=0&navpanes=0&scrollbar=0`}
-                    type="application/pdf"
-                    className="w-full h-[80vh]"
-                  />
-                ) : ['doc', 'docx', 'xls', 'xlsx'].some(ext => selectedImage.endsWith(`.${ext}`)) ? (
-                  <iframe
-                    src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(selectedImage)}`}
-                    className="w-full h-[80vh]"
-                  />
-                ) : (
-                  <img
-                    src={selectedImage}
-                    alt="Preview"
-                    className="max-w-full max-h-full object-contain"
-                    onError={(e) => e.currentTarget.src = "fallback-image.png"}
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        </DialogContent>
+
+  {/* Content Area */}
+  <div className="w-full h-[80vh] flex items-center justify-center bg-gray-50">
+    {selectedImage && (
+      <div className="flex items-center justify-center w-full h-full">
+        {selectedImage.endsWith('.svg') ? (
+          <object
+            data={selectedImage}
+            type="image/svg+xml"
+            className="max-w-full max-h-full"
+          />
+        ) : selectedImage.endsWith('.pdf') ? (
+          <embed
+            src={`${selectedImage}#toolbar=0&navpanes=0&scrollbar=0`}
+            type="application/pdf"
+            className="w-full h-[80vh]"
+          />
+        ) : ['doc', 'docx', 'xls', 'xlsx'].some(ext => selectedImage.endsWith(`.${ext}`)) ? (
+          <iframe
+            src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(selectedImage)}`}
+            className="w-full h-[80vh]"
+          />
+        ) : (
+          <img
+            src={selectedImage}
+            alt="Preview"
+            className="max-w-full max-h-full object-contain"
+            onError={(e) => e.currentTarget.src = "fallback-image.png"}
+          />
+        )}
+      </div>
+    )}
+  </div>
+</DialogContent>
+
+
+        
       </Dialog>
     </div>
   );
