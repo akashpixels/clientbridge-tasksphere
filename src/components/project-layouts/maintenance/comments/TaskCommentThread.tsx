@@ -187,45 +187,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
       {/* Image Preview Dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-
-
-        
-<DialogContent className="max-w-4xl mx-auto flex flex-col items-center justify-center relative">
-  {/* Header Row for Close & Download Buttons */}
-  <div className="w-full flex justify-between items-center px-4 py-2 border-b">
-    {/* Download Button */}
-    <a
-      href={selectedImage}
-      download
-      className="text-gray-600 hover:text-gray-900 transition"
-      title="Download File"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-6 h-6"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 4v12m0 0l-3-3m3 3l3-3m-6 7h6"
-        />
-      </svg>
-    </a>
-
-    {/* Close Button */}
-    <button
-      onClick={() => setSelectedImage(null)}
-      className="text-gray-600 hover:text-gray-900 transition"
-    >
-      ✕
-    </button>
-  </div>
-
-  
+        <DialogContent className="max-w-4xl">
           <div className="w-full h-[80vh] flex items-center justify-center bg-gray-50">
             {selectedImage && (
               <div className="flex items-center justify-center w-full h-full">
