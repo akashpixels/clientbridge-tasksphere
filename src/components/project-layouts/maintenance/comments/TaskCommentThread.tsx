@@ -235,6 +235,17 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       </div>
     )}
   </div>
+
+    {/* Override the Default Close Button */}
+  <style>
+    {`
+      /* Targeting the shadcn/ui Close Button */
+      .dialog-close {
+        width: 20px !important;  /* w-5 (20px) */
+        height: 20px !important; /* h-5 (20px) */
+      }
+    `}
+  </style>
 </DialogContent>
 
 
