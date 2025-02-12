@@ -190,9 +190,10 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
 
         
-<DialogContent className="max-w-4xl relative">
-  {/* Download Icon (Next to Close Button) */}
-  <div className="absolute top-4 right-12 z-10">
+<DialogContent className="max-w-4xl mx-auto flex flex-col items-center justify-center relative">
+  {/* Header Row for Close & Download Buttons */}
+  <div className="w-full flex justify-between items-center px-4 py-2 border-b">
+    {/* Download Button */}
     <a
       href={selectedImage}
       download
@@ -214,6 +215,14 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
         />
       </svg>
     </a>
+
+    {/* Close Button */}
+    <button
+      onClick={() => setSelectedImage(null)}
+      className="text-gray-600 hover:text-gray-900 transition"
+    >
+      ✕
+    </button>
   </div>
 
   
