@@ -189,7 +189,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
 
         
-     <DialogContent className="max-w-4xl relative flex flex-col">
+   <DialogContent className="max-w-4xl">
   {/* Header Row for Close Button */}
   <div className="w-full flex justify-end px-4 py-2 border-b">
     <button
