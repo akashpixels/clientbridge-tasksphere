@@ -61,7 +61,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
   const handleFileClick = (url: string) => {
     const fileExtension = url.split('.').pop()?.toLowerCase();
-    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension || '');
+   const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
     
     if (isImage) {
       setSelectedImage(url);
@@ -117,13 +117,15 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
             
             <div className="mt-2">
   {/* IMAGE PREVIEW: Display in a row with overlap */}
+ {/* IMAGE PREVIEW: Display in a row with overlap */}
   <div className="flex items-center">
     {comment.images
       .filter((url) => {
         const fileExtension = url.split('.').pop()?.toLowerCase();
-        return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension || '');
+        return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
       })
       .map((url, index) => (
+
         <div
           key={index}
           onClick={() => handleFileClick(url)}
@@ -196,13 +198,25 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-4xl">
           <div className="w-full h-[80vh] flex items-center justify-center bg-gray-50">
-            {selectedImage && (
-              <img
-                src={selectedImage}
-                alt="Preview"
-                className="max-w-full max-h-full object-contain"
-              />
-            )}
+           {selectedImage && (
+  <div className="flex items-center justify-center w-full h-full">
+    {selectedImage.endsWith('.svg') ? (
+      <object
+        data={selectedImage}
+        type="image/svg+xml"
+        className="max-w-full max-h-full"
+      />
+    ) : (
+      <img
+        src={selectedImage}
+        alt="Preview"
+        className="max-w-full max-h-full object-contain"
+        onError={(e) => e.currentTarget.src = "fallback-image.png"} // Optional fallback image
+      />
+    )}
+  </div>
+)}
+
           </div>
         </DialogContent>
       </Dialog>
