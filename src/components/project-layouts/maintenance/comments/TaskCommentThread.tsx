@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,16 +72,28 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
   const getFileIcon = (url: string) => {
     const fileExtension = url.split('.').pop()?.toLowerCase();
-    if (['pdf', 'doc', 'docx', 'xls', 'xlsx'].includes(fileExtension || '')) {
-      return <FileText className="h-6 w-6 text-blue-500" />;
+    switch (fileExtension) {
+      case 'pdf':
+        return <FileText className="h-6 w-6 text-red-500" />;
+      case 'doc':
+      case 'docx':
+        return <FileText className="h-6 w-6 text-blue-500" />;
+      case 'xls':
+      case 'xlsx':
+        return <FileText className="h-6 w-6 text-green-500" />;
+      default:
+        return <File className="h-6 w-6 text-gray-500" />;
     }
-    return <File className="h-6 w-6 text-gray-500" />;
   };
 
   const getFileName = (url: string) => {
-    const fileName = url.split('/').pop() || '';
-    // Decode the URL to show proper file name
-    return decodeURIComponent(fileName);
+    const fileName = decodeURIComponent(url.split('/').pop() || '');
+    const extension = fileName.split('.').pop();
+    const nameWithoutExt = fileName.slice(0, fileName.lastIndexOf('.'));
+    
+    if (nameWithoutExt.length <= 15) return fileName;
+    
+    return `${nameWithoutExt.slice(0, 15)}...${extension ? `.${extension}` : ''}`;
   };
 
   if (isLoading) {
@@ -113,7 +124,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
                         className="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
                       >
                         {isImage ? (
-                          <div className="relative w-40 h-40">
+                          <div className="relative w-20 h-20">
                             <img
                               src={url}
                               alt="Attachment"
