@@ -25,7 +25,7 @@ const CommentItem = ({ comment, onFileClick }: CommentItemProps) => {
         <AvatarFallback>{comment.user_profiles?.first_name?.[0]}</AvatarFallback>
       </Avatar>
       <div className="flex-1">
-        <span className="font-medium">{comment.user_profiles?.first_name}</span>
+        <span className="text-xs text-gray-500">{comment.user_profiles?.first_name}</span>
         <span className="text-xs text-gray-500 ml-2">
           {format(new Date(comment.created_at), 'MMM d, h:mmaaa')}
         </span>
