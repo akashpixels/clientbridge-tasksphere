@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,20 +60,19 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     };
   }, [taskId, queryClient]);
 
-const handleFileClick = (url: string) => {
-  const fileExtension = url.split('.').pop()?.toLowerCase();
-  const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
-  const isDocument = ['doc', 'docx', 'xls', 'xlsx', 'pdf'].includes(fileExtension || '');
+  const handleFileClick = (url: string) => {
+    const fileExtension = url.split('.').pop()?.toLowerCase();
+    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
+    const isDocument = ['doc', 'docx', 'xls', 'xlsx', 'pdf'].includes(fileExtension || '');
 
-  if (isImage) {
-    setSelectedImage(url); // Open in image modal
-  } else if (isDocument) {
-    setSelectedImage(url); // Open in modal (for Google Docs Viewer & PDFs)
-  } else {
-    window.open(url, '_blank'); // Open other file types normally
-  }
-};
-
+    if (isImage) {
+      setSelectedImage(url);
+    } else if (isDocument) {
+      setSelectedImage(url);
+    } else {
+      window.open(url, '_blank');
+    }
+  };
 
   const getFileIcon = (url: string) => {
     const fileExtension = url.split('.').pop()?.toLowerCase();
@@ -90,18 +90,12 @@ const handleFileClick = (url: string) => {
     }
   };
 
+  const getFileName = (url: string) => {
+    const fileName = decodeURIComponent(url.split('/').pop() || '');
+    const nameWithoutExt = fileName.slice(0, fileName.lastIndexOf('.')) || fileName;
+    return nameWithoutExt.length <= 20 ? nameWithoutExt : `${nameWithoutExt.slice(0, 20)}...`;
+  };
 
-
-const getFileName = (url: string) => {
-  const fileName = decodeURIComponent(url.split('/').pop() || '');
-  const nameWithoutExt = fileName.slice(0, fileName.lastIndexOf('.')) || fileName; // Handle files with no extension
-
-  return nameWithoutExt.length <= 20 ? nameWithoutExt : `${nameWithoutExt.slice(0, 20)}...`;
-};
-
-
-
-  
   if (isLoading) {
     return <Loader2 className="w-6 h-6 animate-spin text-gray-500" />;
   }
@@ -118,61 +112,51 @@ const getFileName = (url: string) => {
               <p className="text-sm mt-1">{comment.content}</p>
               
               {comment.images && comment.images.length > 0 && (
+                <div className="mt-2">
+                  {/* IMAGE PREVIEW: Display in a row with overlap */}
+                  <div className="flex items-center">
+                    {comment.images
+                      .filter((url) => {
+                        const fileExtension = url.split('.').pop()?.toLowerCase();
+                        return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
+                      })
+                      .map((url, index) => (
+                        <div
+                          key={index}
+                          onClick={() => handleFileClick(url)}
+                          className="relative w-12 h-12 cursor-pointer transition-transform hover:scale-105"
+                          style={{ marginLeft: index === 0 ? "0" : "-8px" }}
+                        >
+                          <img
+                            src={url}
+                            alt="Attachment"
+                            className="w-full h-full object-cover rounded-lg border"
+                          />
+                        </div>
+                      ))}
+                  </div>
 
-
-            
-            <div className="mt-2">
-  {/* IMAGE PREVIEW: Display in a row with overlap */}
- {/* IMAGE PREVIEW: Display in a row with overlap */}
-  <div className="flex items-center">
-    {comment.images
-      .filter((url) => {
-        const fileExtension = url.split('.').pop()?.toLowerCase();
-        return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
-      })
-      .map((url, index) => (
-
-        <div
-          key={index}
-          onClick={() => handleFileClick(url)}
-          className="relative w-12 h-12 cursor-pointer transition-transform hover:scale-105"
-          style={{ marginLeft: index === 0 ? "0" : "-8px" }} // Overlap effect
-        >
-          <img
-            src={url}
-            alt="Attachment"
-            className="w-full h-full object-cover rounded-lg border"
-          />
-        </div>
-      ))}
-  </div>
-
-{/* FILES PREVIEW: Display inline */}
-<div className="mt-2 flex flex-col space-y-2">
-  {comment.images
-    .filter((url) => {
-      const fileExtension = url.split('.').pop()?.toLowerCase();
-      return !['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || ''); // Exclude SVG
-    })
-    .map((url, index) => (
-
-        <div
-          key={index}
-          onClick={() => handleFileClick(url)}
-          className="flex items-center gap-3 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-        >
-          {getFileIcon(url)}
-          <span className="text-xs text-gray-700">
-            {getFileName(url)}
-          </span>
-        </div>
-      ))}
-  </div>
-</div>
-
-
-
-            
+                  {/* FILES PREVIEW: Display inline */}
+                  <div className="mt-2 flex flex-col space-y-2">
+                    {comment.images
+                      .filter((url) => {
+                        const fileExtension = url.split('.').pop()?.toLowerCase();
+                        return !['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
+                      })
+                      .map((url, index) => (
+                        <div
+                          key={index}
+                          onClick={() => handleFileClick(url)}
+                          className="flex items-center gap-3 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                        >
+                          {getFileIcon(url)}
+                          <span className="text-xs text-gray-700">
+                            {getFileName(url)}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -205,69 +189,34 @@ const getFileName = (url: string) => {
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-4xl">
           <div className="w-full h-[80vh] flex items-center justify-center bg-gray-50">
-            
-         {selectedImage && (
-  <div className="flex items-center justify-center w-full h-full">
-    {selectedImage.endsWith('.svg') ? (
-      <object
-        data={selectedImage}
-        type="image/svg+xml"
-        className="max-w-full max-h-full"
-      />
-    ) : selectedImage.endsWith('.pdf') ? (
-      // Display PDF directly inside the modal
-      <iframe
-        src={selectedImage}
-        className="w-full h-[80vh]"
-      />
-    ) : ['doc', 'docx', 'xls', 'xlsx'].some(ext => selectedImage.endsWith(`.${ext}`)) ? (
-
-    
-      // Display Word/Excel using Google Docs Viewerff
-    {selectedImage && (
-  <div className="flex items-center justify-center w-full h-full">
-    {selectedImage.endsWith('.svg') ? (
-      <object
-        data={selectedImage}
-        type="image/svg+xml"
-        className="max-w-full max-h-full"
-      />
-    ) : selectedImage.endsWith('.pdf') ? (
-      <iframe
-        src={`${selectedImage}#toolbar=0&view=fitH`}
-        className="w-full h-[80vh]"
-      />
-    ) : ['doc', 'docx', 'xls', 'xlsx'].some(ext => selectedImage.endsWith(`.${ext}`)) ? (
-      <iframe
-        src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(selectedImage)}`}
-        className="w-full h-[80vh]"
-      />
-    ) : (
-      <img
-        src={selectedImage}
-        alt="Preview"
-        className="max-w-full max-h-full object-contain"
-        onError={(e) => e.currentTarget.src = "fallback-image.png"} // Optional fallback image
-      />
-    )}
-  </div>
-)}
-
-
-
-    
-    ) : (
-      <img
-        src={selectedImage}
-        alt="Preview"
-        className="max-w-full max-h-full object-contain"
-        onError={(e) => e.currentTarget.src = "fallback-image.png"} // Optional fallback image
-      />
-    )}
-  </div>
-)}
-
-
+            {selectedImage && (
+              <div className="flex items-center justify-center w-full h-full">
+                {selectedImage.endsWith('.svg') ? (
+                  <object
+                    data={selectedImage}
+                    type="image/svg+xml"
+                    className="max-w-full max-h-full"
+                  />
+                ) : selectedImage.endsWith('.pdf') ? (
+                  <iframe
+                    src={`${selectedImage}#toolbar=0&view=fitH`}
+                    className="w-full h-[80vh]"
+                  />
+                ) : ['doc', 'docx', 'xls', 'xlsx'].some(ext => selectedImage.endsWith(`.${ext}`)) ? (
+                  <iframe
+                    src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(selectedImage)}`}
+                    className="w-full h-[80vh]"
+                  />
+                ) : (
+                  <img
+                    src={selectedImage}
+                    alt="Preview"
+                    className="max-w-full max-h-full object-contain"
+                    onError={(e) => e.currentTarget.src = "fallback-image.png"}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
