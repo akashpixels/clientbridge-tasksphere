@@ -156,7 +156,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
           className="flex items-center gap-3 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
         >
           {getFileIcon(url)}
-          <span className="text-[10px] text-gray-700">
+          <span className="text-xs text-gray-700">
             {getFileName(url)}
           </span>
         </div>
