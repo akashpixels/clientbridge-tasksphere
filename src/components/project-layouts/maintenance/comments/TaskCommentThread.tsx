@@ -59,16 +59,20 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     };
   }, [taskId, queryClient]);
 
-  const handleFileClick = (url: string) => {
-    const fileExtension = url.split('.').pop()?.toLowerCase();
-   const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
-    
-    if (isImage) {
-      setSelectedImage(url);
-    } else {
-      window.open(url, '_blank');
-    }
-  };
+const handleFileClick = (url: string) => {
+  const fileExtension = url.split('.').pop()?.toLowerCase();
+  const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
+  const isDocument = ['doc', 'docx', 'xls', 'xlsx', 'pdf'].includes(fileExtension || '');
+
+  if (isImage) {
+    setSelectedImage(url); // Open in image modal
+  } else if (isDocument) {
+    setSelectedImage(url); // Open in modal (for Google Docs Viewer & PDFs)
+  } else {
+    window.open(url, '_blank'); // Open other file types normally
+  }
+};
+
 
   const getFileIcon = (url: string) => {
     const fileExtension = url.split('.').pop()?.toLowerCase();
@@ -201,13 +205,26 @@ const getFileName = (url: string) => {
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-4xl">
           <div className="w-full h-[80vh] flex items-center justify-center bg-gray-50">
-           {selectedImage && (
+            
+         {selectedImage && (
   <div className="flex items-center justify-center w-full h-full">
     {selectedImage.endsWith('.svg') ? (
       <object
         data={selectedImage}
         type="image/svg+xml"
         className="max-w-full max-h-full"
+      />
+    ) : selectedImage.endsWith('.pdf') ? (
+      // Display PDF directly inside the modal
+      <iframe
+        src={selectedImage}
+        className="w-full h-[80vh]"
+      />
+    ) : ['doc', 'docx', 'xls', 'xlsx'].some(ext => selectedImage.endsWith(`.${ext}`)) ? (
+      // Display Word/Excel using Google Docs Viewer
+      <iframe
+        src={`https://docs.google.com/gview?url=${encodeURIComponent(selectedImage)}&embedded=true`}
+        className="w-full h-[80vh]"
       />
     ) : (
       <img
@@ -219,6 +236,7 @@ const getFileName = (url: string) => {
     )}
   </div>
 )}
+
 
           </div>
         </DialogContent>
