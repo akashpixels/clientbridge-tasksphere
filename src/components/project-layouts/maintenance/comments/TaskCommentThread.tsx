@@ -187,7 +187,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
       {/* Image Preview Dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-4xl">
+    <DialogContent className="max-w-4xl relative">
 
           {/* Download Button */}
   <div className="absolute top-3 right-5 z-10">
