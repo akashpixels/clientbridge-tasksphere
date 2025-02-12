@@ -141,14 +141,15 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       ))}
   </div>
 
-  {/* FILES PREVIEW: Display inline */}
-  <div className="mt-2 flex flex-col space-y-2">
-    {comment.images
-      .filter((url) => {
-        const fileExtension = url.split('.').pop()?.toLowerCase();
-        return !['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension || '');
-      })
-      .map((url, index) => (
+{/* FILES PREVIEW: Display inline */}
+<div className="mt-2 flex flex-col space-y-2">
+  {comment.images
+    .filter((url) => {
+      const fileExtension = url.split('.').pop()?.toLowerCase();
+      return !['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || ''); // Exclude SVG
+    })
+    .map((url, index) => (
+
         <div
           key={index}
           onClick={() => handleFileClick(url)}
