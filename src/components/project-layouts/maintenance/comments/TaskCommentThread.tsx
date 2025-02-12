@@ -91,9 +91,9 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     const extension = fileName.split('.').pop();
     const nameWithoutExt = fileName.slice(0, fileName.lastIndexOf('.'));
     
-    if (nameWithoutExt.length <= 15) return fileName;
+    if (nameWithoutExt.length <= 10) return fileName;
     
-    return `${nameWithoutExt.slice(0, 15)}...${extension ? `.${extension}` : ''}`;
+    return `${nameWithoutExt.slice(0, 10)}...${extension ? `.${extension}` : ''}`;
   };
 
   if (isLoading) {
@@ -124,7 +124,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
                         className="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
                       >
                         {isImage ? (
-                          <div className="relative w-20 h-20">
+                         <div className="relative w-[13px] h-[13px]">
                             <img
                               src={url}
                               alt="Attachment"
