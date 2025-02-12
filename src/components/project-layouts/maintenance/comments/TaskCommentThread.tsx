@@ -187,7 +187,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
       {/* Image Preview Dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-<DialogContent className="max-w-4xl">
+<DialogContent className="max-w-4xl  pt-0">
   {/* Header Row for Download Button (Left) & Default Close Button (Right) */}
   <div className="w-full flex justify-between items-center px-4 py-2 border-b">
     {/* Download Button (Left Corner) */}
@@ -197,7 +197,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       className="text-gray-600 hover:text-gray-900 transition"
       title="Download"
     >
-      <Download className="w-6 h-6" />
+      <Download className="w-5 h-5" />
     </a>
   </div>
 
