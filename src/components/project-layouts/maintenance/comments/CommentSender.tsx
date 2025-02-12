@@ -80,11 +80,12 @@ const CommentSender = ({
       onClick={handleSubmit} 
       disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
       size="icon" // Ensures square button size
+      className="p-2 w-10 h-10 flex items-center justify-center"
     >
       {isSubmitting ? (
         <span className="animate-spin">⏳</span> // Loader effect
       ) : (
-        <Send className="h-5 w-5" /> // Send Icon
+        <Send className="h-4 w-4" /> // Send Icon
       )}
     </Button>
   );
