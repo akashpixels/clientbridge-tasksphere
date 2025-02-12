@@ -206,13 +206,10 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
                 
                 ) : ['doc', 'docx', 'xls', 'xlsx'].some(ext => selectedImage.endsWith(`.${ext}`)) ? (
-                 
-
-                <iframe
-  src={`https://docs.google.com/gview?url=${encodeURIComponent(selectedImage)}&embedded=true`}
-  className="w-full h-[80vh]"
-/>
-
+                  <iframe
+                    src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(selectedImage)}`}
+                    className="w-full h-[80vh]"
+                  />
                 ) : (
                   <img
                     src={selectedImage}
