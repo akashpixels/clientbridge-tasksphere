@@ -199,10 +199,12 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
                   />
                 ) : selectedImage.endsWith('.pdf') ? (
                 
-   <iframe
-  src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(selectedImage)}`}
+<embed
+  src={selectedImage}
+  type="application/pdf"
   className="w-full h-[80vh]"
 />
+
 
 
                 
