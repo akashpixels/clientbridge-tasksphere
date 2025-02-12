@@ -80,7 +80,7 @@ const CommentSender = ({
       onClick={handleSubmit} 
       disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
       size="icon" // Ensures square button size
-      className="p-2 w-10 h-10 flex items-center justify-center"
+      className="p-2 w-12 h-9 flex items-center justify-center"
     >
       {isSubmitting ? (
         <span className="animate-spin">⏳</span> // Loader effect
