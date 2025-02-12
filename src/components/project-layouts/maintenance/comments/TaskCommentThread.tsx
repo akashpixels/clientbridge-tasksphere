@@ -238,9 +238,9 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
     {/* Override the Default Close Button */}
   <style>
-    {`
-      /* Targeting the shadcn/ui Close Button */
-      .dialog-close {
+   {`
+      /* Only applies to this modal's close button */
+      .max-w-4xl :where(svg.lucide.lucide-x.h-4.w-4) {
         width: 20px !important;  /* w-5 (20px) */
         height: 20px !important; /* h-5 (20px) */
       }
