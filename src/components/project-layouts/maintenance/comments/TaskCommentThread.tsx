@@ -86,16 +86,18 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     }
   };
 
-  const getFileName = (url: string) => {
-    const fileName = decodeURIComponent(url.split('/').pop() || '');
-    const extension = fileName.split('.').pop();
-    const nameWithoutExt = fileName.slice(0, fileName.lastIndexOf('.'));
-    
-    if (nameWithoutExt.length <= 10) return fileName;
-    
-    return `${nameWithoutExt.slice(0, 10)}...${extension ? `.${extension}` : ''}`;
-  };
 
+
+const getFileName = (url: string) => {
+  const fileName = decodeURIComponent(url.split('/').pop() || '');
+  const nameWithoutExt = fileName.slice(0, fileName.lastIndexOf('.')) || fileName; // Handle files with no extension
+
+  return nameWithoutExt.length <= 15 ? nameWithoutExt : `${nameWithoutExt.slice(0, 15)}...`;
+};
+
+
+
+  
   if (isLoading) {
     return <Loader2 className="w-6 h-6 animate-spin text-gray-500" />;
   }
