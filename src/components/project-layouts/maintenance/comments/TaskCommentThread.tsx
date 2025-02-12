@@ -223,7 +223,7 @@ const getFileName = (url: string) => {
     ) : ['doc', 'docx', 'xls', 'xlsx'].some(ext => selectedImage.endsWith(`.${ext}`)) ? (
 
     
-      // Display Word/Excel using Google Docs Viewer
+      // Display Word/Excel using Google Docs Viewerff
     {selectedImage && (
   <div className="flex items-center justify-center w-full h-full">
     {selectedImage.endsWith('.svg') ? (
