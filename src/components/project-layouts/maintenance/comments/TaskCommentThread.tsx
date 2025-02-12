@@ -13,6 +13,7 @@ import AttachmentHandler from "./AttachmentHandler";
 import CommentSender from "./CommentSender";
 import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { Download } from "lucide-react";
+import { X, Download } from "lucide-react";
 
 interface TaskCommentThreadProps {
   taskId: string;
@@ -187,11 +188,12 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
       {/* Image Preview Dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-<DialogContent className="max-w-4xl  pt-0">
-  {/* Header Row for Download Button (Left) & Default Close Button (Right) */}
 
-    <div className="w-full flex justify-between items-center pt-3 pb-2 border-b">
 
+        
+<DialogContent className="max-w-4xl pt-0 ">
+  {/* Header Row for Download & Close Buttons */}
+  <div className="w-full flex justify-between items-center pt-3 pb-2 border-b">
     {/* Download Button (Left Corner) */}
     <a
       href={selectedImage || "#"}
@@ -201,6 +203,15 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     >
       <Download className="w-5 h-5" />
     </a>
+
+    {/* Manual Close Button (Right Corner) */}
+    <button
+      onClick={() => setSelectedImage(null)}
+      className="text-gray-600 hover:text-gray-900 transition w-5 h-5 flex items-center justify-center"
+      title="Close"
+    >
+      <X className="w-5 h-5" />
+    </button>
   </div>
 
   {/* Content Area */}
@@ -229,25 +240,21 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
             src={selectedImage}
             alt="Preview"
             className="max-w-full max-h-full object-contain"
-            onError={(e) => e.currentTarget.src = 'fallback-image.png'}
+            onError={(e) => (e.currentTarget.src = "fallback-image.png")}
           />
         )}
       </div>
     )}
   </div>
 
-    {/* Override the Default Close Button */}
-<style>
-  {`
-    /* Remove focus border from the close button */
-    .max-w-4xl button[data-state="open"] {
-      outline: none !important;
-      border: none !important;
-      box-shadow: none !important;
-    }
-  `}
-</style>
-
+  {/* Hide Default Close Button */}
+  <style>
+    {`
+      .max-w-4xl button[data-state="open"] {
+        display: none !important;
+      }
+    `}
+  </style>
 </DialogContent>
 
 
