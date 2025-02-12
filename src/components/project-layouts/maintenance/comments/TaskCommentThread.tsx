@@ -221,11 +221,41 @@ const getFileName = (url: string) => {
         className="w-full h-[80vh]"
       />
     ) : ['doc', 'docx', 'xls', 'xlsx'].some(ext => selectedImage.endsWith(`.${ext}`)) ? (
+
+    
       // Display Word/Excel using Google Docs Viewer
+    {selectedImage && (
+  <div className="flex items-center justify-center w-full h-full">
+    {selectedImage.endsWith('.svg') ? (
+      <object
+        data={selectedImage}
+        type="image/svg+xml"
+        className="max-w-full max-h-full"
+      />
+    ) : selectedImage.endsWith('.pdf') ? (
       <iframe
-        src={`https://docs.google.com/gview?url=${encodeURIComponent(selectedImage)}&embedded=true`}
+        src={`${selectedImage}#toolbar=0&view=fitH`}
         className="w-full h-[80vh]"
       />
+    ) : ['doc', 'docx', 'xls', 'xlsx'].some(ext => selectedImage.endsWith(`.${ext}`)) ? (
+      <iframe
+        src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(selectedImage)}`}
+        className="w-full h-[80vh]"
+      />
+    ) : (
+      <img
+        src={selectedImage}
+        alt="Preview"
+        className="max-w-full max-h-full object-contain"
+        onError={(e) => e.currentTarget.src = "fallback-image.png"} // Optional fallback image
+      />
+    )}
+  </div>
+)}
+
+
+
+    
     ) : (
       <img
         src={selectedImage}
