@@ -237,15 +237,17 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   </div>
 
     {/* Override the Default Close Button */}
-  <style>
-   {`
-      /* Only applies to this modal's close button */
-      .max-w-4xl :where(svg.lucide.lucide-x.h-4.w-4) {
-        width: 20px !important;  /* w-5 (20px) */
-        height: 20px !important; /* h-5 (20px) */
-      }
-    `}
-  </style>
+<style>
+  {`
+    /* Remove focus border from the close button */
+    .max-w-4xl button[data-state="open"] {
+      outline: none !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+  `}
+</style>
+
 </DialogContent>
 
 
