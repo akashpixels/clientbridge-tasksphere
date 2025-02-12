@@ -124,7 +124,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
                         className="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
                       >
                         {isImage ? (
-                         <div className="relative w-[13px] h-[13px]">
+                         <div className="relative w-12 h-12">
                             <img
                               src={url}
                               alt="Attachment"
