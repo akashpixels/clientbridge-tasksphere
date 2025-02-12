@@ -1,7 +1,8 @@
 
+import { ReactNode } from 'react';
 import { FileText, File } from "lucide-react";
 
-export const getFileIcon = (url: string) => {
+export const getFileIcon = (url: string): ReactNode => {
   const fileExtension = url.split('.').pop()?.toLowerCase();
   switch (fileExtension) {
     case 'pdf':
