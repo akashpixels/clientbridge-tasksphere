@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Paperclip, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
+import AttachmentHandler from "./AttachmentHandler";
 
 interface CommentSenderProps {
   taskId: string;
@@ -75,9 +77,32 @@ const CommentSender = ({
   };
 
   return (
-    <Button onClick={handleSubmit} disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}>
-      {isSubmitting ? "Sending..." : "Send"}
-    </Button>
+    <div className="relative w-full">
+      {/* Comment Box with Attachments and Send Button */}
+      <div className="flex items-center w-full border border-gray-300 rounded-lg p-2 focus-within:ring-1 focus-within:ring-gray-400">
+        
+        {/* Input Field */}
+        <textarea 
+          value={newComment} 
+          onChange={(e) => setNewComment(e.target.value)} 
+          placeholder="Write a comment..."
+          className="flex-1 resize-none border-none focus:ring-0 focus:outline-none p-2"
+        />
+
+        {/* Attachments & File Count */}
+        <AttachmentHandler selectedFiles={selectedFiles} setSelectedFiles={setSelectedFiles} />
+
+        {/* Send Button */}
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
+          className="p-2 text-gray-500 hover:text-gray-800 disabled:text-gray-300"
+          title="Send Comment"
+        >
+          <Send className="h-5 w-5" />
+        </button>
+      </div>
+    </div>
   );
 };
 
