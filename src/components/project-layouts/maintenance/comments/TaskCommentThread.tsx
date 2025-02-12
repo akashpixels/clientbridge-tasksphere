@@ -98,23 +98,40 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   if (isLoading) {
     return <Loader2 className="w-6 h-6 animate-spin text-gray-500" />;
   }
-const handleDownload = (url: string) => {
+const handleDownload = async (url: string) => {
+  if (!url) return;
+
   const fileExtension = url.split('.').pop()?.toLowerCase();
   const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
 
   if (isImage) {
-    // Create an anchor element to force download
+    try {
+      const response = await fetch(url, { mode: 'cors' });
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = url.split('/').pop() || 'downloaded-image';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl); // Clean up memory
+    } catch (error) {
+      console.error("Failed to download image:", error);
+      window.open(url, '_blank'); // Fallback to opening in a new tab
+    }
+  } else {
+    // For PDFs, Word, Excel, etc., normal download
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', url.split('/').pop() || 'image'); // Set download attribute
+    link.setAttribute('download', url.split('/').pop() || 'file'); // Set download attribute
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  } else {
-    // For documents, Excel, PDFs, etc., normal download
-    window.open(url, '_blank');
   }
 };
+
 
   return (
     <div className="flex flex-col h-full">
@@ -210,13 +227,14 @@ const handleDownload = (url: string) => {
   {/* Header Row for Download & Close Buttons */}
   <div className="w-full flex justify-between items-center pt-3 pb-2 border-b">
     {/* Download Button (Left Corner) */}
-   <button
+<button
   onClick={() => handleDownload(selectedImage || "#")}
   className="text-gray-600 hover:text-gray-900 transition"
   title="Download"
 >
   <Download className="w-5 h-5" />
 </button>
+
 
 
     {/* Manual Close Button (Right Corner) */}
