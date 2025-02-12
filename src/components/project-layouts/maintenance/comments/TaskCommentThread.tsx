@@ -188,6 +188,17 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       {/* Image Preview Dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-4xl">
+
+          {/* Download Button */}
+  <div className="absolute top-3 right-5 z-10">
+    <a
+      href={selectedImage} 
+      download 
+      className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 transition"
+    >
+      Download
+    </a>
+  </div>
           <div className="w-full h-[80vh] flex items-center justify-center bg-gray-50">
             {selectedImage && (
               <div className="flex items-center justify-center w-full h-full">
