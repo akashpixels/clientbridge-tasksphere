@@ -246,13 +246,15 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   </div>
 
   {/* Hide Default Close Button */}
-  <style>
-    {`
-      .max-w-4xl button[data-state="open"] {
-        display: none !important;
-      }
-    `}
-  </style>
+<style>
+  {`
+    /* Target only the close button inside the modal */
+    .max-w-4xl svg.lucide.lucide-x.h-4.w-4 {
+      display: none !important;
+    }
+  `}
+</style>
+
 </DialogContent>
 
 
