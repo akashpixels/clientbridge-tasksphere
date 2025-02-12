@@ -112,7 +112,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
               <p className="text-sm mt-1">{comment.content}</p>
               
               {comment.images && comment.images.length > 0 && (
-               <div className="mt-2 flex items-center">
+                <div className="mt-2 space-y-2">
                   {comment.images.map((url, index) => {
                     const fileExtension = url.split('.').pop()?.toLowerCase();
                     const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension || '');
@@ -121,16 +121,14 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
                       <div
                         key={index}
                         onClick={() => handleFileClick(url)}
-                        className="relative w-12 h-12 cursor-pointer transition-transform hover:scale-105"
-        style={{ marginLeft: index === 0 ? "0" : "-8px" }} // Overlaps by 20%
+                        className="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
                       >
                         {isImage ? (
                          <div className="relative w-12 h-12">
-                           
                             <img
                               src={url}
                               alt="Attachment"
-                              className="w-full h-full object-cover rounded-lg border"
+                              className="w-full h-full object-cover rounded-lg"
                             />
                           </div>
                         ) : (
