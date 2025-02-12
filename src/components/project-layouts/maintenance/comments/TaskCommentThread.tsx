@@ -186,7 +186,8 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
       {/* Image Preview Dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-   <DialogContent className="max-w-4xl relative">
+  <DialogContent className="max-w-4xl" hideCloseButton>
+
 
           {/* Header Row for Close Button */}
          {/* Header Row for Close Button */}
