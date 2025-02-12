@@ -189,7 +189,9 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
 <DialogContent className="max-w-4xl  pt-0">
   {/* Header Row for Download Button (Left) & Default Close Button (Right) */}
-  <div className="w-full flex justify-between items-center px-4 py-2 border-b">
+
+    <div className="w-full flex justify-between items-center pt-3 pb-2 border-b">
+
     {/* Download Button (Left Corner) */}
     <a
       href={selectedImage || "#"}
