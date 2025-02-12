@@ -187,8 +187,8 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
 
       {/* Image Preview Dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
- <DialogContent className="max-w-4xl">
-  {/* Header Row for Download and Close Buttons */}
+<DialogContent className="max-w-4xl">
+  {/* Header Row for Download Button (Left) & Default Close Button (Right) */}
   <div className="w-full flex justify-between items-center px-4 py-2 border-b">
     {/* Download Button (Left Corner) */}
     <a
@@ -199,13 +199,6 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     >
       <Download className="w-6 h-6" />
     </a>
-
-    {/* Close Button (Right Corner) */}
-    <DialogClose asChild>
-      <button className="text-gray-600 hover:text-gray-900 transition" title="Close">
-        ✕
-      </button>
-    </DialogClose>
   </div>
 
   {/* Content Area */}
@@ -234,13 +227,14 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
             src={selectedImage}
             alt="Preview"
             className="max-w-full max-h-full object-contain"
-            onError={(e) => e.currentTarget.src = "fallback-image.png"}
+            onError={(e) => e.currentTarget.src = 'fallback-image.png'}
           />
         )}
       </div>
     )}
   </div>
 </DialogContent>
+
 
 
         
