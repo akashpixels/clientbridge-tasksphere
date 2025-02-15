@@ -1,6 +1,7 @@
 
 import { cn } from '@/lib/utils';
-import { createContext, useContext, ReactNode, useState } from 'react';
+import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
 import MainContentArea from './MainContentArea';
@@ -23,6 +24,12 @@ export const useLayout = () => {
 const Layout = () => {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [rightSidebarContent, setRightSidebarContent] = useState<ReactNode | null>(null);
+  const location = useLocation();
+
+  // Close right sidebar when route changes
+  useEffect(() => {
+    setRightSidebarContent(null);
+  }, [location.pathname]);
 
   const setRightSidebar = (content: ReactNode) => {
     setRightSidebarContent(content);
@@ -34,7 +41,7 @@ const Layout = () => {
   const closeRightSidebar = () => setRightSidebarContent(null);
 
   const context: LayoutContext = {
-    setRightSidebarContent: setRightSidebar, // Ensure correct function is used
+    setRightSidebarContent: setRightSidebar,
     closeRightSidebar,
   };
 
@@ -57,4 +64,3 @@ const Layout = () => {
 };
 
 export default Layout;
-
