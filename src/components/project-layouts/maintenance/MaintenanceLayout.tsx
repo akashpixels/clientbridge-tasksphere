@@ -1,15 +1,17 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProjectHeader from "./ProjectHeader";
 import TasksTabContent from "./TasksTabContent";
 import ImageViewerDialog from "./ImageViewerDialog";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useLayout } from "@/context/layout";
 import TaskCommentThread from "./comments/TaskCommentThread";
+import { useLocation } from "react-router-dom";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -39,6 +41,12 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const { setRightSidebarContent, closeRightSidebar } = useLayout();
+  const location = useLocation();
+
+  // Close right sidebar when location changes
+  useEffect(() => {
+    closeRightSidebar();
+  }, [location, closeRightSidebar]);
 
   // Fetch tasks for the selected month
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
@@ -103,6 +111,12 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     }
   };
 
+  const handleTabChange = (value: string) => {
+    if (value !== 'tasks') {
+      closeRightSidebar();
+    }
+  };
+
   const sortedTasks = tasks ? [...tasks].sort((a, b) => {
     const aValue = a[sortConfig.key as keyof typeof a];
     const bValue = b[sortConfig.key as keyof typeof b];
@@ -125,7 +139,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         />
       </div>
 
-      <Tabs defaultValue="tasks" className="w-full">
+      <Tabs defaultValue="tasks" className="w-full" onValueChange={handleTabChange}>
         <div className="flex justify-between items-center mb-4">
           <TabsList>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
