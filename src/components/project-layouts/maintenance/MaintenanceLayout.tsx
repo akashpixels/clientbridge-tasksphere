@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProjectHeader from "./ProjectHeader";
 import TasksTabContent from "./TasksTabContent";
 import ImageViewerDialog from "./ImageViewerDialog";
@@ -39,6 +39,14 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const { setRightSidebarContent, closeRightSidebar } = useLayout();
+  const [currentTab, setCurrentTab] = useState('tasks');
+
+  // Close right sidebar when tab changes
+  useEffect(() => {
+    if (currentTab !== 'tasks') {
+      closeRightSidebar();
+    }
+  }, [currentTab, closeRightSidebar]);
 
   // Fetch tasks for the selected month
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
@@ -125,7 +133,11 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         />
       </div>
 
-      <Tabs defaultValue="tasks" className="w-full">
+      <Tabs 
+        defaultValue="tasks" 
+        className="w-full"
+        onValueChange={(value) => setCurrentTab(value)}
+      >
         <div className="flex justify-between items-center mb-4">
           <TabsList>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
