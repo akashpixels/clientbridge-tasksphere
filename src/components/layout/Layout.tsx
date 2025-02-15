@@ -1,6 +1,6 @@
 
 import { cn } from '@/lib/utils';
-import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
@@ -9,7 +9,7 @@ import { useLayout as useLayoutContext } from '@/context/layout';
 
 const Layout = () => {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
-  const { setRightSidebarContent, closeRightSidebar, currentTab, setCurrentTab } = useLayoutContext();
+  const { closeRightSidebar, currentTab, setRightSidebarContent } = useLayoutContext();
   const location = useLocation();
 
   // Close right sidebar when route changes
@@ -24,6 +24,14 @@ const Layout = () => {
     }
   }, [currentTab]);
 
+  // When right sidebar opens, collapse left sidebar
+  const handleRightSidebarContent = (content: ReactNode) => {
+    setRightSidebarContent(content);
+    if (content) {
+      setIsLeftSidebarOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
       <div className="flex">
@@ -34,7 +42,7 @@ const Layout = () => {
         
         <MainContentArea isLeftSidebarOpen={isLeftSidebarOpen} />
 
-        <RightSidebar content={rightSidebarContent} />
+        <RightSidebar content={null} />
       </div>
     </div>
   );
