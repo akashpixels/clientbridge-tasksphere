@@ -38,15 +38,14 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
-  const { setRightSidebarContent, closeRightSidebar } = useLayout();
-  const [currentTab, setCurrentTab] = useState('tasks');
+  const { setRightSidebarContent, closeRightSidebar, setCurrentTab } = useLayout();
 
-  // Close right sidebar when tab changes
+  // Close right sidebar when unmounting
   useEffect(() => {
-    if (currentTab !== 'tasks') {
+    return () => {
       closeRightSidebar();
-    }
-  }, [currentTab, closeRightSidebar]);
+    };
+  }, [closeRightSidebar]);
 
   // Fetch tasks for the selected month
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
@@ -122,6 +121,13 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     return sortConfig.direction === 'asc' ? comparison : -comparison;
   }) : [];
 
+  const handleTabChange = (value: string) => {
+    setCurrentTab(value);
+    if (value !== 'tasks') {
+      closeRightSidebar();
+    }
+  };
+
   return (
     <div className="container mx-auto">
       <div className="mb-6">
@@ -136,7 +142,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
       <Tabs 
         defaultValue="tasks" 
         className="w-full"
-        onValueChange={(value) => setCurrentTab(value)}
+        onValueChange={handleTabChange}
       >
         <div className="flex justify-between items-center mb-4">
           <TabsList>
