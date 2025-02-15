@@ -24,14 +24,6 @@ const Layout = () => {
     }
   }, [currentTab]);
 
-  // When right sidebar opens, collapse left sidebar
-  const handleRightSidebarContent = (content: ReactNode) => {
-    setRightSidebarContent(content);
-    if (content) {
-      setIsLeftSidebarOpen(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
       <div className="flex">

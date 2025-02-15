@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -193,8 +194,11 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
             key={task.id}
             className="cursor-pointer hover:bg-muted/50"
             onClick={() => {
-              onCommentClick(task.id);
-              setRightSidebarContent(<TaskCommentThread taskId={task.id} />);
+              const content = <TaskCommentThread taskId={task.id} />;
+              setRightSidebarContent(content);
+              if (onCommentClick) {
+                onCommentClick(task.id);
+              }
             }}
           >
             <TableCell>
