@@ -29,8 +29,8 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <LayoutProvider>
-          <Router>
+        <Router>
+          <LayoutProvider>
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route element={<ProtectedRoute />}>
@@ -45,8 +45,8 @@ const App = () => {
                 </Route>
               </Route>
             </Routes>
-          </Router>
-        </LayoutProvider>
+          </LayoutProvider>
+        </Router>
       </AuthProvider>
     </QueryClientProvider>
   );
