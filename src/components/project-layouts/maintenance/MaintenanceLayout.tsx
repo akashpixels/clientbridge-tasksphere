@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ProjectHeader from "./ProjectHeader";
 import TasksTabContent from "./TasksTabContent";
 import ImageViewerDialog from "./ImageViewerDialog";
@@ -38,21 +38,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
-  const { setRightSidebarContent, closeRightSidebar, setCurrentTab, currentTab } = useLayout();
-
-  // Close right sidebar when unmounting
-  useEffect(() => {
-    return () => {
-      closeRightSidebar();
-    };
-  }, [closeRightSidebar]);
-
-  // Effect to close sidebar when currentTab changes
-  useEffect(() => {
-    if (currentTab !== 'tasks') {
-      closeRightSidebar();
-    }
-  }, [currentTab, closeRightSidebar]);
+  const { setRightSidebarContent, closeRightSidebar } = useLayout();
 
   // Fetch tasks for the selected month
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
@@ -128,12 +114,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     return sortConfig.direction === 'asc' ? comparison : -comparison;
   }) : [];
 
-  const handleTabChange = (value: string) => {
-    setCurrentTab(value);
-    setRightSidebarContent(null); // Explicitly clear the sidebar content
-    closeRightSidebar(); // Explicitly close the sidebar
-  };
-
   return (
     <div className="container mx-auto">
       <div className="mb-6">
@@ -145,12 +125,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         />
       </div>
 
-      <Tabs 
-        defaultValue="tasks" 
-        value={currentTab} // Explicitly set the current tab value
-        className="w-full"
-        onValueChange={handleTabChange}
-      >
+      <Tabs defaultValue="tasks" className="w-full">
         <div className="flex justify-between items-center mb-4">
           <TabsList>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
