@@ -5,73 +5,38 @@ import { useLocation } from 'react-router-dom';
 import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
 import MainContentArea from './MainContentArea';
-
-type LayoutContext = {
-  setRightSidebarContent: (content: ReactNode) => void;
-  closeRightSidebar: () => void;
-  currentTab: string;
-  setCurrentTab: (tab: string) => void;
-};
-
-const LayoutContext = createContext<LayoutContext | undefined>(undefined);
-
-export const useLayout = () => {
-  const context = useContext(LayoutContext);
-  if (!context) {
-    throw new Error('useLayout must be used within a Layout component');
-  }
-  return context;
-};
+import { useLayout as useLayoutContext } from '@/context/layout';
 
 const Layout = () => {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
-  const [rightSidebarContent, setRightSidebarContent] = useState<ReactNode | null>(null);
-  const [currentTab, setCurrentTab] = useState('tasks');
+  const { setRightSidebarContent, closeRightSidebar, currentTab, setCurrentTab } = useLayoutContext();
   const location = useLocation();
 
   // Close right sidebar when route changes
   useEffect(() => {
-    setRightSidebarContent(null);
+    closeRightSidebar();
   }, [location.pathname]);
 
   // Close right sidebar when tab changes (except for tasks tab)
   useEffect(() => {
     if (currentTab !== 'tasks') {
-      setRightSidebarContent(null);
+      closeRightSidebar();
     }
   }, [currentTab]);
 
-  const setRightSidebar = (content: ReactNode) => {
-    setRightSidebarContent(content);
-    if (content) {
-      setIsLeftSidebarOpen(false);
-    }
-  };
-
-  const closeRightSidebar = () => setRightSidebarContent(null);
-
-  const context: LayoutContext = {
-    setRightSidebarContent: setRightSidebar,
-    closeRightSidebar,
-    currentTab,
-    setCurrentTab,
-  };
-
   return (
-    <LayoutContext.Provider value={context}>
-      <div className="min-h-screen bg-[#f8f8f8]">
-        <div className="flex">
-          <LeftSidebar 
-            isOpen={isLeftSidebarOpen} 
-            onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
-          />
-          
-          <MainContentArea isLeftSidebarOpen={isLeftSidebarOpen} />
+    <div className="min-h-screen bg-[#f8f8f8]">
+      <div className="flex">
+        <LeftSidebar 
+          isOpen={isLeftSidebarOpen} 
+          onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
+        />
+        
+        <MainContentArea isLeftSidebarOpen={isLeftSidebarOpen} />
 
-          <RightSidebar content={rightSidebarContent} />
-        </div>
+        <RightSidebar content={rightSidebarContent} />
       </div>
-    </LayoutContext.Provider>
+    </div>
   );
 };
 
