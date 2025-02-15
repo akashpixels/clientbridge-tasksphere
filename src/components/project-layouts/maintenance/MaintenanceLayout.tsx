@@ -38,7 +38,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
-  const { setRightSidebarContent, closeRightSidebar, setCurrentTab } = useLayout();
+  const { setRightSidebarContent, closeRightSidebar, setCurrentTab, currentTab } = useLayout();
 
   // Close right sidebar when unmounting
   useEffect(() => {
@@ -46,6 +46,13 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
       closeRightSidebar();
     };
   }, [closeRightSidebar]);
+
+  // Effect to close sidebar when currentTab changes
+  useEffect(() => {
+    if (currentTab !== 'tasks') {
+      closeRightSidebar();
+    }
+  }, [currentTab, closeRightSidebar]);
 
   // Fetch tasks for the selected month
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
@@ -123,9 +130,8 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
 
   const handleTabChange = (value: string) => {
     setCurrentTab(value);
-    if (value !== 'tasks') {
-      closeRightSidebar();
-    }
+    setRightSidebarContent(null); // Explicitly clear the sidebar content
+    closeRightSidebar(); // Explicitly close the sidebar
   };
 
   return (
@@ -141,6 +147,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
 
       <Tabs 
         defaultValue="tasks" 
+        value={currentTab} // Explicitly set the current tab value
         className="w-full"
         onValueChange={handleTabChange}
       >
