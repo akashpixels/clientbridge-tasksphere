@@ -9,6 +9,8 @@ import MainContentArea from './MainContentArea';
 type LayoutContext = {
   setRightSidebarContent: (content: ReactNode) => void;
   closeRightSidebar: () => void;
+  currentTab: string;
+  setCurrentTab: (tab: string) => void;
 };
 
 const LayoutContext = createContext<LayoutContext | undefined>(undefined);
@@ -24,6 +26,7 @@ export const useLayout = () => {
 const Layout = () => {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [rightSidebarContent, setRightSidebarContent] = useState<ReactNode | null>(null);
+  const [currentTab, setCurrentTab] = useState('tasks');
   const location = useLocation();
 
   // Close right sidebar when route changes
@@ -31,10 +34,17 @@ const Layout = () => {
     setRightSidebarContent(null);
   }, [location.pathname]);
 
+  // Close right sidebar when tab changes (except for tasks tab)
+  useEffect(() => {
+    if (currentTab !== 'tasks') {
+      setRightSidebarContent(null);
+    }
+  }, [currentTab]);
+
   const setRightSidebar = (content: ReactNode) => {
     setRightSidebarContent(content);
     if (content) {
-      setIsLeftSidebarOpen(false); // Collapse left sidebar when right sidebar is opened
+      setIsLeftSidebarOpen(false);
     }
   };
 
@@ -43,6 +53,8 @@ const Layout = () => {
   const context: LayoutContext = {
     setRightSidebarContent: setRightSidebar,
     closeRightSidebar,
+    currentTab,
+    setCurrentTab,
   };
 
   return (

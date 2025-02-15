@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
@@ -40,7 +39,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
-  const { setRightSidebarContent, closeRightSidebar } = useLayout();
+  const { setRightSidebarContent, closeRightSidebar, setCurrentTab } = useLayout();
   const location = useLocation();
 
   // Close right sidebar when location changes
@@ -112,9 +111,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   };
 
   const handleTabChange = (value: string) => {
-    if (value !== 'tasks') {
-      closeRightSidebar();
-    }
+    setCurrentTab(value);
   };
 
   const sortedTasks = tasks ? [...tasks].sort((a, b) => {
