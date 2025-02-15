@@ -9,7 +9,7 @@ import { useLayout as useLayoutContext } from '@/context/layout';
 
 const Layout = () => {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
-  const { closeRightSidebar, currentTab, setRightSidebarContent } = useLayoutContext();
+  const { closeRightSidebar, currentTab, setRightSidebarContent, rightSidebarContent } = useLayoutContext();
   const location = useLocation();
 
   // Close right sidebar when route changes
@@ -42,7 +42,7 @@ const Layout = () => {
         
         <MainContentArea isLeftSidebarOpen={isLeftSidebarOpen} />
 
-        <RightSidebar content={null} />
+        <RightSidebar content={rightSidebarContent} />
       </div>
     </div>
   );

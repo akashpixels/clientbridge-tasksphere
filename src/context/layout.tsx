@@ -6,6 +6,7 @@ interface LayoutContextType {
   closeRightSidebar: () => void;
   currentTab: string;
   setCurrentTab: (tab: string) => void;
+  rightSidebarContent: ReactNode | null;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
@@ -34,7 +35,8 @@ export function LayoutProvider({ children }: LayoutProviderProps) {
         setRightSidebarContent,
         closeRightSidebar,
         currentTab,
-        setCurrentTab
+        setCurrentTab,
+        rightSidebarContent
       }}
     >
       {children}
