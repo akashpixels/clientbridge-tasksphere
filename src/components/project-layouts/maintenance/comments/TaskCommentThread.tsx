@@ -56,13 +56,8 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   }, [taskId, queryClient]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      // Don't send if it's just a blank line
-      if (newComment.trim()) {
-        document.querySelector<HTMLButtonElement>('button[type="submit"]')?.click();
-      }
-    }
+    // Remove the Enter key submission logic - let the textarea handle Enter naturally
+    return;
   };
 
   const handleFileClick = (url: string) => {
@@ -126,7 +121,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
           value={newComment} 
           onChange={(e) => setNewComment(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Write a comment... (Shift + Enter for new line)" 
+          placeholder="Write a comment... (Press Enter for new line)" 
         />
         
         <div className="flex items-center mt-2 justify-end gap-2">
