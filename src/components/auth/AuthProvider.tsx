@@ -45,11 +45,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const checkUserRole = async (userId: string) => {
     const { data: userProfile } = await supabase
       .from('user_profiles')
-      .select('role')
+      .select('user_roles(name)')
       .eq('id', userId)
       .single();
 
-    setIsAgencyUser(userProfile?.role === 'agency_admin' || userProfile?.role === 'agency_staff');
+    // Check if the user's role is agency_admin or agency_staff
+    setIsAgencyUser(
+      userProfile?.user_roles?.name === 'agency_admin' || 
+      userProfile?.user_roles?.name === 'agency_staff'
+    );
   };
 
   return (
