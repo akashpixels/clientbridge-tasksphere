@@ -1,3 +1,4 @@
+
 import { cn } from '@/lib/utils';
 import { createContext, useContext, ReactNode, useState } from 'react';
 import LeftSidebar from './LeftSidebar';
@@ -22,27 +23,32 @@ export const useLayout = () => {
 const Layout = () => {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [rightSidebarContent, setRightSidebarContent] = useState<ReactNode | null>(null);
-  const [forceUpdate, setForceUpdate] = useState(0); // NEW FORCE UPDATE STATE
 
   const setRightSidebar = (content: ReactNode) => {
     setRightSidebarContent(content);
-    setForceUpdate(prev => prev + 1); // FORCING RE-RENDER
     if (content) {
-      setIsLeftSidebarOpen(false);
+      setIsLeftSidebarOpen(false); // Collapse left sidebar when right sidebar is opened
     }
   };
 
-  const closeRightSidebar = () => {
-    setRightSidebarContent(null);
-    setForceUpdate(prev => prev + 1); // FORCING RE-RENDER
+  const closeRightSidebar = () => setRightSidebarContent(null);
+
+  const context: LayoutContext = {
+    setRightSidebarContent: setRightSidebar, // Ensure correct function is used
+    closeRightSidebar,
   };
 
   return (
-    <LayoutContext.Provider value={{ setRightSidebarContent: setRightSidebar, closeRightSidebar }}>
-      <div className="min-h-screen bg-[#f8f8f8]" key={forceUpdate}>
+    <LayoutContext.Provider value={context}>
+      <div className="min-h-screen bg-[#f8f8f8]">
         <div className="flex">
-          <LeftSidebar isOpen={isLeftSidebarOpen} onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} />
+          <LeftSidebar 
+            isOpen={isLeftSidebarOpen} 
+            onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
+          />
+          
           <MainContentArea isLeftSidebarOpen={isLeftSidebarOpen} />
+
           <RightSidebar content={rightSidebarContent} />
         </div>
       </div>
@@ -51,3 +57,4 @@ const Layout = () => {
 };
 
 export default Layout;
+
