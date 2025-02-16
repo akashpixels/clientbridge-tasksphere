@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Send } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Toggle } from "@/components/ui/toggle";
 
 interface CommentSenderProps {
   taskId: string;
@@ -41,7 +41,6 @@ const CommentSender = ({
       if (session?.user) {
         console.log("Checking user role for user:", session.user.id);
         
-        // First, let's get the user profile with role information
         const { data: userProfile, error } = await supabase
           .from('user_profiles')
           .select(`
@@ -135,34 +134,32 @@ const CommentSender = ({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-2">
       {!isInputResponse && isAgencyUser && (
         <div className="flex items-center gap-2">
-          <Checkbox
-            id="requestInput"
-            checked={isRequestingInput}
-            onCheckedChange={(checked) => setIsRequestingInput(checked as boolean)}
-          />
-          <label
-            htmlFor="requestInput"
-            className="text-sm text-gray-700 cursor-pointer"
+          <Toggle
+            pressed={isRequestingInput}
+            onPressedChange={setIsRequestingInput}
+            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
           >
             Request Input
-          </label>
+          </Toggle>
         </div>
       )}
-      <Button 
-        onClick={handleSubmit} 
-        disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
-        size="icon"
-        className="p-2 w-12 h-9 flex items-center justify-center"
-      >
-        {isSubmitting ? (
-          <span className="animate-spin">⏳</span>
-        ) : (
-          <Send className="h-4 w-4" />
-        )}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button 
+          onClick={handleSubmit} 
+          disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
+          size="icon"
+          className="p-2 w-12 h-9 flex items-center justify-center"
+        >
+          {isSubmitting ? (
+            <span className="animate-spin">⏳</span>
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
     </div>
   );
 };
