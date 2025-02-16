@@ -39,16 +39,32 @@ const CommentSender = ({
   useEffect(() => {
     const checkUserRole = async () => {
       if (session?.user) {
-        const { data: userProfile } = await supabase
+        console.log("Checking user role for user:", session.user.id);
+        
+        const { data: userProfile, error } = await supabase
           .from('user_profiles')
-          .select('user_roles(name)')
+          .select(`
+            user_role_id,
+            user_roles (
+              name
+            )
+          `)
           .eq('id', session.user.id)
           .single();
         
-        setIsAgencyUser(
+        if (error) {
+          console.error("Error fetching user role:", error);
+          return;
+        }
+
+        console.log("User profile data:", userProfile);
+        
+        const isAgency = 
           userProfile?.user_roles?.name === 'agency_admin' || 
-          userProfile?.user_roles?.name === 'agency_staff'
-        );
+          userProfile?.user_roles?.name === 'agency_staff';
+        
+        console.log("Is agency user:", isAgency);
+        setIsAgencyUser(isAgency);
       }
     };
 
