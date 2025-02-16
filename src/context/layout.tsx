@@ -3,6 +3,7 @@ import { createContext, useContext, ReactNode, useState, useEffect } from 'react
 import { useLocation } from 'react-router-dom';
 
 interface LayoutContextType {
+  rightSidebarContent: ReactNode | null;
   setRightSidebarContent: (content: ReactNode) => void;
   closeRightSidebar: () => void;
   currentTab: string;
@@ -28,7 +29,10 @@ export function LayoutProvider({ children }: LayoutProviderProps) {
   const [currentTab, setCurrentTab] = useState('tasks');
   const location = useLocation();
 
-  const closeRightSidebar = () => setRightSidebarContent(null);
+  const closeRightSidebar = () => {
+    console.log('Closing right sidebar');
+    setRightSidebarContent(null);
+  };
 
   // Effect to close right sidebar on route change
   useEffect(() => {
@@ -37,12 +41,14 @@ export function LayoutProvider({ children }: LayoutProviderProps) {
 
   // Effect to close right sidebar on tab change
   useEffect(() => {
+    console.log('Tab changed to:', currentTab);
     closeRightSidebar();
   }, [currentTab]);
 
   return (
     <LayoutContext.Provider 
       value={{ 
+        rightSidebarContent,
         setRightSidebarContent,
         closeRightSidebar,
         currentTab,
