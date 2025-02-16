@@ -34,7 +34,7 @@ const CommentItem = ({ comment, onFileClick }: CommentItemProps) => {
       
       {/* New Row for Badges - Now Above Avatar */}
       {(comment.is_input_request || comment.is_input_response) && (
-        <div className="mb-1 flex justify-start">
+        <div className="mb-1 pb-2 flex justify-start">
           {comment.is_input_request && (
             <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
               Input Requested
