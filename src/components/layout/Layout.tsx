@@ -1,6 +1,7 @@
 
 import { cn } from '@/lib/utils';
-import { createContext, useContext, ReactNode, useState } from 'react';
+import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
 import MainContentArea from './MainContentArea';
@@ -8,6 +9,8 @@ import MainContentArea from './MainContentArea';
 type LayoutContext = {
   setRightSidebarContent: (content: ReactNode) => void;
   closeRightSidebar: () => void;
+  currentTab: string;
+  setCurrentTab: (tab: string) => void;
 };
 
 const LayoutContext = createContext<LayoutContext | undefined>(undefined);
@@ -23,6 +26,8 @@ export const useLayout = () => {
 const Layout = () => {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [rightSidebarContent, setRightSidebarContent] = useState<ReactNode | null>(null);
+  const [currentTab, setCurrentTab] = useState('tasks');
+  const location = useLocation();
 
   const setRightSidebar = (content: ReactNode) => {
     setRightSidebarContent(content);
@@ -31,11 +36,26 @@ const Layout = () => {
     }
   };
 
-  const closeRightSidebar = () => setRightSidebarContent(null);
+  const closeRightSidebar = () => {
+    setRightSidebarContent(null);
+    setIsLeftSidebarOpen(true); // Restore left sidebar when right sidebar is closed
+  };
+
+  // Effect to close right sidebar on route change
+  useEffect(() => {
+    closeRightSidebar();
+  }, [location.pathname]);
+
+  // Effect to close right sidebar on tab change
+  useEffect(() => {
+    closeRightSidebar();
+  }, [currentTab]);
 
   const context: LayoutContext = {
-    setRightSidebarContent: setRightSidebar, // Ensure correct function is used
+    setRightSidebarContent: setRightSidebar,
     closeRightSidebar,
+    currentTab,
+    setCurrentTab,
   };
 
   return (
@@ -57,4 +77,3 @@ const Layout = () => {
 };
 
 export default Layout;
-
