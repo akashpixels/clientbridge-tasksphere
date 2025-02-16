@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
 interface CommentInputRequestProps {
@@ -64,12 +64,17 @@ const CommentInputRequest = ({
 
   return (
     <div className="flex items-center space-x-2 mb-2">
-      <Switch
-        id="request-input"
+      <Checkbox
+        id="requestInput"
         checked={isRequestingInput}
-        onCheckedChange={setIsRequestingInput}
+        onCheckedChange={(checked) => setIsRequestingInput(checked as boolean)}
       />
-      <Label htmlFor="request-input">Request Input</Label>
+      <label
+        htmlFor="requestInput"
+        className="text-sm text-gray-700 cursor-pointer"
+      >
+        Request Input
+      </label>
     </div>
   );
 };
