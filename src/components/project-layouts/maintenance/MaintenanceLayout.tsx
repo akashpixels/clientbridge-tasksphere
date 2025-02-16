@@ -40,7 +40,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const { setRightSidebarContent, closeRightSidebar } = useLayout();
 
-  // Fetch tasks for the selected month
+  // Fetch tasks for the selected month.
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['tasks', project.id, selectedMonth],
     queryFn: async () => {
