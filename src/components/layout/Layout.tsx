@@ -34,7 +34,7 @@ const Layout = () => {
 
   const closeRightSidebar = () => setRightSidebarContent(null);
 
-  // Close the right sidebar when the route changes
+  // Close the right sidebar when the route changes.
   useEffect(() => {
     const handleRouteChange = () => closeRightSidebar();
     router.events.on('routeChangeStart', handleRouteChange);
