@@ -38,9 +38,8 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
-  const { setRightSidebarContent, closeRightSidebar } = useLayout();
+  const { setRightSidebarContent, closeRightSidebar, setCurrentTab } = useLayout();
 
-  // Fetch tasks for the selected month
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['tasks', project.id, selectedMonth],
     queryFn: async () => {
@@ -73,7 +72,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     },
   });
 
-  // Calculate monthly hours from tasks
   const monthlyHours = tasks?.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) || 0;
 
   const handleSort = (key: string) => {
@@ -125,7 +123,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         />
       </div>
 
-      <Tabs defaultValue="tasks" className="w-full">
+      <Tabs defaultValue="tasks" className="w-full" onValueChange={(value) => setCurrentTab(value)}>
         <div className="flex justify-between items-center mb-4">
           <TabsList>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
