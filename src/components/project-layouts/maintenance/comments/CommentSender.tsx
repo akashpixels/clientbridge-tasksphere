@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -136,15 +135,13 @@ const CommentSender = ({
   return (
     <div className="flex flex-col gap-2">
       {!isInputResponse && isAgencyUser && (
-        <div className="flex items-center gap-2">
-          <Toggle
-            pressed={isRequestingInput}
-            onPressedChange={setIsRequestingInput}
-            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-          >
-            Request Input
-          </Toggle>
-        </div>
+        <Toggle
+          pressed={isRequestingInput}
+          onPressedChange={setIsRequestingInput}
+          className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground w-fit"
+        >
+          Request Input
+        </Toggle>
       )}
       <div className="flex items-center gap-2">
         <Button 
