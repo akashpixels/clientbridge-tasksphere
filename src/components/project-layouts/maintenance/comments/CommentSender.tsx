@@ -135,7 +135,7 @@ const CommentSender = ({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-2">
       {!isInputResponse && isAgencyUser && (
         <div className="flex items-center gap-2">
           <Checkbox
@@ -143,28 +143,24 @@ const CommentSender = ({
             checked={isRequestingInput}
             onCheckedChange={(checked) => setIsRequestingInput(checked as boolean)}
           />
-          <label
-            htmlFor="requestInput"
-            className="text-sm text-gray-700 cursor-pointer"
-          >
+          <label htmlFor="requestInput" className="text-sm text-gray-700 cursor-pointer">
             Request Input
           </label>
         </div>
       )}
-      <Button 
-        onClick={handleSubmit} 
-        disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
-        size="icon"
-        className="p-2 w-12 h-9 flex items-center justify-center"
-      >
-        {isSubmitting ? (
-          <span className="animate-spin">⏳</span>
-        ) : (
-          <Send className="h-4 w-4" />
-        )}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button 
+          onClick={handleSubmit} 
+          disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
+          size="icon"
+          className="p-2 w-12 h-9 flex items-center justify-center"
+        >
+          {isSubmitting ? <span className="animate-spin">⏳</span> : <Send className="h-4 w-4" />}
+        </Button>
+      </div>
     </div>
   );
 };
+
 
 export default CommentSender;
