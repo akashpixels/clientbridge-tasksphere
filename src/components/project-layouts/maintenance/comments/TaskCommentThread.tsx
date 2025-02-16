@@ -55,6 +55,16 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     };
   }, [taskId, queryClient]);
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      // Don't send if it's just a blank line
+      if (newComment.trim()) {
+        document.querySelector<HTMLButtonElement>('button[type="submit"]')?.click();
+      }
+    }
+  };
+
   const handleFileClick = (url: string) => {
     const fileExtension = url.split('.').pop()?.toLowerCase();
     const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
@@ -114,8 +124,9 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       <div className="border-t p-4">
         <Textarea 
           value={newComment} 
-          onChange={(e) => setNewComment(e.target.value)} 
-          placeholder="Write a comment..." 
+          onChange={(e) => setNewComment(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Write a comment... (Shift + Enter for new line)" 
         />
         
         <div className="flex items-center mt-2 justify-end gap-2">

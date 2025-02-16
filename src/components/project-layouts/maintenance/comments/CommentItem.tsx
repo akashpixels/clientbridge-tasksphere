@@ -19,6 +19,14 @@ interface CommentItemProps {
 }
 
 const CommentItem = ({ comment, onFileClick }: CommentItemProps) => {
+  // Split the content by newlines and map each line to a paragraph
+  const formattedContent = comment.content.split('\n').map((line, index) => (
+    <React.Fragment key={index}>
+      {line}
+      {index < comment.content.split('\n').length - 1 && <br />}
+    </React.Fragment>
+  ));
+
   return (
     <div className="flex gap-3">
       <Avatar>
@@ -29,7 +37,7 @@ const CommentItem = ({ comment, onFileClick }: CommentItemProps) => {
         <span className="text-xs text-gray-500 ml-2">
           {format(new Date(comment.created_at), 'MMM d, h:mmaaa')}
         </span>
-        <p className="text-sm mt-1">{comment.content}</p>
+        <p className="text-sm mt-1 whitespace-pre-line">{formattedContent}</p>
         
         {comment.images && comment.images.length > 0 && (
           <FilePreview files={comment.images} onFileClick={onFileClick} />
