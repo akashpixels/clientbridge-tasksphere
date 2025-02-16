@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { Toggle } from "@/components/ui/toggle";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface CommentInputRequestProps {
   isInputResponse?: boolean;
@@ -62,14 +63,13 @@ const CommentInputRequest = ({
   }
 
   return (
-    <div className="flex items-center gap-2 mb-2">
-      <Toggle
-        pressed={isRequestingInput}
-        onPressedChange={setIsRequestingInput}
-        className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-      >
-        Request Input
-      </Toggle>
+    <div className="flex items-center space-x-2 mb-2">
+      <Switch
+        id="request-input"
+        checked={isRequestingInput}
+        onCheckedChange={setIsRequestingInput}
+      />
+      <Label htmlFor="request-input">Request Input</Label>
     </div>
   );
 };
