@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ProjectHeader from "./ProjectHeader";
 import TasksTabContent from "./TasksTabContent";
 import ImageViewerDialog from "./ImageViewerDialog";
@@ -39,13 +39,8 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const { setRightSidebarContent, closeRightSidebar } = useLayout();
-  
-  useEffect(() => {
-    return () => {
-      closeRightSidebar();
-    };
-  }, [closeRightSidebar]);
 
+  // Fetch tasks for the selected month
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['tasks', project.id, selectedMonth],
     queryFn: async () => {
@@ -78,6 +73,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     },
   });
 
+  // Calculate monthly hours from tasks
   const monthlyHours = tasks?.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) || 0;
 
   const handleSort = (key: string) => {
@@ -129,15 +125,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         />
       </div>
 
-  <Tabs 
-  defaultValue="tasks" 
-  className="w-full"
-  onValueChange={(value) => {
-    if (value !== "tasks") {
-      setRightSidebarContent(null);  // This should now work
-    }
-  }}
->
+      <Tabs defaultValue="tasks" className="w-full">
         <div className="flex justify-between items-center mb-4">
           <TabsList>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
