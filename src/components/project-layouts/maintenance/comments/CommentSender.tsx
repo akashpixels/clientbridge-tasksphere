@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { Send } from "lucide-react"; // Import Send icon
+import { Send } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CommentSenderProps {
   taskId: string;
@@ -12,12 +14,24 @@ interface CommentSenderProps {
   selectedFiles: File[];
   setSelectedFiles: (files: File[]) => void;
   onCommentPosted: () => void;
+  isInputRequest?: boolean;
+  isInputResponse?: boolean;
+  parentCommentId?: string;
 }
 
 const CommentSender = ({ 
-  taskId, newComment, setNewComment, selectedFiles, setSelectedFiles, onCommentPosted 
+  taskId, 
+  newComment, 
+  setNewComment, 
+  selectedFiles, 
+  setSelectedFiles, 
+  onCommentPosted,
+  isInputRequest,
+  isInputResponse,
+  parentCommentId
 }: CommentSenderProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRequestingInput, setIsRequestingInput] = useState(false);
   const { toast } = useToast();
   const { session } = useAuth();
 
@@ -58,15 +72,19 @@ const CommentSender = ({
           content: newComment,
           images: uploadedFiles,
           user_id: session.user.id,
+          is_input_request: isRequestingInput,
+          is_input_response: isInputResponse,
+          parent_id: parentCommentId
         });
 
       if (commentError) throw commentError;
 
       setNewComment("");
       setSelectedFiles([]);
+      setIsRequestingInput(false);
       onCommentPosted();
 
-      toast({ title: "Comment posted successfully" });
+      toast({ title: isRequestingInput ? "Input requested" : "Comment posted successfully" });
     } catch (error) {
       console.error("Error posting comment:", error);
       toast({ title: "Error posting comment", variant: "destructive" });
@@ -76,18 +94,35 @@ const CommentSender = ({
   };
 
   return (
-    <Button 
-      onClick={handleSubmit} 
-      disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
-      size="icon" // Ensures square button size
-      className="p-2 w-12 h-9 flex items-center justify-center"
-    >
-      {isSubmitting ? (
-        <span className="animate-spin">⏳</span> // Loader effect
-      ) : (
-        <Send className="h-4 w-4" /> // Send Icon
+    <div className="flex items-center gap-2">
+      {!isInputResponse && (
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="requestInput"
+            checked={isRequestingInput}
+            onCheckedChange={(checked) => setIsRequestingInput(checked as boolean)}
+          />
+          <label
+            htmlFor="requestInput"
+            className="text-sm text-gray-700 cursor-pointer"
+          >
+            Request Input
+          </label>
+        </div>
       )}
-    </Button>
+      <Button 
+        onClick={handleSubmit} 
+        disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
+        size="icon"
+        className="p-2 w-12 h-9 flex items-center justify-center"
+      >
+        {isSubmitting ? (
+          <span className="animate-spin">⏳</span>
+        ) : (
+          <Send className="h-4 w-4" />
+        )}
+      </Button>
+    </div>
   );
 };
 

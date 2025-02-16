@@ -21,12 +21,16 @@ interface Comment {
     first_name: string;
   } | null;
   images: string[] | null;
+  is_input_request?: boolean;
+  is_input_response?: boolean;
+  parent_id?: string;
 }
 
 const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   const [newComment, setNewComment] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [respondingToComment, setRespondingToComment] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: comments, isLoading } = useQuery({
@@ -34,7 +38,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('task_comments')
-        .select(`id, content, created_at, user_profiles(first_name), images`)
+        .select(`id, content, created_at, user_profiles(first_name), images, is_input_request, is_input_response, parent_id`)
         .eq('task_id', taskId)
         .order('created_at', { ascending: true });
 
@@ -42,6 +46,12 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       return data as Comment[];
     },
   });
+
+  // Find if there's any pending input request
+  const pendingInputRequest = comments?.find(comment => 
+    comment.is_input_request && 
+    !comments.some(c => c.is_input_response && c.parent_id === comment.id)
+  );
 
   useEffect(() => {
     const channel = supabase.channel('comments-changes')
@@ -56,7 +66,6 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   }, [taskId, queryClient]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Remove the Enter key submission logic - let the textarea handle Enter naturally
     return;
   };
 
@@ -121,7 +130,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
           value={newComment} 
           onChange={(e) => setNewComment(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder=" comment..." 
+          placeholder={pendingInputRequest ? "Provide input..." : "Add a comment..."} 
         />
         
         <div className="flex items-center mt-2 justify-end gap-2">
@@ -131,7 +140,9 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
             newComment={newComment} 
             setNewComment={setNewComment} 
             selectedFiles={selectedFiles} 
-            setSelectedFiles={setSelectedFiles} 
+            setSelectedFiles={setSelectedFiles}
+            isInputResponse={!!pendingInputRequest}
+            parentCommentId={pendingInputRequest?.id}
             onCommentPosted={() => {
               queryClient.invalidateQueries({ queryKey: ['taskComments', taskId] });
             }}

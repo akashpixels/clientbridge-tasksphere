@@ -3,6 +3,7 @@ import React from "react";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import FilePreview from "./FilePreview";
+import { Badge } from "@/components/ui/badge";
 
 interface Comment {
   id: string;
@@ -12,6 +13,8 @@ interface Comment {
     first_name: string;
   } | null;
   images: string[] | null;
+  is_input_request?: boolean;
+  is_input_response?: boolean;
 }
 
 interface CommentItemProps {
@@ -29,15 +32,27 @@ const CommentItem = ({ comment, onFileClick }: CommentItemProps) => {
   ));
 
   return (
-    <div className="flex gap-3">
+    <div className={`flex gap-3 ${comment.is_input_request ? 'bg-yellow-50 p-3 rounded-lg' : ''} ${comment.is_input_response ? 'bg-green-50 p-3 rounded-lg' : ''}`}>
       <Avatar>
         <AvatarFallback>{comment.user_profiles?.first_name?.[0]}</AvatarFallback>
       </Avatar>
       <div className="flex-1">
-        <span className="text-xs text-gray-500">{comment.user_profiles?.first_name}</span>
-        <span className="text-xs text-gray-500 ml-2">
-          {format(new Date(comment.created_at), 'MMM d, h:mmaaa')}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">{comment.user_profiles?.first_name}</span>
+          <span className="text-xs text-gray-500">
+            {format(new Date(comment.created_at), 'MMM d, h:mmaaa')}
+          </span>
+          {comment.is_input_request && (
+            <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
+              Input Requested
+            </Badge>
+          )}
+          {comment.is_input_response && (
+            <Badge variant="outline" className="bg-green-100 text-green-800">
+              Input Provided
+            </Badge>
+          )}
+        </div>
         <p className="text-sm mt-1 whitespace-pre-line">{formattedContent}</p>
         
         {comment.images && comment.images.length > 0 && (
