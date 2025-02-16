@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProjectHeader from "./ProjectHeader";
 import TasksTabContent from "./TasksTabContent";
 import ImageViewerDialog from "./ImageViewerDialog";
@@ -39,7 +39,11 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const { setRightSidebarContent, closeRightSidebar } = useLayout();
-
+  
+  // Ensure the right sidebar is closed on initial load
+  useEffect(() => {
+    closeRightSidebar();
+  }, []);  // Runs once on component mount
   // Fetch tasks for the selected month
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['tasks', project.id, selectedMonth],
