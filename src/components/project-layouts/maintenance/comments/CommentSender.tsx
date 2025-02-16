@@ -41,11 +41,14 @@ const CommentSender = ({
       if (session?.user) {
         console.log("Checking user role for user:", session.user.id);
         
+        // First, let's get the user profile with role information
         const { data: userProfile, error } = await supabase
           .from('user_profiles')
           .select(`
+            id,
             user_role_id,
-            user_roles (
+            user_roles!user_profiles_user_role_id_fkey (
+              id,
               name
             )
           `)
@@ -57,13 +60,15 @@ const CommentSender = ({
           return;
         }
 
-        console.log("User profile data:", userProfile);
+        console.log("Full user profile data:", userProfile);
         
         const isAgency = 
-          userProfile?.user_roles?.name === 'agency_admin' || 
-          userProfile?.user_roles?.name === 'agency_staff';
+          userProfile?.user_roles?.name === 'Agency Admin' || 
+          userProfile?.user_roles?.name === 'Agency Staff';
         
         console.log("Is agency user:", isAgency);
+        console.log("Role name:", userProfile?.user_roles?.name);
+        
         setIsAgencyUser(isAgency);
       }
     };
