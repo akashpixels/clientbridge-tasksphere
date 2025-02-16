@@ -129,15 +129,18 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         />
       </div>
 
-     <Tabs 
+<Tabs 
   defaultValue="tasks" 
   className="w-full"
   onValueChange={(value) => {
+    console.log("Tab changed to:", value); // Debugging
     if (value !== "tasks") {
-      closeRightSidebar(); // Close the right sidebar if switching away from "tasks"
+      console.log("Closing right sidebar...");
+      closeRightSidebar(); // Close the right sidebar when switching away from "tasks"
     }
   }}
 >
+
         <div className="flex justify-between items-center mb-4">
           <TabsList>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
