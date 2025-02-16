@@ -1,6 +1,6 @@
 
 import { cn } from '@/lib/utils';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { useLayout } from '@/context/layout';
 import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
@@ -20,7 +20,7 @@ const Layout = () => {
         
         <MainContentArea isLeftSidebarOpen={isLeftSidebarOpen} />
 
-        <RightSidebar content={rightSidebarContent} />
+        <RightSidebar />
       </div>
     </div>
   );
