@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,25 +5,20 @@ import { supabase } from '@/integrations/supabase/client';
 interface AuthContextType {
   session: Session | null;
   loading: boolean;
-  isAgencyUser: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({ session: null, loading: true, isAgencyUser: false });
+const AuthContext = createContext<AuthContextType>({ session: null, loading: true });
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isAgencyUser, setIsAgencyUser] = useState(false);
 
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session?.user) {
-        checkUserRole(session.user.id);
-      }
       setLoading(false);
     });
 
@@ -33,31 +27,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session?.user) {
-        checkUserRole(session.user.id);
-      }
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkUserRole = async (userId: string) => {
-    const { data: userProfile } = await supabase
-      .from('user_profiles')
-      .select('user_roles(name)')
-      .eq('id', userId)
-      .single();
-
-    // Check if the user's role is agency_admin or agency_staff
-    setIsAgencyUser(
-      userProfile?.user_roles?.name === 'agency_admin' || 
-      userProfile?.user_roles?.name === 'agency_staff'
-    );
-  };
-
   return (
-    <AuthContext.Provider value={{ session, loading, isAgencyUser }}>
+    <AuthContext.Provider value={{ session, loading }}>
       {children}
     </AuthContext.Provider>
   );

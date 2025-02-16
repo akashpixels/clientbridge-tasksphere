@@ -33,7 +33,7 @@ const CommentSender = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRequestingInput, setIsRequestingInput] = useState(false);
   const { toast } = useToast();
-  const { session, isAgencyUser } = useAuth();
+  const { session } = useAuth();
 
   const handleSubmit = async () => {
     if (!newComment.trim() && selectedFiles.length === 0) return;
@@ -95,7 +95,7 @@ const CommentSender = ({
 
   return (
     <div className="flex items-center gap-2">
-      {!isInputResponse && isAgencyUser && (
+      {!isInputResponse && (
         <div className="flex items-center gap-2">
           <Checkbox
             id="requestInput"
