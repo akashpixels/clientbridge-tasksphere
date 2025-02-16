@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Toggle } from "@/components/ui/toggle";
 
 interface CommentInputRequestProps {
   isInputResponse?: boolean;
@@ -63,17 +63,13 @@ const CommentInputRequest = ({
 
   return (
     <div className="flex items-center gap-2 mb-2">
-      <Checkbox
-        id="requestInput"
-        checked={isRequestingInput}
-        onCheckedChange={(checked) => setIsRequestingInput(checked as boolean)}
-      />
-      <label
-        htmlFor="requestInput"
-        className="text-sm text-gray-700 cursor-pointer"
+      <Toggle
+        pressed={isRequestingInput}
+        onPressedChange={setIsRequestingInput}
+        className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
       >
         Request Input
-      </label>
+      </Toggle>
     </div>
   );
 };
