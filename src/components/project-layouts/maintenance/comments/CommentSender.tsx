@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -32,8 +32,28 @@ const CommentSender = ({
 }: CommentSenderProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRequestingInput, setIsRequestingInput] = useState(false);
+  const [isAgencyUser, setIsAgencyUser] = useState(false);
   const { toast } = useToast();
   const { session } = useAuth();
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (session?.user) {
+        const { data: userProfile } = await supabase
+          .from('user_profiles')
+          .select('user_roles(name)')
+          .eq('id', session.user.id)
+          .single();
+        
+        setIsAgencyUser(
+          userProfile?.user_roles?.name === 'agency_admin' || 
+          userProfile?.user_roles?.name === 'agency_staff'
+        );
+      }
+    };
+
+    checkUserRole();
+  }, [session]);
 
   const handleSubmit = async () => {
     if (!newComment.trim() && selectedFiles.length === 0) return;
@@ -95,7 +115,7 @@ const CommentSender = ({
 
   return (
     <div className="flex items-center gap-2">
-      {!isInputResponse && (
+      {!isInputResponse && isAgencyUser && (
         <div className="flex items-center gap-2">
           <Checkbox
             id="requestInput"
