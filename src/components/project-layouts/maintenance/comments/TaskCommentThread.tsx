@@ -121,7 +121,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
           value={newComment} 
           onChange={(e) => setNewComment(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Write a comment... (Press Enter for new line)" 
+          placeholder=" comment..." 
         />
         
         <div className="flex items-center mt-2 justify-end gap-2">
