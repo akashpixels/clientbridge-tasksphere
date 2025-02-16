@@ -1,11 +1,10 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Send } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface CommentSenderProps {
   taskId: string;
@@ -17,6 +16,7 @@ interface CommentSenderProps {
   isInputRequest?: boolean;
   isInputResponse?: boolean;
   parentCommentId?: string;
+  isRequestingInput: boolean;
 }
 
 const CommentSender = ({ 
@@ -28,53 +28,12 @@ const CommentSender = ({
   onCommentPosted,
   isInputRequest,
   isInputResponse,
-  parentCommentId
+  parentCommentId,
+  isRequestingInput
 }: CommentSenderProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRequestingInput, setIsRequestingInput] = useState(false);
-  const [isAgencyUser, setIsAgencyUser] = useState(false);
   const { toast } = useToast();
   const { session } = useAuth();
-
-  useEffect(() => {
-    const checkUserRole = async () => {
-      if (session?.user) {
-        console.log("Checking user role for user:", session.user.id);
-        
-        // First, let's get the user profile with role information
-        const { data: userProfile, error } = await supabase
-          .from('user_profiles')
-          .select(`
-            id,
-            user_role_id,
-            user_roles!user_profiles_user_role_id_fkey (
-              id,
-              name
-            )
-          `)
-          .eq('id', session.user.id)
-          .single();
-        
-        if (error) {
-          console.error("Error fetching user role:", error);
-          return;
-        }
-
-        console.log("Full user profile data:", userProfile);
-        
-        const isAgency = 
-          userProfile?.user_roles?.name === 'Agency Admin' || 
-          userProfile?.user_roles?.name === 'Agency Staff';
-        
-        console.log("Is agency user:", isAgency);
-        console.log("Role name:", userProfile?.user_roles?.name);
-        
-        setIsAgencyUser(isAgency);
-      }
-    };
-
-    checkUserRole();
-  }, [session]);
 
   const handleSubmit = async () => {
     if (!newComment.trim() && selectedFiles.length === 0) return;
@@ -122,7 +81,6 @@ const CommentSender = ({
 
       setNewComment("");
       setSelectedFiles([]);
-      setIsRequestingInput(false);
       onCommentPosted();
 
       toast({ title: isRequestingInput ? "Input requested" : "Comment posted successfully" });
@@ -136,21 +94,6 @@ const CommentSender = ({
 
   return (
     <div className="flex items-center gap-2">
-      {!isInputResponse && isAgencyUser && (
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="requestInput"
-            checked={isRequestingInput}
-            onCheckedChange={(checked) => setIsRequestingInput(checked as boolean)}
-          />
-          <label
-            htmlFor="requestInput"
-            className="text-sm text-gray-700 cursor-pointer"
-          >
-            Request Input
-          </label>
-        </div>
-      )}
       <Button 
         onClick={handleSubmit} 
         disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}

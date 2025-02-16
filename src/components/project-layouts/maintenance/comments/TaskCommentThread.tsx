@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import CommentList from "./CommentList";
 import AttachmentHandler from "./AttachmentHandler";
 import CommentSender from "./CommentSender";
+import CommentInputRequest from "./CommentInputRequest";
 import PreviewDialog from "./PreviewDialog";
 
 interface TaskCommentThreadProps {
@@ -31,6 +32,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [respondingToComment, setRespondingToComment] = useState<string | null>(null);
+  const [isRequestingInput, setIsRequestingInput] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: comments, isLoading } = useQuery({
@@ -126,6 +128,12 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       />
 
       <div className="border-t p-4">
+        <CommentInputRequest
+          isInputResponse={!!pendingInputRequest}
+          isRequestingInput={isRequestingInput}
+          setIsRequestingInput={setIsRequestingInput}
+        />
+        
         <Textarea 
           value={newComment} 
           onChange={(e) => setNewComment(e.target.value)}
@@ -143,8 +151,10 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
             setSelectedFiles={setSelectedFiles}
             isInputResponse={!!pendingInputRequest}
             parentCommentId={pendingInputRequest?.id}
+            isRequestingInput={isRequestingInput}
             onCommentPosted={() => {
               queryClient.invalidateQueries({ queryKey: ['taskComments', taskId] });
+              setIsRequestingInput(false);
             }}
           />
         </div>
