@@ -38,8 +38,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
-  const [activeTab, setActiveTab] = useState('tasks');
-  const { setRightSidebarContent, closeRightSidebar } = useLayout();
+  const { setRightSidebarContent } = useLayout();
   
  // Close right sidebar when component unmounts or when active tab changes
   useEffect(() => {
@@ -136,11 +135,13 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         />
       </div>
 
-<Tabs 
+      <Tabs 
         defaultValue="tasks" 
         className="w-full"
         onValueChange={(value) => {
-          setActiveTab(value);
+          if (value !== "tasks") {
+            setRightSidebarContent(null); // Set content to null to hide sidebar
+          }
         }}
       >
         <div className="flex justify-between items-center mb-4">
@@ -170,6 +171,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
             }}
           />
         </TabsContent>
+
 
         <TabsContent value="overview">
           <Card className="p-6">
