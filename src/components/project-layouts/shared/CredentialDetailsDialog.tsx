@@ -22,7 +22,7 @@ const CredentialDetailsDialog = ({ credential, open, onOpenChange }: CredentialD
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Lock className="h-5 w-5" />
+            <Lock className="h-5 w-5 text-blue-500" />
             {credential.type} Credentials
           </DialogTitle>
         </DialogHeader>
@@ -34,8 +34,8 @@ const CredentialDetailsDialog = ({ credential, open, onOpenChange }: CredentialD
             </div>
           )}
           
-          <div className="space-y-3">
-            <div className="flex items-start gap-2">
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 p-3 bg-secondary/50 rounded-lg">
               <Globe className="h-4 w-4 mt-1 text-muted-foreground" />
               <div>
                 <h4 className="text-sm font-medium">URL</h4>
@@ -51,7 +51,7 @@ const CredentialDetailsDialog = ({ credential, open, onOpenChange }: CredentialD
             </div>
 
             {credential.username && (
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-3 p-3 bg-secondary/50 rounded-lg">
                 <User className="h-4 w-4 mt-1 text-muted-foreground" />
                 <div>
                   <h4 className="text-sm font-medium">Username</h4>
@@ -61,11 +61,11 @@ const CredentialDetailsDialog = ({ credential, open, onOpenChange }: CredentialD
             )}
 
             {credential.password && (
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-3 p-3 bg-secondary/50 rounded-lg">
                 <Key className="h-4 w-4 mt-1 text-muted-foreground" />
                 <div>
                   <h4 className="text-sm font-medium">Password</h4>
-                  <p className="text-sm font-mono bg-secondary p-1 rounded">
+                  <p className="text-sm font-mono bg-secondary p-1.5 rounded">
                     {credential.password}
                   </p>
                 </div>
@@ -73,12 +73,10 @@ const CredentialDetailsDialog = ({ credential, open, onOpenChange }: CredentialD
             )}
           </div>
 
-          {credential.encrypted && (
-            <div className="mt-4 flex items-center gap-2 text-sm text-green-600">
-              <Lock className="h-4 w-4" />
-              <span>This credential is stored encrypted</span>
-            </div>
-          )}
+          <div className="mt-4 flex items-center gap-2 text-sm text-green-600 bg-green-50 p-2 rounded-lg">
+            <Lock className="h-4 w-4" />
+            <span>This credential is stored encrypted</span>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

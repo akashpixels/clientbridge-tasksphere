@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock } from "lucide-react";
+import { Lock, Key, Globe, User } from "lucide-react";
 import CredentialDetailsDialog from "./CredentialDetailsDialog";
 import { Tables } from "@/integrations/supabase/types";
 
@@ -51,55 +51,63 @@ const CredentialsTab = ({ projectId }: CredentialsTabProps) => {
                 Add Credentials
               </Button>
             </div>
-            <div className="grid gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {credentials.map((cred) => (
-                <div 
-                  key={cred.id} 
-                  className="p-4 border rounded-lg bg-card"
+                <Card
+                  key={cred.id}
+                  className="p-4 flex flex-col h-[280px] hover:shadow-md transition-shadow duration-200"
                 >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-medium">{cred.type}</h4>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {cred.details || 'No additional details'}
-                      </p>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <Lock className="h-5 w-5 text-blue-500" />
+                      <h4 className="font-medium truncate">{cred.type}</h4>
                     </div>
+                  </div>
+                  
+                  <div className="mt-4 flex-grow space-y-3">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {cred.details || 'No additional details'}
+                    </p>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <Globe className="h-4 w-4 mt-1 text-muted-foreground" />
+                        <div className="flex-grow min-w-0">
+                          <span className="text-xs text-muted-foreground block">URL</span>
+                          <a 
+                            href={cred.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-500 hover:text-blue-600 truncate block"
+                          >
+                            {cred.url}
+                          </a>
+                        </div>
+                      </div>
+                      
+                      {cred.username && (
+                        <div className="flex items-start gap-2">
+                          <User className="h-4 w-4 mt-1 text-muted-foreground" />
+                          <div className="flex-grow min-w-0">
+                            <span className="text-xs text-muted-foreground block">Username</span>
+                            <span className="text-sm truncate block">{cred.username}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t">
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="text-blue-500 hover:text-blue-600"
+                      className="w-full text-blue-500 hover:text-blue-600"
                       onClick={() => setSelectedCredential(cred)}
                     >
                       View Details
                     </Button>
                   </div>
-                  <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">URL:</span>
-                      <a 
-                        href={cred.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-500 hover:text-blue-600"
-                      >
-                        {cred.url}
-                      </a>
-                    </div>
-                    {cred.username && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">Username:</span>
-                        <span className="text-sm">{cred.username}</span>
-                      </div>
-                    )}
-                    {cred.encrypted && (
-                      <div className="mt-2">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                          🔒 Encrypted
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                </Card>
               ))}
             </div>
           </div>
