@@ -51,57 +51,59 @@ const CredentialsTab = ({ projectId }: CredentialsTabProps) => {
                 Add Credentials
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {credentials.map((cred) => (
                 <Card
                   key={cred.id}
-                  className="p-4 flex flex-col h-[280px] hover:shadow-md transition-shadow duration-200"
+                  className="relative flex flex-col h-[320px] hover:shadow-md transition-shadow duration-200 overflow-hidden group"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <Lock className="h-5 w-5 text-blue-500" />
-                      <h4 className="font-medium truncate">{cred.type}</h4>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 flex-grow space-y-3">
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {cred.details || 'No additional details'}
-                    </p>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-start gap-2">
-                        <Globe className="h-4 w-4 mt-1 text-muted-foreground" />
-                        <div className="flex-grow min-w-0">
-                          <span className="text-xs text-muted-foreground block">URL</span>
-                          <a 
-                            href={cred.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-500 hover:text-blue-600 truncate block"
-                          >
-                            {cred.url}
-                          </a>
-                        </div>
+                  <div className="p-4 flex-grow space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <Lock className="h-5 w-5 text-blue-500" />
+                        <h4 className="font-medium truncate">{cred.type}</h4>
                       </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {cred.details || 'No additional details'}
+                      </p>
                       
-                      {cred.username && (
+                      <div className="space-y-3">
                         <div className="flex items-start gap-2">
-                          <User className="h-4 w-4 mt-1 text-muted-foreground" />
-                          <div className="flex-grow min-w-0">
-                            <span className="text-xs text-muted-foreground block">Username</span>
-                            <span className="text-sm truncate block">{cred.username}</span>
+                          <Globe className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                          <div className="min-w-0">
+                            <span className="text-xs text-muted-foreground block">URL</span>
+                            <a 
+                              href={cred.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-sm text-blue-500 hover:text-blue-600 truncate block"
+                            >
+                              {cred.url}
+                            </a>
                           </div>
                         </div>
-                      )}
+                        
+                        {cred.username && (
+                          <div className="flex items-start gap-2">
+                            <User className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                            <div className="min-w-0">
+                              <span className="text-xs text-muted-foreground block">Username</span>
+                              <span className="text-sm truncate block">{cred.username}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t">
+                  <div className="p-4 mt-auto border-t bg-secondary/20">
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="w-full text-blue-500 hover:text-blue-600"
+                      className="w-full text-blue-500 hover:text-blue-600 hover:bg-secondary/40"
                       onClick={() => setSelectedCredential(cred)}
                     >
                       View Details
