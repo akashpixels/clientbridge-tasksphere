@@ -78,12 +78,12 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
       const { data: assignees } = await supabase
         .from('project_assignees')
         .select(`
-          user:user_profiles!project_assignees_user_id_fkey(
+          user:user_profiles!inner(
             id,
             first_name,
             last_name,
             username,
-            user_role:user_roles(name),
+            user_role:user_roles!inner(name),
             job_role:job_roles(name),
             client:clients(
               id,
@@ -95,7 +95,7 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
 
       console.log('Project assignees:', assignees);
 
-      // Get agency admins
+      // Get agency admins using user_roles table join
       const { data: agencyAdmins } = await supabase
         .from('user_profiles')
         .select(`
@@ -114,7 +114,7 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
 
       console.log('Agency admins:', agencyAdmins);
 
-      // Get client admins for this project's client
+      // Get client admins using user_roles table and project's client_id
       const { data: clientAdmins } = await supabase
         .from('user_profiles')
         .select(`
@@ -124,7 +124,7 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
           username,
           user_role:user_roles!inner(name),
           job_role:job_roles(name),
-          client:clients(
+          client:clients!inner(
             id,
             business_name
           )
