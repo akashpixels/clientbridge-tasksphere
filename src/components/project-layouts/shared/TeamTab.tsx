@@ -63,32 +63,35 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
     queryFn: async () => {
       console.log('Fetching team members for project:', projectId);
       
-      // First get the project's client
+      // First get the project's client_id
       const { data: project } = await supabase
         .from('projects')
-        .select(`
-          clients!client_id(
-            id,
-            user_profiles!id(
-              id,
-              first_name,
-              last_name,
-              username,
-              user_role:user_roles(name),
-              job_role:job_roles(name),
-              client:clients(
-                id,
-                business_name
-              )
-            )
-          )
-        `)
+        .select('client_id')
         .eq('id', projectId)
         .single();
 
-      console.log('Project and client data:', project);
+      console.log('Project data:', project);
 
-      if (!project?.clients?.user_profiles) return [];
+      if (!project?.client_id) return [];
+
+      // Get client users (including client admin)
+      const { data: clientUsers } = await supabase
+        .from('user_profiles')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          username,
+          user_role:user_roles(name),
+          job_role:job_roles(name),
+          client:clients(
+            id,
+            business_name
+          )
+        `)
+        .eq('client_id', project.client_id);
+
+      console.log('Client users:', clientUsers);
 
       // Get agency admins
       const { data: agencyAdmins } = await supabase
@@ -109,11 +112,11 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
 
       console.log('Agency admins:', agencyAdmins);
 
-      // Combine client admin and agency admins
+      // Combine client users and agency admins
       let allUsers = [
-        project.clients.user_profiles,
+        ...(clientUsers || []),
         ...(agencyAdmins || [])
-      ].filter(Boolean);
+      ];
 
       console.log('Combined users before filtering:', allUsers);
 
