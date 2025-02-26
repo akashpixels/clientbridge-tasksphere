@@ -926,6 +926,7 @@ export type Database = {
           priority_level_id: number
           project_id: string
           reference_links: Json | null
+          start_time: string | null
           target_device: Database["public"]["Enums"]["device_type"]
           task_completed_at: string | null
           task_type_id: number
@@ -949,6 +950,7 @@ export type Database = {
           priority_level_id?: number
           project_id: string
           reference_links?: Json | null
+          start_time?: string | null
           target_device?: Database["public"]["Enums"]["device_type"]
           task_completed_at?: string | null
           task_type_id: number
@@ -972,6 +974,7 @@ export type Database = {
           priority_level_id?: number
           project_id?: string
           reference_links?: Json | null
+          start_time?: string | null
           target_device?: Database["public"]["Enums"]["device_type"]
           task_completed_at?: string | null
           task_type_id?: number
