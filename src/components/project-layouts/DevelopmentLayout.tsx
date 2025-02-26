@@ -1,10 +1,7 @@
-
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
+import CredentialsTab from "./shared/CredentialsTab";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -29,27 +26,6 @@ interface DevelopmentLayoutProps {
 const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
   // Get the latest subscription
   const currentSubscription = project.project_subscriptions?.[0];
-
-  // Fetch credentials for the project
-  const { data: credentials, isLoading: isLoadingCredentials } = useQuery({
-    queryKey: ['credentials', project.id],
-    queryFn: async () => {
-      console.log('Fetching credentials for project:', project.id);
-      const { data, error } = await supabase
-        .from('project_credentials')
-        .select('*')
-        .eq('project_id', project.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching credentials:', error);
-        throw error;
-      }
-
-      console.log('Fetched credentials:', data);
-      return data;
-    },
-  });
   
   return (
     <div className="container mx-auto p-6">
@@ -143,73 +119,7 @@ const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
         </TabsContent>
 
         <TabsContent value="credentials">
-          <Card className="p-6">
-            {isLoadingCredentials ? (
-              <div>Loading credentials...</div>
-            ) : credentials && credentials.length > 0 ? (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">Project Credentials</h3>
-                  <button className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md">
-                    Add Credentials
-                  </button>
-                </div>
-                <div className="grid gap-4">
-                  {credentials.map((cred) => (
-                    <div 
-                      key={cred.id} 
-                      className="p-4 border rounded-lg bg-card"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-medium">{cred.type}</h4>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {cred.details || 'No additional details'}
-                          </p>
-                        </div>
-                        <button className="text-sm text-blue-500 hover:text-blue-600">
-                          View Details
-                        </button>
-                      </div>
-                      <div className="mt-4 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">URL:</span>
-                          <a 
-                            href={cred.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-500 hover:text-blue-600"
-                          >
-                            {cred.url}
-                          </a>
-                        </div>
-                        {cred.username && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">Username:</span>
-                            <span className="text-sm">{cred.username}</span>
-                          </div>
-                        )}
-                        {cred.encrypted && (
-                          <div className="mt-2">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                              🔒 Encrypted
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No credentials found for this project.</p>
-                <button className="mt-4 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md">
-                  Add First Credentials
-                </button>
-              </div>
-            )}
-          </Card>
+          <CredentialsTab projectId={project.id} />
         </TabsContent>
       </Tabs>
     </div>
