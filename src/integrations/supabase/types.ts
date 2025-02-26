@@ -918,8 +918,6 @@ export type Database = {
           dependent_task_id: string | null
           details: string
           eta: string | null
-          feedback_received_at: string | null
-          feedback_requested_at: string | null
           hours_needed: number | null
           hours_spent: number | null
           id: string
@@ -943,8 +941,6 @@ export type Database = {
           dependent_task_id?: string | null
           details: string
           eta?: string | null
-          feedback_received_at?: string | null
-          feedback_requested_at?: string | null
           hours_needed?: number | null
           hours_spent?: number | null
           id?: string
@@ -968,8 +964,6 @@ export type Database = {
           dependent_task_id?: string | null
           details?: string
           eta?: string | null
-          feedback_received_at?: string | null
-          feedback_requested_at?: string | null
           hours_needed?: number | null
           hours_spent?: number | null
           id?: string
