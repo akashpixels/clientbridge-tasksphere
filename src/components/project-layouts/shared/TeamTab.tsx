@@ -63,29 +63,32 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
     queryFn: async () => {
       console.log('Fetching team members for project:', projectId);
       
-      // Get project with client admin's details through user_profiles
+      // First get the project's client
       const { data: project } = await supabase
         .from('projects')
         .select(`
-          client_admin:user_profiles!client_id(
+          clients!client_id(
             id,
-            first_name,
-            last_name,
-            username,
-            user_role:user_roles(name),
-            job_role:job_roles(name),
-            client:clients(
+            user_profiles!id(
               id,
-              business_name
+              first_name,
+              last_name,
+              username,
+              user_role:user_roles(name),
+              job_role:job_roles(name),
+              client:clients(
+                id,
+                business_name
+              )
             )
           )
         `)
         .eq('id', projectId)
         .single();
 
-      console.log('Project and client admin data:', project);
+      console.log('Project and client data:', project);
 
-      if (!project) return [];
+      if (!project?.clients?.user_profiles) return [];
 
       // Get agency admins
       const { data: agencyAdmins } = await supabase
@@ -108,7 +111,7 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
 
       // Combine client admin and agency admins
       let allUsers = [
-        project?.client_admin,
+        project.clients.user_profiles,
         ...(agencyAdmins || [])
       ].filter(Boolean);
 
