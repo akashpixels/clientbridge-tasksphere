@@ -13,7 +13,8 @@ import {
   FileSpreadsheet, 
   FileCode, 
   FileArchive,
-  FileType 
+  FileType,
+  FileChartLine 
 } from "lucide-react";
 
 interface FileCardProps {
@@ -42,7 +43,11 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
         return <FileSpreadsheet className="w-20 h-20 stroke-[0.5] text-green-500" />;
       case 'ppt':
       case 'pptx':
-        return <FileSpreadsheet className="w-20 h-20 stroke-[0.5] text-orange-500" />;
+      case 'key':
+      case 'odp':
+      case 'pps':
+      case 'ppsx':
+        return <FileChartLine className="w-20 h-20 stroke-[0.5] text-orange-500" />;
       case 'zip':
       case 'rar':
       case '7z':
