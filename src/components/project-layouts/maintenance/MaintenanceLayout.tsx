@@ -11,6 +11,7 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useLayout } from "@/context/layout";
 import TaskCommentThread from "./comments/TaskCommentThread";
 import CredentialsTab from "../shared/CredentialsTab";
+import FilesTab from "../shared/FilesTab";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -195,9 +196,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         </TabsContent>
 
         <TabsContent value="files">
-          <Card className="p-6">
-            <p>Files content coming soon...</p>
-          </Card>
+          <FilesTab projectId={project.id} />
         </TabsContent>
       </Tabs>
 
