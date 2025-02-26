@@ -60,7 +60,17 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
   const { data: teamMembers, isLoading } = useQuery({
     queryKey: ['project-team-members', projectId, userRole, clientId],
     queryFn: async () => {
-      let query = supabase
+      // First get the project details to get the client_id
+      const { data: project } = await supabase
+        .from('projects')
+        .select('client_id')
+        .eq('id', projectId)
+        .single();
+
+      if (!project) return [];
+
+      // Get all assigned team members
+      const { data: assignees } = await supabase
         .from('project_assignees')
         .select(`
           user:user_profiles!project_assignees_user_id_fkey(
@@ -78,30 +88,60 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
         `)
         .eq('project_id', projectId);
 
-      const { data: assignees, error } = await query;
-      
-      if (error) {
-        throw error;
-      }
+      // Get agency admins
+      const { data: agencyAdmins } = await supabase
+        .from('user_profiles')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          username,
+          user_role:user_roles(name),
+          job_role:job_roles(name),
+          client:clients(
+            id,
+            business_name
+          )
+        `)
+        .eq('user_role.name', 'agency_admin');
 
-      // Get the project's client ID
-      const { data: project } = await supabase
-        .from('projects')
-        .select('client_id')
-        .eq('id', projectId)
-        .single();
+      // Get client admins for this project's client
+      const { data: clientAdmins } = await supabase
+        .from('user_profiles')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          username,
+          user_role:user_roles(name),
+          job_role:job_roles(name),
+          client:clients(
+            id,
+            business_name
+          )
+        `)
+        .eq('client_id', project.client_id)
+        .eq('user_role.name', 'client_admin');
 
-      if (!assignees) return [];
+      // Combine all users and remove duplicates
+      let allUsers = [
+        ...(assignees?.map(a => a.user) || []),
+        ...(agencyAdmins || []),
+        ...(clientAdmins || [])
+      ];
+
+      // Remove duplicates based on user ID
+      allUsers = allUsers.filter((user, index, self) =>
+        index === self.findIndex((u) => u.id === user.id)
+      );
 
       // Filter users based on role
-      let filteredUsers = assignees.map(a => a.user);
-
       if (userRole === 'client_admin') {
         // Show only users from their client
-        filteredUsers = filteredUsers.filter(user => user.client?.id === clientId);
+        allUsers = allUsers.filter(user => user.client?.id === clientId);
       } else if (userRole === 'client_staff') {
         // Show only client admin and staff from their client
-        filteredUsers = filteredUsers.filter(
+        allUsers = allUsers.filter(
           user => 
             user.client?.id === clientId && 
             ['client_admin', 'client_staff'].includes(user.user_role.name)
@@ -111,7 +151,7 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
         return [];
       }
       
-      return filteredUsers;
+      return allUsers;
     },
     enabled: !!userRole && !!projectId,
   });
