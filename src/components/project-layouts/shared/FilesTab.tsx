@@ -5,7 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
 import PreviewDialog from "../maintenance/comments/PreviewDialog";
-import { FileText, File } from "lucide-react";
+import { 
+  File, 
+  FileText, 
+  FileImage, 
+  FileVideo, 
+  FileSpreadsheet, 
+  FileCode, 
+  FileArchive,
+  FileType 
+} from "lucide-react";
 
 interface FileCardProps {
   file: {
@@ -23,16 +32,45 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
     const fileExtension = url.split('.').pop()?.toLowerCase();
     switch (fileExtension) {
       case 'pdf':
-        return <FileText className="w-20 h-20 stroke-[0.5] text-red-500" />;
+        return <File className="w-20 h-20 stroke-[0.5] text-red-500" />;
       case 'doc':
       case 'docx':
         return <FileText className="w-20 h-20 stroke-[0.5] text-blue-500" />;
       case 'xls':
       case 'xlsx':
-        return <FileText className="w-20 h-20 stroke-[0.5] text-green-500" />;
+      case 'csv':
+        return <FileSpreadsheet className="w-20 h-20 stroke-[0.5] text-green-500" />;
       case 'ppt':
       case 'pptx':
-        return <FileText className="w-20 h-20 stroke-[0.5] text-orange-500" />;
+        return <FileSpreadsheet className="w-20 h-20 stroke-[0.5] text-orange-500" />;
+      case 'zip':
+      case 'rar':
+      case '7z':
+      case 'tar':
+      case 'gz':
+        return <FileArchive className="w-20 h-20 stroke-[0.5] text-purple-500" />;
+      case 'mp4':
+      case 'avi':
+      case 'mov':
+      case 'wmv':
+      case 'flv':
+      case 'mkv':
+        return <FileVideo className="w-20 h-20 stroke-[0.5] text-blue-400" />;
+      case 'js':
+      case 'ts':
+      case 'jsx':
+      case 'tsx':
+      case 'html':
+      case 'css':
+      case 'php':
+      case 'py':
+      case 'java':
+      case 'cpp':
+        return <FileCode className="w-20 h-20 stroke-[0.5] text-yellow-500" />;
+      case 'txt':
+      case 'rtf':
+      case 'md':
+        return <FileType className="w-20 h-20 stroke-[0.5] text-gray-500" />;
       default:
         return <File className="w-20 h-20 stroke-[0.5] text-gray-500" />;
     }
@@ -41,6 +79,12 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
   const isImageFile = (url: string) => {
     const fileExtension = url.split('.').pop()?.toLowerCase();
     return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = '';
+    e.currentTarget.onerror = null;
+    e.currentTarget.parentElement!.innerHTML = FileImage.toString();
   };
 
   return (
@@ -55,6 +99,7 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
               src={file.file_url}
               alt={file.file_name}
               className="w-full h-full object-cover rounded"
+              onError={handleImageError}
             />
           </div>
         ) : (
