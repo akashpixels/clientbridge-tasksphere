@@ -48,6 +48,7 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
           .single();
 
         if (!error && userData) {
+          console.log('Current user role:', userData.user_role?.name);
           setUserRole(userData.user_role?.name);
           setClientId(userData.client_id);
         }
@@ -60,12 +61,16 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
   const { data: teamMembers, isLoading } = useQuery({
     queryKey: ['project-team-members', projectId, userRole, clientId],
     queryFn: async () => {
+      console.log('Fetching team members for project:', projectId);
+      
       // First get the project details to get the client_id
       const { data: project } = await supabase
         .from('projects')
         .select('client_id')
         .eq('id', projectId)
         .single();
+
+      console.log('Project data:', project);
 
       if (!project) return [];
 
@@ -88,6 +93,8 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
         `)
         .eq('project_id', projectId);
 
+      console.log('Project assignees:', assignees);
+
       // Get agency admins
       const { data: agencyAdmins } = await supabase
         .from('user_profiles')
@@ -103,7 +110,9 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
             business_name
           )
         `)
-        .eq('user_role.name', 'agency_admin');
+        .eq('user_roles.name', 'agency_admin');
+
+      console.log('Agency admins:', agencyAdmins);
 
       // Get client admins for this project's client
       const { data: clientAdmins } = await supabase
@@ -121,18 +130,22 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
           )
         `)
         .eq('client_id', project.client_id)
-        .eq('user_role.name', 'client_admin');
+        .eq('user_roles.name', 'client_admin');
+
+      console.log('Client admins:', clientAdmins);
 
       // Combine all users and remove duplicates
       let allUsers = [
-        ...(assignees?.map(a => a.user) || []),
+        ...((assignees?.map(a => a.user) || [])),
         ...(agencyAdmins || []),
         ...(clientAdmins || [])
-      ];
+      ].filter(Boolean); // Remove any null/undefined values
+
+      console.log('Combined users before filtering:', allUsers);
 
       // Remove duplicates based on user ID
       allUsers = allUsers.filter((user, index, self) =>
-        index === self.findIndex((u) => u.id === user.id)
+        index === self.findIndex((u) => u?.id === user?.id)
       );
 
       // Filter users based on role
@@ -151,6 +164,7 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
         return [];
       }
       
+      console.log('Final filtered users:', allUsers);
       return allUsers;
     },
     enabled: !!userRole && !!projectId,
