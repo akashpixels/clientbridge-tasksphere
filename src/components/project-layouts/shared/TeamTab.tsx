@@ -103,14 +103,14 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
           first_name,
           last_name,
           username,
-          user_role:user_roles(name),
+          user_role:user_roles!inner(name),
           job_role:job_roles(name),
           client:clients(
             id,
             business_name
           )
         `)
-        .eq('user_roles.name', 'agency_admin');
+        .eq('user_role.name', 'agency_admin');
 
       console.log('Agency admins:', agencyAdmins);
 
@@ -122,7 +122,7 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
           first_name,
           last_name,
           username,
-          user_role:user_roles(name),
+          user_role:user_roles!inner(name),
           job_role:job_roles(name),
           client:clients(
             id,
@@ -130,7 +130,7 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
           )
         `)
         .eq('client_id', project.client_id)
-        .eq('user_roles.name', 'client_admin');
+        .eq('user_role.name', 'client_admin');
 
       console.log('Client admins:', clientAdmins);
 
