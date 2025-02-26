@@ -60,7 +60,7 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
         ) : (
           getFileIcon(file.file_url)
         )}
-        <p className="mt-2 text-sm text-center line-clamp-2 w-full">
+        <p className="mt-2 text-sm text-center break-all line-clamp-2 w-24">
           {file.file_name}
         </p>
       </div>
