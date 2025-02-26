@@ -28,7 +28,7 @@ const CredentialCard = ({ credential }: { credential: Tables<"project_credential
       </div>
 
       <div className="p-4 flex-grow space-y-4">
-        <div>
+        <div className="min-h-[100px]">
           <h4 className="font-medium text-lg">{credential.type}</h4>
           <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
             {credential.details || 'No additional details'}
