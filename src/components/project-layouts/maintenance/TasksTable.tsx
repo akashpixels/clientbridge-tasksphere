@@ -206,7 +206,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
                     color: getStatusColor(task.status || { name: null, color_hex: null }).text
                   }}
                 >
-                  {task.status?.name}
+                  {task.status?.name === 'Open' ? 'Starts at' : task.status?.name}
                 </span>
                 {task.task_completed_at && task.actual_hours_spent && (
                   <span className="text-xs text-gray-500 pl-2">
