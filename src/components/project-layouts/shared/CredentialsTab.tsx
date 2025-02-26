@@ -24,7 +24,7 @@ const CredentialCard = ({
         </span>
       </div>
 
-      <div className="p-4 flex-grow space-y-4">
+      <div className="p-4 flex-grow space-y-4 min-h-[200px]">
         <div className="py-0 pb-8">
           <h4 className="font-medium text-lg">{credential.type}</h4>
           <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
