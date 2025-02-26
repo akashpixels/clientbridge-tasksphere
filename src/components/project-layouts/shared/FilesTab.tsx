@@ -1,9 +1,11 @@
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
-import { FileIcon, ImageIcon, VideoIcon, Music, FileTextIcon } from "lucide-react";
+import PreviewDialog from "../maintenance/comments/PreviewDialog";
+import { FileText, File } from "lucide-react";
 
 interface FileCardProps {
   file: {
@@ -13,28 +15,51 @@ interface FileCardProps {
     created_at: string;
     file_type_id: number | null;
   };
+  onFileClick: (url: string) => void;
 }
 
-const FileCard = ({ file }: FileCardProps) => {
-  const getFileIcon = () => {
-    const extension = file.file_name.split('.').pop()?.toLowerCase();
-    
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension || '')) {
-      return <ImageIcon className="w-12 h-12 text-blue-500" />;
-    } else if (['mp4', 'webm', 'avi'].includes(extension || '')) {
-      return <VideoIcon className="w-12 h-12 text-purple-500" />;
-    } else if (['mp3', 'wav'].includes(extension || '')) {
-      return <Music className="w-12 h-12 text-green-500" />;
-    } else if (['pdf', 'doc', 'docx', 'txt'].includes(extension || '')) {
-      return <FileTextIcon className="w-12 h-12 text-red-500" />;
+const FileCard = ({ file, onFileClick }: FileCardProps) => {
+  const getFileIcon = (url: string) => {
+    const fileExtension = url.split('.').pop()?.toLowerCase();
+    switch (fileExtension) {
+      case 'pdf':
+        return <FileText className="w-12 h-12 text-red-500" />;
+      case 'doc':
+      case 'docx':
+        return <FileText className="w-12 h-12 text-blue-500" />;
+      case 'xls':
+      case 'xlsx':
+        return <FileText className="w-12 h-12 text-green-500" />;
+      case 'ppt':
+      case 'pptx':
+        return <FileText className="w-12 h-12 text-orange-500" />;
+      default:
+        return <File className="w-12 h-12 text-gray-500" />;
     }
-    return <FileIcon className="w-12 h-12 text-gray-500" />;
+  };
+
+  const isImageFile = (url: string) => {
+    const fileExtension = url.split('.').pop()?.toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
   };
 
   return (
-    <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+    <div 
+      className="p-4 border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+      onClick={() => onFileClick(file.file_url)}
+    >
       <div className="flex flex-col items-center">
-        {getFileIcon()}
+        {isImageFile(file.file_url) ? (
+          <div className="w-12 h-12 relative">
+            <img
+              src={file.file_url}
+              alt={file.file_name}
+              className="w-full h-full object-cover rounded"
+            />
+          </div>
+        ) : (
+          getFileIcon(file.file_url)
+        )}
         <p className="mt-2 text-sm text-center truncate max-w-full">
           {file.file_name}
         </p>
@@ -48,6 +73,8 @@ interface FilesTabProps {
 }
 
 const FilesTab = ({ projectId }: FilesTabProps) => {
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+
   const { data: files, isLoading } = useQuery({
     queryKey: ['project-files', projectId],
     queryFn: async () => {
@@ -91,6 +118,10 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     );
   }
 
+  const handleDownload = (url: string) => {
+    window.open(url, '_blank');
+  };
+
   return (
     <Card className="p-6">
       <div className="space-y-8">
@@ -99,12 +130,22 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
             <h3 className="text-lg font-medium mb-4">{date}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
               {dateFiles.map((file) => (
-                <FileCard key={file.id} file={file} />
+                <FileCard 
+                  key={file.id} 
+                  file={file} 
+                  onFileClick={setSelectedFile} 
+                />
               ))}
             </div>
           </div>
         ))}
       </div>
+
+      <PreviewDialog
+        selectedImage={selectedFile}
+        onClose={() => setSelectedFile(null)}
+        onDownload={handleDownload}
+      />
     </Card>
   );
 };
