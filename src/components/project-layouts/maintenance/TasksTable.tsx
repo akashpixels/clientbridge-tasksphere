@@ -213,6 +213,11 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
                     {task.actual_hours_spent} hrs
                   </span>
                 )}
+                {task.status?.name === 'Open' && task.start_time && (
+                  <span className="text-xs text-gray-500 pl-2">
+                    {format(new Date(task.start_time), "h:mmaaa d MMM")}
+                  </span>
+                )}
               </div>
             </TableCell>
             <TableCell>
