@@ -66,55 +66,31 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
       // First get the project details to get the client_id
       const { data: project } = await supabase
         .from('projects')
-        .select('client_id')
-        .eq('id', projectId)
-        .single();
-
-      console.log('Project data:', project);
-
-      if (!project) return [];
-
-      // Get all assigned team members
-      const { data: assignees } = await supabase
-        .from('project_assignees')
         .select(`
-          user:user_profiles!inner(
-            id,
-            first_name,
-            last_name,
-            username,
-            user_role:user_roles!inner(name),
-            job_role:job_roles(name),
-            client:clients(
+          client_id,
+          client:clients(
+            user_profiles:user_profiles(
               id,
-              business_name
+              first_name,
+              last_name,
+              username,
+              user_role:user_roles(name),
+              job_role:job_roles(name),
+              client:clients(
+                id,
+                business_name
+              )
             )
           )
         `)
-        .eq('project_id', projectId);
+        .eq('id', projectId)
+        .single();
 
-      console.log('Project assignees:', assignees);
+      console.log('Project and client data:', project);
 
-      // Get agency admins using user_roles table join
-      const { data: agencyAdmins } = await supabase
-        .from('user_profiles')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          username,
-          user_role:user_roles!inner(name),
-          job_role:job_roles(name),
-          client:clients(
-            id,
-            business_name
-          )
-        `)
-        .eq('user_role.name', 'agency_admin');
+      if (!project) return [];
 
-      console.log('Agency admins:', agencyAdmins);
-
-      // Get client admins using user_roles table and project's client_id
+      // Get client admin from user_profiles where client_id matches and role is client_admin
       const { data: clientAdmins } = await supabase
         .from('user_profiles')
         .select(`
@@ -134,12 +110,30 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
 
       console.log('Client admins:', clientAdmins);
 
+      // Get agency admins
+      const { data: agencyAdmins } = await supabase
+        .from('user_profiles')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          username,
+          user_role:user_roles!inner(name),
+          job_role:job_roles(name),
+          client:clients(
+            id,
+            business_name
+          )
+        `)
+        .eq('user_role.name', 'agency_admin');
+
+      console.log('Agency admins:', agencyAdmins);
+
       // Combine all users and remove duplicates
       let allUsers = [
-        ...((assignees?.map(a => a.user) || [])),
-        ...(agencyAdmins || []),
-        ...(clientAdmins || [])
-      ].filter(Boolean); // Remove any null/undefined values
+        ...(clientAdmins || []),
+        ...(agencyAdmins || [])
+      ].filter(Boolean);
 
       console.log('Combined users before filtering:', allUsers);
 
