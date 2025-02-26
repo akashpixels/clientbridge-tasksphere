@@ -10,6 +10,7 @@ import ImageViewerDialog from "./ImageViewerDialog";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useLayout } from "@/context/layout";
 import TaskCommentThread from "./comments/TaskCommentThread";
+import CredentialsTab from "../shared/CredentialsTab";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -190,9 +191,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         </TabsContent>
 
         <TabsContent value="credentials">
-          <Card className="p-6">
-            <p>Credentials content coming soon...</p>
-          </Card>
+          <CredentialsTab projectId={project.id} />
         </TabsContent>
 
         <TabsContent value="files">
