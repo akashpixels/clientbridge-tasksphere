@@ -1,8 +1,8 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import CredentialsTab from "./shared/CredentialsTab";
+import TeamTab from "./shared/TeamTab";
 
 interface BrandingLayoutProps {
   project: Tables<"projects"> & {
@@ -112,9 +112,7 @@ const BrandingLayout = ({ project }: BrandingLayoutProps) => {
         </TabsContent>
 
         <TabsContent value="team">
-          <Card className="p-6">
-            <p>Team content coming soon...</p>
-          </Card>
+          <TeamTab projectId={project.id} />
         </TabsContent>
 
         <TabsContent value="credentials">
