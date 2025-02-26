@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
-import { FileIcon, ImageIcon, VideoIcon, AudioIcon, FileTextIcon } from "lucide-react";
+import { FileIcon, ImageIcon, VideoIcon, Music, FileTextIcon } from "lucide-react";
 
 interface FileCardProps {
   file: {
@@ -24,7 +24,7 @@ const FileCard = ({ file }: FileCardProps) => {
     } else if (['mp4', 'webm', 'avi'].includes(extension || '')) {
       return <VideoIcon className="w-12 h-12 text-purple-500" />;
     } else if (['mp3', 'wav'].includes(extension || '')) {
-      return <AudioIcon className="w-12 h-12 text-green-500" />;
+      return <Music className="w-12 h-12 text-green-500" />;
     } else if (['pdf', 'doc', 'docx', 'txt'].includes(extension || '')) {
       return <FileTextIcon className="w-12 h-12 text-red-500" />;
     }
