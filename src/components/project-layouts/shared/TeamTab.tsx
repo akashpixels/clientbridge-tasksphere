@@ -63,52 +63,29 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
     queryFn: async () => {
       console.log('Fetching team members for project:', projectId);
       
-      // First get the project details to get the client_id
+      // Get project with client admin's details
       const { data: project } = await supabase
         .from('projects')
         .select(`
-          client_id,
-          client:clients(
-            user_profiles:user_profiles(
+          client:client_id(
+            id,
+            first_name,
+            last_name,
+            username,
+            user_role:user_roles(name),
+            job_role:job_roles(name),
+            client:clients(
               id,
-              first_name,
-              last_name,
-              username,
-              user_role:user_roles(name),
-              job_role:job_roles(name),
-              client:clients(
-                id,
-                business_name
-              )
+              business_name
             )
           )
         `)
         .eq('id', projectId)
         .single();
 
-      console.log('Project and client data:', project);
+      console.log('Project and client admin data:', project);
 
       if (!project) return [];
-
-      // Get client admin from user_profiles where client_id matches and role is client_admin
-      const { data: clientAdmins } = await supabase
-        .from('user_profiles')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          username,
-          user_role:user_roles!inner(name),
-          job_role:job_roles(name),
-          client:clients!inner(
-            id,
-            business_name
-          )
-        `)
-        .eq('client_id', project.client_id)
-        .eq('user_role.name', 'client_admin');
-
-      console.log('Client admins:', clientAdmins);
 
       // Get agency admins
       const { data: agencyAdmins } = await supabase
@@ -129,9 +106,9 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
 
       console.log('Agency admins:', agencyAdmins);
 
-      // Combine all users and remove duplicates
+      // Combine client admin and agency admins
       let allUsers = [
-        ...(clientAdmins || []),
+        project.client,
         ...(agencyAdmins || [])
       ].filter(Boolean);
 
