@@ -22,7 +22,7 @@ const AddCredentialDialog = ({ projectId, open, onClose }: AddCredentialDialogPr
 
   const queryClient = useQueryClient();
 
-  const { mutate: addCredential, isLoading } = useMutation({
+  const { mutate: addCredential, isPending } = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase
         .from("project_credentials")
@@ -126,8 +126,8 @@ const AddCredentialDialog = ({ projectId, open, onClose }: AddCredentialDialogPr
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Adding..." : "Add Credential"}
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Adding..." : "Add Credential"}
             </Button>
           </DialogFooter>
         </form>
