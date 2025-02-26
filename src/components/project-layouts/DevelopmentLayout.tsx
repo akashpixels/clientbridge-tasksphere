@@ -2,7 +2,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import CredentialsTab from "./shared/CredentialsTab";
-import TeamTab from "./shared/TeamTab";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -114,7 +113,9 @@ const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
         </TabsContent>
 
         <TabsContent value="team">
-          <TeamTab projectId={project.id} />
+          <Card className="p-6">
+            <p>Team content coming soon...</p>
+          </Card>
         </TabsContent>
 
         <TabsContent value="credentials">
