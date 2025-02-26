@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Globe, User, Copy } from "lucide-react";
+import { Eye, EyeOff, Globe, User, Copy, Shield } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 
 interface CredentialsTabProps {
@@ -20,7 +21,8 @@ const CredentialCard = ({ credential }: { credential: Tables<"project_credential
   return (
     <Card className="relative flex flex-col h-[320px] hover:shadow-md transition-shadow duration-200 overflow-hidden group">
       <div className="absolute top-2 right-2">
-        <span className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full">
+        <span className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full flex items-center gap-1">
+          <Shield className="h-3 w-3" />
           Encrypted
         </span>
       </div>
