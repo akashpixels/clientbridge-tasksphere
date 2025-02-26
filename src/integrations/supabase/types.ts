@@ -1151,6 +1151,13 @@ export type Database = {
         }
         Returns: number
       }
+      calculate_start_time: {
+        Args: {
+          created_at: string
+          priority_id: number
+        }
+        Returns: string
+      }
       count_active_tasks: {
         Args: {
           project_id: string
@@ -1162,6 +1169,10 @@ export type Database = {
           project_id: string
         }
         Returns: boolean
+      }
+      update_in_progress_tasks: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {
