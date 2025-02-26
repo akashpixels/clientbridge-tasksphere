@@ -1148,6 +1148,18 @@ export type Database = {
         }
         Returns: number
       }
+      count_active_tasks: {
+        Args: {
+          project_id: string
+        }
+        Returns: number
+      }
+      should_queue_task: {
+        Args: {
+          project_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       attachment_type: "image" | "document" | "other"
