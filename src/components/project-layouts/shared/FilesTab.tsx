@@ -23,18 +23,18 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
     const fileExtension = url.split('.').pop()?.toLowerCase();
     switch (fileExtension) {
       case 'pdf':
-        return <FileText className="w-12 h-12 text-red-500" />;
+        return <FileText className="w-16 h-16 stroke-1 text-red-500" />;
       case 'doc':
       case 'docx':
-        return <FileText className="w-12 h-12 text-blue-500" />;
+        return <FileText className="w-16 h-16 stroke-1 text-blue-500" />;
       case 'xls':
       case 'xlsx':
-        return <FileText className="w-12 h-12 text-green-500" />;
+        return <FileText className="w-16 h-16 stroke-1 text-green-500" />;
       case 'ppt':
       case 'pptx':
-        return <FileText className="w-12 h-12 text-orange-500" />;
+        return <FileText className="w-16 h-16 stroke-1 text-orange-500" />;
       default:
-        return <File className="w-12 h-12 text-gray-500" />;
+        return <File className="w-16 h-16 stroke-1 text-gray-500" />;
     }
   };
 
@@ -50,7 +50,7 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
     >
       <div className="flex flex-col items-center">
         {isImageFile(file.file_url) ? (
-          <div className="w-12 h-12 relative">
+          <div className="w-16 h-16 relative">
             <img
               src={file.file_url}
               alt={file.file_name}
