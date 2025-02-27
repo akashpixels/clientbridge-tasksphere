@@ -7,6 +7,9 @@ import TasksTabContent from "./maintenance/TasksTabContent";
 import ProjectStats from "./maintenance/ProjectStats";
 import CredentialsTab from "./shared/CredentialsTab";
 import TeamTab from "./shared/TeamTab";
+import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MaintenanceLayoutProps {
   project: Tables<"projects"> & {
@@ -31,6 +34,24 @@ interface MaintenanceLayoutProps {
 }
 
 const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
+  // State for month selection
+  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
+  
+  // Get tasks for the current month to calculate hours
+  const { data: monthlyTasks } = useQuery({
+    queryKey: ['monthly-tasks', project.id, selectedMonth],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('tasks')
+        .select('actual_hours_spent')
+        .eq('project_id', project.id);
+      return data || [];
+    }
+  });
+  
+  // Calculate monthly hours from tasks
+  const monthlyHours = monthlyTasks?.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) || 0;
+  
   // Get subscription if available
   const subscription = project.project_subscriptions && project.project_subscriptions.length > 0 
     ? project.project_subscriptions[0] 
@@ -38,10 +59,16 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
 
   return (
     <div className="container mx-auto">
-      <ProjectHeader project={project} />
+      <ProjectHeader 
+        project={project} 
+        selectedMonth={selectedMonth}
+        onMonthChange={setSelectedMonth}
+        monthlyHours={monthlyHours}
+      />
       <ProjectStats 
         project={project} 
-        subscription={subscription} 
+        selectedMonth={selectedMonth}
+        monthlyHours={monthlyHours}
       />
 
       <Tabs defaultValue="tasks" className="w-full mt-6">
@@ -54,7 +81,14 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
         </TabsList>
 
         <TabsContent value="tasks">
-          <TasksTabContent projectId={project.id} />
+          <TasksTabContent 
+            isLoadingTasks={false}
+            tasks={[]}
+            sortConfig={{ key: 'created_at', direction: 'desc' }}
+            onSort={() => {}}
+            onImageClick={() => {}}
+            onCommentClick={() => {}}
+          />
         </TabsContent>
 
         <TabsContent value="overview">
