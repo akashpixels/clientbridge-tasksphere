@@ -37,34 +37,56 @@ const Clients = () => {
     queryKey: ['client-admins'],
     enabled: currentUserRole === 1, // Only run for agency admins
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('clients')
+      // First, get users with role_id = 3 (client admins)
+      const { data: userProfiles, error: userError } = await supabase
+        .from('user_profiles')
         .select(`
           id,
-          business_name,
-          user_profiles!clients_id_fkey (
-            id,
-            first_name,
-            last_name,
-            username
-          )
-        `);
-
-      if (error) {
-        console.error('Error fetching client admins:', error);
+          first_name,
+          last_name,
+          username,
+          client_id
+        `)
+        .eq('user_role_id', 3);
+      
+      if (userError) {
+        console.error('Error fetching client admin users:', userError);
         return [];
       }
       
-      // Transform the data to match our table structure
-      const transformedData = data
-        .filter(client => client.user_profiles && client.user_profiles.length > 0)
-        .map(client => ({
-          ...client.user_profiles[0],
-          business_name: client.business_name
-        }));
-
-      console.log('Fetched client admins:', transformedData);
-      return transformedData;
+      // If we have user profiles, fetch the associated client business names
+      if (userProfiles && userProfiles.length > 0) {
+        // Get all client IDs to fetch
+        const clientIds = userProfiles
+          .filter(profile => profile.client_id)
+          .map(profile => profile.client_id);
+        
+        if (clientIds.length > 0) {
+          const { data: clients, error: clientError } = await supabase
+            .from('clients')
+            .select('id, business_name')
+            .in('id', clientIds);
+          
+          if (clientError) {
+            console.error('Error fetching client businesses:', clientError);
+          } else {
+            // Create a map of client IDs to business names for quick lookup
+            const clientMap = new Map();
+            clients.forEach(client => {
+              clientMap.set(client.id, client.business_name);
+            });
+            
+            // Add business names to the user profiles
+            return userProfiles.map(profile => ({
+              ...profile,
+              business_name: profile.client_id ? clientMap.get(profile.client_id) : null
+            }));
+          }
+        }
+      }
+      
+      // Return the original user profiles if we couldn't fetch clients
+      return userProfiles || [];
     }
   });
 
