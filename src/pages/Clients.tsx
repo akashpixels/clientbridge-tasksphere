@@ -12,15 +12,15 @@ import {
   TableRow 
 } from "@/components/ui/table";
 
-// Define the type for client admins
+// Define the type for client data
 interface ClientAdmin {
   id: string;
   first_name: string;
   last_name: string;
   username: string;
   email: string;
-  client_id: string | null;
-  business_name: string | null;
+  client_id: string;
+  business_name: string;
 }
 
 const Clients = () => {
@@ -48,98 +48,67 @@ const Clients = () => {
     queryKey: ['client-admins'],
     enabled: currentUserRole === 1, // Only run for agency admins
     queryFn: async () => {
-      console.log("Fetching client admins...");
+      console.log("Fetching client data...");
       
-      // First, get users with role_id = 3 (client admins)
-      const { data: userProfiles, error: userError } = await supabase
-        .from('user_profiles')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          username,
-          client_id
-        `)
-        .eq('user_role_id', 3);
+      // First, get all clients directly from the clients table
+      const { data: clients, error: clientError } = await supabase
+        .from('clients')
+        .select('id, business_name');
       
-      if (userError) {
-        console.error('Error fetching client admin users:', userError);
+      if (clientError) {
+        console.error('Error fetching clients:', clientError);
         return [];
       }
       
-      console.log("User profiles fetched:", userProfiles);
+      console.log("Clients fetched:", clients);
       
-      // Get all client IDs to fetch, including null check
-      const clientIds = userProfiles
-        .filter(profile => profile.client_id)
-        .map(profile => profile.client_id);
+      // Create an array to store the final results
+      const results: ClientAdmin[] = [];
       
-      console.log("Client IDs to fetch:", clientIds);
-      
-      // Create a map to store client business names
-      const clientMap = new Map();
-      
-      // Only fetch clients if we have client IDs
-      if (clientIds.length > 0) {
-        const { data: clients, error: clientError } = await supabase
-          .from('clients')
-          .select('id, business_name');
+      // For each client, find the associated client admin user
+      for (const client of clients) {
+        // Get the client admin user (user_role_id = 3) associated with this client
+        const { data: userProfiles, error: userError } = await supabase
+          .from('user_profiles')
+          .select('id, first_name, last_name, username')
+          .eq('user_role_id', 3)
+          .eq('id', client.id); // Assuming id in user_profiles references client.id
         
-        if (clientError) {
-          console.error('Error fetching client businesses:', clientError);
-        } else {
-          console.log("Clients fetched:", clients);
-          
-          // Create a map of client IDs to business names for quick lookup
-          clients.forEach(client => {
-            clientMap.set(client.id, client.business_name);
-          });
+        if (userError) {
+          console.error(`Error fetching user profile for client ${client.id}:`, userError);
+          continue;
         }
-      }
-      
-      // Get email addresses from auth.users for each user profile
-      const authIds = userProfiles.map(profile => profile.id);
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      
-      console.log("Auth users fetched:", authUsers);
-      
-      // Create email map
-      const emailMap = new Map();
-      if (authUsers && !authError) {
-        // Properly type the authUsers to access the users array
-        type AuthUser = {
-          id: string;
-          email?: string;
-        };
         
-        // Use type assertion to tell TypeScript about the shape of the data
-        const users = (authUsers as unknown as { users: AuthUser[] }).users || [];
-        users.forEach(user => {
-          if (user.id && user.email) {
-            emailMap.set(user.id, user.email);
+        console.log(`User profiles for client ${client.id}:`, userProfiles);
+        
+        // If we found matching user profiles
+        if (userProfiles && userProfiles.length > 0) {
+          // For each user profile, get the email from auth.users
+          for (const profile of userProfiles) {
+            // Get email from auth.users using the profile id
+            const { data: authUser, error: authError } = await supabase.auth
+              .admin.getUserById(profile.id);
+            
+            if (authError) {
+              console.error(`Error fetching auth user for profile ${profile.id}:`, authError);
+              continue;
+            }
+            
+            const email = authUser?.user?.email || 'No email';
+            
+            // Add to results
+            results.push({
+              ...profile,
+              email,
+              client_id: client.id,
+              business_name: client.business_name,
+            });
           }
-        });
-      } else {
-        console.error('Error fetching auth users:', authError);
+        }
       }
       
-      // Combine everything into the final result
-      const result = userProfiles.map(profile => {
-        let businessName = null;
-        
-        if (profile.client_id && clientMap.has(profile.client_id)) {
-          businessName = clientMap.get(profile.client_id);
-        }
-        
-        return {
-          ...profile,
-          email: emailMap.get(profile.id) || 'No email',
-          business_name: businessName
-        };
-      });
-      
-      console.log("Final result:", result);
-      return result as ClientAdmin[];
+      console.log("Final client admins data:", results);
+      return results;
     }
   });
 
@@ -181,9 +150,7 @@ const Clients = () => {
                     </TableCell>
                     <TableCell>{admin.username}</TableCell>
                     <TableCell>{admin.email}</TableCell>
-                    <TableCell>
-                      {admin.business_name || 'Not assigned'}
-                    </TableCell>
+                    <TableCell>{admin.business_name}</TableCell>
                   </TableRow>
                 ))
               ) : (
