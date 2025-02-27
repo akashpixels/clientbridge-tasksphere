@@ -46,7 +46,8 @@ const Clients = () => {
           first_name,
           last_name,
           username,
-          client:clients(business_name)
+          client_id,
+          clients!user_profiles_client_id_fkey(business_name)
         `)
         .eq('user_role_id', 3); // Only fetch client admins (role_id = 3)
       
@@ -104,7 +105,7 @@ const Clients = () => {
                         </TableCell>
                         <TableCell>{admin.username}</TableCell>
                         <TableCell>
-                          {admin.client?.business_name || 'Not assigned'}
+                          {admin.clients?.business_name || 'Not assigned'}
                         </TableCell>
                       </TableRow>
                     ))
