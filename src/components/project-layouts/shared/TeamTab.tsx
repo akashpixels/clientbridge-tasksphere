@@ -20,8 +20,6 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
   const { data: teamMembers, isLoading } = useQuery({
     queryKey: ['project-team', projectId],
     queryFn: async () => {
-      console.log('Fetching team members for project:', projectId);
-      
       // First get the project's client_id
       const { data: project, error: projectError } = await supabase
         .from('projects')
@@ -33,8 +31,6 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
         console.error('Error fetching project:', projectError);
         return [];
       }
-      
-      console.log('Found project with client_id:', project.client_id);
       
       // Get the client admin (user_role_id = 3)
       const { data: clientAdmin, error: adminError } = await supabase
@@ -56,8 +52,6 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
         return [];
       }
       
-      console.log('Found client admin:', clientAdmin);
-      
       // Get project assignees if any
       const { data: assignees, error: assigneesError } = await supabase
         .from('project_assignees')
@@ -78,8 +72,6 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
         return [clientAdmin];
       }
       
-      console.log('Found assignees:', assignees);
-      
       // Combine client admin with assignees
       const allTeamMembers = [
         clientAdmin,
@@ -87,12 +79,9 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
       ].filter(Boolean);
       
       // Remove duplicates
-      const uniqueMembers = allTeamMembers.filter((member, index, self) => 
+      return allTeamMembers.filter((member, index, self) => 
         index === self.findIndex(m => m.id === member.id)
       );
-      
-      console.log('Final team members:', uniqueMembers);
-      return uniqueMembers;
     },
   });
 
