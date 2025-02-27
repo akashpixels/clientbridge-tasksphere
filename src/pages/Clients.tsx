@@ -1,7 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { 
@@ -36,8 +35,8 @@ const Clients = () => {
     },
   });
 
-  const { data: agencyStaff, isLoading } = useQuery({
-    queryKey: ['agency-staff'],
+  const { data: clientAdmins, isLoading } = useQuery({
+    queryKey: ['client-admins'],
     enabled: currentUserRole === 1, // Only run for agency admins
     queryFn: async () => {
       const { data, error } = await supabase
@@ -47,16 +46,16 @@ const Clients = () => {
           first_name,
           last_name,
           username,
-          job_role:job_roles(name)
+          client:clients(business_name)
         `)
-        .eq('user_role_id', 2); // Only fetch agency staff (role_id = 2)
+        .eq('user_role_id', 3); // Only fetch client admins (role_id = 3)
       
       if (error) {
-        console.error('Error fetching agency staff:', error);
+        console.error('Error fetching client admins:', error);
         return [];
       }
       
-      console.log('Fetched agency staff:', data);
+      console.log('Fetched client admins:', data);
       return data;
     },
   });
@@ -78,14 +77,14 @@ const Clients = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-6">Agency Staff</h1>
+      <h1 className="text-2xl font-semibold mb-6">Client Administrators</h1>
       <Card>
         <CardHeader>
-          <CardTitle>Staff Members</CardTitle>
+          <CardTitle>Client Admins</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-center py-4">Loading agency staff...</p>
+            <p className="text-center py-4">Loading client administrators...</p>
           ) : (
             <div className="rounded-md border">
               <Table>
@@ -93,19 +92,19 @@ const Clients = () => {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Username</TableHead>
-                    <TableHead>Job Role</TableHead>
+                    <TableHead>Client Business</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {agencyStaff && agencyStaff.length > 0 ? (
-                    agencyStaff.map((staff) => (
-                      <TableRow key={staff.id}>
+                  {clientAdmins && clientAdmins.length > 0 ? (
+                    clientAdmins.map((admin) => (
+                      <TableRow key={admin.id}>
                         <TableCell>
-                          {staff.first_name} {staff.last_name}
+                          {admin.first_name} {admin.last_name}
                         </TableCell>
-                        <TableCell>{staff.username}</TableCell>
+                        <TableCell>{admin.username}</TableCell>
                         <TableCell>
-                          {staff.job_role?.name || 'Not assigned'}
+                          {admin.client?.business_name || 'Not assigned'}
                         </TableCell>
                       </TableRow>
                     ))
@@ -115,7 +114,7 @@ const Clients = () => {
                         colSpan={3}
                         className="text-center text-muted-foreground"
                       >
-                        No agency staff found
+                        No client administrators found
                       </TableCell>
                     </TableRow>
                   )}
