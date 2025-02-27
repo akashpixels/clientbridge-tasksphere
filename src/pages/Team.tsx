@@ -49,14 +49,15 @@ const Team = () => {
           first_name,
           last_name,
           username,
+          user_role_id,
           user_role:user_roles(id, name),
           job_role:job_roles(name),
           client:clients(id, business_name)
         `);
 
-      // For agency admin (role_id = 1), show all agency staff
+      // For agency admin (role_id = 1), show all agency staff and admin
       if (currentUserRole === 1) {
-        query = query.in('user_role_id', [1, 2]); // Agency Admin and Agency Staff roles
+        query = query.in('user_role_id', [1, 2]); // Agency Admin (1) and Agency Staff (2) roles
       }
       // For client admin (role_id = 3), show only their client's staff
       else if (currentUserRole === 3) {
@@ -78,6 +79,7 @@ const Team = () => {
         return [];
       }
 
+      console.log('Fetched team members:', data);
       return data;
     },
   });
@@ -155,4 +157,3 @@ const Team = () => {
 };
 
 export default Team;
-
