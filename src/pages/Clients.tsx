@@ -1,7 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { 
@@ -12,9 +11,12 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Clients = () => {
   const { session } = useAuth();
+  const navigate = useNavigate();
 
   const { data: currentUserRole } = useQuery({
     queryKey: ['current-user-role-clients'],
@@ -35,6 +37,13 @@ const Clients = () => {
       return data?.user_role_id;
     },
   });
+
+  // If user is not an agency admin, redirect them to the dashboard
+  useEffect(() => {
+    if (currentUserRole !== null && currentUserRole !== 1) {
+      navigate('/', { replace: true });
+    }
+  }, [currentUserRole, navigate]);
 
   const { data: agencyStaff, isLoading } = useQuery({
     queryKey: ['agency-staff'],
@@ -60,6 +69,21 @@ const Clients = () => {
       return data;
     },
   });
+
+  // Show loading state while checking permissions
+  if (currentUserRole === null) {
+    return (
+      <div className="container mx-auto p-6">
+        <Card className="p-6">
+          <CardContent className="pt-6">
+            <p className="text-center text-gray-500">
+              Checking permissions...
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Redirect or show access denied message if not an agency admin
   if (currentUserRole !== 1) {
