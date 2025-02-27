@@ -69,7 +69,7 @@ const Clients = () => {
       <h1 className="text-2xl font-semibold mb-6">Clients</h1>
  
    
-        <CardContent>
+
           {isLoading ? <p className="text-center py-4">Loading client administrators...</p> : <div className="rounded-md border">
               <Table>
                 <TableHeader>
@@ -96,7 +96,7 @@ const Clients = () => {
                 </TableBody>
               </Table>
             </div>}
-        </CardContent>
+     
 
     </div>;
 };
