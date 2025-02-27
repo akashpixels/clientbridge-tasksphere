@@ -106,8 +106,18 @@ const Clients = () => {
       // Create email map
       const emailMap = new Map();
       if (authUsers && !authError) {
-        authUsers.users.forEach(user => {
-          emailMap.set(user.id, user.email);
+        // Properly type the authUsers to access the users array
+        type AuthUser = {
+          id: string;
+          email?: string;
+        };
+        
+        // Use type assertion to tell TypeScript about the shape of the data
+        const users = (authUsers as unknown as { users: AuthUser[] }).users || [];
+        users.forEach(user => {
+          if (user.id && user.email) {
+            emailMap.set(user.id, user.email);
+          }
         });
       } else {
         console.error('Error fetching auth users:', authError);
