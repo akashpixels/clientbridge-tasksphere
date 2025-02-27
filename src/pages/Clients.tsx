@@ -12,6 +12,16 @@ import {
   TableRow 
 } from "@/components/ui/table";
 
+// Define the type for client admins
+interface ClientAdmin {
+  id: string;
+  first_name: string;
+  last_name: string;
+  username: string;
+  client_id: string | null;
+  business_name: string | null;
+}
+
 const Clients = () => {
   const { session } = useAuth();
 
@@ -33,7 +43,7 @@ const Clients = () => {
     }
   });
 
-  const { data: clientAdmins, isLoading } = useQuery({
+  const { data: clientAdmins, isLoading } = useQuery<ClientAdmin[]>({
     queryKey: ['client-admins'],
     enabled: currentUserRole === 1, // Only run for agency admins
     queryFn: async () => {
@@ -80,13 +90,17 @@ const Clients = () => {
             return userProfiles.map(profile => ({
               ...profile,
               business_name: profile.client_id ? clientMap.get(profile.client_id) : null
-            }));
+            })) as ClientAdmin[];
           }
         }
       }
       
       // Return the original user profiles if we couldn't fetch clients
-      return userProfiles || [];
+      // Add the business_name property as null
+      return (userProfiles || []).map(profile => ({
+        ...profile,
+        business_name: null
+      })) as ClientAdmin[];
     }
   });
 
