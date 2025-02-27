@@ -50,7 +50,20 @@ const Clients = () => {
     queryFn: async () => {
       console.log("Fetching client data...");
       
-      // First, get all clients directly from the clients table
+      // Get all client admin users (role_id = 3)
+      const { data: clientAdminProfiles, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('id, first_name, last_name, username')
+        .eq('user_role_id', 3);
+      
+      if (profileError) {
+        console.error('Error fetching client admin profiles:', profileError);
+        return [];
+      }
+      
+      console.log("Client admin profiles fetched:", clientAdminProfiles);
+      
+      // Get all clients
       const { data: clients, error: clientError } = await supabase
         .from('clients')
         .select('id, business_name');
@@ -62,48 +75,42 @@ const Clients = () => {
       
       console.log("Clients fetched:", clients);
       
+      // Create a mapping of client IDs to business names for easier lookup
+      const clientMap = clients.reduce((map, client) => {
+        map[client.id] = client.business_name;
+        return map;
+      }, {});
+      
       // Create an array to store the final results
       const results: ClientAdmin[] = [];
       
-      // For each client, find the associated client admin user
-      for (const client of clients) {
-        // Get the client admin user (user_role_id = 3) associated with this client
-        const { data: userProfiles, error: userError } = await supabase
-          .from('user_profiles')
-          .select('id, first_name, last_name, username')
-          .eq('user_role_id', 3)
-          .eq('id', client.id); // Assuming id in user_profiles references client.id
+      // Process the client admin profiles
+      for (const profile of clientAdminProfiles) {
+        // Get email from auth.users using the profile id
+        const { data: authUser, error: authError } = await supabase.auth
+          .admin.getUserById(profile.id);
         
-        if (userError) {
-          console.error(`Error fetching user profile for client ${client.id}:`, userError);
+        if (authError) {
+          console.error(`Error fetching auth user for profile ${profile.id}:`, authError);
           continue;
         }
         
-        console.log(`User profiles for client ${client.id}:`, userProfiles);
+        const email = authUser?.user?.email || 'No email';
         
-        // If we found matching user profiles
-        if (userProfiles && userProfiles.length > 0) {
-          // For each user profile, get the email from auth.users
-          for (const profile of userProfiles) {
-            // Get email from auth.users using the profile id
-            const { data: authUser, error: authError } = await supabase.auth
-              .admin.getUserById(profile.id);
-            
-            if (authError) {
-              console.error(`Error fetching auth user for profile ${profile.id}:`, authError);
-              continue;
-            }
-            
-            const email = authUser?.user?.email || 'No email';
-            
-            // Add to results
-            results.push({
-              ...profile,
-              email,
-              client_id: client.id,
-              business_name: client.business_name,
-            });
-          }
+        // Check if this profile ID matches any client ID
+        // This assumes that client admins would have the same ID as their client
+        const clientId = profile.id;
+        
+        // If a corresponding client exists, add the admin to results
+        if (clientMap[clientId]) {
+          results.push({
+            ...profile,
+            email,
+            client_id: clientId,
+            business_name: clientMap[clientId],
+          });
+        } else {
+          console.log(`No matching client found for admin ${profile.id}`);
         }
       }
       
