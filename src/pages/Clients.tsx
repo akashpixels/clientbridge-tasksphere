@@ -18,6 +18,7 @@ interface ClientAdmin {
   first_name: string;
   last_name: string;
   username: string;
+  email: string;
   client_id: string | null;
   business_name: string | null;
 }
@@ -47,6 +48,8 @@ const Clients = () => {
     queryKey: ['client-admins'],
     enabled: currentUserRole === 1, // Only run for agency admins
     queryFn: async () => {
+      console.log("Fetching client admins...");
+      
       // First, get users with role_id = 3 (client admins)
       const { data: userProfiles, error: userError } = await supabase
         .from('user_profiles')
@@ -64,43 +67,69 @@ const Clients = () => {
         return [];
       }
       
-      // If we have user profiles, fetch the associated client business names
-      if (userProfiles && userProfiles.length > 0) {
-        // Get all client IDs to fetch
-        const clientIds = userProfiles
-          .filter(profile => profile.client_id)
-          .map(profile => profile.client_id);
+      console.log("User profiles fetched:", userProfiles);
+      
+      // Get all client IDs to fetch, including null check
+      const clientIds = userProfiles
+        .filter(profile => profile.client_id)
+        .map(profile => profile.client_id);
+      
+      console.log("Client IDs to fetch:", clientIds);
+      
+      // Create a map to store client business names
+      const clientMap = new Map();
+      
+      // Only fetch clients if we have client IDs
+      if (clientIds.length > 0) {
+        const { data: clients, error: clientError } = await supabase
+          .from('clients')
+          .select('id, business_name');
         
-        if (clientIds.length > 0) {
-          const { data: clients, error: clientError } = await supabase
-            .from('clients')
-            .select('id, business_name')
-            .in('id', clientIds);
+        if (clientError) {
+          console.error('Error fetching client businesses:', clientError);
+        } else {
+          console.log("Clients fetched:", clients);
           
-          if (clientError) {
-            console.error('Error fetching client businesses:', clientError);
-          } else {
-            // Create a map of client IDs to business names for quick lookup
-            const clientMap = new Map();
-            clients.forEach(client => {
-              clientMap.set(client.id, client.business_name);
-            });
-            
-            // Add business names to the user profiles
-            return userProfiles.map(profile => ({
-              ...profile,
-              business_name: profile.client_id ? clientMap.get(profile.client_id) : null
-            })) as ClientAdmin[];
-          }
+          // Create a map of client IDs to business names for quick lookup
+          clients.forEach(client => {
+            clientMap.set(client.id, client.business_name);
+          });
         }
       }
       
-      // Return the original user profiles if we couldn't fetch clients
-      // Add the business_name property as null
-      return (userProfiles || []).map(profile => ({
-        ...profile,
-        business_name: null
-      })) as ClientAdmin[];
+      // Get email addresses from auth.users for each user profile
+      const authIds = userProfiles.map(profile => profile.id);
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      
+      console.log("Auth users fetched:", authUsers);
+      
+      // Create email map
+      const emailMap = new Map();
+      if (authUsers && !authError) {
+        authUsers.users.forEach(user => {
+          emailMap.set(user.id, user.email);
+        });
+      } else {
+        console.error('Error fetching auth users:', authError);
+      }
+      
+      // Combine everything into the final result
+      const result = userProfiles.map(profile => {
+        let businessName = null;
+        
+        if (profile.client_id && clientMap.has(profile.client_id)) {
+          businessName = clientMap.get(profile.client_id);
+        }
+        
+        return {
+          ...profile,
+          email: emailMap.get(profile.id) || 'No email',
+          business_name: businessName
+        };
+      });
+      
+      console.log("Final result:", result);
+      return result as ClientAdmin[];
     }
   });
 
@@ -120,47 +149,47 @@ const Clients = () => {
   return <div className="container mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-6">Clients</h1>
  
-   {isLoading ? (
-            <p className="text-center py-4">Loading client administrators...</p>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Username</TableHead>
-                    <TableHead>Client Business</TableHead>
+      {isLoading ? (
+        <p className="text-center py-4">Loading client administrators...</p>
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Username</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Client Business</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {clientAdmins && clientAdmins.length > 0 ? (
+                clientAdmins.map(admin => (
+                  <TableRow key={admin.id}>
+                    <TableCell>
+                      {admin.first_name} {admin.last_name}
+                    </TableCell>
+                    <TableCell>{admin.username}</TableCell>
+                    <TableCell>{admin.email}</TableCell>
+                    <TableCell>
+                      {admin.business_name || 'Not assigned'}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {clientAdmins && clientAdmins.length > 0 ? (
-                    clientAdmins.map(admin => (
-                      <TableRow key={admin.id}>
-                        <TableCell>
-                          {admin.first_name} {admin.last_name}
-                        </TableCell>
-                        <TableCell>{admin.username}</TableCell>
-                        <TableCell>
-                          {admin.business_name || 'Not assigned'}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={3}
-                        className="text-center text-muted-foreground"
-                      >
-                        No client administrators found
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-     
-
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="text-center text-muted-foreground"
+                  >
+                    No client administrators found
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>;
 };
 
