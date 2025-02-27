@@ -38,12 +38,19 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   
   // Get tasks for the current month to calculate hours
-  const { data: monthlyTasks } = useQuery({
+  const { data: monthlyTasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['monthly-tasks', project.id, selectedMonth],
     queryFn: async () => {
       const { data } = await supabase
         .from('tasks')
-        .select('actual_hours_spent')
+        .select(`
+          *,
+          task_type:task_types(name, category),
+          status:task_statuses!tasks_current_status_id_fkey(name, color_hex),
+          priority:priority_levels(name, color),
+          complexity:complexity_levels(name, multiplier),
+          assigned_user:user_profiles!tasks_assigned_user_id_fkey(first_name, last_name)
+        `)
         .eq('project_id', project.id);
       return data || [];
     }
@@ -52,10 +59,25 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
   // Calculate monthly hours from tasks
   const monthlyHours = monthlyTasks?.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) || 0;
   
-  // Get subscription if available
-  const subscription = project.project_subscriptions && project.project_subscriptions.length > 0 
-    ? project.project_subscriptions[0] 
-    : null;
+  // Sorting state for tasks
+  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' as 'asc' | 'desc' });
+  
+  const handleSort = (key: string) => {
+    setSortConfig(current => ({
+      key,
+      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+  
+  const handleImageClick = (image: string, images: string[]) => {
+    // Handle image click (left empty for now)
+    console.log("Image clicked:", image);
+  };
+  
+  const handleCommentClick = (taskId: string) => {
+    // Handle comment click (left empty for now)
+    console.log("Comment clicked for task:", taskId);
+  };
 
   return (
     <div className="container mx-auto">
@@ -82,12 +104,12 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
 
         <TabsContent value="tasks">
           <TasksTabContent 
-            isLoadingTasks={false}
-            tasks={[]}
-            sortConfig={{ key: 'created_at', direction: 'desc' }}
-            onSort={() => {}}
-            onImageClick={() => {}}
-            onCommentClick={() => {}}
+            isLoadingTasks={isLoadingTasks}
+            tasks={monthlyTasks || []}
+            sortConfig={sortConfig}
+            onSort={handleSort}
+            onImageClick={handleImageClick}
+            onCommentClick={handleCommentClick}
           />
         </TabsContent>
 
