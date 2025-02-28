@@ -86,6 +86,12 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
     return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
   };
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = '';
+    e.currentTarget.onerror = null;
+    e.currentTarget.parentElement!.innerHTML = FileImage.toString();
+  };
+
   return (
     <div 
       className="p-2 cursor-pointer"
@@ -98,10 +104,7 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
               src={file.file_url}
               alt={file.file_name}
               className="w-full h-full object-cover rounded"
-              onError={(e) => {
-                console.log(`Error loading image: ${file.file_url}`);
-                e.currentTarget.src = '/placeholder.svg';
-              }}
+              onError={handleImageError}
             />
           </div>
         ) : (
@@ -122,37 +125,23 @@ interface FilesTabProps {
 const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
-  // Using the same pattern as TeamTab - simple and direct query
   const { data: files, isLoading } = useQuery({
     queryKey: ['project-files', projectId],
     queryFn: async () => {
       console.log('Fetching files for project:', projectId);
-      
-      // Simple direct query like in TeamTab
       const { data, error } = await supabase
         .from('files')
         .select('*')
-        .eq('project_id', projectId);
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching files:', error);
         throw error;
       }
 
-      console.log('Fetched files data:', data);
-
-      if (!data || data.length === 0) {
-        console.log('No files found for project ID:', projectId);
-        return {};
-      }
-
       // Group files by date
-      const groupedFiles = data.reduce((groups: Record<string, any[]>, file) => {
-        if (!file.created_at) {
-          console.warn('File missing created_at:', file);
-          return groups;
-        }
-        
+      const groupedFiles = data.reduce((groups: Record<string, typeof data>, file) => {
         const date = format(new Date(file.created_at), 'MMMM d, yyyy');
         if (!groups[date]) {
           groups[date] = [];
@@ -166,7 +155,7 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
   });
 
   if (isLoading) {
-    return <Card className="p-6"><div>Loading files...</div></Card>;
+    return <div>Loading files...</div>;
   }
 
   if (!files || Object.keys(files).length === 0) {
@@ -190,7 +179,7 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
           <div key={date}>
             <h3 className="text-lg font-medium mb-4">{date}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-              {Array.isArray(dateFiles) && dateFiles.map((file) => (
+              {dateFiles.map((file) => (
                 <FileCard 
                   key={file.id} 
                   file={file} 
