@@ -14,13 +14,6 @@ interface ProjectHeaderProps {
         last_name: string;
       } | null;
     } | null;
-    project_subscriptions?: {
-      id: string;
-      hours_allotted: number;
-      hours_spent: number | null;
-      subscription_status: string;
-      next_renewal_date: string;
-    }[];
   };
   selectedMonth: string;
   onMonthChange: (month: string) => void;
@@ -36,8 +29,6 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
       label: format(date, 'MMM yyyy')
     };
   });
-
-  console.log("ProjectHeader received project with subscriptions:", project.project_subscriptions);
 
   return (
     <div className="flex items-center justify-between w-full gap-4">

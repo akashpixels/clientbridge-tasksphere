@@ -1,14 +1,11 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import { differenceInDays } from "date-fns";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface ProjectStatsProps {
   project: Tables<"projects"> & {
     project_subscriptions?: {
-      id: string;
       hours_allotted: number;
-      hours_spent: number | null;
       subscription_status: string;
       next_renewal_date: string;
     }[];
@@ -20,21 +17,13 @@ interface ProjectStatsProps {
 const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProps) => {
   const [hovered, setHovered] = useState(false);
 
-  // Log the project subscriptions to debug
-  useEffect(() => {
-    console.log("ProjectStats received project:", project);
-    console.log("ProjectStats subscriptions:", project.project_subscriptions);
-  }, [project]);
-
   const subscription = project.project_subscriptions?.[0];
   const hoursAllotted = subscription?.hours_allotted || 0;
 
-  console.log("Hours allotted:", hoursAllotted);
-  console.log("Monthly hours:", monthlyHours);
-
-  const hoursPercentage = hoursAllotted > 0 
-    ? Math.min(Math.round((monthlyHours / hoursAllotted) * 100), 100)
-    : 0;
+  const hoursPercentage = Math.min(
+    Math.round((monthlyHours / hoursAllotted) * 100),
+    100
+  );
 
   // Renewal Status Logic.
   const renewalDate = subscription?.next_renewal_date ? new Date(subscription.next_renewal_date) : new Date();
@@ -46,7 +35,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
   if (daysUntilRenewal <= 5 && daysUntilRenewal > 0) {
     statusColor = "bg-orange-500"; // Warning (Orange)
     statusText = "Renew Soon";
-  } else if (!subscription || subscription.subscription_status !== "active") {
+  } else if (subscription?.subscription_status !== "active") {
     statusColor = "bg-red-600"; // Inactive (Red)
     statusText = "Inactive";
   }
@@ -55,6 +44,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
     <div className="flex gap-4">
       
      {/* Hours Progress Card */}
+
       <div 
         className="relative w-[160px] h-[108px] border border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 overflow-hidden text-gray-900"
         style={{
@@ -62,6 +52,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
           transition: "background 0.5s ease"
         }}
       >
+
         {/* Hours Label */}
         <p className="text-[11px] font-medium text-gray-500">Hours Used</p>
 
