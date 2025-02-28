@@ -125,10 +125,21 @@ interface FilesTabProps {
 const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
-  const { data: files, isLoading } = useQuery({
+  const { data: files, isLoading, error } = useQuery({
     queryKey: ['project-files', projectId],
     queryFn: async () => {
       console.log('Fetching files for project:', projectId);
+      console.log('Project ID type:', typeof projectId);
+      
+      // Direct query to check all files without filters first
+      const allFilesQuery = await supabase
+        .from('files')
+        .select('id, project_id')
+        .limit(5);
+        
+      console.log('Sample of all files in the database:', allFilesQuery.data);
+      
+      // Now perform the actual filtered query
       const { data, error } = await supabase
         .from('files')
         .select('*')
@@ -138,6 +149,21 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
       if (error) {
         console.error('Error fetching files:', error);
         throw error;
+      }
+
+      console.log('Files found for this project:', data?.length || 0);
+      console.log('Raw files data:', data);
+
+      // If no files found, check if projectId matches any of the project_ids in the database
+      if (data?.length === 0) {
+        console.log('No files found. Checking if project exists...');
+        const { data: projectCheck } = await supabase
+          .from('projects')
+          .select('id')
+          .eq('id', projectId)
+          .single();
+          
+        console.log('Project exists check:', projectCheck);
       }
 
       // Group files by date
@@ -157,12 +183,23 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
   if (isLoading) {
     return <div>Loading files...</div>;
   }
+  
+  if (error) {
+    console.error('Error in files query:', error);
+    return (
+      <Card className="p-6">
+        <div className="text-center py-8">
+          <p className="text-red-500">Error loading files: {(error as Error).message}</p>
+        </div>
+      </Card>
+    );
+  }
 
   if (!files || Object.keys(files).length === 0) {
     return (
       <Card className="p-6">
         <div className="text-center py-8">
-          <p className="text-gray-500">No files found for this project.</p>
+          <p className="text-gray-500">No files found for this project (ID: {projectId}).</p>
         </div>
       </Card>
     );
