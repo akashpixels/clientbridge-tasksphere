@@ -125,7 +125,7 @@ const CredentialsTab = ({ projectId }: CredentialsTabProps) => {
 
       const { data, error } = await supabase
         .from('user_profiles')
-        .select('user_role_id, client_id')
+        .select('user_role_id')
         .eq('id', user.id)
         .single();
 
