@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,7 +19,7 @@ const ProjectDetails = () => {
           *,
           client:clients(
             id,
-            user_profiles(
+            user_profiles!clients_id_fkey(
               first_name,
               last_name
             )
