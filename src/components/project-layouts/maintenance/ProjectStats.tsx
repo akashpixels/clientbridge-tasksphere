@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { differenceInDays } from "date-fns";
 import { useState } from "react";
@@ -5,9 +6,12 @@ import { useState } from "react";
 interface ProjectStatsProps {
   project: Tables<"projects"> & {
     project_subscriptions?: {
-      hours_allotted: number;
+      id: string;
       subscription_status: string;
+      hours_allotted: number;
+      hours_spent: number | null;
       next_renewal_date: string;
+      billing_cycle: string;
     }[];
   };
   selectedMonth: string;
@@ -17,11 +21,14 @@ interface ProjectStatsProps {
 const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProps) => {
   const [hovered, setHovered] = useState(false);
 
+  console.log("ProjectStats - Project:", project);
+  console.log("ProjectStats - Project subscriptions:", project.project_subscriptions);
+
   const subscription = project.project_subscriptions?.[0];
   const hoursAllotted = subscription?.hours_allotted || 0;
 
   const hoursPercentage = Math.min(
-    Math.round((monthlyHours / hoursAllotted) * 100),
+    Math.round((monthlyHours / hoursAllotted) * 100) || 0,
     100
   );
 
@@ -77,7 +84,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
 
           {/* Tooltip Appears on Hover */}
           {hovered && (
-            <div className="absolute top-[-28px] right-1/2 translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap">
+            <div className="absolute top-[-28px] right-1/2 translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap z-10">
               {statusText}
             </div>
           )}
@@ -86,7 +93,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
         {/* Subscription Info (Centered) */}
         <p className="text-[11px] text-gray-500">Renews in</p>
         <p className="text-xl font-semibold">{daysUntilRenewal > 0 ? `${daysUntilRenewal} Days` : "Expired"}</p>
-        <p className="text-[11px] text-gray-400">Cycle: Monthly</p>
+        <p className="text-[11px] text-gray-400">Cycle: {subscription?.billing_cycle ? subscription.billing_cycle.charAt(0).toUpperCase() + subscription.billing_cycle.slice(1) : "Monthly"}</p>
       </div>
     
     </div>
