@@ -1048,7 +1048,7 @@ export type Database = {
       }
       user_profiles: {
         Row: {
-          client_admin: string | null
+          agency_admin: string | null
           created_at: string
           first_name: string
           gender: Database["public"]["Enums"]["gender_enum"]
@@ -1060,7 +1060,7 @@ export type Database = {
           username: string
         }
         Insert: {
-          client_admin?: string | null
+          agency_admin?: string | null
           created_at?: string
           first_name: string
           gender: Database["public"]["Enums"]["gender_enum"]
@@ -1072,7 +1072,7 @@ export type Database = {
           username: string
         }
         Update: {
-          client_admin?: string | null
+          agency_admin?: string | null
           created_at?: string
           first_name?: string
           gender?: Database["public"]["Enums"]["gender_enum"]
@@ -1085,8 +1085,8 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_profiles_client_admin_fkey"
-            columns: ["client_admin"]
+            foreignKeyName: "user_profiles_agency_admin_fkey"
+            columns: ["agency_admin"]
             isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
