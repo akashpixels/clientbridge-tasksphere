@@ -132,10 +132,23 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
         
         // Try different query approaches
         const approaches = [
-          { name: "Direct UUID", query: () => supabase.from('files').select('*').eq('project_id', projectId) },
-          { name: "String UUID", query: () => supabase.from('files').select('*').eq('project_id', String(projectId)) },
-          { name: "Text UUID", query: () => supabase.from('files').select('*').filter('project_id::text', 'eq', projectId) },
-          { name: "Raw SQL", query: () => supabase.rpc('get_files_for_project', { p_project_id: projectId }) }
+          { name: "Direct UUID", query: async () => {
+            const result = await supabase.from('files').select('*').eq('project_id', projectId);
+            return { data: result.data, error: result.error };
+          }},
+          { name: "String UUID", query: async () => {
+            const result = await supabase.from('files').select('*').eq('project_id', String(projectId));
+            return { data: result.data, error: result.error };
+          }},
+          { name: "Text UUID", query: async () => {
+            const result = await supabase.from('files').select('*').filter('project_id::text', 'eq', projectId);
+            return { data: result.data, error: result.error };
+          }},
+          { name: "Raw SQL via Function", query: async () => {
+            // This is just for debugging, so we'll use a simple query
+            const result = await supabase.from('files').select('*');
+            return { data: result.data?.filter(file => file.project_id === projectId), error: result.error };
+          }}
         ];
         
         let successfulApproach = null;
@@ -146,7 +159,7 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
             const { data, error } = await approach.query();
             console.log(`${approach.name} approach:`, { data, error });
             
-            if (!error && data && data.length > 0) {
+            if (!error && data && Array.isArray(data) && data.length > 0) {
               successfulApproach = approach.name;
               foundData = data;
               break;
@@ -171,7 +184,11 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
           const projects = await supabase.from('projects').select('id, name');
           console.log("All projects:", projects.data);
           
-          setDebugInfo(`No files found with any approach. All files in table: ${data?.length || 0}. Raw project ID: ${projectId}. First file project_id (if exists): ${data && data.length > 0 ? data[0].project_id : 'none'}`);
+          if (data && Array.isArray(data)) {
+            setDebugInfo(`No files found with any approach. All files in table: ${data.length || 0}. Raw project ID: ${projectId}. First file project_id (if exists): ${data.length > 0 ? data[0].project_id : 'none'}`);
+          } else {
+            setDebugInfo(`Error retrieving files: ${error?.message || 'Unknown error'}`);
+          }
         }
       } catch (err) {
         console.error("Debug query exception:", err);
@@ -182,61 +199,20 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     checkFilesDirectly();
   }, [projectId, attemptCount]);
 
-  // First, create the RPC function if it doesn't exist yet
-  useEffect(() => {
-    const createRpcFunction = async () => {
-      try {
-        console.log("Setting up RPC function for file queries");
-        
-        // Check if the function exists first by calling it
-        const testCall = await supabase.rpc('get_files_for_project', { p_project_id: projectId });
-        if (!testCall.error || !testCall.error.message.includes("function get_files_for_project() does not exist")) {
-          console.log("RPC function already exists or different error");
-          return;
-        }
-        
-        // If we get here, the function doesn't exist
-        const { error } = await supabase.rpc('create_get_files_function');
-        if (error) {
-          console.error("Error creating RPC function:", error);
-        } else {
-          console.log("Successfully created RPC function");
-          // Increment attempt count to trigger a query refresh
-          setAttemptCount(1);
-        }
-      } catch (err) {
-        console.error("Exception in createRpcFunction:", err);
-      }
-    };
-    
-    createRpcFunction();
-  }, [projectId]);
-
   const { data: files, isLoading, error } = useQuery({
     queryKey: ['project-files', projectId, attemptCount],
     queryFn: async () => {
       console.log('Fetching files for project:', projectId, 'Attempt:', attemptCount);
       
       try {
-        let data;
-        let error;
-        
-        // Use different approaches based on attempt count
-        if (attemptCount >= 2) {
-          // Use the RPC function on later attempts
-          const result = await supabase.rpc('get_files_for_project', { p_project_id: projectId });
-          data = result.data;
-          error = result.error;
-        } else {
-          // Default approach
-          const result = await supabase
-            .from('files')
-            .select('*')
-            .eq('project_id', projectId);
+        // We'll use the approach that worked best in testing
+        const result = await supabase
+          .from('files')
+          .select('*')
+          .eq('project_id', projectId);
           
-          data = result.data;
-          error = result.error;
-        }
+        const data = result.data;
+        const error = result.error;
 
         if (error) {
           console.error('Error fetching files:', error);
@@ -332,7 +308,7 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
           <div key={date}>
             <h3 className="text-lg font-medium mb-4">{date}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-              {dateFiles.map((file) => (
+              {Array.isArray(dateFiles) && dateFiles.map((file) => (
                 <FileCard 
                   key={file.id} 
                   file={file} 
