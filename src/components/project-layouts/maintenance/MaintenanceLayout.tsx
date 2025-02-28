@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,11 +30,36 @@ interface MaintenanceLayoutProps {
     project_subscriptions: {
       subscription_status: string;
       hours_allotted: number;
-      hours_spent: number | null;
+      hours_spent?: number | null;
       next_renewal_date: string;
+      billing_cycle?: string;
     }[];
   };
 }
+
+// Define a type that matches the TasksTable expected input structure
+type TaskWithRelations = Tables<"tasks"> & {
+  task_type: {
+    name: string;
+    category: string;
+  } | null;
+  status: {
+    name: string;
+    color_hex: string | null;
+  } | null;
+  priority: {
+    name: string;
+    color: string;
+  } | null;
+  complexity: {
+    name: string;
+    multiplier: number;
+  } | null;
+  assigned_user: {
+    first_name: string;
+    last_name: string;
+  } | null;
+};
 
 const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
@@ -63,7 +87,7 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
   }, [project]);
 
   // Get tasks for the project
-  const { data: tasks = [], isLoading: isLoadingTasks } = useQuery({
+  const { data: tasksData = [], isLoading: isLoadingTasks } = useQuery({
     queryKey: ['project-tasks', project.id, selectedMonth, sortConfig],
     queryFn: async () => {
       const startDate = startOfMonth(parseISO(selectedMonth));
@@ -95,6 +119,18 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
       console.log(`Found ${data.length} tasks for ${selectedMonth}:`, data);
       return data;
     },
+  });
+
+  // Ensure the tasks data matches the expected type
+  const tasks: TaskWithRelations[] = tasksData.map(task => {
+    return {
+      ...task,
+      task_type: task.task_type || null,
+      status: task.status || null,
+      priority: task.priority || null,
+      complexity: task.complexity || null,
+      assigned_user: task.assigned_user || null,
+    };
   });
 
   // Calculate hours spent for the selected month
@@ -200,7 +236,7 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
 
       {/* Image Viewer Dialog */}
       <ImageViewerDialog
-        isOpen={isViewerOpen}
+        open={isViewerOpen}
         onClose={() => setIsViewerOpen(false)}
         currentImage={currentImage}
         imageArray={imageArray}
@@ -208,9 +244,9 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
 
       {/* Task Comment Thread Dialog */}
       <TaskCommentThread
-        isOpen={isCommentOpen && !!selectedTaskId}
+        open={isCommentOpen && !!selectedTaskId}
         onClose={() => setIsCommentOpen(false)}
-        taskId={selectedTaskId}
+        taskId={selectedTaskId || ""}
       />
     </div>
   );

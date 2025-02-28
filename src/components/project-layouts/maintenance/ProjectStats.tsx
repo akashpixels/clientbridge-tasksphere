@@ -11,10 +11,20 @@ interface ProjectStatsProps {
       hours_allotted: number;
       subscription_status: string;
       next_renewal_date: string;
+      billing_cycle?: string;
+      hours_spent?: number | null;
     }[];
   };
   selectedMonth: string;
   monthlyHours: number;
+}
+
+interface SubscriptionData {
+  hours_allotted: number;
+  hours_spent?: number | null;
+  subscription_status: string;
+  next_renewal_date: string;
+  billing_cycle?: string;
 }
 
 const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProps) => {
@@ -40,7 +50,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
       }
       
       console.log('Direct subscription data:', data);
-      return data;
+      return data as SubscriptionData;
     },
   });
 
