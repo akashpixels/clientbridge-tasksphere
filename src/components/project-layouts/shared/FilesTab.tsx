@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -121,46 +121,82 @@ interface FilesTabProps {
 
 const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
+
+  // Debug query directly to check if data exists
+  useEffect(() => {
+    const checkFilesDirectly = async () => {
+      try {
+        console.log("Running debug query for project ID:", projectId);
+        const { data, error } = await supabase
+          .from('files')
+          .select('*')
+          .eq('project_id', projectId);
+
+        if (error) {
+          console.error("Debug query error:", error);
+          setDebugInfo(`Debug query error: ${error.message}`);
+        } else {
+          console.log("Debug query results:", data);
+          setDebugInfo(`Debug found ${data?.length || 0} files. Data: ${JSON.stringify(data)}`);
+        }
+      } catch (err) {
+        console.error("Debug query exception:", err);
+        setDebugInfo(`Debug exception: ${(err as Error).message}`);
+      }
+    };
+
+    checkFilesDirectly();
+  }, [projectId]);
 
   const { data: files, isLoading, error } = useQuery({
     queryKey: ['project-files', projectId],
     queryFn: async () => {
       console.log('Fetching files for project:', projectId);
       
-      // Fetch files directly with the project_id
-      const { data, error } = await supabase
-        .from('files')
-        .select('*')
-        .eq('project_id', projectId);
-
-      if (error) {
-        console.error('Error fetching files:', error);
-        throw error;
-      }
-
-      console.log('Fetched files data:', data);
-
-      if (!data || data.length === 0) {
-        console.log('No files found for project ID:', projectId);
-        return {};
-      }
-
-      // Group files by date
-      const groupedFiles = data.reduce((groups: Record<string, any[]>, file) => {
-        if (!file.created_at) {
-          console.warn('File missing created_at:', file);
-          return groups;
-        }
+      try {
+        // Try with explicit cast to string
+        const projectIdString = String(projectId);
+        console.log('Using project ID as string:', projectIdString);
         
-        const date = format(new Date(file.created_at), 'MMMM d, yyyy');
-        if (!groups[date]) {
-          groups[date] = [];
-        }
-        groups[date].push(file);
-        return groups;
-      }, {});
+        // Fetch files directly with the project_id
+        const { data, error } = await supabase
+          .from('files')
+          .select('*')
+          .eq('project_id', projectIdString);
 
-      return groupedFiles;
+        if (error) {
+          console.error('Error fetching files:', error);
+          throw error;
+        }
+
+        console.log('Fetched files data:', data);
+
+        if (!data || data.length === 0) {
+          console.log('No files found for project ID:', projectIdString);
+          return {};
+        }
+
+        // Group files by date
+        const groupedFiles = data.reduce((groups: Record<string, any[]>, file) => {
+          if (!file.created_at) {
+            console.warn('File missing created_at:', file);
+            return groups;
+          }
+          
+          const date = format(new Date(file.created_at), 'MMMM d, yyyy');
+          if (!groups[date]) {
+            groups[date] = [];
+          }
+          groups[date].push(file);
+          return groups;
+        }, {});
+
+        return groupedFiles;
+      } catch (err) {
+        console.error("Exception in queryFn:", err);
+        throw err;
+      }
     },
   });
 
@@ -175,6 +211,11 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
         <div className="text-center py-8">
           <p className="text-red-500">Error loading files. Please try again.</p>
           <p className="text-sm text-gray-500 mt-2">{(error as Error).message}</p>
+          {debugInfo && (
+            <div className="mt-4 p-4 bg-gray-100 rounded text-left overflow-auto max-h-40">
+              <p className="text-xs font-mono">{debugInfo}</p>
+            </div>
+          )}
         </div>
       </Card>
     );
@@ -185,6 +226,11 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
       <Card className="p-6">
         <div className="text-center py-8">
           <p className="text-gray-500">No files found for this project (ID: {projectId}).</p>
+          {debugInfo && (
+            <div className="mt-4 p-4 bg-gray-100 rounded text-left overflow-auto max-h-40">
+              <p className="text-xs font-mono">{debugInfo}</p>
+            </div>
+          )}
         </div>
       </Card>
     );
