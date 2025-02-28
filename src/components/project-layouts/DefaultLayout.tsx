@@ -3,8 +3,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import CredentialsTab from "./shared/CredentialsTab";
-import TeamTab from "./shared/TeamTab";
-import FilesTab from "./shared/FilesTab";
 
 interface DefaultLayoutProps {
   project: Tables<"projects"> & {
@@ -92,7 +90,9 @@ const DefaultLayout = ({ project }: DefaultLayoutProps) => {
         </TabsContent>
 
         <TabsContent value="team">
-          <TeamTab projectId={project.id} />
+          <Card className="p-6">
+            <p>Team content coming soon...</p>
+          </Card>
         </TabsContent>
 
         <TabsContent value="credentials">
@@ -100,7 +100,9 @@ const DefaultLayout = ({ project }: DefaultLayoutProps) => {
         </TabsContent>
 
         <TabsContent value="files">
-          <FilesTab projectId={project.id} />
+          <Card className="p-6">
+            <p>Files content coming soon...</p>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

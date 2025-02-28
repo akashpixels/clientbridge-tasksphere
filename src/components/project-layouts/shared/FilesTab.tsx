@@ -140,8 +140,6 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
         throw error;
       }
 
-      console.log('Fetched files data:', data);
-
       // Group files by date
       const groupedFiles = data.reduce((groups: Record<string, typeof data>, file) => {
         const date = format(new Date(file.created_at), 'MMMM d, yyyy');
