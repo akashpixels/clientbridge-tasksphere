@@ -1,21 +1,20 @@
 
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect } from "react";
-import ProjectHeader from "./ProjectHeader";
-import TasksTabContent from "./TasksTabContent";
-import ImageViewerDialog from "./ImageViewerDialog";
-import { format, startOfMonth, endOfMonth } from "date-fns";
-import { useLayout } from "@/context/layout";
-import TaskCommentThread from "./comments/TaskCommentThread";
+import { format, parseISO, startOfMonth, endOfMonth } from "date-fns";
 import CredentialsTab from "../shared/CredentialsTab";
 import FilesTab from "../shared/FilesTab";
+import TasksTabContent from "./TasksTabContent";
 import TeamTab from "../shared/TeamTab";
+import ProjectHeader from "./ProjectHeader";
+import ImageViewerDialog from "./ImageViewerDialog";
+import TaskCommentThread from "./comments/TaskCommentThread";
 
-interface DevelopmentLayoutProps {
+interface MaintenanceLayoutProps {
   project: Tables<"projects"> & {
     client_admin: {
       id: string;
@@ -29,194 +28,165 @@ interface DevelopmentLayoutProps {
       name: string;
       color_hex: string | null;
     } | null;
+    project_subscriptions: {
+      subscription_status: string;
+      hours_allotted: number;
+      hours_spent: number | null;
+      next_renewal_date: string;
+    }[];
   };
 }
 
-type SortConfig = {
-  key: string;
-  direction: 'asc' | 'desc';
-};
+const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [currentImage, setCurrentImage] = useState<string>("");
+  const [imageArray, setImageArray] = useState<string[]>([]);
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: 'asc' | 'desc';
+  }>({
+    key: 'created_at',
+    direction: 'desc',
+  });
 
-const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'created_at', direction: 'desc' });
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
-  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
-  const { setRightSidebarContent, closeRightSidebar, setCurrentTab } = useLayout();
+  // Current month selection for filtering tasks/hours
+  const [selectedMonth, setSelectedMonth] = useState(
+    format(new Date(), "yyyy-MM")
+  );
 
-  // Add direct project ID check
+  // Debug log project data
   useEffect(() => {
-    console.log("MaintenanceLayout - Project ID:", project.id);
-    
-    // Check project data table permissions
-    const checkProjectData = async () => {
-      try {
-        // Check if we can get the project directly
-        const { data, error } = await supabase
-          .from('projects')
-          .select('id, name')
-          .eq('id', project.id)
-          .single();
-          
-        console.log("Direct project access test:", data);
-        console.log("Direct project access error:", error);
-      } catch (e) {
-        console.error("Error checking project data:", e);
-      }
-    };
-    
-    checkProjectData();
-  }, [project.id]);
+    console.log("MaintenanceLayout project data:", project);
+    console.log("Project ID:", project.id);
+  }, [project]);
 
-  const { data: tasks, isLoading: isLoadingTasks, error: tasksError } = useQuery({
-    queryKey: ['tasks', project.id, selectedMonth],
+  // Get tasks for the project
+  const { data: tasks = [], isLoading: isLoadingTasks } = useQuery({
+    queryKey: ['project-tasks', project.id, selectedMonth, sortConfig],
     queryFn: async () => {
+      const startDate = startOfMonth(parseISO(selectedMonth));
+      const endDate = endOfMonth(parseISO(selectedMonth));
+      
       console.log('Fetching tasks for project:', project.id);
-      const startDate = startOfMonth(new Date(selectedMonth));
-      const endDate = endOfMonth(new Date(selectedMonth));
+      console.log('Date range:', format(startDate, 'yyyy-MM-dd'), 'to', format(endDate, 'yyyy-MM-dd'));
       
       const { data, error } = await supabase
         .from('tasks')
         .select(`
           *,
           task_type:task_types(name, category),
-          status:task_statuses!tasks_current_status_id_fkey(name, color_hex),
+          status:task_statuses(name, color_hex),
           priority:priority_levels(name, color),
           complexity:complexity_levels(name, multiplier),
-          assigned_user:user_profiles!tasks_assigned_user_id_fkey(first_name, last_name)
+          assigned_user:user_profiles(first_name, last_name)
         `)
         .eq('project_id', project.id)
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString())
-        .order('created_at', { ascending: false });
+        .order(sortConfig.key, { ascending: sortConfig.direction === 'asc' });
 
       if (error) {
         console.error('Error fetching tasks:', error);
         throw error;
       }
       
-      console.log('Fetched tasks:', data);
+      console.log(`Found ${data.length} tasks for ${selectedMonth}:`, data);
       return data;
     },
   });
 
-  // Report any task fetching errors
-  useEffect(() => {
-    if (tasksError) {
-      console.error("Task query error:", tasksError);
-    }
-  }, [tasksError]);
+  // Calculate hours spent for the selected month
+  const { data: monthlyHours = 0 } = useQuery({
+    queryKey: ['monthly-hours', project.id, selectedMonth],
+    queryFn: async () => {
+      const startDate = startOfMonth(parseISO(selectedMonth));
+      const endDate = endOfMonth(parseISO(selectedMonth));
+      
+      console.log('Calculating hours for range:', startDate, 'to', endDate);
+      
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('hours_spent, actual_hours_spent')
+        .eq('project_id', project.id)
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString());
 
-  const monthlyHours = tasks?.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) || 0;
+      if (error) {
+        console.error('Error fetching task hours:', error);
+        return 0;
+      }
+      
+      console.log('Hours calculation data:', data);
+
+      // Sum up either hours_spent or actual_hours_spent (whichever is available)
+      const totalHours = data.reduce((acc, task) => {
+        const hours = task.actual_hours_spent || task.hours_spent || 0;
+        return acc + hours;
+      }, 0);
+      
+      console.log(`Total hours for ${selectedMonth}:`, totalHours);
+      return totalHours;
+    },
+  });
 
   const handleSort = (key: string) => {
-    setSortConfig(current => ({
+    setSortConfig(prevSortConfig => ({
       key,
-      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+      direction: prevSortConfig.key === key && prevSortConfig.direction === 'asc' 
+        ? 'desc' 
+        : 'asc',
     }));
   };
 
   const handleImageClick = (image: string, images: string[]) => {
-    setSelectedTaskImages(images);
-    setSelectedImage(image);
-    setCurrentImageIndex(images.indexOf(image));
+    setCurrentImage(image);
+    setImageArray(images);
+    setIsViewerOpen(true);
   };
 
-  const handlePreviousImage = () => {
-    if (currentImageIndex > 0) {
-      setCurrentImageIndex(prev => prev - 1);
-      setSelectedImage(selectedTaskImages[currentImageIndex - 1]);
-    }
+  const handleCommentClick = (taskId: string) => {
+    setSelectedTaskId(taskId);
+    setIsCommentOpen(true);
   };
 
-  const handleNextImage = () => {
-    if (currentImageIndex < selectedTaskImages.length - 1) {
-      setCurrentImageIndex(prev => prev + 1);
-      setSelectedImage(selectedTaskImages[currentImageIndex + 1]);
-    }
+  const handleMonthChange = (month: string) => {
+    setSelectedMonth(month);
   };
-
-  const sortedTasks = tasks ? [...tasks].sort((a, b) => {
-    const aValue = a[sortConfig.key as keyof typeof a];
-    const bValue = b[sortConfig.key as keyof typeof b];
-    
-    if (aValue === null) return 1;
-    if (bValue === null) return -1;
-    
-    const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-    return sortConfig.direction === 'asc' ? comparison : -comparison;
-  }) : [];
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto p-6">
       <div className="mb-6">
         <ProjectHeader 
           project={project} 
-          selectedMonth={selectedMonth}
-          onMonthChange={setSelectedMonth}
+          selectedMonth={selectedMonth} 
+          onMonthChange={handleMonthChange}
           monthlyHours={monthlyHours}
         />
       </div>
 
-      <Tabs defaultValue="tasks" className="w-full" onValueChange={(value) => setCurrentTab(value)}>
-        <div className="flex justify-between items-center mb-4">
-          <TabsList>
-            <TabsTrigger value="tasks">Tasks</TabsTrigger>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
-            <TabsTrigger value="credentials">Credentials</TabsTrigger>
-            <TabsTrigger value="files">Files</TabsTrigger>
-          </TabsList>
-          <button className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md">
-            New Task
-          </button>
-        </div>
+      <Tabs defaultValue="tasks" className="w-full">
+        <TabsList>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="files">Files</TabsTrigger>
+          <TabsTrigger value="team">Team</TabsTrigger>
+          <TabsTrigger value="credentials">Credentials</TabsTrigger>
+        </TabsList>
 
         <TabsContent value="tasks">
-          <TasksTabContent
+          <TasksTabContent 
             isLoadingTasks={isLoadingTasks}
-            tasks={sortedTasks}
+            tasks={tasks}
             sortConfig={sortConfig}
             onSort={handleSort}
             onImageClick={handleImageClick}
-            onCommentClick={(taskId: string) => {
-              setRightSidebarContent(
-                <TaskCommentThread taskId={taskId} />
-              );
-            }}
+            onCommentClick={handleCommentClick}
           />
         </TabsContent>
 
-        <TabsContent value="overview">
-          <Card className="p-6">
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium">Project Details</h3>
-                <p className="text-gray-500 mt-1">{project.details || 'No details provided'}</p>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-medium">Status</h4>
-                  <span 
-                    className="inline-block px-2 py-1 rounded-full text-xs mt-1"
-                    style={{
-                      backgroundColor: `${project.status?.color_hex}15`,
-                      color: project.status?.color_hex
-                    }}
-                  >
-                    {project.status?.name || 'Unknown'}
-                  </span>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium">Progress</h4>
-                  <p className="text-gray-500 mt-1">{project.progress || 0}%</p>
-                </div>
-              </div>
-            </div>
-          </Card>
+        <TabsContent value="files">
+          <FilesTab projectId={project.id} />
         </TabsContent>
 
         <TabsContent value="team">
@@ -226,19 +196,21 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         <TabsContent value="credentials">
           <CredentialsTab projectId={project.id} />
         </TabsContent>
-
-        <TabsContent value="files">
-          <FilesTab projectId={project.id} />
-        </TabsContent>
       </Tabs>
 
+      {/* Image Viewer Dialog */}
       <ImageViewerDialog
-        selectedImage={selectedImage}
-        selectedTaskImages={selectedTaskImages}
-        currentImageIndex={currentImageIndex}
-        onClose={() => setSelectedImage(null)}
-        onPrevious={handlePreviousImage}
-        onNext={handleNextImage}
+        isOpen={isViewerOpen}
+        onClose={() => setIsViewerOpen(false)}
+        currentImage={currentImage}
+        imageArray={imageArray}
+      />
+
+      {/* Task Comment Thread Dialog */}
+      <TaskCommentThread
+        isOpen={isCommentOpen && !!selectedTaskId}
+        onClose={() => setIsCommentOpen(false)}
+        taskId={selectedTaskId}
       />
     </div>
   );
