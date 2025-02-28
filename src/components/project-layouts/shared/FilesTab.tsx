@@ -122,23 +122,56 @@ interface FilesTabProps {
 const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
+  const [attemptCount, setAttemptCount] = useState<number>(0);
 
   // Debug query directly to check if data exists
   useEffect(() => {
     const checkFilesDirectly = async () => {
       try {
         console.log("Running debug query for project ID:", projectId);
-        const { data, error } = await supabase
-          .from('files')
-          .select('*')
-          .eq('project_id', projectId);
-
-        if (error) {
-          console.error("Debug query error:", error);
-          setDebugInfo(`Debug query error: ${error.message}`);
+        
+        // Try different query approaches
+        const approaches = [
+          { name: "Direct UUID", query: () => supabase.from('files').select('*').eq('project_id', projectId) },
+          { name: "String UUID", query: () => supabase.from('files').select('*').eq('project_id', String(projectId)) },
+          { name: "Text UUID", query: () => supabase.from('files').select('*').filter('project_id::text', 'eq', projectId) },
+          { name: "Raw SQL", query: () => supabase.rpc('get_files_for_project', { p_project_id: projectId }) }
+        ];
+        
+        let successfulApproach = null;
+        let foundData = null;
+        
+        for (const approach of approaches) {
+          try {
+            const { data, error } = await approach.query();
+            console.log(`${approach.name} approach:`, { data, error });
+            
+            if (!error && data && data.length > 0) {
+              successfulApproach = approach.name;
+              foundData = data;
+              break;
+            }
+          } catch (err) {
+            console.error(`Error with ${approach.name} approach:`, err);
+          }
+        }
+        
+        if (successfulApproach) {
+          console.log(`Found data with ${successfulApproach} approach:`, foundData);
+          setDebugInfo(`Found ${foundData?.length} files using ${successfulApproach} approach. Data: ${JSON.stringify(foundData)}`);
+          
+          // If we're on attempt 2+, trigger a refetch of the main query with the successful approach
+          if (attemptCount > 0) {
+            setAttemptCount(prev => prev + 1);
+          }
         } else {
-          console.log("Debug query results:", data);
-          setDebugInfo(`Debug found ${data?.length || 0} files. Data: ${JSON.stringify(data)}`);
+          const { data, error } = await supabase.from('files').select('*');
+          console.log("All files in table:", data);
+          
+          const projects = await supabase.from('projects').select('id, name');
+          console.log("All projects:", projects.data);
+          
+          setDebugInfo(`No files found with any approach. All files in table: ${data?.length || 0}. Raw project ID: ${projectId}. First file project_id (if exists): ${data && data.length > 0 ? data[0].project_id : 'none'}`);
         }
       } catch (err) {
         console.error("Debug query exception:", err);
@@ -147,23 +180,63 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     };
 
     checkFilesDirectly();
+  }, [projectId, attemptCount]);
+
+  // First, create the RPC function if it doesn't exist yet
+  useEffect(() => {
+    const createRpcFunction = async () => {
+      try {
+        console.log("Setting up RPC function for file queries");
+        
+        // Check if the function exists first by calling it
+        const testCall = await supabase.rpc('get_files_for_project', { p_project_id: projectId });
+        if (!testCall.error || !testCall.error.message.includes("function get_files_for_project() does not exist")) {
+          console.log("RPC function already exists or different error");
+          return;
+        }
+        
+        // If we get here, the function doesn't exist
+        const { error } = await supabase.rpc('create_get_files_function');
+        if (error) {
+          console.error("Error creating RPC function:", error);
+        } else {
+          console.log("Successfully created RPC function");
+          // Increment attempt count to trigger a query refresh
+          setAttemptCount(1);
+        }
+      } catch (err) {
+        console.error("Exception in createRpcFunction:", err);
+      }
+    };
+    
+    createRpcFunction();
   }, [projectId]);
 
   const { data: files, isLoading, error } = useQuery({
-    queryKey: ['project-files', projectId],
+    queryKey: ['project-files', projectId, attemptCount],
     queryFn: async () => {
-      console.log('Fetching files for project:', projectId);
+      console.log('Fetching files for project:', projectId, 'Attempt:', attemptCount);
       
       try {
-        // Try with explicit cast to string
-        const projectIdString = String(projectId);
-        console.log('Using project ID as string:', projectIdString);
+        let data;
+        let error;
         
-        // Fetch files directly with the project_id
-        const { data, error } = await supabase
-          .from('files')
-          .select('*')
-          .eq('project_id', projectIdString);
+        // Use different approaches based on attempt count
+        if (attemptCount >= 2) {
+          // Use the RPC function on later attempts
+          const result = await supabase.rpc('get_files_for_project', { p_project_id: projectId });
+          data = result.data;
+          error = result.error;
+        } else {
+          // Default approach
+          const result = await supabase
+            .from('files')
+            .select('*')
+            .eq('project_id', projectId);
+          
+          data = result.data;
+          error = result.error;
+        }
 
         if (error) {
           console.error('Error fetching files:', error);
@@ -173,7 +246,7 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
         console.log('Fetched files data:', data);
 
         if (!data || data.length === 0) {
-          console.log('No files found for project ID:', projectIdString);
+          console.log('No files found for project ID:', projectId);
           return {};
         }
 
@@ -216,6 +289,12 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
               <p className="text-xs font-mono">{debugInfo}</p>
             </div>
           )}
+          <button 
+            onClick={() => setAttemptCount(prev => prev + 1)} 
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Try Another Approach
+          </button>
         </div>
       </Card>
     );
@@ -231,6 +310,12 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
               <p className="text-xs font-mono">{debugInfo}</p>
             </div>
           )}
+          <button 
+            onClick={() => setAttemptCount(prev => prev + 1)} 
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Try Another Approach
+          </button>
         </div>
       </Card>
     );
