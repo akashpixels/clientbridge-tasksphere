@@ -1,4 +1,3 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import { differenceInDays } from "date-fns";
 import { useState } from "react";
@@ -9,8 +8,6 @@ interface ProjectStatsProps {
       hours_allotted: number;
       subscription_status: string;
       next_renewal_date: string;
-      hours_spent?: number;
-      billing_cycle?: string;
     }[];
   };
   selectedMonth: string;
@@ -24,7 +21,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
   const hoursAllotted = subscription?.hours_allotted || 0;
 
   const hoursPercentage = Math.min(
-    Math.round((monthlyHours / (hoursAllotted || 1)) * 100),
+    Math.round((monthlyHours / hoursAllotted) * 100),
     100
   );
 
@@ -89,7 +86,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
         {/* Subscription Info (Centered) */}
         <p className="text-[11px] text-gray-500">Renews in</p>
         <p className="text-xl font-semibold">{daysUntilRenewal > 0 ? `${daysUntilRenewal} Days` : "Expired"}</p>
-        <p className="text-[11px] text-gray-400">Cycle: {subscription?.billing_cycle || "Monthly"}</p>
+        <p className="text-[11px] text-gray-400">Cycle: Monthly</p>
       </div>
     
     </div>

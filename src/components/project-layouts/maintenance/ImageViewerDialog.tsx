@@ -1,25 +1,50 @@
-
-import React from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 interface ImageViewerDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  imageUrl: string;
+  selectedImage: string | null;
+  selectedTaskImages: string[];
+  currentImageIndex: number;
+  onClose: () => void;
+  onPrevious: () => void;
+  onNext: () => void;
 }
 
-const ImageViewerDialog = ({ open, onOpenChange, imageUrl }: ImageViewerDialogProps) => {
-  if (!imageUrl) return null;
-
+const ImageViewerDialog = ({
+  selectedImage,
+  selectedTaskImages,
+  currentImageIndex,
+  onClose,
+  onPrevious,
+  onNext,
+}: ImageViewerDialogProps) => {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-0 shadow-none">
-        <div className="flex items-center justify-center">
-          <img
-            src={imageUrl}
-            alt="Full size preview"
-            className="max-h-[80vh] max-w-full object-contain rounded-md shadow-lg"
-          />
+    <Dialog open={!!selectedImage} onOpenChange={onClose}>
+      <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
+        <div className="relative flex-1 min-h-0 flex items-center justify-center">
+          {selectedImage && (
+            <>
+              <button
+                onClick={onPrevious}
+                className="absolute left-4 p-2 bg-white/80 rounded-full"
+                disabled={currentImageIndex === 0}
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <img 
+                src={selectedImage} 
+                alt="Task image"
+                className="max-w-full max-h-[calc(80vh-4rem)] object-contain"
+              />
+              <button
+                onClick={onNext}
+                className="absolute right-4 p-2 bg-white/80 rounded-full"
+                disabled={currentImageIndex === selectedTaskImages.length - 1}
+              >
+                <ArrowRight className="w-6 h-6" />
+              </button>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
