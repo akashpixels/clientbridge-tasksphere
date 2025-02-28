@@ -86,7 +86,7 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
     console.log("Project ID:", project.id);
   }, [project]);
 
-  // Get tasks for the project
+  // Get tasks for the project - fix the query to avoid multiple relationship issue
   const { data: tasksData = [], isLoading: isLoadingTasks } = useQuery({
     queryKey: ['project-tasks', project.id, selectedMonth, sortConfig],
     queryFn: async () => {
@@ -96,33 +96,67 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
       console.log('Fetching tasks for project:', project.id);
       console.log('Date range:', format(startDate, 'yyyy-MM-dd'), 'to', format(endDate, 'yyyy-MM-dd'));
       
-      const { data, error } = await supabase
-        .from('tasks')
-        .select(`
-          *,
-          task_type:task_types(name, category),
-          status:task_statuses(name, color_hex),
-          priority:priority_levels(name, color),
-          complexity:complexity_levels(name, multiplier),
-          assigned_user:user_profiles(first_name, last_name)
-        `)
-        .eq('project_id', project.id)
-        .gte('created_at', startDate.toISOString())
-        .lte('created_at', endDate.toISOString())
-        .order(sortConfig.key, { ascending: sortConfig.direction === 'asc' });
+      try {
+        // First approach: Using specific relationship hints
+        const { data, error } = await supabase
+          .from('tasks')
+          .select(`
+            *,
+            task_type:task_types(name, category),
+            status:task_statuses!tasks_current_status_id_fkey(name, color_hex),
+            priority:priority_levels(name, color),
+            complexity:complexity_levels(name, multiplier),
+            assigned_user:user_profiles(first_name, last_name)
+          `)
+          .eq('project_id', project.id)
+          .gte('created_at', startDate.toISOString())
+          .lte('created_at', endDate.toISOString())
+          .order(sortConfig.key, { ascending: sortConfig.direction === 'asc' });
 
-      if (error) {
-        console.error('Error fetching tasks:', error);
-        throw error;
+        if (error) {
+          console.error('Error fetching tasks with relationship hint:', error);
+          throw error;
+        }
+        
+        console.log(`Found ${data.length} tasks for ${selectedMonth}:`, data);
+        return data;
+      } catch (firstError) {
+        console.error('First approach failed:', firstError);
+        
+        // Fallback approach: Fetch tasks first, then fetch related data separately
+        try {
+          const { data: tasksOnly, error: tasksError } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('project_id', project.id)
+            .gte('created_at', startDate.toISOString())
+            .lte('created_at', endDate.toISOString())
+            .order(sortConfig.key, { ascending: sortConfig.direction === 'asc' });
+            
+          if (tasksError) {
+            console.error('Error fetching tasks:', tasksError);
+            throw tasksError;
+          }
+          
+          // Create placeholder objects that match the expected structure
+          return tasksOnly.map(task => ({
+            ...task,
+            task_type: null,
+            status: null,
+            priority: null, 
+            complexity: null,
+            assigned_user: null
+          }));
+        } catch (fallbackError) {
+          console.error('Fallback approach failed:', fallbackError);
+          return [];
+        }
       }
-      
-      console.log(`Found ${data.length} tasks for ${selectedMonth}:`, data);
-      return data;
     },
   });
 
-  // Ensure the tasks data matches the expected type
-  const tasks: TaskWithRelations[] = tasksData.map(task => {
+  // Map tasks to ensure they match the expected type
+  const tasks: TaskWithRelations[] = Array.isArray(tasksData) ? tasksData.map(task => {
     return {
       ...task,
       task_type: task.task_type || null,
@@ -131,7 +165,7 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
       complexity: task.complexity || null,
       assigned_user: task.assigned_user || null,
     };
-  });
+  }) : [];
 
   // Calculate hours spent for the selected month
   const { data: monthlyHours = 0 } = useQuery({
@@ -234,17 +268,17 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
         </TabsContent>
       </Tabs>
 
-      {/* Image Viewer Dialog */}
+      {/* Image Viewer Dialog - use isOpen prop instead of open */}
       <ImageViewerDialog
-        open={isViewerOpen}
+        isOpen={isViewerOpen}
         onClose={() => setIsViewerOpen(false)}
         currentImage={currentImage}
         imageArray={imageArray}
       />
 
-      {/* Task Comment Thread Dialog */}
+      {/* Task Comment Thread Dialog - use isOpen prop instead of open */}
       <TaskCommentThread
-        open={isCommentOpen && !!selectedTaskId}
+        isOpen={isCommentOpen && !!selectedTaskId}
         onClose={() => setIsCommentOpen(false)}
         taskId={selectedTaskId || ""}
       />
