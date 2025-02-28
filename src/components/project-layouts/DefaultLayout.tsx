@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import CredentialsTab from "./shared/CredentialsTab";
 import TeamTab from "./shared/TeamTab";
+import FilesTab from "./shared/FilesTab";
 
 interface DefaultLayoutProps {
   project: Tables<"projects"> & {
@@ -99,9 +100,7 @@ const DefaultLayout = ({ project }: DefaultLayoutProps) => {
         </TabsContent>
 
         <TabsContent value="files">
-          <Card className="p-6">
-            <p>Files content coming soon...</p>
-          </Card>
+          <FilesTab projectId={project.id} />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,7 +1,10 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import CredentialsTab from "./shared/CredentialsTab";
+import TeamTab from "./shared/TeamTab";
+import FilesTab from "./shared/FilesTab";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -57,6 +60,7 @@ const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
           <TabsTrigger value="deployments">Deployments</TabsTrigger>
           <TabsTrigger value="team">Team</TabsTrigger>
           <TabsTrigger value="credentials">Credentials</TabsTrigger>
+          <TabsTrigger value="files">Files</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -113,13 +117,15 @@ const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
         </TabsContent>
 
         <TabsContent value="team">
-          <Card className="p-6">
-            <p>Team content coming soon...</p>
-          </Card>
+          <TeamTab projectId={project.id} />
         </TabsContent>
 
         <TabsContent value="credentials">
           <CredentialsTab projectId={project.id} />
+        </TabsContent>
+
+        <TabsContent value="files">
+          <FilesTab projectId={project.id} />
         </TabsContent>
       </Tabs>
     </div>
