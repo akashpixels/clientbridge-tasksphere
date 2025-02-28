@@ -1,11 +1,13 @@
+
 import { Tables } from "@/integrations/supabase/types";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, format } from "date-fns";
 import { useState } from "react";
 
 interface ProjectStatsProps {
   project: Tables<"projects"> & {
     project_subscriptions?: {
       hours_allotted: number;
+      hours_spent: number | null;
       subscription_status: string;
       next_renewal_date: string;
     }[];
@@ -21,30 +23,44 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
   const hoursAllotted = subscription?.hours_allotted || 0;
 
   const hoursPercentage = Math.min(
-    Math.round((monthlyHours / hoursAllotted) * 100),
+    Math.round((monthlyHours / hoursAllotted) * 100) || 0,
     100
   );
 
-  // Renewal Status Logic.
+  // Renewal Status Logic
   const renewalDate = subscription?.next_renewal_date ? new Date(subscription.next_renewal_date) : new Date();
-  const daysUntilRenewal = differenceInDays(renewalDate, new Date());
+  const currentDate = new Date();
+  const daysUntilRenewal = differenceInDays(renewalDate, currentDate);
+
+  console.log("Subscription status:", subscription?.subscription_status);
+  console.log("Next renewal date:", renewalDate);
+  console.log("Days until renewal:", daysUntilRenewal);
 
   let statusColor = "bg-green-600"; // Default Active (Green)
   let statusText = "Active";
 
-  if (daysUntilRenewal <= 5 && daysUntilRenewal > 0) {
-    statusColor = "bg-orange-500"; // Warning (Orange)
-    statusText = "Renew Soon";
-  } else if (subscription?.subscription_status !== "active") {
+  // Check subscription status first - this should take precedence
+  if (subscription?.subscription_status !== "active") {
     statusColor = "bg-red-600"; // Inactive (Red)
     statusText = "Inactive";
+  } 
+  // Then check renewal date
+  else if (daysUntilRenewal <= 5 && daysUntilRenewal > 0) {
+    statusColor = "bg-orange-500"; // Warning (Orange)
+    statusText = "Renew Soon";
   }
+  // Check if the date is in the past
+  else if (daysUntilRenewal < 0) {
+    statusColor = "bg-red-600"; // Expired (Red)
+    statusText = "Renewal Overdue";
+  }
+
+  const formattedRenewalDate = format(renewalDate, 'MMM yyyy');
 
   return (
     <div className="flex gap-4">
       
      {/* Hours Progress Card */}
-
       <div 
         className="relative w-[160px] h-[108px] border border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 overflow-hidden text-gray-900"
         style={{
@@ -52,7 +68,6 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
           transition: "background 0.5s ease"
         }}
       >
-
         {/* Hours Label */}
         <p className="text-[11px] font-medium text-gray-500">Hours Used</p>
 
@@ -85,7 +100,11 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
 
         {/* Subscription Info (Centered) */}
         <p className="text-[11px] text-gray-500">Renews in</p>
-        <p className="text-xl font-semibold">{daysUntilRenewal > 0 ? `${daysUntilRenewal} Days` : "Expired"}</p>
+        <p className="text-xl font-semibold">
+          {daysUntilRenewal > 0 
+            ? `${daysUntilRenewal} Days` 
+            : (subscription?.subscription_status === "active" ? "Renewal Overdue" : "Expired")}
+        </p>
         <p className="text-[11px] text-gray-400">Cycle: Monthly</p>
       </div>
     
