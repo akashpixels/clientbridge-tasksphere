@@ -98,7 +98,10 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
               src={file.file_url}
               alt={file.file_name}
               className="w-full h-full object-cover rounded"
-              onError={() => console.log(`Error loading image: ${file.file_url}`)}
+              onError={(e) => {
+                console.log(`Error loading image: ${file.file_url}`);
+                e.currentTarget.src = '/placeholder.svg';
+              }}
             />
           </div>
         ) : (
@@ -123,6 +126,8 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     queryKey: ['project-files', projectId],
     queryFn: async () => {
       console.log('Fetching files for project:', projectId);
+      
+      // Fetch files directly with the project_id
       const { data, error } = await supabase
         .from('files')
         .select('*')
@@ -136,11 +141,17 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
       console.log('Fetched files data:', data);
 
       if (!data || data.length === 0) {
+        console.log('No files found for project ID:', projectId);
         return {};
       }
 
       // Group files by date
-      const groupedFiles = data.reduce((groups: Record<string, typeof data>, file) => {
+      const groupedFiles = data.reduce((groups: Record<string, any[]>, file) => {
+        if (!file.created_at) {
+          console.warn('File missing created_at:', file);
+          return groups;
+        }
+        
         const date = format(new Date(file.created_at), 'MMMM d, yyyy');
         if (!groups[date]) {
           groups[date] = [];
@@ -163,6 +174,7 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
       <Card className="p-6">
         <div className="text-center py-8">
           <p className="text-red-500">Error loading files. Please try again.</p>
+          <p className="text-sm text-gray-500 mt-2">{(error as Error).message}</p>
         </div>
       </Card>
     );
