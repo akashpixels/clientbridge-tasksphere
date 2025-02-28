@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { Tables } from "@/integrations/supabase/types";
 import { format } from "date-fns";
 import ProjectHeader from "./ProjectHeader";
 import TaskList from "./TaskList";
@@ -9,11 +9,14 @@ import CredentialsTab from "../shared/CredentialsTab";
 import TeamTab from "../shared/TeamTab";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import ImageViewerDialog from "@/components/ImageViewerDialog";
+import ImageViewerDialog from "../maintenance/ImageViewerDialog";
 import TaskCommentThread from "@/components/TaskCommentThread";
 
 interface MaintenanceLayoutProps {
-  project: Tables<"projects"> & {
+  project: {
+    id: string;
+    name: string;
+    description: string;
     client_admin: {
       id: string;
       business_name: string;
@@ -31,6 +34,7 @@ interface MaintenanceLayoutProps {
       subscription_status: string;
       next_renewal_date: string;
       hours_spent?: number;
+      billing_cycle?: string;
     }[];
   };
 }
@@ -44,25 +48,30 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
   const { data: tasks, isLoading } = useQuery({
     queryKey: ['project-tasks', project.id, selectedMonth],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select(`
-          *,
-          task_status(name, color_hex),
-          assigned_to:user_profiles(id, first_name, last_name, avatar_url),
-          task_comments(
-            id,
-            content,
-            created_at,
-            user_profiles(id, first_name, last_name, avatar_url)
-          ),
-          task_attachments(id, file_name, file_url, file_type, created_at)
-        `)
-        .eq('project_id', project.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase
+          .from('tasks')
+          .select(`
+            *,
+            task_status(name, color_hex),
+            assigned_to:user_profiles(id, first_name, last_name, avatar_url),
+            task_comments(
+              id,
+              content,
+              created_at,
+              user_profiles(id, first_name, last_name, avatar_url)
+            ),
+            task_attachments(id, file_name, file_url, file_type, created_at)
+          `)
+          .eq('project_id', project.id)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+        return [];
+      }
     }
   });
 
@@ -76,16 +85,26 @@ const MaintenanceLayout = ({ project }: MaintenanceLayoutProps) => {
         ? `${parseInt(year) + 1}-01-01` 
         : `${year}-${String(parseInt(month) + 1).padStart(2, '0')}-01`;
       
-      const { data, error } = await supabase
-        .from('time_entries')
-        .select('hours')
-        .eq('project_id', project.id)
-        .gte('date', startDate)
-        .lt('date', endDate);
-      
-      if (error) throw error;
-      
-      return data.reduce((sum, entry) => sum + (entry.hours || 0), 0);
+      try {
+        const { data, error } = await supabase
+          .rpc('get_time_entries_for_project', { 
+            project_id_param: project.id,
+            start_date_param: startDate,
+            end_date_param: endDate
+          });
+        
+        if (error) {
+          console.error('Error fetching time entries:', error);
+          return 0;
+        }
+        
+        return data && Array.isArray(data) 
+          ? data.reduce((sum, entry) => sum + (entry.hours || 0), 0)
+          : 0;
+      } catch (error) {
+        console.error('Error calculating monthly hours:', error);
+        return 0;
+      }
     }
   });
 
