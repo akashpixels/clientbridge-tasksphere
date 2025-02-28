@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2, AlertCircle } from "lucide-react";
 
 interface TasksTabContentProps {
   isLoadingTasks: boolean;
@@ -94,7 +95,10 @@ const TasksTabContent = ({
   return (
     <Card className="p-0">
       {isLoadingTasks ? (
-        <p className="p-6">Loading tasks...</p>
+        <div className="flex items-center justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+          <p>Loading tasks...</p>
+        </div>
       ) : tasks && tasks.length > 0 ? (
         <div className="overflow-x-auto">
           <TasksTable 
@@ -106,9 +110,17 @@ const TasksTabContent = ({
           />
         </div>
       ) : (
-        <div className="p-6">
-          <p>No tasks found for this project.</p>
-          <p className="text-sm text-gray-400 mt-2">This could be due to permission settings or because no tasks exist.</p>
+        <div className="p-6 text-center">
+          <AlertCircle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
+          <p className="text-lg font-semibold">No tasks found for this project.</p>
+          <p className="text-sm text-gray-500 mt-2">
+            This could be due to permission settings or because no tasks exist for this project.
+          </p>
+          <div className="mt-4 p-3 bg-gray-50 rounded-md text-sm text-left">
+            <p className="font-medium">Debugging information:</p>
+            <p className="mt-1 text-xs">Project ID: {window.location.pathname.split('/').pop()}</p>
+            <p className="mt-1 text-xs">RLS Status: Temporarily disabled</p>
+          </div>
         </div>
       )}
     </Card>

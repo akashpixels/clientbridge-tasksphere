@@ -14,7 +14,10 @@ import {
   FileCode, 
   FileArchive,
   FileType,
-  FileChartLine 
+  FileChartLine,
+  Loader2,
+  AlertCircle,
+  RefreshCw
 } from "lucide-react";
 
 interface FileCardProps {
@@ -131,6 +134,7 @@ interface FilesTabProps {
 
 const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Direct database check - this will help us diagnose if there's a permission issue
   useEffect(() => {
@@ -164,7 +168,12 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     checkDirectAccess();
   }, [projectId]);
 
-  const { data: projectFiles, isLoading, error } = useQuery({
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    refetch().finally(() => setIsRefreshing(false));
+  };
+
+  const { data: projectFiles, isLoading, error, refetch } = useQuery({
     queryKey: ['project-files', projectId],
     queryFn: async () => {
       console.log('Fetching files for project:', projectId);
@@ -195,7 +204,14 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
   });
 
   if (isLoading) {
-    return <Card className="p-6"><div>Loading files...</div></Card>;
+    return (
+      <Card className="p-6">
+        <div className="flex items-center justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+          <p>Loading files...</p>
+        </div>
+      </Card>
+    );
   }
   
   if (error) {
@@ -203,8 +219,17 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     return (
       <Card className="p-6">
         <div className="text-center py-8">
-          <p className="text-red-500">Error loading files: {(error as Error).message}</p>
-          <p className="text-sm text-gray-500 mt-2">Project ID: {projectId}</p>
+          <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+          <p className="text-lg font-semibold text-red-500">Error loading files</p>
+          <p className="text-sm text-gray-500 mt-2">{(error as Error).message}</p>
+          <p className="text-xs text-gray-400 mt-1">Project ID: {projectId}</p>
+          <button 
+            className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-sm mx-auto"
+            onClick={handleRefresh}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Try again
+          </button>
         </div>
       </Card>
     );
@@ -214,8 +239,24 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     return (
       <Card className="p-6">
         <div className="text-center py-8">
-          <p className="text-gray-500">No files found for this project.</p>
-          <p className="text-sm text-gray-400 mt-2">Project ID: {projectId}</p>
+          <AlertCircle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
+          <p className="text-lg font-semibold">No files found for this project.</p>
+          <p className="text-sm text-gray-500 mt-2">
+            This could be due to permission settings or because no files exist for this project.
+          </p>
+          <div className="mt-4 p-3 bg-gray-50 rounded-md text-sm text-left max-w-md mx-auto">
+            <p className="font-medium">Debugging information:</p>
+            <p className="mt-1 text-xs">Project ID: {projectId}</p>
+            <p className="mt-1 text-xs">RLS Status: Temporarily disabled</p>
+          </div>
+          <button 
+            className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-sm mx-auto"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
         </div>
       </Card>
     );
@@ -237,6 +278,18 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
 
   return (
     <Card className="p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-medium">Project Files</h3>
+        <button 
+          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center text-sm"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-1.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+      
       <div className="space-y-8">
         {Object.entries(groupedFiles).map(([date, dateFiles]) => (
           <div key={date}>
