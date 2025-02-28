@@ -87,9 +87,16 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    e.currentTarget.src = '';
-    e.currentTarget.onerror = null;
-    e.currentTarget.parentElement!.innerHTML = FileImage.toString();
+    const target = e.currentTarget;
+    target.style.display = 'none';
+    
+    // Add a fallback icon when image fails to load
+    const container = target.parentElement;
+    if (container) {
+      const icon = document.createElement('div');
+      icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="w-20 h-20 stroke-[0.5] text-blue-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><circle cx="10" cy="13" r="2"></circle><path d="m20 17-1.09-1.09a2 2 0 0 0-2.82 0L10 22"></path></svg>';
+      container.appendChild(icon);
+    }
   };
 
   return (
@@ -99,7 +106,7 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
     >
       <div className="flex flex-col items-center">
         {isImageFile(file.file_url) ? (
-          <div className="w-20 h-20 relative">
+          <div className="w-20 h-20 relative flex items-center justify-center bg-gray-100 rounded">
             <img
               src={file.file_url}
               alt={file.file_name}
@@ -145,6 +152,9 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
       console.log(`Found ${data?.length || 0} files for project ${projectId}:`, data);
       return data || [];
     },
+    // Add refetch on window focus and stale time for better user experience
+    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   if (isLoading) {
