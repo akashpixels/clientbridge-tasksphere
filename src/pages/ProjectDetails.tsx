@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,6 +56,7 @@ const ProjectDetails = () => {
   }
 
   console.log('Project layout:', project.layout);
+  console.log('Project layout_id:', project.layout_id);
   
   // Render the appropriate layout based on the project's layout type
   const layoutId = project.layout_id;
