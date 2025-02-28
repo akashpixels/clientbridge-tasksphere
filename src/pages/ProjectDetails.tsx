@@ -29,12 +29,10 @@ const ProjectDetails = () => {
           status:task_statuses(name, color_hex),
           layout:project_layouts(id, name),
           project_subscriptions(
-            id,
             subscription_status,
             hours_allotted,
             hours_spent,
-            next_renewal_date,
-            billing_cycle
+            next_renewal_date
           )
         `)
         .eq('id', id)
@@ -59,7 +57,6 @@ const ProjectDetails = () => {
   }
 
   console.log('Project layout:', project.layout);
-  console.log('Project subscriptions:', project.project_subscriptions);
   
   // Render the appropriate layout based on the project's layout type
   const layoutId = project.layout_id;

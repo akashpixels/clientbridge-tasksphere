@@ -1,8 +1,8 @@
 
-import { useState } from "react";
-import { format } from "date-fns";
 import { Tables } from "@/integrations/supabase/types";
 import ProjectStats from "./ProjectStats";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format, subMonths } from "date-fns";
 
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
@@ -14,117 +14,81 @@ interface ProjectHeaderProps {
         last_name: string;
       } | null;
     } | null;
-    status: {
-      name: string;
-      color_hex: string | null;
-    } | null;
-    project_subscriptions?: {
-      id: string;
-      subscription_status: string;
-      hours_allotted: number;
-      hours_spent: number | null;
-      next_renewal_date: string;
-      billing_cycle: string;
-    }[];
   };
   selectedMonth: string;
   onMonthChange: (month: string) => void;
   monthlyHours: number;
 }
 
-const ProjectHeader = ({ 
-  project, 
-  selectedMonth, 
-  onMonthChange,
-  monthlyHours
-}: ProjectHeaderProps) => {
-  const [showMonthSelector, setShowMonthSelector] = useState(false);
-
-  // Generate last 12 months for selection
-  const getMonthOptions = () => {
-    const options = [];
-    const now = new Date();
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const formattedDate = format(date, 'yyyy-MM');
-      const displayDate = format(date, 'MMMM yyyy');
-      options.push({ value: formattedDate, label: displayDate });
-    }
-    return options;
-  };
-
-  const monthOptions = getMonthOptions();
-  const currentMonth = monthOptions.find(option => option.value === selectedMonth);
-
-  // The client name can come from different places depending on the data structure
-  const getClientName = () => {
-    if (project.client_admin?.business_name) {
-      return project.client_admin.business_name;
-    }
-    
-    if (project.client_admin?.user_profiles?.first_name) {
-      const { first_name, last_name } = project.client_admin.user_profiles;
-      return `${first_name} ${last_name || ''}`;
-    }
-    
-    return 'No Client Assigned';
-  };
-
-  console.log("ProjectHeader - Project subscriptions:", project.project_subscriptions);
+const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: ProjectHeaderProps) => {
+  // Generate last 6 months options (current month + 5 previous months)
+  const monthOptions = Array.from({ length: 6 }, (_, i) => {
+    const date = subMonths(new Date(), i);
+    return {
+      value: format(date, 'yyyy-MM'),
+      label: format(date, 'MMM yyyy')
+    };
+  });
 
   return (
-    <div className="flex flex-col space-y-4">
-      <div className="flex items-start justify-between">
+    <div className="flex items-center justify-between w-full gap-4">
+      <div className="flex items-center gap-4">
+        {project.logo_url && (
+          <img 
+            src={project.logo_url} 
+            alt={`${project.name} logo`}
+            className="w-16 h-16 object-contain rounded-lg"
+          />
+        )}
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">{project.name}</h1>
-            <span 
-              className="text-xs px-2 py-1 rounded-full"
-              style={{
-                backgroundColor: `${project.status?.color_hex || '#f1f5f9'}15`,
-                color: project.status?.color_hex || '#64748b'
-              }}
-            >
-              {project.status?.name || 'Status unknown'}
-            </span>
-          </div>
-          <p className="text-gray-500 mt-1">Client: {getClientName()}</p>
-        </div>
-        
-        <div className="relative inline-block">
-          <button 
-            className="px-3 py-2 border border-gray-200 rounded-md text-sm flex items-center gap-2"
-            onClick={() => setShowMonthSelector(!showMonthSelector)}
-          >
-            {currentMonth?.label || 'Select Month'}
-            <span className="w-4 h-4">▼</span>
-          </button>
-          
-          {showMonthSelector && (
-            <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-              {monthOptions.map(option => (
-                <button
-                  key={option.value}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                  onClick={() => {
-                    onMonthChange(option.value);
-                    setShowMonthSelector(false);
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          )}
+          <h1 className="text-2xl font-semibold">{project.name}</h1>
+          <p className="text-gray-500">
+            {project.client_admin?.user_profiles ? 
+              `${project.client_admin.user_profiles.first_name} ${project.client_admin.user_profiles.last_name}` : 
+              project.client_admin?.business_name || 'No Client'}
+          </p>
         </div>
       </div>
-      
-      <div className="flex justify-between items-center">
-        <ProjectStats 
+      <div className="flex items-center gap-4">
+        
+<ProjectStats 
           project={project} 
           selectedMonth={selectedMonth}
           monthlyHours={monthlyHours}
         />
+        
+        <div className="bg-[#fcfcfc]">
+          <Select
+            value={selectedMonth}
+            onValueChange={onMonthChange}
+          >
+           <SelectTrigger className="w-[108px] h-[108px] flex flex-col items-center justify-between p-4 rounded-[4px] border border-gray-200 focus:ring-0 focus:border-gray-200 bg-transparent">
+
+              <SelectValue placeholder="Select month">
+                {selectedMonth && (
+                  <div className="flex flex-col items-center">
+                    <span className="text-2xl font-semibold">
+                      {format(new Date(selectedMonth), 'MMM')}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {format(new Date(selectedMonth), 'yyyy')}
+                    </span>
+                   
+                  </div>
+                )}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent className="bg-[#fcfcfc]">
+              {monthOptions.map((month) => (
+                <SelectItem key={month.value} value={month.value}>
+                  {month.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+       
+        
       </div>
     </div>
   );

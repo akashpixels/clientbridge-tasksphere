@@ -29,14 +29,6 @@ interface DevelopmentLayoutProps {
       name: string;
       color_hex: string | null;
     } | null;
-    project_subscriptions?: {
-      id: string;
-      subscription_status: string;
-      hours_allotted: number;
-      hours_spent: number | null;
-      next_renewal_date: string;
-      billing_cycle: string;
-    }[];
   };
 }
 
@@ -56,7 +48,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   // Add direct project ID check
   useEffect(() => {
     console.log("MaintenanceLayout - Project ID:", project.id);
-    console.log("Project subscriptions:", project.project_subscriptions);
     
     // Check project data table permissions
     const checkProjectData = async () => {
