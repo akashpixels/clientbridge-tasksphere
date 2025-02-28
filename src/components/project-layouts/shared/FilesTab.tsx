@@ -125,10 +125,12 @@ interface FilesTabProps {
 const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
-  const { data: files, isLoading } = useQuery({
+  const { data: projectFiles, isLoading, error } = useQuery({
     queryKey: ['project-files', projectId],
     queryFn: async () => {
       console.log('Fetching files for project:', projectId);
+      
+      // Get files for the project
       const { data, error } = await supabase
         .from('files')
         .select('*')
@@ -139,26 +141,28 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
         console.error('Error fetching files:', error);
         throw error;
       }
-
-      // Group files by date
-      const groupedFiles = data.reduce((groups: Record<string, typeof data>, file) => {
-        const date = format(new Date(file.created_at), 'MMMM d, yyyy');
-        if (!groups[date]) {
-          groups[date] = [];
-        }
-        groups[date].push(file);
-        return groups;
-      }, {});
-
-      return groupedFiles;
+      
+      console.log(`Found ${data?.length || 0} files for project ${projectId}:`, data);
+      return data || [];
     },
   });
 
   if (isLoading) {
-    return <div>Loading files...</div>;
+    return <Card className="p-6"><div>Loading files...</div></Card>;
+  }
+  
+  if (error) {
+    console.error('Error in files query:', error);
+    return (
+      <Card className="p-6">
+        <div className="text-center py-8">
+          <p className="text-red-500">Error loading files: {(error as Error).message}</p>
+        </div>
+      </Card>
+    );
   }
 
-  if (!files || Object.keys(files).length === 0) {
+  if (!projectFiles || projectFiles.length === 0) {
     return (
       <Card className="p-6">
         <div className="text-center py-8">
@@ -168,6 +172,16 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     );
   }
 
+  // Group files by date for display
+  const groupedFiles: Record<string, typeof projectFiles> = {};
+  projectFiles.forEach(file => {
+    const date = format(new Date(file.created_at), 'MMMM d, yyyy');
+    if (!groupedFiles[date]) {
+      groupedFiles[date] = [];
+    }
+    groupedFiles[date].push(file);
+  });
+
   const handleDownload = (url: string) => {
     window.open(url, '_blank');
   };
@@ -175,7 +189,7 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
   return (
     <Card className="p-6">
       <div className="space-y-8">
-        {Object.entries(files).map(([date, dateFiles]) => (
+        {Object.entries(groupedFiles).map(([date, dateFiles]) => (
           <div key={date}>
             <h3 className="text-lg font-medium mb-4">{date}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
