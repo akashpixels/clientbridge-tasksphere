@@ -86,12 +86,6 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
     return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    e.currentTarget.src = '';
-    e.currentTarget.onerror = null;
-    e.currentTarget.parentElement!.innerHTML = FileImage.toString();
-  };
-
   return (
     <div 
       className="p-2 cursor-pointer"
@@ -104,7 +98,7 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
               src={file.file_url}
               alt={file.file_name}
               className="w-full h-full object-cover rounded"
-              onError={handleImageError}
+              onError={() => console.log(`Error loading image: ${file.file_url}`)}
             />
           </div>
         ) : (
@@ -125,15 +119,14 @@ interface FilesTabProps {
 const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
-  const { data: files, isLoading } = useQuery({
+  const { data: files, isLoading, error } = useQuery({
     queryKey: ['project-files', projectId],
     queryFn: async () => {
       console.log('Fetching files for project:', projectId);
       const { data, error } = await supabase
         .from('files')
         .select('*')
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: false });
+        .eq('project_id', projectId);
 
       if (error) {
         console.error('Error fetching files:', error);
@@ -141,6 +134,10 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
       }
 
       console.log('Fetched files data:', data);
+
+      if (!data || data.length === 0) {
+        return {};
+      }
 
       // Group files by date
       const groupedFiles = data.reduce((groups: Record<string, typeof data>, file) => {
@@ -160,11 +157,22 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     return <div>Loading files...</div>;
   }
 
+  if (error) {
+    console.error("Error loading files:", error);
+    return (
+      <Card className="p-6">
+        <div className="text-center py-8">
+          <p className="text-red-500">Error loading files. Please try again.</p>
+        </div>
+      </Card>
+    );
+  }
+
   if (!files || Object.keys(files).length === 0) {
     return (
       <Card className="p-6">
         <div className="text-center py-8">
-          <p className="text-gray-500">No files found for this project.</p>
+          <p className="text-gray-500">No files found for this project (ID: {projectId}).</p>
         </div>
       </Card>
     );
