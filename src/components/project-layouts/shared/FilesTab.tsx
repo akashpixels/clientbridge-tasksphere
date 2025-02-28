@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -121,177 +121,59 @@ interface FilesTabProps {
 
 const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string | null>(null);
-  const [attemptCount, setAttemptCount] = useState<number>(0);
 
-  // Debug query directly to check if data exists
-  useEffect(() => {
-    const checkFilesDirectly = async () => {
-      try {
-        console.log("Running debug query for project ID:", projectId);
-        
-        // Try different query approaches
-        const approaches = [
-          { name: "Direct UUID", query: async () => {
-            const result = await supabase.from('files').select('*').eq('project_id', projectId);
-            return { data: result.data, error: result.error };
-          }},
-          { name: "String UUID", query: async () => {
-            const result = await supabase.from('files').select('*').eq('project_id', String(projectId));
-            return { data: result.data, error: result.error };
-          }},
-          { name: "Text UUID", query: async () => {
-            const result = await supabase.from('files').select('*').filter('project_id::text', 'eq', projectId);
-            return { data: result.data, error: result.error };
-          }},
-          { name: "Raw SQL via Function", query: async () => {
-            // This is just for debugging, so we'll use a simple query
-            const result = await supabase.from('files').select('*');
-            return { data: result.data?.filter(file => file.project_id === projectId), error: result.error };
-          }}
-        ];
-        
-        let successfulApproach = null;
-        let foundData = null;
-        
-        for (const approach of approaches) {
-          try {
-            const { data, error } = await approach.query();
-            console.log(`${approach.name} approach:`, { data, error });
-            
-            if (!error && data && Array.isArray(data) && data.length > 0) {
-              successfulApproach = approach.name;
-              foundData = data;
-              break;
-            }
-          } catch (err) {
-            console.error(`Error with ${approach.name} approach:`, err);
-          }
-        }
-        
-        if (successfulApproach) {
-          console.log(`Found data with ${successfulApproach} approach:`, foundData);
-          setDebugInfo(`Found ${foundData?.length} files using ${successfulApproach} approach. Data: ${JSON.stringify(foundData)}`);
-          
-          // If we're on attempt 2+, trigger a refetch of the main query with the successful approach
-          if (attemptCount > 0) {
-            setAttemptCount(prev => prev + 1);
-          }
-        } else {
-          const { data, error } = await supabase.from('files').select('*');
-          console.log("All files in table:", data);
-          
-          const projects = await supabase.from('projects').select('id, name');
-          console.log("All projects:", projects.data);
-          
-          if (data && Array.isArray(data)) {
-            setDebugInfo(`No files found with any approach. All files in table: ${data.length || 0}. Raw project ID: ${projectId}. First file project_id (if exists): ${data.length > 0 ? data[0].project_id : 'none'}`);
-          } else {
-            setDebugInfo(`Error retrieving files: ${error?.message || 'Unknown error'}`);
-          }
-        }
-      } catch (err) {
-        console.error("Debug query exception:", err);
-        setDebugInfo(`Debug exception: ${(err as Error).message}`);
-      }
-    };
-
-    checkFilesDirectly();
-  }, [projectId, attemptCount]);
-
-  const { data: files, isLoading, error } = useQuery({
-    queryKey: ['project-files', projectId, attemptCount],
+  // Using the same pattern as TeamTab - simple and direct query
+  const { data: files, isLoading } = useQuery({
+    queryKey: ['project-files', projectId],
     queryFn: async () => {
-      console.log('Fetching files for project:', projectId, 'Attempt:', attemptCount);
+      console.log('Fetching files for project:', projectId);
       
-      try {
-        // We'll use the approach that worked best in testing
-        const result = await supabase
-          .from('files')
-          .select('*')
-          .eq('project_id', projectId);
-          
-        const data = result.data;
-        const error = result.error;
+      // Simple direct query like in TeamTab
+      const { data, error } = await supabase
+        .from('files')
+        .select('*')
+        .eq('project_id', projectId);
 
-        if (error) {
-          console.error('Error fetching files:', error);
-          throw error;
-        }
-
-        console.log('Fetched files data:', data);
-
-        if (!data || data.length === 0) {
-          console.log('No files found for project ID:', projectId);
-          return {};
-        }
-
-        // Group files by date
-        const groupedFiles = data.reduce((groups: Record<string, any[]>, file) => {
-          if (!file.created_at) {
-            console.warn('File missing created_at:', file);
-            return groups;
-          }
-          
-          const date = format(new Date(file.created_at), 'MMMM d, yyyy');
-          if (!groups[date]) {
-            groups[date] = [];
-          }
-          groups[date].push(file);
-          return groups;
-        }, {});
-
-        return groupedFiles;
-      } catch (err) {
-        console.error("Exception in queryFn:", err);
-        throw err;
+      if (error) {
+        console.error('Error fetching files:', error);
+        throw error;
       }
+
+      console.log('Fetched files data:', data);
+
+      if (!data || data.length === 0) {
+        console.log('No files found for project ID:', projectId);
+        return {};
+      }
+
+      // Group files by date
+      const groupedFiles = data.reduce((groups: Record<string, any[]>, file) => {
+        if (!file.created_at) {
+          console.warn('File missing created_at:', file);
+          return groups;
+        }
+        
+        const date = format(new Date(file.created_at), 'MMMM d, yyyy');
+        if (!groups[date]) {
+          groups[date] = [];
+        }
+        groups[date].push(file);
+        return groups;
+      }, {});
+
+      return groupedFiles;
     },
   });
 
   if (isLoading) {
-    return <div>Loading files...</div>;
-  }
-
-  if (error) {
-    console.error("Error loading files:", error);
-    return (
-      <Card className="p-6">
-        <div className="text-center py-8">
-          <p className="text-red-500">Error loading files. Please try again.</p>
-          <p className="text-sm text-gray-500 mt-2">{(error as Error).message}</p>
-          {debugInfo && (
-            <div className="mt-4 p-4 bg-gray-100 rounded text-left overflow-auto max-h-40">
-              <p className="text-xs font-mono">{debugInfo}</p>
-            </div>
-          )}
-          <button 
-            onClick={() => setAttemptCount(prev => prev + 1)} 
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Try Another Approach
-          </button>
-        </div>
-      </Card>
-    );
+    return <Card className="p-6"><div>Loading files...</div></Card>;
   }
 
   if (!files || Object.keys(files).length === 0) {
     return (
       <Card className="p-6">
         <div className="text-center py-8">
-          <p className="text-gray-500">No files found for this project (ID: {projectId}).</p>
-          {debugInfo && (
-            <div className="mt-4 p-4 bg-gray-100 rounded text-left overflow-auto max-h-40">
-              <p className="text-xs font-mono">{debugInfo}</p>
-            </div>
-          )}
-          <button 
-            onClick={() => setAttemptCount(prev => prev + 1)} 
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Try Another Approach
-          </button>
+          <p className="text-gray-500">No files found for this project.</p>
         </div>
       </Card>
     );
