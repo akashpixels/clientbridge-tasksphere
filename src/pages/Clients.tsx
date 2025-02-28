@@ -4,15 +4,30 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 
+type ClientAdmin = {
+  id: string;
+  business_name: string;
+  logo_url: string | null;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  user_profiles: {
+    first_name: string;
+    last_name: string;
+    username: string;
+  } | null;
+};
+
 const Clients = () => {
-  const { data: clients, isLoading } = useQuery({
+  const { data: clients, isLoading } = useQuery<ClientAdmin[]>({
     queryKey: ['clients'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('client_admins')
         .select(`
           *,
-          user_profiles(
+          user_profiles:user_profiles(
             first_name,
             last_name,
             username
@@ -30,14 +45,14 @@ const Clients = () => {
     },
   });
 
-  const { data: archivedClients, isLoading: isLoadingArchived } = useQuery({
+  const { data: archivedClients, isLoading: isLoadingArchived } = useQuery<ClientAdmin[]>({
     queryKey: ['archived-clients'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('client_admins')
         .select(`
           *,
-          user_profiles(
+          user_profiles:user_profiles(
             first_name,
             last_name,
             username
@@ -83,9 +98,11 @@ const Clients = () => {
                       )}
                       <div>
                         <h3 className="font-medium">{client.business_name}</h3>
-                        <p className="text-sm text-gray-500">
-                          {client.user_profiles?.first_name} {client.user_profiles?.last_name}
-                        </p>
+                        {client.user_profiles && (
+                          <p className="text-sm text-gray-500">
+                            {client.user_profiles.first_name} {client.user_profiles.last_name}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </Card>
@@ -114,9 +131,11 @@ const Clients = () => {
                       )}
                       <div>
                         <h3 className="font-medium">{client.business_name}</h3>
-                        <p className="text-sm text-gray-500">
-                          {client.user_profiles?.first_name} {client.user_profiles?.last_name}
-                        </p>
+                        {client.user_profiles && (
+                          <p className="text-sm text-gray-500">
+                            {client.user_profiles.first_name} {client.user_profiles.last_name}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </Card>

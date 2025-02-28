@@ -32,6 +32,8 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
         return [];
       }
       
+      console.log('Fetched project client_admin_id:', project.client_admin_id);
+      
       // Get the client admin (user_role_id = 3)
       const { data: clientAdmin, error: adminError } = await supabase
         .from('user_profiles')
@@ -49,6 +51,7 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
       
       if (adminError) {
         console.error('Error fetching client admin:', adminError);
+        console.log('Client admin ID used for query:', project.client_admin_id);
         return [];
       }
       
@@ -69,7 +72,7 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
       
       if (assigneesError) {
         console.error('Error fetching project assignees:', assigneesError);
-        return [clientAdmin];
+        return clientAdmin ? [clientAdmin] : [];
       }
       
       // Combine client admin with assignees

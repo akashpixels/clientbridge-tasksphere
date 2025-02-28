@@ -2,11 +2,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
 import { ProjectFilters } from "@/components/projects/ProjectFilters";
 import { ProjectList } from "@/components/projects/ProjectList";
 
-type Project = Database['public']['Tables']['projects']['Row'] & {
+type Project = {
+  id: string;
+  name: string;
+  logo_url: string;
+  due_date: string | null;
   client_admin: {
     id: string;
     business_name: string;

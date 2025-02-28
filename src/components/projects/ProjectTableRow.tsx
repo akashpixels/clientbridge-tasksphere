@@ -1,9 +1,12 @@
 
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Database } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
 
-type Project = Database['public']['Tables']['projects']['Row'] & {
+type Project = {
+  id: string;
+  name: string;
+  logo_url: string;
+  due_date: string | null;
   client_admin: {
     id: string;
     business_name: string;

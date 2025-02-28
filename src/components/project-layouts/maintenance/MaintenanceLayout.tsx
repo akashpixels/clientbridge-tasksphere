@@ -17,8 +17,9 @@ import TeamTab from "../shared/TeamTab";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
-    client: {
+    client_admin: {
       id: string;
+      business_name: string;
       user_profiles: {
         first_name: string;
         last_name: string;

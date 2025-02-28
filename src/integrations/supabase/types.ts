@@ -80,7 +80,7 @@ export type Database = {
         }
         Relationships: []
       }
-      clients: {
+      client_admins: {
         Row: {
           business_name: string
           created_at: string
@@ -116,7 +116,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "clients_id_fkey"
+            foreignKeyName: "client_admins_id_fkey"
             columns: ["id"]
             isOneToOne: true
             referencedRelation: "user_profiles"
@@ -603,7 +603,7 @@ export type Database = {
       }
       projects: {
         Row: {
-          client_id: string | null
+          client_admin_id: string | null
           created_at: string
           details: string | null
           due_date: string | null
@@ -624,7 +624,7 @@ export type Database = {
           uses_phases: boolean
         }
         Insert: {
-          client_id?: string | null
+          client_admin_id?: string | null
           created_at?: string
           details?: string | null
           due_date?: string | null
@@ -645,7 +645,7 @@ export type Database = {
           uses_phases?: boolean
         }
         Update: {
-          client_id?: string | null
+          client_admin_id?: string | null
           created_at?: string
           details?: string | null
           due_date?: string | null
@@ -667,10 +667,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "projects_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "projects_client_admin_id_fkey"
+            columns: ["client_admin_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "client_admins"
             referencedColumns: ["id"]
           },
           {
