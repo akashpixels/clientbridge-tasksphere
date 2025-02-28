@@ -20,14 +20,14 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
   const { data: teamMembers, isLoading } = useQuery({
     queryKey: ['project-team', projectId],
     queryFn: async () => {
-      // First get the project's client_id
+      // First get the project's client_admin_id
       const { data: project, error: projectError } = await supabase
         .from('projects')
-        .select('client_id')
+        .select('client_admin_id')
         .eq('id', projectId)
         .single();
       
-      if (projectError || !project?.client_id) {
+      if (projectError || !project?.client_admin_id) {
         console.error('Error fetching project:', projectError);
         return [];
       }
@@ -43,7 +43,7 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
           user_role:user_roles(id, name),
           job_role:job_roles(name)
         `)
-        .eq('id', project.client_id)
+        .eq('id', project.client_admin_id)
         .eq('user_role_id', 3) // client_admin role
         .single();
       
