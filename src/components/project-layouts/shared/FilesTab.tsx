@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -132,10 +132,47 @@ interface FilesTabProps {
 const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
+  // Direct database check - this will help us diagnose if there's a permission issue
+  useEffect(() => {
+    const checkDirectAccess = async () => {
+      console.log("Directly checking files for project:", projectId);
+      
+      try {
+        // Direct query to check if we can access the files table
+        const { data, error } = await supabase
+          .from('files')
+          .select('*')
+          .limit(10);
+          
+        console.log("Direct access test - all files:", data?.length || 0, data);
+        console.log("Direct access error:", error);
+        
+        // Try directly with the projectId
+        const { data: projectData, error: projectError } = await supabase
+          .from('files')
+          .select('*')
+          .eq('project_id', projectId)
+          .limit(10);
+          
+        console.log(`Direct check for project ${projectId} files:`, projectData?.length || 0, projectData);
+        console.log("Project files error:", projectError);
+      } catch (e) {
+        console.error("Error in direct check:", e);
+      }
+    };
+    
+    checkDirectAccess();
+  }, [projectId]);
+
   const { data: projectFiles, isLoading, error } = useQuery({
     queryKey: ['project-files', projectId],
     queryFn: async () => {
       console.log('Fetching files for project:', projectId);
+      
+      if (!projectId) {
+        console.error('No project ID provided to FilesTab');
+        return [];
+      }
       
       // Get files for the project
       const { data, error } = await supabase
@@ -167,6 +204,7 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
       <Card className="p-6">
         <div className="text-center py-8">
           <p className="text-red-500">Error loading files: {(error as Error).message}</p>
+          <p className="text-sm text-gray-500 mt-2">Project ID: {projectId}</p>
         </div>
       </Card>
     );
@@ -177,6 +215,7 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
       <Card className="p-6">
         <div className="text-center py-8">
           <p className="text-gray-500">No files found for this project.</p>
+          <p className="text-sm text-gray-400 mt-2">Project ID: {projectId}</p>
         </div>
       </Card>
     );

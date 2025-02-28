@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProjectHeader from "./ProjectHeader";
 import TasksTabContent from "./TasksTabContent";
 import ImageViewerDialog from "./ImageViewerDialog";
@@ -45,7 +45,31 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const { setRightSidebarContent, closeRightSidebar, setCurrentTab } = useLayout();
 
-  const { data: tasks, isLoading: isLoadingTasks } = useQuery({
+  // Add direct project ID check
+  useEffect(() => {
+    console.log("MaintenanceLayout - Project ID:", project.id);
+    
+    // Check project data table permissions
+    const checkProjectData = async () => {
+      try {
+        // Check if we can get the project directly
+        const { data, error } = await supabase
+          .from('projects')
+          .select('id, name')
+          .eq('id', project.id)
+          .single();
+          
+        console.log("Direct project access test:", data);
+        console.log("Direct project access error:", error);
+      } catch (e) {
+        console.error("Error checking project data:", e);
+      }
+    };
+    
+    checkProjectData();
+  }, [project.id]);
+
+  const { data: tasks, isLoading: isLoadingTasks, error: tasksError } = useQuery({
     queryKey: ['tasks', project.id, selectedMonth],
     queryFn: async () => {
       console.log('Fetching tasks for project:', project.id);
@@ -76,6 +100,13 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
       return data;
     },
   });
+
+  // Report any task fetching errors
+  useEffect(() => {
+    if (tasksError) {
+      console.error("Task query error:", tasksError);
+    }
+  }, [tasksError]);
 
   const monthlyHours = tasks?.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) || 0;
 
