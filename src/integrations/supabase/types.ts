@@ -535,6 +535,7 @@ export type Database = {
           hours_allotted: number
           hours_spent: number | null
           id: string
+          max_concurrent_tasks: number
           next_renewal_date: string
           project_id: string
           start_date: string
@@ -548,6 +549,7 @@ export type Database = {
           hours_allotted?: number
           hours_spent?: number | null
           id?: string
+          max_concurrent_tasks?: number
           next_renewal_date: string
           project_id: string
           start_date?: string
@@ -561,6 +563,7 @@ export type Database = {
           hours_allotted?: number
           hours_spent?: number | null
           id?: string
+          max_concurrent_tasks?: number
           next_renewal_date?: string
           project_id?: string
           start_date?: string
