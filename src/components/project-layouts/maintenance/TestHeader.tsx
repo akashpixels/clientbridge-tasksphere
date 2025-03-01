@@ -2,7 +2,27 @@
 import { Tables } from "@/integrations/supabase/types";
 
 interface TestHeaderProps {
-  project: any;
+  project: Tables<"projects"> & {
+    client_admin?: {
+      id: string;
+      business_name: string;
+      user_profiles: {
+        first_name: string;
+        last_name: string;
+      } | null;
+    } | null;
+    status?: {
+      name: string;
+      color_hex: string | null;
+    } | null;
+    project_subscriptions?: {
+      id: string;
+      subscription_status: string;
+      hours_allotted: number;
+      hours_spent: number;
+      next_renewal_date: string;
+    }[];
+  };
   monthlyHours: number;
 }
 

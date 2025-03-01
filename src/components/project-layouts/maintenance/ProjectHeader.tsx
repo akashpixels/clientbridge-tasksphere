@@ -14,6 +14,13 @@ interface ProjectHeaderProps {
         last_name: string;
       } | null;
     } | null;
+    project_subscriptions?: {
+      id: string;
+      subscription_status: string;
+      hours_allotted: number;
+      hours_spent: number;
+      next_renewal_date: string;
+    }[];
   };
   selectedMonth: string;
   onMonthChange: (month: string) => void;
