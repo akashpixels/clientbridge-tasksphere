@@ -30,6 +30,12 @@ interface TasksTableProps {
   maxConcurrentTasks: number;
 }
 
+// Define a type for task status that handles potential error cases
+interface TaskStatus {
+  name: string | null;
+  color_hex: string | null;
+}
+
 const TasksTable = ({ projectId, selectedMonth, statusFilter, maxConcurrentTasks }: TasksTableProps) => {
   const { setRightSidebarContent } = useLayout();
   const [sortConfig, setSortConfig] = useState({
@@ -156,10 +162,18 @@ const TasksTable = ({ projectId, selectedMonth, statusFilter, maxConcurrentTasks
     return format(new Date(date), "h.mmaaa do MMM");
   };
 
+  // Helper function to check if status is a valid object and not an error
+  const isValidStatus = (status: any): status is TaskStatus => {
+    return status && 
+           typeof status === 'object' && 
+           !('error' in status) && 
+           ('name' in status || 'color_hex' in status);
+  };
+
   // Fix type issues by providing default values for null or undefined status
-  const getStatusColor = (status: { name: string | null, color_hex: string | null } | null) => {
-    // Default values if status is null or undefined
-    if (!status) {
+  const getStatusColor = (status: any) => {
+    // Default values if status is null, undefined, or an error
+    if (!status || !isValidStatus(status)) {
       return { bg: '#F3F4F6', text: '#374151' };
     }
 
@@ -246,6 +260,14 @@ const TasksTable = ({ projectId, selectedMonth, statusFilter, maxConcurrentTasks
     ));
   };
 
+  // Helper to safely access status name
+  const getStatusName = (status: any): string => {
+    if (!status || !isValidStatus(status)) {
+      return 'Unknown';
+    }
+    return status.name || 'Unknown';
+  };
+
   return (
     <>
       <Table>
@@ -309,14 +331,14 @@ const TasksTable = ({ projectId, selectedMonth, statusFilter, maxConcurrentTasks
                       color: getStatusColor(task.status).text
                     }}
                   >
-                    {task.status?.name === 'Open' ? 'Starts at' : task.status?.name}
+                    {getStatusName(task.status) === 'Open' ? 'Starts at' : getStatusName(task.status)}
                   </span>
                   {task.task_completed_at && task.actual_hours_spent && (
                     <span className="text-xs text-gray-500 pl-2">
                       {task.actual_hours_spent} hrs
                     </span>
                   )}
-                  {task.status?.name === 'Open' && task.start_time && (
+                  {getStatusName(task.status) === 'Open' && task.start_time && (
                     <span className="text-xs text-gray-500 pl-2">
                       {format(new Date(task.start_time), "h:mmaaa d MMM")}
                     </span>
