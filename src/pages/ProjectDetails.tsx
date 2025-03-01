@@ -32,8 +32,7 @@ const ProjectDetails = () => {
             subscription_status,
             hours_allotted,
             hours_spent,
-            next_renewal_date,
-            max_concurrent_tasks
+            next_renewal_date
           )
         `)
         .eq('id', id)

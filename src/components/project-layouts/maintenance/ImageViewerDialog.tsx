@@ -1,57 +1,45 @@
-
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useState } from "react";
 
 interface ImageViewerDialogProps {
-  images: string[];
-  initialIndex: number;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  selectedImage: string | null;
+  selectedTaskImages: string[];
+  currentImageIndex: number;
+  onClose: () => void;
+  onPrevious: () => void;
+  onNext: () => void;
 }
 
 const ImageViewerDialog = ({
-  images,
-  initialIndex,
-  open,
-  onOpenChange,
+  selectedImage,
+  selectedTaskImages,
+  currentImageIndex,
+  onClose,
+  onPrevious,
+  onNext,
 }: ImageViewerDialogProps) => {
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  
-  const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentIndex < images.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={!!selectedImage} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
         <div className="relative flex-1 min-h-0 flex items-center justify-center">
-          {images[currentIndex] && (
+          {selectedImage && (
             <>
               <button
-                onClick={handlePrevious}
+                onClick={onPrevious}
                 className="absolute left-4 p-2 bg-white/80 rounded-full"
-                disabled={currentIndex === 0}
+                disabled={currentImageIndex === 0}
               >
                 <ArrowLeft className="w-6 h-6" />
               </button>
               <img 
-                src={images[currentIndex]} 
-                alt={`Task image ${currentIndex + 1}`}
+                src={selectedImage} 
+                alt="Task image"
                 className="max-w-full max-h-[calc(80vh-4rem)] object-contain"
               />
               <button
-                onClick={handleNext}
+                onClick={onNext}
                 className="absolute right-4 p-2 bg-white/80 rounded-full"
-                disabled={currentIndex === images.length - 1}
+                disabled={currentImageIndex === selectedTaskImages.length - 1}
               >
                 <ArrowRight className="w-6 h-6" />
               </button>
