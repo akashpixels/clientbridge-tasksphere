@@ -41,9 +41,31 @@ const ProjectDetails = () => {
         console.error('Error fetching project:', error);
         throw error;
       }
+
+      // Fetch project_subscription_usage for monthly hours
+      const { data: usageData, error: usageError } = await supabase
+        .from('project_subscription_usage')
+        .select('hours_spent')
+        .eq('project_id', id)
+        .eq('month_year', new Date().toISOString().slice(0, 7) + '-01')
+        .single();
+
+      if (usageError && usageError.code !== 'PGRST116') { // PGRST116 is "no rows returned" which is ok
+        console.error('Error fetching usage data:', usageError);
+      }
+
+      // Add the hours_spent property to project_subscriptions for compatibility
+      const enhancedProject = {
+        ...data,
+        project_subscriptions: data.project_subscriptions.map(sub => ({
+          ...sub,
+          // Use usage data if available, otherwise default to 0
+          hours_spent: usageData?.hours_spent || 0
+        }))
+      };
       
-      console.log('Fetched project data:', data);
-      return data;
+      console.log('Fetched project data:', enhancedProject);
+      return enhancedProject;
     },
   });
 
