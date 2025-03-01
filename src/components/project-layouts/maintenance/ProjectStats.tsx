@@ -1,6 +1,5 @@
-
 import { Tables } from "@/integrations/supabase/types";
-import { differenceInDays, format } from "date-fns";
+import { differenceInDays } from "date-fns";
 import { useState } from "react";
 
 interface ProjectStatsProps {
@@ -45,6 +44,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
     <div className="flex gap-4">
       
      {/* Hours Progress Card */}
+
       <div 
         className="relative w-[160px] h-[108px] border border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 overflow-hidden text-gray-900"
         style={{
@@ -52,6 +52,7 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
           transition: "background 0.5s ease"
         }}
       >
+
         {/* Hours Label */}
         <p className="text-[11px] font-medium text-gray-500">Hours Used</p>
 
