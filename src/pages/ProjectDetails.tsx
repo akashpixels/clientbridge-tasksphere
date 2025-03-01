@@ -29,6 +29,7 @@ const ProjectDetails = () => {
           status:task_statuses(name, color_hex),
           layout:project_layouts(id, name),
           project_subscriptions(
+            id,
             subscription_status,
             hours_allotted,
             next_renewal_date
@@ -42,29 +43,42 @@ const ProjectDetails = () => {
         throw error;
       }
 
+      // Get current month in YYYY-MM-DD format (first day of month)
+      const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
+      console.log('Fetching usage data for month:', currentMonth);
+
       // Fetch project_subscription_usage for monthly hours
       const { data: usageData, error: usageError } = await supabase
         .from('project_subscription_usage')
-        .select('hours_spent')
+        .select('hours_spent, project_subscription_id')
         .eq('project_id', id)
-        .eq('month_year', new Date().toISOString().slice(0, 7) + '-01')
-        .single();
+        .eq('month_year', currentMonth);
 
-      if (usageError && usageError.code !== 'PGRST116') { // PGRST116 is "no rows returned" which is ok
+      if (usageError) {
         console.error('Error fetching usage data:', usageError);
       }
 
-      // Add the hours_spent property to project_subscriptions for compatibility
+      console.log('Usage data fetched:', usageData);
+
+      // Create a map of subscription_id to hours_spent
+      const usageMap = {};
+      if (usageData && usageData.length > 0) {
+        usageData.forEach(usage => {
+          usageMap[usage.project_subscription_id] = usage.hours_spent;
+        });
+      }
+
+      // Add the hours_spent property to project_subscriptions
       const enhancedProject = {
         ...data,
         project_subscriptions: data.project_subscriptions.map(sub => ({
           ...sub,
-          // Use usage data if available, otherwise default to 0
-          hours_spent: usageData?.hours_spent || 0
+          // Use usage data if available for this subscription, otherwise default to 0
+          hours_spent: usageMap[sub.id] || 0
         }))
       };
       
-      console.log('Fetched project data:', enhancedProject);
+      console.log('Enhanced project data with usage info:', enhancedProject);
       return enhancedProject;
     },
   });
