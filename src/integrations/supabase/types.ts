@@ -581,7 +581,6 @@ export type Database = {
           billing_cycle: Database["public"]["Enums"]["billing_cycle_enum"]
           created_at: string
           hours_allotted: number
-          hours_spent: number | null
           id: string
           max_concurrent_tasks: number
           next_renewal_date: string
@@ -595,7 +594,6 @@ export type Database = {
           billing_cycle?: Database["public"]["Enums"]["billing_cycle_enum"]
           created_at?: string
           hours_allotted?: number
-          hours_spent?: number | null
           id?: string
           max_concurrent_tasks?: number
           next_renewal_date: string
@@ -609,7 +607,6 @@ export type Database = {
           billing_cycle?: Database["public"]["Enums"]["billing_cycle_enum"]
           created_at?: string
           hours_allotted?: number
-          hours_spent?: number | null
           id?: string
           max_concurrent_tasks?: number
           next_renewal_date?: string
