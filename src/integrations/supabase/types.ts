@@ -689,6 +689,63 @@ export type Database = {
           },
         ]
       }
+      subscription_usage: {
+        Row: {
+          created_at: string
+          hours_allotted: number
+          hours_spent: number
+          id: string
+          metadata: Json | null
+          month_year: string
+          notes: string | null
+          project_id: string
+          status: string | null
+          subscription_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hours_allotted: number
+          hours_spent: number
+          id?: string
+          metadata?: Json | null
+          month_year: string
+          notes?: string | null
+          project_id: string
+          status?: string | null
+          subscription_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hours_allotted?: number
+          hours_spent?: number
+          id?: string
+          metadata?: Json | null
+          month_year?: string
+          notes?: string | null
+          project_id?: string
+          status?: string | null
+          subscription_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_usage_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_usage_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "project_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subtasks: {
         Row: {
           assigned_to: string | null
@@ -1150,6 +1207,10 @@ export type Database = {
           priority_level_id: number
         }
         Returns: number
+      }
+      calculate_monthly_subscription_usage: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       calculate_start_time: {
         Args: {

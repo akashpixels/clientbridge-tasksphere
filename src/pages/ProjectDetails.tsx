@@ -94,7 +94,7 @@ const ProjectDetails = () => {
       else {
         console.log('Looking up historical data for month:', currentMonth);
         
-        // Try to fetch data from subscription_usage table first
+        // Try to fetch data from subscription_usage table
         const { data: usageData, error: usageError } = await supabase
           .from('subscription_usage')
           .select('*')
