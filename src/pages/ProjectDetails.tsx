@@ -34,7 +34,6 @@ const ProjectDetails = () => {
             id,
             subscription_status,
             hours_allotted,
-            hours_spent,
             next_renewal_date
           )
         `)
@@ -111,20 +110,29 @@ const ProjectDetails = () => {
       const enhancedProject = {
         ...data,
         project_subscriptions: subscriptions.map(subscription => {
-          // Make sure subscription is a valid object before trying to spread it
-          if (subscription && typeof subscription === 'object') {
+          // First check if subscription is null or undefined
+          if (!subscription) {
+            console.log('Encountered null or undefined subscription');
+            return null;
+          }
+          
+          // Then make sure subscription is a valid object
+          if (typeof subscription === 'object') {
             const subId = subscription.id;
             if (subId) {
               return {
                 ...subscription,
-                // Use usage data if available for this subscription, otherwise use existing or default to 0
-                hours_spent: usageMap[subId] !== undefined ? usageMap[subId] : (subscription.hours_spent || 0)
+                // Use usage data if available, otherwise use existing or default to 0
+                hours_spent: usageMap[subId] !== undefined 
+                  ? usageMap[subId] 
+                  : (subscription.hours_spent || 0)
               };
             }
           }
-          // Return the subscription as is if it's not a valid object or doesn't have an ID
+          
+          // Return the subscription as is if it doesn't meet the criteria
           return subscription;
-        })
+        }).filter(Boolean) // Remove any null entries
       };
       
       console.log('Enhanced project data with usage info:', enhancedProject);

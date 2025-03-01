@@ -27,8 +27,10 @@ interface TestHeaderProps {
 }
 
 const TestHeader = ({ project, monthlyHours }: TestHeaderProps) => {
-  // Extract relevant data for debugging
-  const subscription = project.project_subscriptions?.[0];
+  // Safely extract subscription data
+  const subscription = Array.isArray(project.project_subscriptions) && project.project_subscriptions.length > 0
+    ? project.project_subscriptions[0]
+    : null;
   
   return (
     <div className="p-4 my-4 bg-gray-100 rounded-lg border border-gray-300">
