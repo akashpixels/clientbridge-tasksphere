@@ -1,6 +1,8 @@
+
 import { Tables } from "@/integrations/supabase/types";
-import { differenceInDays } from "date-fns";
-import { useState } from "react";
+import { differenceInDays, format } from "date-fns";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProjectStatsProps {
   project: Tables<"projects"> & {
@@ -14,11 +16,55 @@ interface ProjectStatsProps {
   monthlyHours: number;
 }
 
-const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProps) => {
+const ProjectStats = ({ project, selectedMonth, monthlyHours: initialMonthlyHours }: ProjectStatsProps) => {
   const [hovered, setHovered] = useState(false);
+  const [monthlyHours, setMonthlyHours] = useState(initialMonthlyHours);
+  const [isLoading, setIsLoading] = useState(true);
 
   const subscription = project.project_subscriptions?.[0];
   const hoursAllotted = subscription?.hours_allotted || 0;
+  
+  useEffect(() => {
+    const fetchMonthlyUsage = async () => {
+      if (!subscription) {
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        setIsLoading(true);
+        
+        // Format the selectedMonth to YYYY-MM-01 format for the database query
+        const formattedMonth = selectedMonth ? 
+          `${selectedMonth}-01` : 
+          format(new Date(), 'yyyy-MM-01');
+        
+        const { data, error } = await supabase
+          .from('project_subscription_usage')
+          .select('hours_spent, hours_allotted')
+          .eq('project_id', project.id)
+          .eq('month_year', formattedMonth)
+          .single();
+        
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
+          console.error('Error fetching monthly usage:', error);
+        }
+        
+        if (data) {
+          setMonthlyHours(data.hours_spent);
+        } else {
+          // If no data found for the selected month, use the passed in initial value
+          setMonthlyHours(initialMonthlyHours);
+        }
+      } catch (error) {
+        console.error('Error in fetching monthly usage:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchMonthlyUsage();
+  }, [project.id, selectedMonth, subscription, initialMonthlyHours]);
 
   const hoursPercentage = Math.min(
     Math.round((monthlyHours / hoursAllotted) * 100),
@@ -44,7 +90,6 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
     <div className="flex gap-4">
       
      {/* Hours Progress Card */}
-
       <div 
         className="relative w-[160px] h-[108px] border border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 overflow-hidden text-gray-900"
         style={{
@@ -52,15 +97,20 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
           transition: "background 0.5s ease"
         }}
       >
+        {isLoading ? (
+          <div className="text-gray-400">Loading...</div>
+        ) : (
+          <>
+            {/* Hours Label */}
+            <p className="text-[11px] font-medium text-gray-500">Hours Used</p>
 
-        {/* Hours Label */}
-        <p className="text-[11px] font-medium text-gray-500">Hours Used</p>
+            {/* Percentage Display */}
+            <p className="text-xl font-semibold">{monthlyHours?.toFixed(1) || "0"} / {hoursAllotted}</p>
 
-        {/* Percentage Display */}
-        <p className="text-xl font-semibold">{monthlyHours?.toFixed(1) || "0"} / {hoursAllotted}</p>
-
-        {/* Hours Spent & Total */}
-        <p className="text-[11px] text-gray-400">{hoursPercentage}%</p>
+            {/* Hours Spent & Total */}
+            <p className="text-[11px] text-gray-400">{hoursPercentage}%</p>
+          </>
+        )}
       </div>
 
       {/* Subscription Status Card */}
