@@ -92,11 +92,13 @@ const ProjectDetails = () => {
       }
 
       // Create a map of subscription_id to hours_spent
-      const usageMap = {};
+      const usageMap: Record<string, number> = {};
       if (usageData && usageData.length > 0) {
         usageData.forEach(usage => {
-          usageMap[usage.project_subscription_id] = usage.hours_spent;
-          console.log(`Mapping subscription ${usage.project_subscription_id} to ${usage.hours_spent} hours`);
+          if (usage && usage.project_subscription_id) {
+            usageMap[usage.project_subscription_id] = usage.hours_spent;
+            console.log(`Mapping subscription ${usage.project_subscription_id} to ${usage.hours_spent} hours`);
+          }
         });
       } else {
         console.log('No usage data found for this project');
@@ -108,16 +110,20 @@ const ProjectDetails = () => {
       // Add the hours_spent property to project_subscriptions
       const enhancedProject = {
         ...data,
-        project_subscriptions: subscriptions.map(sub => {
-          // Make sure sub is a valid object before trying to spread it
-          if (sub && typeof sub === 'object') {
-            return {
-              ...sub,
-              // Use usage data if available for this subscription, otherwise use existing or default to 0
-              hours_spent: usageMap[sub.id] !== undefined ? usageMap[sub.id] : (sub.hours_spent || 0)
-            };
+        project_subscriptions: subscriptions.map(subscription => {
+          // Make sure subscription is a valid object before trying to spread it
+          if (subscription && typeof subscription === 'object') {
+            const subId = subscription.id;
+            if (subId) {
+              return {
+                ...subscription,
+                // Use usage data if available for this subscription, otherwise use existing or default to 0
+                hours_spent: usageMap[subId] !== undefined ? usageMap[subId] : (subscription.hours_spent || 0)
+              };
+            }
           }
-          return sub;
+          // Return the subscription as is if it's not a valid object or doesn't have an ID
+          return subscription;
         })
       };
       
