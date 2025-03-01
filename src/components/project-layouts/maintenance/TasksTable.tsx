@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useLayout } from "@/context/layout";
 import TaskCommentThread from "./comments/TaskCommentThread";
-import { ImageViewerDialog } from "./ImageViewerDialog";
+import ImageViewerDialog from "./ImageViewerDialog";
 
 interface TasksTableProps {
   projectId: string;
@@ -156,8 +156,15 @@ const TasksTable = ({ projectId, selectedMonth, statusFilter, maxConcurrentTasks
     return format(new Date(date), "h.mmaaa do MMM");
   };
 
-  const getStatusColor = (status: { name: string | null, color_hex: string | null }) => {
-    if (!status?.color_hex) {
+  // Fix type issues by providing default values for null or undefined status
+  const getStatusColor = (status: { name: string | null, color_hex: string | null } | null) => {
+    // Default values if status is null or undefined
+    if (!status) {
+      return { bg: '#F3F4F6', text: '#374151' };
+    }
+
+    // Default values if color_hex is null
+    if (!status.color_hex) {
       return { bg: '#F3F4F6', text: '#374151' };
     }
 
@@ -298,8 +305,8 @@ const TasksTable = ({ projectId, selectedMonth, statusFilter, maxConcurrentTasks
                   <span 
                     className="px-2 py-1 text-xs rounded-full font-semibold"
                     style={{
-                      backgroundColor: getStatusColor(task.status || { name: null, color_hex: null }).bg,
-                      color: getStatusColor(task.status || { name: null, color_hex: null }).text
+                      backgroundColor: getStatusColor(task.status).bg,
+                      color: getStatusColor(task.status).text
                     }}
                   >
                     {task.status?.name === 'Open' ? 'Starts at' : task.status?.name}
