@@ -31,7 +31,6 @@ const ProjectDetails = () => {
           project_subscriptions(
             subscription_status,
             hours_allotted,
-            hours_spent,
             next_renewal_date
           )
         `)

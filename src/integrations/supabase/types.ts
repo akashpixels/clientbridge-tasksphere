@@ -527,14 +527,62 @@ export type Database = {
           },
         ]
       }
+      project_subscription_usage: {
+        Row: {
+          created_at: string
+          hours_allotted: number
+          hours_spent: number
+          id: string
+          month_year: string
+          project_id: string
+          project_subscription_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hours_allotted?: number
+          hours_spent?: number
+          id?: string
+          month_year: string
+          project_id: string
+          project_subscription_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hours_allotted?: number
+          hours_spent?: number
+          id?: string
+          month_year?: string
+          project_id?: string
+          project_subscription_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_subscription_usage_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_subscription_usage_subscription_id_fkey"
+            columns: ["project_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "project_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_subscriptions: {
         Row: {
           auto_renew: boolean
           billing_cycle: Database["public"]["Enums"]["billing_cycle_enum"]
           created_at: string
           hours_allotted: number
-          hours_spent: number | null
           id: string
+          max_concurrent_tasks: number
           next_renewal_date: string
           project_id: string
           start_date: string
@@ -546,8 +594,8 @@ export type Database = {
           billing_cycle?: Database["public"]["Enums"]["billing_cycle_enum"]
           created_at?: string
           hours_allotted?: number
-          hours_spent?: number | null
           id?: string
+          max_concurrent_tasks?: number
           next_renewal_date: string
           project_id: string
           start_date?: string
@@ -559,8 +607,8 @@ export type Database = {
           billing_cycle?: Database["public"]["Enums"]["billing_cycle_enum"]
           created_at?: string
           hours_allotted?: number
-          hours_spent?: number | null
           id?: string
+          max_concurrent_tasks?: number
           next_renewal_date?: string
           project_id?: string
           start_date?: string
