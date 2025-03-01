@@ -6,9 +6,13 @@ import MaintenanceLayout from "@/components/project-layouts/MaintenanceLayout";
 import BrandingLayout from "@/components/project-layouts/BrandingLayout";
 import DevelopmentLayout from "@/components/project-layouts/DevelopmentLayout";
 import DefaultLayout from "@/components/project-layouts/DefaultLayout";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 
 const ProjectDetails = () => {
   const { id } = useParams();
+  const currentMonth = format(new Date(), 'yyyy-MM');
+  const startDate = startOfMonth(new Date(currentMonth));
+  const endDate = endOfMonth(new Date(currentMonth));
 
   const { data: project, isLoading } = useQuery({
     queryKey: ['project', id],
@@ -43,42 +47,38 @@ const ProjectDetails = () => {
         throw error;
       }
 
-      // Get current month in YYYY-MM-DD format (first day of month)
-      const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
-      console.log('Fetching usage data for month:', currentMonth);
-
-      // Fetch project_subscription_usage for monthly hours
-      const { data: usageData, error: usageError } = await supabase
-        .from('project_subscription_usage')
-        .select('hours_spent, project_subscription_id')
+      // Fetch monthly hours directly from the tasks table
+      const { data: tasksData, error: tasksError } = await supabase
+        .from('tasks')
+        .select('actual_hours_spent')
         .eq('project_id', id)
-        .eq('month_year', currentMonth);
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString());
 
-      if (usageError) {
-        console.error('Error fetching usage data:', usageError);
+      if (tasksError) {
+        console.error('Error fetching tasks data:', tasksError);
       }
 
-      console.log('Usage data fetched:', usageData);
+      // Calculate total hours spent this month from tasks
+      const monthlyHours = tasksData ? 
+        tasksData.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) : 
+        0;
 
-      // Create a map of subscription_id to hours_spent
-      const usageMap = {};
-      if (usageData && usageData.length > 0) {
-        usageData.forEach(usage => {
-          usageMap[usage.project_subscription_id] = usage.hours_spent;
-        });
-      }
+      console.log('Monthly hours from tasks:', monthlyHours);
 
-      // Add the hours_spent property to project_subscriptions
+      // Ensure project_subscriptions is an array
+      const projectSubscriptions = data.project_subscriptions || [];
+      
+      // Create enhanced project with monthly hours
       const enhancedProject = {
         ...data,
-        project_subscriptions: data.project_subscriptions.map(sub => ({
-          ...sub,
-          // Use usage data if available for this subscription, otherwise default to 0
-          hours_spent: usageMap[sub.id] || 0
+        project_subscriptions: projectSubscriptions.map(subscription => ({
+          ...subscription,
+          hours_spent: monthlyHours // Add monthly hours to each subscription
         }))
       };
       
-      console.log('Enhanced project data with usage info:', enhancedProject);
+      console.log('Enhanced project data:', enhancedProject);
       return enhancedProject;
     },
   });

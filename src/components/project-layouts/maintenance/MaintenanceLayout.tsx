@@ -29,6 +29,13 @@ interface DevelopmentLayoutProps {
       name: string;
       color_hex: string | null;
     } | null;
+    project_subscriptions?: {
+      id: string;
+      subscription_status: string;
+      hours_allotted: number;
+      hours_spent: number;
+      next_renewal_date: string;
+    }[];
   };
 }
 
@@ -108,6 +115,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     }
   }, [tasksError]);
 
+  // Calculate monthly hours directly from tasks
   const monthlyHours = tasks?.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) || 0;
 
   const handleSort = (key: string) => {
