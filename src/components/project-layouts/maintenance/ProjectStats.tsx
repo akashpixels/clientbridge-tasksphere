@@ -7,7 +7,7 @@ interface ProjectStatsProps {
   project: Tables<"projects"> & {
     project_subscriptions?: {
       hours_allotted: number;
-      hours_spent: number;
+      hours_spent: number; // Added for compatibility
       subscription_status: string;
       next_renewal_date: string;
     }[];

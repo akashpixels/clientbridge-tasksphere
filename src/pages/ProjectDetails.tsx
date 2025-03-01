@@ -14,8 +14,6 @@ const ProjectDetails = () => {
     queryKey: ['project', id],
     queryFn: async () => {
       console.log('Fetching project details for ID:', id);
-      
-      // First fetch the project with all related data
       const { data, error } = await supabase
         .from('projects')
         .select(`
@@ -45,94 +43,39 @@ const ProjectDetails = () => {
         throw error;
       }
 
-      // Validate that the main project data exists
-      if (!data) {
-        throw new Error("Project not found");
-      }
-
       // Get current month in YYYY-MM-DD format (first day of month)
       const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
       console.log('Fetching usage data for month:', currentMonth);
 
-      // Log direct project subscription data for debugging
-      console.log('Direct project subscriptions:', data.project_subscriptions);
-
-      // Attempt direct query to verify table access
-      try {
-        const { data: testUsage, error: testError } = await supabase
-          .from('project_subscription_usage')
-          .select('*')
-          .limit(5);
-          
-        console.log('Test query to project_subscription_usage:', testUsage);
-        if (testError) {
-          console.error('Test query error:', testError);
-        }
-      } catch (e) {
-        console.error('Exception during test query:', e);
-      }
-
       // Fetch project_subscription_usage for monthly hours
       const { data: usageData, error: usageError } = await supabase
         .from('project_subscription_usage')
-        .select('hours_spent, project_subscription_id, month_year')
-        .eq('project_id', id);
+        .select('hours_spent, project_subscription_id')
+        .eq('project_id', id)
+        .eq('month_year', currentMonth);
 
       if (usageError) {
         console.error('Error fetching usage data:', usageError);
-      } else {
-        console.log('All usage data fetched:', usageData);
-        
-        // Filter for February 2025 usage data specifically
-        const febUsage = usageData?.filter(usage => 
-          usage.month_year.startsWith('2025-02')
-        );
-        console.log('February usage data:', febUsage);
       }
+
+      console.log('Usage data fetched:', usageData);
 
       // Create a map of subscription_id to hours_spent
-      const usageMap: Record<string, number> = {};
+      const usageMap = {};
       if (usageData && usageData.length > 0) {
         usageData.forEach(usage => {
-          if (usage && usage.project_subscription_id) {
-            usageMap[usage.project_subscription_id] = usage.hours_spent;
-            console.log(`Mapping subscription ${usage.project_subscription_id} to ${usage.hours_spent} hours`);
-          }
+          usageMap[usage.project_subscription_id] = usage.hours_spent;
         });
-      } else {
-        console.log('No usage data found for this project');
       }
 
-      // Ensure project_subscriptions is an array before processing
-      const subscriptions = Array.isArray(data.project_subscriptions) ? data.project_subscriptions : [];
-      
       // Add the hours_spent property to project_subscriptions
       const enhancedProject = {
         ...data,
-        project_subscriptions: subscriptions.map(subscription => {
-          // First check if subscription is null or undefined
-          if (!subscription) {
-            console.log('Encountered null or undefined subscription');
-            return null;
-          }
-          
-          // Then make sure subscription is a valid object
-          if (typeof subscription === 'object') {
-            const subId = subscription.id;
-            if (subId) {
-              return {
-                ...subscription,
-                // Use usage data if available, otherwise use existing or default to 0
-                hours_spent: usageMap[subId] !== undefined 
-                  ? usageMap[subId] 
-                  : (subscription.hours_spent || 0)
-              };
-            }
-          }
-          
-          // Return the subscription as is if it doesn't meet the criteria
-          return subscription;
-        }).filter(Boolean) // Remove any null entries
+        project_subscriptions: data.project_subscriptions.map(sub => ({
+          ...sub,
+          // Use usage data if available for this subscription, otherwise default to 0
+          hours_spent: usageMap[sub.id] || 0
+        }))
       };
       
       console.log('Enhanced project data with usage info:', enhancedProject);
@@ -149,7 +92,6 @@ const ProjectDetails = () => {
   }
 
   console.log('Project layout:', project.layout);
-  console.log('Project subscriptions before rendering:', project.project_subscriptions);
   
   // Render the appropriate layout based on the project's layout type
   const layoutId = project.layout_id;
