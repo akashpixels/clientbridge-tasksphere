@@ -14,6 +14,7 @@ import TaskCommentThread from "./comments/TaskCommentThread";
 import CredentialsTab from "../shared/CredentialsTab";
 import FilesTab from "../shared/FilesTab";
 import TeamTab from "../shared/TeamTab";
+import TestHeader from "./TestHeader"; // Import the new TestHeader component
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -108,6 +109,12 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     }
   }, [tasksError]);
 
+  // Log the project data for debugging
+  useEffect(() => {
+    console.log("Project data in MaintenanceLayout:", project);
+    console.log("Project subscriptions:", project.project_subscriptions);
+  }, [project]);
+
   const monthlyHours = tasks?.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) || 0;
 
   const handleSort = (key: string) => {
@@ -158,6 +165,12 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
           monthlyHours={monthlyHours}
         />
       </div>
+
+      {/* Add TestHeader for debugging */}
+      <TestHeader 
+        project={project}
+        monthlyHours={monthlyHours}
+      />
 
       <Tabs defaultValue="tasks" className="w-full" onValueChange={(value) => setCurrentTab(value)}>
         <div className="flex justify-between items-center mb-4">

@@ -47,6 +47,21 @@ const ProjectDetails = () => {
       const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
       console.log('Fetching usage data for month:', currentMonth);
 
+      // Attempt direct query to verify table access
+      try {
+        const { data: testUsage, error: testError } = await supabase
+          .from('project_subscription_usage')
+          .select('*')
+          .limit(5);
+          
+        console.log('Test query to project_subscription_usage:', testUsage);
+        if (testError) {
+          console.error('Test query error:', testError);
+        }
+      } catch (e) {
+        console.error('Exception during test query:', e);
+      }
+
       // Fetch project_subscription_usage for monthly hours
       const { data: usageData, error: usageError } = await supabase
         .from('project_subscription_usage')
@@ -56,26 +71,33 @@ const ProjectDetails = () => {
 
       if (usageError) {
         console.error('Error fetching usage data:', usageError);
+      } else {
+        console.log('Usage data fetched successfully:', usageData);
       }
-
-      console.log('Usage data fetched:', usageData);
 
       // Create a map of subscription_id to hours_spent
       const usageMap = {};
       if (usageData && usageData.length > 0) {
         usageData.forEach(usage => {
           usageMap[usage.project_subscription_id] = usage.hours_spent;
+          console.log(`Mapping subscription ${usage.project_subscription_id} to ${usage.hours_spent} hours`);
         });
+      } else {
+        console.log('No usage data found for this project and month');
       }
 
       // Add the hours_spent property to project_subscriptions
       const enhancedProject = {
         ...data,
-        project_subscriptions: data.project_subscriptions.map(sub => ({
-          ...sub,
-          // Use usage data if available for this subscription, otherwise default to 0
-          hours_spent: usageMap[sub.id] || 0
-        }))
+        project_subscriptions: data.project_subscriptions.map(sub => {
+          const mapped = {
+            ...sub,
+            // Use usage data if available for this subscription, otherwise default to 0
+            hours_spent: usageMap[sub.id] || 0
+          };
+          console.log(`Enhanced subscription ${sub.id} with hours_spent: ${mapped.hours_spent}`);
+          return mapped;
+        })
       };
       
       console.log('Enhanced project data with usage info:', enhancedProject);
