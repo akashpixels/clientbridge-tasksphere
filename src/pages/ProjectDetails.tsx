@@ -2,7 +2,7 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import MaintenanceLayout from "@/components/project-layouts/MaintenanceLayout";
+import MaintenanceLayout from "@/components/project-layouts/maintenance/MaintenanceLayout";
 import BrandingLayout from "@/components/project-layouts/BrandingLayout";
 import DevelopmentLayout from "@/components/project-layouts/DevelopmentLayout";
 import DefaultLayout from "@/components/project-layouts/DefaultLayout";
