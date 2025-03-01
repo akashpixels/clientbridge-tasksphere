@@ -32,6 +32,7 @@ const ProjectDetails = () => {
             id,
             subscription_status,
             hours_allotted,
+            hours_spent,
             next_renewal_date
           )
         `)
@@ -46,6 +47,9 @@ const ProjectDetails = () => {
       // Get current month in YYYY-MM-DD format (first day of month)
       const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
       console.log('Fetching usage data for month:', currentMonth);
+
+      // Log direct project subscription data for debugging
+      console.log('Direct project subscriptions:', data.project_subscriptions);
 
       // Attempt direct query to verify table access
       try {
@@ -65,14 +69,19 @@ const ProjectDetails = () => {
       // Fetch project_subscription_usage for monthly hours
       const { data: usageData, error: usageError } = await supabase
         .from('project_subscription_usage')
-        .select('hours_spent, project_subscription_id')
-        .eq('project_id', id)
-        .eq('month_year', currentMonth);
+        .select('hours_spent, project_subscription_id, month_year')
+        .eq('project_id', id);
 
       if (usageError) {
         console.error('Error fetching usage data:', usageError);
       } else {
-        console.log('Usage data fetched successfully:', usageData);
+        console.log('All usage data fetched:', usageData);
+        
+        // Filter for February 2025 usage data specifically
+        const febUsage = usageData?.filter(usage => 
+          usage.month_year.startsWith('2025-02')
+        );
+        console.log('February usage data:', febUsage);
       }
 
       // Create a map of subscription_id to hours_spent
@@ -83,13 +92,13 @@ const ProjectDetails = () => {
           console.log(`Mapping subscription ${usage.project_subscription_id} to ${usage.hours_spent} hours`);
         });
       } else {
-        console.log('No usage data found for this project and month');
+        console.log('No usage data found for this project');
       }
 
       // Add the hours_spent property to project_subscriptions
       const enhancedProject = {
         ...data,
-        project_subscriptions: data.project_subscriptions.map(sub => {
+        project_subscriptions: data.project_subscriptions?.map(sub => {
           const mapped = {
             ...sub,
             // Use usage data if available for this subscription, otherwise default to 0
@@ -97,7 +106,7 @@ const ProjectDetails = () => {
           };
           console.log(`Enhanced subscription ${sub.id} with hours_spent: ${mapped.hours_spent}`);
           return mapped;
-        })
+        }) || []
       };
       
       console.log('Enhanced project data with usage info:', enhancedProject);
@@ -114,6 +123,7 @@ const ProjectDetails = () => {
   }
 
   console.log('Project layout:', project.layout);
+  console.log('Project subscriptions before rendering:', project.project_subscriptions);
   
   // Render the appropriate layout based on the project's layout type
   const layoutId = project.layout_id;

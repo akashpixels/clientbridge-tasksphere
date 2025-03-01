@@ -65,6 +65,16 @@ const TestHeader = ({ project, monthlyHours }: TestHeaderProps) => {
           {JSON.stringify(project.project_subscriptions, null, 2)}
         </pre>
       </div>
+
+      <div className="mt-4 bg-yellow-50 p-3 rounded border border-yellow-200">
+        <h3 className="font-medium text-yellow-800">Specific Subscription Values:</h3>
+        <ul className="mt-2 space-y-1 text-yellow-700">
+          <li>Hours Allotted: <span className="font-mono">{subscription?.hours_allotted ?? 'N/A'}</span></li>
+          <li>Hours Spent: <span className="font-mono">{subscription?.hours_spent ?? 'N/A'}</span></li>
+          <li>Status: <span className="font-mono">{subscription?.subscription_status ?? 'N/A'}</span></li>
+          <li>Next Renewal: <span className="font-mono">{subscription?.next_renewal_date ?? 'N/A'}</span></li>
+        </ul>
+      </div>
     </div>
   );
 };
