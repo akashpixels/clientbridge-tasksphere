@@ -14,6 +14,8 @@ const ProjectDetails = () => {
     queryKey: ['project', id],
     queryFn: async () => {
       console.log('Fetching project details for ID:', id);
+      
+      // First fetch the project with all related data
       const { data, error } = await supabase
         .from('projects')
         .select(`
@@ -42,6 +44,11 @@ const ProjectDetails = () => {
       if (error) {
         console.error('Error fetching project:', error);
         throw error;
+      }
+
+      // Validate that the main project data exists
+      if (!data) {
+        throw new Error("Project not found");
       }
 
       // Get current month in YYYY-MM-DD format (first day of month)
@@ -95,18 +102,23 @@ const ProjectDetails = () => {
         console.log('No usage data found for this project');
       }
 
+      // Ensure project_subscriptions is an array before processing
+      const subscriptions = Array.isArray(data.project_subscriptions) ? data.project_subscriptions : [];
+      
       // Add the hours_spent property to project_subscriptions
       const enhancedProject = {
         ...data,
-        project_subscriptions: data.project_subscriptions?.map(sub => {
-          const mapped = {
-            ...sub,
-            // Use usage data if available for this subscription, otherwise default to 0
-            hours_spent: usageMap[sub.id] || 0
-          };
-          console.log(`Enhanced subscription ${sub.id} with hours_spent: ${mapped.hours_spent}`);
-          return mapped;
-        }) || []
+        project_subscriptions: subscriptions.map(sub => {
+          // Make sure sub is a valid object before trying to spread it
+          if (sub && typeof sub === 'object') {
+            return {
+              ...sub,
+              // Use usage data if available for this subscription, otherwise use existing or default to 0
+              hours_spent: usageMap[sub.id] !== undefined ? usageMap[sub.id] : (sub.hours_spent || 0)
+            };
+          }
+          return sub;
+        })
       };
       
       console.log('Enhanced project data with usage info:', enhancedProject);
