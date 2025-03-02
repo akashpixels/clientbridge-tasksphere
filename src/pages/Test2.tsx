@@ -41,6 +41,8 @@ const Test2 = () => {
     queryFn: async () => {
       if (!selectedProjectId) return null;
       
+      console.log('Fetching data for project ID:', selectedProjectId);
+      
       // Get subscription details - using maybeSingle() instead of single()
       const { data: subscriptionDetails, error: subscriptionError } = await supabase
         .from('project_subscriptions')
@@ -49,6 +51,8 @@ const Test2 = () => {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
+      
+      console.log('Subscription details response:', { data: subscriptionDetails, error: subscriptionError });
       
       if (subscriptionError && subscriptionError.code !== 'PGRST116') {
         console.error('Error fetching subscription details:', subscriptionError);
@@ -70,6 +74,8 @@ const Test2 = () => {
         .eq('id', selectedProjectId)
         .single();
         
+      console.log('Project details response:', { data: project, error: projectError });
+      
       if (projectError) {
         console.error('Error fetching project:', projectError);
         toast({
@@ -80,8 +86,14 @@ const Test2 = () => {
         throw projectError;
       }
       
-      // Create default subscription data if none exists
-      const defaultSubscription = {
+      // Use the actual subscription data or provide defaults if properties are missing
+      const subscription = subscriptionDetails ? {
+        subscription_status: subscriptionDetails.subscription_status || "unknown",
+        billing_cycle: subscriptionDetails.billing_cycle || null,
+        start_date: subscriptionDetails.start_date || null,
+        next_renewal_date: subscriptionDetails.next_renewal_date || null,
+        auto_renew: subscriptionDetails.auto_renew !== undefined ? subscriptionDetails.auto_renew : false
+      } : {
         subscription_status: "unknown",
         billing_cycle: null,
         start_date: null,
@@ -89,9 +101,11 @@ const Test2 = () => {
         auto_renew: false
       };
       
+      console.log('Processed subscription data:', subscription);
+      
       return {
         project,
-        subscription: subscriptionDetails || defaultSubscription
+        subscription
       };
     },
     enabled: !!selectedProjectId,
