@@ -159,9 +159,9 @@ const ProjectDetails = () => {
         },
         project_subscriptions: projectData.project_subscriptions?.map(subscription => ({
           ...subscription,
-          // Add calculated data for compatibility with existing components
+          // Add calculated hours_spent for compatibility with existing components
           hours_spent: monthlyHours
-        }))
+        })) || []
       };
       
       console.log('Enhanced project data:', enhancedProject);
