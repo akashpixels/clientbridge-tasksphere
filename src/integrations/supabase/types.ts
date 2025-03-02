@@ -967,6 +967,7 @@ export type Database = {
       tasks: {
         Row: {
           actual_hours_spent: number | null
+          actual_start_time: string | null
           assigned_user_id: string | null
           complexity_level_id: number | null
           created_at: string
@@ -991,6 +992,7 @@ export type Database = {
         }
         Insert: {
           actual_hours_spent?: number | null
+          actual_start_time?: string | null
           assigned_user_id?: string | null
           complexity_level_id?: number | null
           created_at?: string
@@ -1015,6 +1017,7 @@ export type Database = {
         }
         Update: {
           actual_hours_spent?: number | null
+          actual_start_time?: string | null
           assigned_user_id?: string | null
           complexity_level_id?: number | null
           created_at?: string
