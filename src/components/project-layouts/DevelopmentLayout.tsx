@@ -1,9 +1,8 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import CredentialsTab from "./shared/CredentialsTab";
-import { format } from "date-fns";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -20,22 +19,15 @@ interface DevelopmentLayoutProps {
       color_hex: string | null;
     } | null;
     project_subscriptions: {
-      id: string;
-      subscription_status: string;
       hours_spent: number | null;
       hours_allotted: number;
-      start_date: string;
-      next_renewal_date: string;
-      max_concurrent_tasks: number;
-      billing_cycle: string;
-      auto_renew: boolean;
     }[];
   };
 }
 
 const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
   // Get the latest subscription
-  const subscription = project.project_subscriptions?.[0];
+  const currentSubscription = project.project_subscriptions?.[0];
   
   return (
     <div className="container mx-auto p-6">
@@ -70,97 +62,38 @@ const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
         </TabsList>
 
         <TabsContent value="overview">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Development Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Description</h3>
-                    <p className="mt-1">{project.details || 'No details provided'}</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500">Status</h4>
-                      <span 
-                        className="inline-block px-2 py-1 rounded-full text-xs mt-1"
-                        style={{
-                          backgroundColor: `${project.status?.color_hex}15`,
-                          color: project.status?.color_hex
-                        }}
-                      >
-                        {project.status?.name || 'Unknown'}
-                      </span>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500">Progress</h4>
-                      <p className="mt-1">{project.progress || 0}%</p>
-                    </div>
-                  </div>
+          <Card className="p-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-medium">Development Overview</h3>
+                <p className="text-gray-500 mt-1">{project.details || 'No details provided'}</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-medium">Status</h4>
+                  <span 
+                    className="inline-block px-2 py-1 rounded-full text-xs mt-1"
+                    style={{
+                      backgroundColor: `${project.status?.color_hex}15`,
+                      color: project.status?.color_hex
+                    }}
+                  >
+                    {project.status?.name || 'Unknown'}
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-
-            {subscription && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Subscription Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Status</h4>
-                        <span className={`inline-block px-2 py-1 rounded-full text-xs mt-1 ${
-                          subscription.subscription_status === 'active' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {subscription.subscription_status}
-                        </span>
-                      </div>
-                      
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Hours</h4>
-                        <p className="mt-1">
-                          {subscription.hours_spent || 0} / {subscription.hours_allotted} hours
-                        </p>
-                      </div>
-
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Start Date</h4>
-                        <p className="mt-1">{format(new Date(subscription.start_date), 'MMM d, yyyy')}</p>
-                      </div>
-
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Next Renewal</h4>
-                        <p className="mt-1">{format(new Date(subscription.next_renewal_date), 'MMM d, yyyy')}</p>
-                      </div>
-
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Billing Cycle</h4>
-                        <p className="mt-1 capitalize">{subscription.billing_cycle}</p>
-                      </div>
-
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Auto Renew</h4>
-                        <p className="mt-1">{subscription.auto_renew ? 'Yes' : 'No'}</p>
-                      </div>
-
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Max Concurrent Tasks</h4>
-                        <p className="mt-1">{subscription.max_concurrent_tasks}</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                
+                <div>
+                  <h4 className="font-medium">Hours</h4>
+                  <p className="text-gray-500 mt-1">
+                    {currentSubscription ? 
+                      `${currentSubscription.hours_spent || 0} / ${currentSubscription.hours_allotted} hours` 
+                      : 'No subscription data'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Card>
         </TabsContent>
 
         <TabsContent value="tasks">
