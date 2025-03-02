@@ -72,7 +72,11 @@ const TestSubscription = () => {
             id, 
             subscription_status,
             hours_allotted,
-            next_renewal_date
+            next_renewal_date,
+            billing_cycle,
+            start_date,
+            auto_renew,
+            max_concurrent_tasks
           )
         `)
         .eq('id', selectedProjectId)
@@ -90,15 +94,27 @@ const TestSubscription = () => {
       
       console.log('Base project data:', projectData);
       
+      // Get subscription details from project
+      const subscriptionDetails = projectData.project_subscriptions?.[0] || {
+        hours_allotted: 0,
+        subscription_status: "unknown",
+        next_renewal_date: null,
+        billing_cycle: null,
+        start_date: null
+      };
+      
       // 2. Prepare response object
       const result = {
         projectData,
         subscriptionData: {
           hours_spent: 0,
-          hours_allotted: projectData.project_subscriptions?.[0]?.hours_allotted || 0,
+          hours_allotted: subscriptionDetails.hours_allotted || 0,
           data_source: "unknown",
-          subscription_status: projectData.project_subscriptions?.[0]?.subscription_status || "unknown",
-          next_renewal_date: projectData.project_subscriptions?.[0]?.next_renewal_date || "unknown"
+          subscription_status: subscriptionDetails.subscription_status || "unknown",
+          next_renewal_date: subscriptionDetails.next_renewal_date || null,
+          billing_cycle: subscriptionDetails.billing_cycle || null,
+          start_date: subscriptionDetails.start_date || null,
+          auto_renew: subscriptionDetails.auto_renew || false
         },
         rawData: {
           tasks: [],
@@ -110,7 +126,7 @@ const TestSubscription = () => {
         }
       };
       
-      // 3. For past months, try to get data from subscription_usage table
+      // 3. For past months, ONLY check subscription_usage table
       if (!isCurrentMonth) {
         console.log('Looking for historical data for', selectedMonth);
         
@@ -130,9 +146,12 @@ const TestSubscription = () => {
           result.subscriptionData.hours_spent = usageData.hours_spent || 0;
           result.subscriptionData.hours_allotted = usageData.hours_allotted || 0;
           result.subscriptionData.data_source = "historical";
+          
+          // No task data for historical months
+          result.rawData.tasks = [];
         } else {
           // No historical data found
-          console.log('No historical data found');
+          console.log('No historical data found for month:', selectedMonth);
           result.subscriptionData.data_source = "no data";
         }
       } 
@@ -155,20 +174,20 @@ const TestSubscription = () => {
           result.subscriptionData.data_source = "live";
           console.log('Live hours calculation:', result.subscriptionData.hours_spent);
         }
-      }
-      
-      // 5. Fetch raw task data for debugging
-      const { data: rawTaskData, error: rawTaskError } = await supabase
-        .from('tasks')
-        .select('id, details, actual_hours_spent, created_at')
-        .eq('project_id', selectedProjectId)
-        .gte('created_at', startDate.toISOString())
-        .lte('created_at', endDate.toISOString());
-      
-      if (rawTaskError) {
-        console.error('Error in raw task query:', rawTaskError);
-      } else {
-        result.rawData.tasks = rawTaskData || [];
+        
+        // 5. Fetch raw task data for current month only
+        const { data: rawTaskData, error: rawTaskError } = await supabase
+          .from('tasks')
+          .select('id, details, actual_hours_spent, created_at')
+          .eq('project_id', selectedProjectId)
+          .gte('created_at', startDate.toISOString())
+          .lte('created_at', endDate.toISOString());
+        
+        if (rawTaskError) {
+          console.error('Error in raw task query:', rawTaskError);
+        } else {
+          result.rawData.tasks = rawTaskData || [];
+        }
       }
       
       return result;
@@ -240,7 +259,7 @@ const TestSubscription = () => {
                 <CardTitle>Subscription Data</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <p className="text-sm font-medium">Project Name</p>
                     <p className="text-md">{subscriptionData.projectData.name}</p>
@@ -251,8 +270,22 @@ const TestSubscription = () => {
                     <p className="text-md">{format(selectedDate, 'MMMM yyyy')}</p>
                   </div>
                   
+                  <div className="space-y-2 col-span-2 md:col-span-1">
+                    <p className="text-sm font-medium">Data Source</p>
+                    <div className="flex items-center">
+                      <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
+                        subscriptionData.subscriptionData.data_source === "historical" 
+                          ? "bg-blue-500" 
+                          : subscriptionData.subscriptionData.data_source === "live"
+                            ? "bg-green-500"
+                            : "bg-yellow-500"
+                      }`}></span>
+                      <p className="text-md capitalize">{subscriptionData.subscriptionData.data_source}</p>
+                    </div>
+                  </div>
+                  
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">Hours Spent</p>
+                    <p className="text-sm font-medium">Hours Usage</p>
                     <p className="text-md">
                       {subscriptionData.subscriptionData.data_source === "no data" 
                         ? "No data available" 
@@ -262,65 +295,85 @@ const TestSubscription = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">Data Source</p>
-                    <p className="text-md">{subscriptionData.subscriptionData.data_source}</p>
+                    <p className="text-sm font-medium">Subscription Status</p>
+                    <p className="text-md capitalize">{subscriptionData.subscriptionData.subscription_status}</p>
                   </div>
                   
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">Subscription Status</p>
-                    <p className="text-md">{subscriptionData.subscriptionData.subscription_status}</p>
+                    <p className="text-sm font-medium">Billing Cycle</p>
+                    <p className="text-md capitalize">{subscriptionData.subscriptionData.billing_cycle || "Not set"}</p>
                   </div>
                   
                   <div className="space-y-2">
                     <p className="text-sm font-medium">Next Renewal Date</p>
-                    <p className="text-md">{subscriptionData.subscriptionData.next_renewal_date}</p>
+                    <p className="text-md">
+                      {subscriptionData.subscriptionData.next_renewal_date 
+                        ? new Date(subscriptionData.subscriptionData.next_renewal_date).toLocaleDateString() 
+                        : "Not set"}
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Start Date</p>
+                    <p className="text-md">
+                      {subscriptionData.subscriptionData.start_date
+                        ? new Date(subscriptionData.subscriptionData.start_date).toLocaleDateString()
+                        : "Not set"}
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Auto Renew</p>
+                    <p className="text-md">{subscriptionData.subscriptionData.auto_renew ? "Yes" : "No"}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>Raw Task Data</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4">
-                  <h3 className="font-medium mb-2">Query Parameters</h3>
-                  <pre className="bg-gray-100 p-4 rounded text-xs overflow-auto">
-                    {JSON.stringify(subscriptionData.rawData.query, null, 2)}
-                  </pre>
-                </div>
-                
-                <h3 className="font-medium mb-2">Tasks in Date Range</h3>
-                {subscriptionData.rawData.tasks.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Details</TableHead>
-                        <TableHead>Created At</TableHead>
-                        <TableHead>Hours</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {subscriptionData.rawData.tasks.map((task) => (
-                        <TableRow key={task.id}>
-                          <TableCell className="font-mono text-xs">{task.id}</TableCell>
-                          <TableCell>{task.details}</TableCell>
-                          <TableCell>{new Date(task.created_at).toLocaleString()}</TableCell>
-                          <TableCell>{task.actual_hours_spent || 0}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <div className="flex items-center gap-2 text-amber-600 bg-amber-50 p-4 rounded">
-                    <AlertCircle size={16} />
-                    <span>No tasks found in this date range</span>
+            {isCurrentMonth && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Raw Task Data (Current Month Only)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4">
+                    <h3 className="font-medium mb-2">Query Parameters</h3>
+                    <pre className="bg-gray-100 p-4 rounded text-xs overflow-auto">
+                      {JSON.stringify(subscriptionData.rawData.query, null, 2)}
+                    </pre>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  
+                  <h3 className="font-medium mb-2">Tasks in Date Range</h3>
+                  {subscriptionData.rawData.tasks.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Details</TableHead>
+                          <TableHead>Created At</TableHead>
+                          <TableHead>Hours</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {subscriptionData.rawData.tasks.map((task) => (
+                          <TableRow key={task.id}>
+                            <TableCell className="font-mono text-xs">{task.id}</TableCell>
+                            <TableCell>{task.details}</TableCell>
+                            <TableCell>{new Date(task.created_at).toLocaleString()}</TableCell>
+                            <TableCell>{task.actual_hours_spent || 0}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="flex items-center gap-2 text-amber-600 bg-amber-50 p-4 rounded">
+                      <AlertCircle size={16} />
+                      <span>No tasks found in this date range</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </>
         )}
       </div>
