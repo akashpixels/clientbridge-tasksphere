@@ -117,33 +117,23 @@ const CredentialsTab = ({ projectId }: CredentialsTabProps) => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   // Check if user is admin
-  const { data: userProfile, isLoading: isLoadingProfile, error: profileError } = useQuery({
+  const { data: userProfile } = useQuery({
     queryKey: ['userProfile'],
     queryFn: async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Not authenticated');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('user_role_id')
-          .eq('id', user.id)
-          .single();
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('user_role_id, client_id')
+        .eq('id', user.id)
+        .single();
 
-        if (error) {
-          console.error('Error fetching user profile:', error);
-          return null;
-        }
-
-        return data;
-      } catch (err) {
-        console.error('Error in user profile query:', err);
-        return null;
-      }
+      if (error) throw error;
+      return data;
     },
   });
 
-  // Safe check if the user is an admin
   const isAdmin = userProfile?.user_role_id === 1 || userProfile?.user_role_id === 3;
 
   const { data: credentials, isLoading: isLoadingCredentials } = useQuery({
@@ -166,11 +156,9 @@ const CredentialsTab = ({ projectId }: CredentialsTabProps) => {
     },
   });
 
-  const isLoading = isLoadingProfile || isLoadingCredentials;
-
   return (
     <Card className="p-6">
-      {isLoading ? (
+      {isLoadingCredentials ? (
         <div>Loading credentials...</div>
       ) : credentials && credentials.length > 0 ? (
         <div className="space-y-6">

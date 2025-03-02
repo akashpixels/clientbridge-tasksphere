@@ -1,16 +1,11 @@
-
 import { Table, TableBody } from "@/components/ui/table";
+import { Database } from "@/integrations/supabase/types";
 import { ProjectTableHeader } from "./ProjectTableHeader";
 import { ProjectTableRow } from "./ProjectTableRow";
 
-type Project = {
-  id: string;
-  name: string;
-  logo_url: string;
-  due_date: string | null;
-  client_admin: {
+type Project = Database['public']['Tables']['projects']['Row'] & {
+  client: {
     id: string;
-    business_name: string;
     user_profiles: {
       first_name: string;
       last_name: string;
@@ -20,9 +15,6 @@ type Project = {
     name: string;
     color_hex: string;
   } | null;
-  project_subscriptions?: {
-    subscription_status: string;
-  }[];
 };
 
 interface ProjectListProps {

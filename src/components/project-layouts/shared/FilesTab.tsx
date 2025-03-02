@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -14,10 +14,7 @@ import {
   FileCode, 
   FileArchive,
   FileType,
-  FileChartLine,
-  Loader2,
-  AlertCircle,
-  RefreshCw
+  FileChartLine 
 } from "lucide-react";
 
 interface FileCardProps {
@@ -90,16 +87,9 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const target = e.currentTarget;
-    target.style.display = 'none';
-    
-    // Add a fallback icon when image fails to load
-    const container = target.parentElement;
-    if (container) {
-      const icon = document.createElement('div');
-      icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="w-20 h-20 stroke-[0.5] text-blue-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><circle cx="10" cy="13" r="2"></circle><path d="m20 17-1.09-1.09a2 2 0 0 0-2.82 0L10 22"></path></svg>';
-      container.appendChild(icon);
-    }
+    e.currentTarget.src = '';
+    e.currentTarget.onerror = null;
+    e.currentTarget.parentElement!.innerHTML = FileImage.toString();
   };
 
   return (
@@ -109,7 +99,7 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
     >
       <div className="flex flex-col items-center">
         {isImageFile(file.file_url) ? (
-          <div className="w-20 h-20 relative flex items-center justify-center bg-gray-100 rounded">
+          <div className="w-20 h-20 relative">
             <img
               src={file.file_url}
               alt={file.file_name}
@@ -134,56 +124,11 @@ interface FilesTabProps {
 
 const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Direct database check - this will help us diagnose if there's a permission issue
-  useEffect(() => {
-    const checkDirectAccess = async () => {
-      console.log("Directly checking files for project:", projectId);
-      
-      try {
-        // Direct query to check if we can access the files table
-        const { data, error } = await supabase
-          .from('files')
-          .select('*')
-          .limit(10);
-          
-        console.log("Direct access test - all files:", data?.length || 0, data);
-        console.log("Direct access error:", error);
-        
-        // Try directly with the projectId
-        const { data: projectData, error: projectError } = await supabase
-          .from('files')
-          .select('*')
-          .eq('project_id', projectId)
-          .limit(10);
-          
-        console.log(`Direct check for project ${projectId} files:`, projectData?.length || 0, projectData);
-        console.log("Project files error:", projectError);
-      } catch (e) {
-        console.error("Error in direct check:", e);
-      }
-    };
-    
-    checkDirectAccess();
-  }, [projectId]);
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    refetch().finally(() => setIsRefreshing(false));
-  };
-
-  const { data: projectFiles, isLoading, error, refetch } = useQuery({
+  const { data: files, isLoading } = useQuery({
     queryKey: ['project-files', projectId],
     queryFn: async () => {
       console.log('Fetching files for project:', projectId);
-      
-      if (!projectId) {
-        console.error('No project ID provided to FilesTab');
-        return [];
-      }
-      
-      // Get files for the project
       const { data, error } = await supabase
         .from('files')
         .select('*')
@@ -194,83 +139,34 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
         console.error('Error fetching files:', error);
         throw error;
       }
-      
-      console.log(`Found ${data?.length || 0} files for project ${projectId}:`, data);
-      return data || [];
+
+      // Group files by date
+      const groupedFiles = data.reduce((groups: Record<string, typeof data>, file) => {
+        const date = format(new Date(file.created_at), 'MMMM d, yyyy');
+        if (!groups[date]) {
+          groups[date] = [];
+        }
+        groups[date].push(file);
+        return groups;
+      }, {});
+
+      return groupedFiles;
     },
-    // Add refetch on window focus and stale time for better user experience
-    refetchOnWindowFocus: true,
-    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   if (isLoading) {
-    return (
-      <Card className="p-6">
-        <div className="flex items-center justify-center p-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-          <p>Loading files...</p>
-        </div>
-      </Card>
-    );
+    return <div>Loading files...</div>;
   }
-  
-  if (error) {
-    console.error('Error in files query:', error);
+
+  if (!files || Object.keys(files).length === 0) {
     return (
       <Card className="p-6">
         <div className="text-center py-8">
-          <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-          <p className="text-lg font-semibold text-red-500">Error loading files</p>
-          <p className="text-sm text-gray-500 mt-2">{(error as Error).message}</p>
-          <p className="text-xs text-gray-400 mt-1">Project ID: {projectId}</p>
-          <button 
-            className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-sm mx-auto"
-            onClick={handleRefresh}
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Try again
-          </button>
+          <p className="text-gray-500">No files found for this project.</p>
         </div>
       </Card>
     );
   }
-
-  if (!projectFiles || projectFiles.length === 0) {
-    return (
-      <Card className="p-6">
-        <div className="text-center py-8">
-          <AlertCircle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
-          <p className="text-lg font-semibold">No files found for this project.</p>
-          <p className="text-sm text-gray-500 mt-2">
-            This could be due to permission settings or because no files exist for this project.
-          </p>
-          <div className="mt-4 p-3 bg-gray-50 rounded-md text-sm text-left max-w-md mx-auto">
-            <p className="font-medium">Debugging information:</p>
-            <p className="mt-1 text-xs">Project ID: {projectId}</p>
-            <p className="mt-1 text-xs">RLS Status: Temporarily disabled</p>
-          </div>
-          <button 
-            className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-sm mx-auto"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Refreshing...' : 'Refresh'}
-          </button>
-        </div>
-      </Card>
-    );
-  }
-
-  // Group files by date for display
-  const groupedFiles: Record<string, typeof projectFiles> = {};
-  projectFiles.forEach(file => {
-    const date = format(new Date(file.created_at), 'MMMM d, yyyy');
-    if (!groupedFiles[date]) {
-      groupedFiles[date] = [];
-    }
-    groupedFiles[date].push(file);
-  });
 
   const handleDownload = (url: string) => {
     window.open(url, '_blank');
@@ -278,20 +174,8 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
 
   return (
     <Card className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium">Project Files</h3>
-        <button 
-          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center text-sm"
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-        >
-          <RefreshCw className={`h-4 w-4 mr-1.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </div>
-      
       <div className="space-y-8">
-        {Object.entries(groupedFiles).map(([date, dateFiles]) => (
+        {Object.entries(files).map(([date, dateFiles]) => (
           <div key={date}>
             <h3 className="text-lg font-medium mb-4">{date}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">

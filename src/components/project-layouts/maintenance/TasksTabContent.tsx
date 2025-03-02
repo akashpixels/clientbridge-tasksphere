@@ -1,10 +1,10 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Card } from "@/components/ui/card";
 import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, AlertCircle } from "lucide-react";
 
 interface TasksTabContentProps {
   isLoadingTasks: boolean;
@@ -47,30 +47,6 @@ const TasksTabContent = ({
   onImageClick,
   onCommentClick,
 }: TasksTabContentProps) => {
-  
-  // Add diagnostic output
-  useEffect(() => {
-    console.log("TasksTabContent rendered with tasks:", tasks?.length || 0);
-    console.log("isLoadingTasks:", isLoadingTasks);
-    
-    // Check if we can directly access the tasks table
-    const checkTasksAccess = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('tasks')
-          .select('id, details')
-          .limit(5);
-          
-        console.log("Direct tasks access test:", data?.length || 0, data);
-        console.log("Direct tasks access error:", error);
-      } catch (e) {
-        console.error("Error in direct tasks check:", e);
-      }
-    };
-    
-    checkTasksAccess();
-  }, [tasks, isLoadingTasks]);
-  
   useEffect(() => {
     const channel = supabase
       .channel('comments-changes')
@@ -95,10 +71,7 @@ const TasksTabContent = ({
   return (
     <Card className="p-0">
       {isLoadingTasks ? (
-        <div className="flex items-center justify-center p-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-          <p>Loading tasks...</p>
-        </div>
+        <p>Loading tasks...</p>
       ) : tasks && tasks.length > 0 ? (
         <div className="overflow-x-auto">
           <TasksTable 
@@ -110,18 +83,7 @@ const TasksTabContent = ({
           />
         </div>
       ) : (
-        <div className="p-6 text-center">
-          <AlertCircle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
-          <p className="text-lg font-semibold">No tasks found for this project.</p>
-          <p className="text-sm text-gray-500 mt-2">
-            This could be due to permission settings or because no tasks exist for this project.
-          </p>
-          <div className="mt-4 p-3 bg-gray-50 rounded-md text-sm text-left">
-            <p className="font-medium">Debugging information:</p>
-            <p className="mt-1 text-xs">Project ID: {window.location.pathname.split('/').pop()}</p>
-            <p className="mt-1 text-xs">RLS Status: Temporarily disabled</p>
-          </div>
-        </div>
+        <p className="p-6">No tasks found for this project.</p>
       )}
     </Card>
   );

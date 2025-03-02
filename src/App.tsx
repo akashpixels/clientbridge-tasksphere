@@ -14,8 +14,6 @@ import Clients from "./pages/Clients";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import TestSubscription from "./pages/TestSubscription";
-import Test2 from "./pages/Test2";
 
 // Create a client outside of the component
 const queryClient = new QueryClient({
@@ -43,8 +41,6 @@ const App = () => {
                   <Route path="/tasks" element={<Tasks />} />
                   <Route path="/team" element={<Team />} />
                   <Route path="/clients" element={<Clients />} />
-                  <Route path="/test-subscription" element={<TestSubscription />} />
-                  <Route path="/test2" element={<Test2 />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Route>
