@@ -60,8 +60,8 @@ const TestSubscription = () => {
       
       console.log('Fetching data for project:', selectedProjectId, 'Month:', selectedMonth);
       
-      // 1. Get current subscription data directly 
-      // This will be used for both current and past months
+      // 1. First get the latest subscription details - this will be used for ALL months
+      // This contains subscription status, billing cycle, renewal date, etc.
       const { data: subscriptionDetails, error: subscriptionError } = await supabase
         .from('project_subscriptions')
         .select('*')
@@ -72,6 +72,11 @@ const TestSubscription = () => {
         
       if (subscriptionError) {
         console.error('Error fetching subscription details:', subscriptionError);
+        toast({
+          title: "Error loading subscription details",
+          description: subscriptionError.message,
+          variant: "destructive",
+        });
       }
       
       console.log('Subscription details from DB:', subscriptionDetails);
@@ -97,13 +102,15 @@ const TestSubscription = () => {
         throw projectError;
       }
       
-      // 2. Prepare response object with actual subscription details
+      // 2. Prepare base response object with subscription details
+      // These subscription details remain constant regardless of month
       const result = {
         projectData,
         subscriptionData: {
           hours_spent: 0,
           hours_allotted: subscriptionDetails?.hours_allotted || 0,
           data_source: "unknown",
+          // Always use the subscription details for these fields, regardless of month
           subscription_status: subscriptionDetails?.subscription_status || "unknown",
           next_renewal_date: subscriptionDetails?.next_renewal_date || null,
           billing_cycle: subscriptionDetails?.billing_cycle || null,
@@ -121,7 +128,7 @@ const TestSubscription = () => {
         }
       };
       
-      // 3. For past months, ONLY check subscription_usage table
+      // 3. For past months, check subscription_usage table for hours data only
       if (!isCurrentMonth) {
         console.log('Looking for historical data for', selectedMonth);
         
@@ -138,6 +145,7 @@ const TestSubscription = () => {
         
         if (usageData) {
           console.log('Found historical usage data:', usageData);
+          // Only update the hours usage data, keep subscription details intact
           result.subscriptionData.hours_spent = usageData.hours_spent || 0;
           result.subscriptionData.hours_allotted = usageData.hours_allotted || 0;
           result.subscriptionData.data_source = "historical";
@@ -153,7 +161,7 @@ const TestSubscription = () => {
         return result;
       } 
       
-      // 4. For current month, calculate from tasks
+      // 4. For current month, calculate hours from tasks
       console.log('Calculating live data for current month');
       
       const { data: tasksData, error: tasksError } = await supabase
@@ -166,6 +174,7 @@ const TestSubscription = () => {
       if (tasksError) {
         console.error('Error fetching tasks data:', tasksError);
       } else if (tasksData) {
+        // Only update the hours_spent, keep subscription details intact
         result.subscriptionData.hours_spent = tasksData.reduce((sum, task) => 
           sum + (task.actual_hours_spent || 0), 0);
         result.subscriptionData.data_source = "live";
