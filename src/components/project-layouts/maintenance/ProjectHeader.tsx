@@ -17,7 +17,6 @@ interface ProjectHeaderProps {
       id: string;
       subscription_status: string;
       hours_allotted: number;
-      hours_spent: number;
       next_renewal_date: string;
     }[];
   };
@@ -35,6 +34,11 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
       label: format(date, 'MMM yyyy')
     };
   });
+
+  // Get subscription data for debugging
+  const subscription = project.project_subscriptions?.[0];
+  console.log("Project subscription data:", subscription);
+  console.log("Monthly hours:", monthlyHours);
 
   return (
     <div className="flex items-center justify-between w-full gap-4">
@@ -56,6 +60,30 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
         </div>
       </div>
       <div className="flex items-center gap-4">
+        
+        {/* Temporary Debug Info */}
+        <div className="border border-gray-200 rounded-lg p-4 bg-[#fcfcfc]">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Subscription Details (Debug)</h3>
+          <ul className="space-y-2 text-sm">
+            <li className="flex justify-between">
+              <span className="text-gray-500">Hours Spent:</span>
+              <span className="font-medium text-gray-900">{monthlyHours?.toFixed(1) || "0"}</span>
+            </li>
+            <li className="flex justify-between">
+              <span className="text-gray-500">Hours Allotted:</span>
+              <span className="font-medium text-gray-900">{subscription?.hours_allotted || "0"}</span>
+            </li>
+            <li className="flex justify-between">
+              <span className="text-gray-500">Status:</span>
+              <span className="font-medium text-gray-900">{subscription?.subscription_status || "unknown"}</span>
+            </li>
+            <li className="flex justify-between">
+              <span className="text-gray-500">Next Renewal:</span>
+              <span className="font-medium text-gray-900">{subscription?.next_renewal_date || "unknown"}</span>
+            </li>
+          </ul>
+        </div>
+        
         <div className="bg-[#fcfcfc]">
           <Select
             value={selectedMonth}
@@ -86,6 +114,8 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
             </SelectContent>
           </Select>
         </div>
+       
+        
       </div>
     </div>
   );

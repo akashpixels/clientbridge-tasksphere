@@ -176,63 +176,6 @@ const ProjectDetails = () => {
     return <div className="container mx-auto p-6">Project not found</div>;
   }
 
-  // Debug information - display directly on this page before rendering the layout
-  console.log('Project details before rendering layout:', project);
-  const subscription = project.project_subscriptions?.[0];
-  
-  if (subscription) {
-    return (
-      <div className="container mx-auto">
-        {/* Debug Panel */}
-        <div className="bg-gray-100 p-4 mb-6 rounded-lg border border-gray-300">
-          <h2 className="text-lg font-semibold mb-2">Debug Information</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="font-medium">Project ID:</p>
-              <p className="text-sm text-gray-600">{project.id}</p>
-            </div>
-            <div>
-              <p className="font-medium">Project Name:</p>
-              <p className="text-sm text-gray-600">{project.name}</p>
-            </div>
-            <div>
-              <p className="font-medium">Subscription ID:</p>
-              <p className="text-sm text-gray-600">{subscription.id}</p>
-            </div>
-            <div>
-              <p className="font-medium">Subscription Status:</p>
-              <p className="text-sm text-gray-600">{subscription.subscription_status}</p>
-            </div>
-            <div>
-              <p className="font-medium">Hours Allotted:</p>
-              <p className="text-sm text-gray-600">{subscription.hours_allotted}</p>
-            </div>
-            <div>
-              <p className="font-medium">Hours Spent:</p>
-              <p className="text-sm text-gray-600">{subscription.hours_spent?.toFixed(1) || "0"}</p>
-            </div>
-            <div>
-              <p className="font-medium">Next Renewal:</p>
-              <p className="text-sm text-gray-600">{subscription.next_renewal_date}</p>
-            </div>
-          </div>
-        </div>
-        
-        {/* Render the normal layout below the debug panel */}
-        {project.layout_id === 1 ? (
-          <MaintenanceLayout project={project} />
-        ) : project.layout_id === 2 ? (
-          <BrandingLayout project={project} />
-        ) : project.layout_id === 3 ? (
-          <DevelopmentLayout project={project} />
-        ) : (
-          <DefaultLayout project={project} />
-        )}
-      </div>
-    );
-  }
-  
-  // If no subscription data, just render the layout without debug panel
   console.log('Project layout:', project.layout);
   
   // Render the appropriate layout based on the project's layout type
