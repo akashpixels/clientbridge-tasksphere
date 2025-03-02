@@ -86,13 +86,14 @@ const Test2 = () => {
         throw projectError;
       }
       
-      // Use the actual subscription data or provide defaults if properties are missing
+      // Simply use the subscription data directly since all fields are NOT NULL in the DB
+      // Only use defaults if no subscription is found
       const subscription = subscriptionDetails ? {
-        subscription_status: subscriptionDetails.subscription_status || "unknown",
-        billing_cycle: subscriptionDetails.billing_cycle || null,
-        start_date: subscriptionDetails.start_date || null,
-        next_renewal_date: subscriptionDetails.next_renewal_date || null,
-        auto_renew: subscriptionDetails.auto_renew !== undefined ? subscriptionDetails.auto_renew : false
+        subscription_status: subscriptionDetails.subscription_status,
+        billing_cycle: subscriptionDetails.billing_cycle,
+        start_date: subscriptionDetails.start_date,
+        next_renewal_date: subscriptionDetails.next_renewal_date,
+        auto_renew: subscriptionDetails.auto_renew
       } : {
         subscription_status: "unknown",
         billing_cycle: null,
