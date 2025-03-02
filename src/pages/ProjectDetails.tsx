@@ -78,9 +78,9 @@ const ProjectDetails = () => {
       let hoursAllotted = projectData.project_subscriptions?.[0]?.hours_allotted || 0;
       let dataSource = "unknown";
       
-      // SIMPLIFIED LOGIC:
-      // 1. For past months, get data from subscription_usage
-      // 2. For current month, calculate from tasks
+      // Simple logic for subscription data:
+      // - Current month: Calculate from tasks
+      // - Past month: Get from subscription_usage
       
       if (isCurrentMonth) {
         // Current month - calculate hours from tasks
@@ -106,7 +106,7 @@ const ProjectDetails = () => {
         }
       } 
       else {
-        // Past or future month - check subscription_usage first
+        // Past month - check subscription_usage
         console.log('Getting data for month:', selectedMonth, 'from subscription_usage');
         
         const { data: usageData, error: usageError } = await supabase
@@ -134,7 +134,8 @@ const ProjectDetails = () => {
         }
       }
 
-      // 4. Always use subscription data from project_subscriptions for status
+      // Create our enhanced project object with all the needed data
+      // First, add the subscription_data
       const enhancedProject = {
         ...projectData,
         subscription_data: {
@@ -144,7 +145,16 @@ const ProjectDetails = () => {
         }
       };
       
-      console.log('Enhanced project data with subscription info:', enhancedProject.subscription_data);
+      // Now enhance the project_subscriptions array to include the hours_spent field
+      // that the ProjectHeader component expects
+      if (enhancedProject.project_subscriptions && enhancedProject.project_subscriptions.length > 0) {
+        enhancedProject.project_subscriptions = enhancedProject.project_subscriptions.map(sub => ({
+          ...sub,
+          hours_spent: monthlyHours // Add hours_spent to match the expected type
+        }));
+      }
+      
+      console.log('Enhanced project data with subscription info:', enhancedProject);
       return enhancedProject;
     },
   });

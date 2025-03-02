@@ -18,6 +18,7 @@ interface ProjectHeaderProps {
       id: string;
       subscription_status: string;
       hours_allotted: number;
+      hours_spent: number; // This is required by the component
       next_renewal_date: string;
     }[];
     subscription_data?: {
