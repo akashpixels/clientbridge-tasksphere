@@ -6,19 +6,34 @@ import MaintenanceLayout from "@/components/project-layouts/maintenance/Maintena
 import BrandingLayout from "@/components/project-layouts/BrandingLayout";
 import DevelopmentLayout from "@/components/project-layouts/DevelopmentLayout";
 import DefaultLayout from "@/components/project-layouts/DefaultLayout";
-import { format, startOfMonth, endOfMonth, isAfter, isSameMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, isAfter, isBefore, isSameMonth, parse } from "date-fns";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const ProjectDetails = () => {
   const { id } = useParams();
-  const currentMonth = format(new Date(), 'yyyy-MM');
-  const startDate = startOfMonth(new Date(currentMonth));
-  const endDate = endOfMonth(new Date(currentMonth));
+  const { toast } = useToast();
+  
+  // Maintain selected month state
+  const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
+  
+  // Calculate date ranges based on selected month
+  const selectedDate = parse(selectedMonth, 'yyyy-MM', new Date());
+  const startDate = startOfMonth(selectedDate);
+  const endDate = endOfMonth(selectedDate);
+  const currentDate = new Date();
+  const isCurrentMonth = isSameMonth(selectedDate, currentDate);
+  
+  // Log selected month for debugging
+  console.log('Selected month:', selectedMonth, 'Is current month:', isCurrentMonth);
 
   const { data: project, isLoading } = useQuery({
-    queryKey: ['project', id],
+    queryKey: ['project', id, selectedMonth],
     queryFn: async () => {
-      console.log('Fetching project details for ID:', id);
-      const { data, error } = await supabase
+      console.log('Fetching project details for ID:', id, 'Month:', selectedMonth);
+      
+      // 1. Fetch base project data
+      const { data: projectData, error: projectError } = await supabase
         .from('projects')
         .select(`
           *,
@@ -42,21 +57,78 @@ const ProjectDetails = () => {
         .eq('id', id)
         .single();
 
-      if (error) {
-        console.error('Error fetching project:', error);
-        throw error;
+      if (projectError) {
+        console.error('Error fetching project:', projectError);
+        toast({
+          title: "Error loading project",
+          description: projectError.message,
+          variant: "destructive",
+        });
+        throw projectError;
+      }
+      
+      // Early return if no project data
+      if (!projectData) {
+        throw new Error("Project not found");
       }
 
-      // Project data successfully fetched
-      const projectData = data;
-      const selectedDate = new Date(currentMonth);
-      const currentDate = new Date();
+      console.log('Basic project data fetched:', projectData);
       
-      // If the selected month is current month or future, use live calculation
-      if (isSameMonth(selectedDate, currentDate) || isAfter(selectedDate, currentDate)) {
-        console.log('Using live calculation for current/future month:', currentMonth);
+      let monthlyHours = 0;
+      let hoursAllotted = projectData.project_subscriptions?.[0]?.hours_allotted || 0;
+      let dataSource = "unknown";
+      
+      // 2. Determine if we should use historical data
+      if (!isCurrentMonth && isBefore(selectedDate, currentDate)) {
+        console.log('Looking up historical data for past month:', selectedMonth);
         
-        // Fetch monthly hours directly from the tasks table
+        // Try to fetch data from subscription_usage table
+        const { data: usageData, error: usageError } = await supabase
+          .from('subscription_usage')
+          .select('*')
+          .eq('project_id', id)
+          .eq('month_year', selectedMonth)
+          .maybeSingle();
+
+        if (usageError) {
+          console.error('Error fetching historical usage data:', usageError);
+        }
+
+        // If we found historical data, use it
+        if (usageData) {
+          console.log('Found historical usage data:', usageData);
+          monthlyHours = usageData.hours_spent || 0;
+          hoursAllotted = usageData.hours_allotted || 0;
+          dataSource = "historical";
+        } else {
+          // No historical data found, calculate from tasks
+          console.log('No historical data found, calculating from tasks for month:', selectedMonth);
+          
+          const { data: tasksData, error: tasksError } = await supabase
+            .from('tasks')
+            .select('actual_hours_spent')
+            .eq('project_id', id)
+            .gte('created_at', startDate.toISOString())
+            .lte('created_at', endDate.toISOString());
+
+          if (tasksError) {
+            console.error('Error calculating historical data from tasks:', tasksError);
+          } else {
+            // Calculate total hours spent from tasks
+            monthlyHours = tasksData ? 
+              tasksData.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) : 
+              0;
+            
+            dataSource = "calculated";
+            console.log('Calculated hours for past month from tasks:', monthlyHours);
+          }
+        }
+      } 
+      // 3. For current month or future months, use live calculation
+      else {
+        console.log('Using live calculation for month:', selectedMonth);
+        
+        // Fetch tasks for the selected month
         const { data: tasksData, error: tasksError } = await supabase
           .from('tasks')
           .select('actual_hours_spent')
@@ -66,107 +138,42 @@ const ProjectDetails = () => {
 
         if (tasksError) {
           console.error('Error fetching tasks data:', tasksError);
-        }
-
-        // Calculate total hours spent this month from tasks
-        const monthlyHours = tasksData ? 
-          tasksData.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) : 
-          0;
-
-        console.log('Monthly hours calculated from tasks:', monthlyHours);
-
-        // Ensure project_subscriptions is an array
-        const projectSubscriptions = projectData.project_subscriptions || [];
-        
-        // Create enhanced project with monthly hours
-        const enhancedProject = {
-          ...projectData,
-          project_subscriptions: projectSubscriptions.map(subscription => ({
-            ...subscription,
-            hours_spent: monthlyHours // Add monthly hours to each subscription
-          }))
-        };
-        
-        console.log('Enhanced project data for current month:', enhancedProject);
-        return enhancedProject;
-      } 
-      // For past months, check the subscription_usage table
-      else {
-        console.log('Looking up historical data for month:', currentMonth);
-        
-        // Try to fetch data from subscription_usage table
-        const { data: usageData, error: usageError } = await supabase
-          .from('subscription_usage')
-          .select('*')
-          .eq('project_id', id)
-          .eq('month_year', currentMonth)
-          .maybeSingle();
-
-        if (usageError) {
-          console.error('Error fetching subscription usage data:', usageError);
-        }
-
-        // If we found historical data, use it
-        if (usageData) {
-          console.log('Found historical usage data:', usageData);
-          
-          // Ensure project_subscriptions is an array
-          const projectSubscriptions = projectData.project_subscriptions || [];
-          
-          // Create enhanced project with historical usage data
-          const enhancedProject = {
-            ...projectData,
-            project_subscriptions: projectSubscriptions.map(subscription => ({
-              ...subscription,
-              hours_spent: usageData.hours_spent,
-              hours_allotted: usageData.hours_allotted // Use historical allocated hours
-            }))
-          };
-          
-          console.log('Enhanced project with historical data:', enhancedProject);
-          return enhancedProject;
-        } 
-        // If no historical data found, fall back to task calculation
-        else {
-          console.log('No historical data found, falling back to task calculation');
-          
-          // Fetch monthly hours from tasks for the selected month
-          const { data: tasksData, error: tasksError } = await supabase
-            .from('tasks')
-            .select('actual_hours_spent')
-            .eq('project_id', id)
-            .gte('created_at', startDate.toISOString())
-            .lte('created_at', endDate.toISOString());
-
-          if (tasksError) {
-            console.error('Error fetching tasks data for past month:', tasksError);
-          }
-
-          // Calculate total hours spent for the month from tasks
-          const monthlyHours = tasksData ? 
+        } else {
+          // Calculate total hours spent from tasks
+          monthlyHours = tasksData ? 
             tasksData.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) : 
             0;
-
-          console.log('Monthly hours calculated from tasks for past month:', monthlyHours);
-
-          // Ensure project_subscriptions is an array
-          const projectSubscriptions = projectData.project_subscriptions || [];
           
-          // Create enhanced project with calculated monthly hours
-          const enhancedProject = {
-            ...projectData,
-            project_subscriptions: projectSubscriptions.map(subscription => ({
-              ...subscription,
-              hours_spent: monthlyHours
-            }))
-          };
-          
-          console.log('Enhanced project data for past month (calculated):', enhancedProject);
-          return enhancedProject;
+          dataSource = "live";
+          console.log('Calculated live hours:', monthlyHours);
         }
       }
+
+      // 4. Enhance project with subscription data
+      const enhancedProject = {
+        ...projectData,
+        subscription_data: {
+          hours_spent: monthlyHours,
+          hours_allotted: hoursAllotted,
+          data_source: dataSource,
+        },
+        project_subscriptions: projectData.project_subscriptions?.map(subscription => ({
+          ...subscription,
+          // Add calculated data for compatibility with existing components
+          hours_spent: monthlyHours
+        }))
+      };
+      
+      console.log('Enhanced project data:', enhancedProject);
+      return enhancedProject;
     },
   });
+
+  // Handle monthly change from ProjectHeader
+  const handleMonthChange = (month: string) => {
+    console.log('Month changed to:', month);
+    setSelectedMonth(month);
+  };
 
   if (isLoading) {
     return <div className="container mx-auto p-6">Loading project details...</div>;
@@ -176,6 +183,9 @@ const ProjectDetails = () => {
     return <div className="container mx-auto p-6">Project not found</div>;
   }
 
+  // Extract subscription info for current UI pattern
+  const monthlyHours = project.subscription_data?.hours_spent || 0;
+  
   console.log('Project layout:', project.layout);
   
   // Render the appropriate layout based on the project's layout type
@@ -183,7 +193,12 @@ const ProjectDetails = () => {
   
   switch (layoutId) {
     case 1:
-      return <MaintenanceLayout project={project} />;
+      return <MaintenanceLayout 
+        project={project} 
+        selectedMonth={selectedMonth}
+        onMonthChange={handleMonthChange}
+        monthlyHours={monthlyHours}
+      />;
     case 2:
       return <BrandingLayout project={project} />;
     case 3:

@@ -15,7 +15,7 @@ import CredentialsTab from "../shared/CredentialsTab";
 import FilesTab from "../shared/FilesTab";
 import TeamTab from "../shared/TeamTab";
 
-interface DevelopmentLayoutProps {
+interface MaintenanceLayoutProps {
   project: Tables<"projects"> & {
     client_admin: {
       id: string;
@@ -36,7 +36,15 @@ interface DevelopmentLayoutProps {
       hours_spent: number;
       next_renewal_date: string;
     }[];
+    subscription_data?: {
+      hours_spent: number;
+      hours_allotted: number;
+      data_source: string;
+    };
   };
+  selectedMonth: string;
+  onMonthChange: (month: string) => void;
+  monthlyHours: number;
 }
 
 type SortConfig = {
@@ -44,17 +52,18 @@ type SortConfig = {
   direction: 'asc' | 'desc';
 };
 
-const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
+const MaintenanceLayout = ({ project, selectedMonth, onMonthChange, monthlyHours }: MaintenanceLayoutProps) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'created_at', direction: 'desc' });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
-  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const { setRightSidebarContent, closeRightSidebar, setCurrentTab } = useLayout();
 
   // Add direct project ID check
   useEffect(() => {
     console.log("MaintenanceLayout - Project ID:", project.id);
+    console.log("MaintenanceLayout - Selected Month:", selectedMonth);
+    console.log("MaintenanceLayout - Subscription Data:", project.subscription_data);
     
     // Check project data table permissions
     const checkProjectData = async () => {
@@ -74,7 +83,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     };
     
     checkProjectData();
-  }, [project.id]);
+  }, [project.id, selectedMonth]);
 
   const { data: tasks, isLoading: isLoadingTasks, error: tasksError } = useQuery({
     queryKey: ['tasks', project.id, selectedMonth],
@@ -114,9 +123,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
       console.error("Task query error:", tasksError);
     }
   }, [tasksError]);
-
-  // Calculate monthly hours directly from tasks
-  const monthlyHours = tasks?.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) || 0;
 
   const handleSort = (key: string) => {
     setSortConfig(current => ({
@@ -162,7 +168,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         <ProjectHeader 
           project={project} 
           selectedMonth={selectedMonth}
-          onMonthChange={setSelectedMonth}
+          onMonthChange={onMonthChange}
           monthlyHours={monthlyHours}
         />
       </div>
