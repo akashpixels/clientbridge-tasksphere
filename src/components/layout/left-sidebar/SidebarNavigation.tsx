@@ -1,55 +1,29 @@
+import { Home, Folders, Users, CheckSquare, Users2, Beaker } from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import NavigationItem from "./NavigationItem";
 
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Briefcase, CheckSquare, Users, FileText } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-interface NavItem {
-  label: string;
-  icon: React.ReactNode;
-  href: string;
-}
-
-interface SidebarNavigationProps {
-  isOpen: boolean;
-}
-
-const navItems: NavItem[] = [
-  { label: 'Dashboard', icon: <Home size={20} />, href: '/' },
-  { label: 'Projects', icon: <Briefcase size={20} />, href: '/projects' },
-  { label: 'Tasks', icon: <CheckSquare size={20} />, href: '/tasks' },
-  { label: 'Team', icon: <Users size={20} />, href: '/team' },
-  { label: 'Clients', icon: <FileText size={20} />, href: '/clients' },
-];
-
-const SidebarNavigation = ({ isOpen }: SidebarNavigationProps) => {
-  const navigate = useNavigate();
-  const location = useLocation();
+const SidebarNavigation = () => {
 
   return (
-    <nav className="space-y-2">
-      {navItems.map((item) => {
-        const isActive = location.pathname === item.href;
-        return (
-          <button
-            key={item.href}
-            onClick={() => navigate(item.href)}
-            className={cn(
-              'w-full flex items-center gap-3 p-3 rounded-[6px] transition-all',
-              'text-gray-700 hover:text-gray-900 hover:bg-gray-100',
-              isActive && 'bg-gray-100 text-gray-900'
-            )}
-          >
-            <div className="min-w-[20px]">
-              {item.icon}
-            </div>
-            {isOpen && (
-              <span className="text-sm font-medium truncate">
-                {item.label}
-              </span>
-            )}
-          </button>
-        );
-      })}
+    <nav className="flex flex-col flex-1 px-4 py-4">
+      <ul className="flex flex-col gap-1">
+        <NavigationItem to="/" icon={<Home />}>Dashboard</NavigationItem>
+        <NavigationItem to="/projects" icon={<Folders />}>Projects</NavigationItem>
+        <NavigationItem to="/clients" icon={<Users />}>Clients</NavigationItem>
+        <NavigationItem to="/tasks" icon={<CheckSquare />}>Tasks</NavigationItem>
+        <NavigationItem to="/team" icon={<Users2 />}>Team</NavigationItem>
+        
+        {/* Add test subscription link */}
+        <li className="mt-4 pt-4 border-t border-border">
+          <NavigationItem to="/test-subscription" icon={<Beaker className="h-4 w-4" />}>
+            <span className="flex items-center gap-2">
+              Test Subscription
+              <span className="bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded">Debug</span>
+            </span>
+          </NavigationItem>
+        </li>
+      </ul>
     </nav>
   );
 };
