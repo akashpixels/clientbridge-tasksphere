@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
@@ -115,9 +114,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     }
   }, [tasksError]);
 
-  // Calculate monthly hours directly from tasks
-  const monthlyHours = tasks?.reduce((sum, task) => sum + (task.actual_hours_spent || 0), 0) || 0;
-
   const handleSort = (key: string) => {
     setSortConfig(current => ({
       key,
@@ -163,7 +159,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
           project={project} 
           selectedMonth={selectedMonth}
           onMonthChange={setSelectedMonth}
-          monthlyHours={monthlyHours}
         />
       </div>
 

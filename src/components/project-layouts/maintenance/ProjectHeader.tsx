@@ -17,10 +17,9 @@ interface ProjectHeaderProps {
   };
   selectedMonth: string;
   onMonthChange: (month: string) => void;
-  monthlyHours: number;
 }
 
-const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: ProjectHeaderProps) => {
+const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderProps) => {
   // Generate last 6 months options (current month + 5 previous months)
   const monthOptions = Array.from({ length: 6 }, (_, i) => {
     const date = subMonths(new Date(), i);
@@ -51,10 +50,9 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
       </div>
       <div className="flex items-center gap-4">
         
-<ProjectStats 
+        <ProjectStats 
           project={project} 
           selectedMonth={selectedMonth}
-          monthlyHours={monthlyHours}
         />
         
         <div className="bg-[#fcfcfc]">
@@ -87,8 +85,6 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
             </SelectContent>
           </Select>
         </div>
-       
-        
       </div>
     </div>
   );
