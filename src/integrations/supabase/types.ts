@@ -1190,7 +1190,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      usage_view: {
+        Row: {
+          hours_allotted: number | null
+          hours_spent: number | null
+          month_year: string | null
+          project_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_eta: {
