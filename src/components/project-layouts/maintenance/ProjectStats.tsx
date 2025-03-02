@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { differenceInDays } from "date-fns";
 import { useState } from "react";
@@ -6,24 +7,23 @@ interface ProjectStatsProps {
   project: Tables<"projects"> & {
     project_subscriptions?: {
       hours_allotted: number;
-      hours_spent: number; // This comes from either live calculation or historical data
+      hours_spent: number;
       subscription_status: string;
       next_renewal_date: string;
     }[];
   };
   selectedMonth: string;
-  monthlyHours: number;
 }
 
-const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProps) => {
+const ProjectStats = ({ project, selectedMonth }: ProjectStatsProps) => {
   const [hovered, setHovered] = useState(false);
 
   const subscription = project.project_subscriptions?.[0];
-  const hoursAllotted = subscription?.hours_allotted || 0;
   
-  // Use hours_spent from subscription if available (for historical data)
-  // Otherwise use monthlyHours (for current month live calculation)
-  const hoursSpent = subscription?.hours_spent ?? monthlyHours;
+  // Hours data now comes directly from the subscription object
+  // which is pre-populated with data from usage_view
+  const hoursAllotted = subscription?.hours_allotted || 0;
+  const hoursSpent = subscription?.hours_spent || 0;
 
   const hoursPercentage = Math.min(
     Math.round((hoursSpent / hoursAllotted) * 100),
