@@ -1,3 +1,4 @@
+
 import Auth from "@/pages/Auth";
 import Index from "@/pages/Index";
 import Projects from "@/pages/Projects";
@@ -8,7 +9,7 @@ import Team from "@/pages/Team";
 import NotFound from "@/pages/NotFound";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
-import { Layout } from "@/components/layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
