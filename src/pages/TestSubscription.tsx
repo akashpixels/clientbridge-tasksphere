@@ -100,7 +100,8 @@ const TestSubscription = () => {
         subscription_status: "unknown",
         next_renewal_date: null,
         billing_cycle: null,
-        start_date: null
+        start_date: null,
+        auto_renew: false
       };
       
       // 2. Prepare response object
@@ -114,7 +115,7 @@ const TestSubscription = () => {
           next_renewal_date: subscriptionDetails.next_renewal_date || null,
           billing_cycle: subscriptionDetails.billing_cycle || null,
           start_date: subscriptionDetails.start_date || null,
-          auto_renew: subscriptionDetails.auto_renew || false
+          auto_renew: subscriptionDetails.auto_renew !== undefined ? subscriptionDetails.auto_renew : false
         },
         rawData: {
           tasks: [],
