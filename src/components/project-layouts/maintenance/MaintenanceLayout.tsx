@@ -14,7 +14,7 @@ import CredentialsTab from "../shared/CredentialsTab";
 import FilesTab from "../shared/FilesTab";
 import TeamTab from "../shared/TeamTab";
 
-interface DevelopmentLayoutProps {
+interface MaintenanceLayoutProps {
   project: Tables<"projects"> & {
     client_admin: {
       id: string;
@@ -36,6 +36,8 @@ interface DevelopmentLayoutProps {
       next_renewal_date: string;
     }[];
   };
+  selectedMonth: string;
+  onMonthChange: (month: string) => void;
 }
 
 type SortConfig = {
@@ -43,22 +45,18 @@ type SortConfig = {
   direction: 'asc' | 'desc';
 };
 
-const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
+const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: MaintenanceLayoutProps) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'created_at', direction: 'desc' });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
-  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const { setRightSidebarContent, closeRightSidebar, setCurrentTab } = useLayout();
 
-  // Add direct project ID check
   useEffect(() => {
     console.log("MaintenanceLayout - Project ID:", project.id);
     
-    // Check project data table permissions
     const checkProjectData = async () => {
       try {
-        // Check if we can get the project directly
         const { data, error } = await supabase
           .from('projects')
           .select('id, name')
@@ -107,7 +105,6 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
     },
   });
 
-  // Report any task fetching errors
   useEffect(() => {
     if (tasksError) {
       console.error("Task query error:", tasksError);
@@ -158,7 +155,7 @@ const MaintenanceLayout = ({ project }: DevelopmentLayoutProps) => {
         <ProjectHeader 
           project={project} 
           selectedMonth={selectedMonth}
-          onMonthChange={setSelectedMonth}
+          onMonthChange={onMonthChange}
         />
       </div>
 

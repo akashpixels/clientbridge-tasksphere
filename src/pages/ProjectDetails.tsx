@@ -7,15 +7,16 @@ import BrandingLayout from "@/components/project-layouts/BrandingLayout";
 import DevelopmentLayout from "@/components/project-layouts/DevelopmentLayout";
 import DefaultLayout from "@/components/project-layouts/DefaultLayout";
 import { format } from "date-fns";
+import { useState } from "react";
 
 const ProjectDetails = () => {
   const { id } = useParams();
-  const currentMonth = format(new Date(), 'yyyy-MM');
+  const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
 
   const { data: project, isLoading } = useQuery({
-    queryKey: ['project', id, currentMonth],
+    queryKey: ['project', id, selectedMonth],
     queryFn: async () => {
-      console.log('Fetching project details for ID:', id);
+      console.log('Fetching project details for ID:', id, 'for month:', selectedMonth);
       
       // Fetch base project data with relationships
       const { data, error } = await supabase
@@ -50,19 +51,19 @@ const ProjectDetails = () => {
       // Project data successfully fetched
       console.log('Project base data fetched:', data);
       
-      // Fetch usage data from usage_view
+      // Fetch usage data from usage_view for the selected month
       const { data: usageData, error: usageError } = await supabase
         .from('usage_view')
         .select('hours_allotted, hours_spent')
         .eq('project_id', id)
-        .eq('month_year', currentMonth)
+        .eq('month_year', selectedMonth)
         .maybeSingle();
 
       if (usageError) {
-        console.error('Error fetching usage data:', usageError);
+        console.error('Error fetching usage data for selected month:', usageError);
       }
 
-      console.log('Usage data for current month:', usageData);
+      console.log('Usage data for selected month:', usageData);
       
       // Construct the enhanced project object
       const projectData = data;
@@ -96,7 +97,11 @@ const ProjectDetails = () => {
   
   switch (layoutId) {
     case 1:
-      return <MaintenanceLayout project={project} />;
+      return <MaintenanceLayout 
+        project={project} 
+        selectedMonth={selectedMonth}
+        onMonthChange={setSelectedMonth}
+      />;
     case 2:
       return <BrandingLayout project={project} />;
     case 3:

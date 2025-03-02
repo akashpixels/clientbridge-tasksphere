@@ -18,15 +18,21 @@ interface ProjectStatsProps {
 const ProjectStats = ({ project, selectedMonth }: ProjectStatsProps) => {
   const [hovered, setHovered] = useState(false);
 
+  // Log for debugging
+  console.log(`ProjectStats rendering for month: ${selectedMonth}`);
+  console.log('Project subscriptions data:', project.project_subscriptions);
+
   const subscription = project.project_subscriptions?.[0];
   
-  // Hours data now comes directly from the subscription object
-  // which is pre-populated with data from usage_view
+  // Hours data comes directly from the subscription object
+  // which is pre-populated with data from usage_view for the selected month
   const hoursAllotted = subscription?.hours_allotted || 0;
   const hoursSpent = subscription?.hours_spent || 0;
 
+  console.log(`Hours for ${selectedMonth}: allotted=${hoursAllotted}, spent=${hoursSpent}`);
+
   const hoursPercentage = Math.min(
-    Math.round((hoursSpent / hoursAllotted) * 100),
+    Math.round((hoursSpent / hoursAllotted) * 100) || 0,
     100
   );
 
