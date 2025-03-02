@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format, subMonths, startOfMonth, endOfMonth, isAfter, isBefore, isSameMonth, parse } from "date-fns";
+import { format, subMonths, startOfMonth, endOfMonth, isSameMonth, parse } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -61,7 +61,7 @@ const TestSubscription = () => {
       
       console.log('Fetching data for project:', selectedProjectId, 'Month:', selectedMonth);
       
-      // 1. Fetch project and subscription data
+      // 1. Get basic project and subscription data
       const { data: projectData, error: projectError } = await supabase
         .from('projects')
         .select(`
@@ -90,16 +90,30 @@ const TestSubscription = () => {
       
       console.log('Base project data:', projectData);
       
-      // 2. Determine data source and hours
-      let monthlyHours = 0;
-      let hoursAllotted = projectData.project_subscriptions?.[0]?.hours_allotted || 0;
-      let dataSource = "unknown";
+      // 2. Prepare response object
+      const result = {
+        projectData,
+        subscriptionData: {
+          hours_spent: 0,
+          hours_allotted: projectData.project_subscriptions?.[0]?.hours_allotted || 0,
+          data_source: "unknown",
+          subscription_status: projectData.project_subscriptions?.[0]?.subscription_status || "unknown",
+          next_renewal_date: projectData.project_subscriptions?.[0]?.next_renewal_date || "unknown"
+        },
+        rawData: {
+          tasks: [],
+          query: {
+            project_id: selectedProjectId,
+            start_date: startDate.toISOString(),
+            end_date: endDate.toISOString()
+          }
+        }
+      };
       
-      // For past months, try to use historical data
-      if (!isCurrentMonth && isBefore(selectedDate, currentDate)) {
+      // 3. For past months, try to get data from subscription_usage table
+      if (!isCurrentMonth) {
         console.log('Looking for historical data for', selectedMonth);
         
-        // Try to get stored usage data
         const { data: usageData, error: usageError } = await supabase
           .from('subscription_usage')
           .select('*')
@@ -113,32 +127,16 @@ const TestSubscription = () => {
         
         if (usageData) {
           console.log('Found historical usage data:', usageData);
-          monthlyHours = usageData.hours_spent || 0;
-          hoursAllotted = usageData.hours_allotted || 0;
-          dataSource = "historical";
+          result.subscriptionData.hours_spent = usageData.hours_spent || 0;
+          result.subscriptionData.hours_allotted = usageData.hours_allotted || 0;
+          result.subscriptionData.data_source = "historical";
         } else {
-          // Calculate from tasks if no historical data
-          console.log('No historical data found, calculating from tasks');
-          
-          const { data: tasksData, error: tasksError } = await supabase
-            .from('tasks')
-            .select('actual_hours_spent')
-            .eq('project_id', selectedProjectId)
-            .gte('created_at', startDate.toISOString())
-            .lte('created_at', endDate.toISOString());
-            
-          if (tasksError) {
-            console.error('Error calculating historical data from tasks:', tasksError);
-          } else if (tasksData) {
-            // Sum up actual_hours_spent
-            monthlyHours = tasksData.reduce((sum, task) => 
-              sum + (task.actual_hours_spent || 0), 0);
-            dataSource = "calculated";
-            console.log('Calculated hours from tasks:', monthlyHours);
-          }
+          // No historical data found
+          console.log('No historical data found');
+          result.subscriptionData.data_source = "no data";
         }
-      }
-      // For current month, always calculate from tasks
+      } 
+      // 4. For current month, calculate from tasks
       else {
         console.log('Calculating live data for current month');
         
@@ -152,44 +150,28 @@ const TestSubscription = () => {
         if (tasksError) {
           console.error('Error fetching tasks data:', tasksError);
         } else if (tasksData) {
-          monthlyHours = tasksData.reduce((sum, task) => 
+          result.subscriptionData.hours_spent = tasksData.reduce((sum, task) => 
             sum + (task.actual_hours_spent || 0), 0);
-          dataSource = "live";
-          console.log('Live hours calculation:', monthlyHours);
+          result.subscriptionData.data_source = "live";
+          console.log('Live hours calculation:', result.subscriptionData.hours_spent);
         }
       }
       
-      // Show the raw query for debugging
-      const rawQueryPromise = supabase
+      // 5. Fetch raw task data for debugging
+      const { data: rawTaskData, error: rawTaskError } = await supabase
         .from('tasks')
         .select('id, details, actual_hours_spent, created_at')
         .eq('project_id', selectedProjectId)
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString());
       
-      const { data: rawQueryData, error: rawQueryError } = await rawQueryPromise;
-      
-      if (rawQueryError) {
-        console.error('Error in raw query:', rawQueryError);
+      if (rawTaskError) {
+        console.error('Error in raw task query:', rawTaskError);
+      } else {
+        result.rawData.tasks = rawTaskData || [];
       }
       
-      // Return enhanced data
-      return {
-        projectData,
-        subscriptionData: {
-          hours_spent: monthlyHours,
-          hours_allotted: hoursAllotted,
-          data_source: dataSource,
-        },
-        rawData: {
-          tasks: rawQueryData || [],
-          query: {
-            project_id: selectedProjectId,
-            start_date: startDate.toISOString(),
-            end_date: endDate.toISOString()
-          }
-        }
-      };
+      return result;
     },
     enabled: !!selectedProjectId,
   });
@@ -272,7 +254,10 @@ const TestSubscription = () => {
                   <div className="space-y-2">
                     <p className="text-sm font-medium">Hours Spent</p>
                     <p className="text-md">
-                      {subscriptionData.subscriptionData.hours_spent.toFixed(1)} / {subscriptionData.subscriptionData.hours_allotted} hours
+                      {subscriptionData.subscriptionData.data_source === "no data" 
+                        ? "No data available" 
+                        : `${subscriptionData.subscriptionData.hours_spent.toFixed(1)} / ${subscriptionData.subscriptionData.hours_allotted} hours`
+                      }
                     </p>
                   </div>
                   
@@ -283,14 +268,12 @@ const TestSubscription = () => {
                   
                   <div className="space-y-2">
                     <p className="text-sm font-medium">Subscription Status</p>
-                    <p className="text-md">{subscriptionData.projectData.project_subscriptions?.[0]?.subscription_status || 'N/A'}</p>
+                    <p className="text-md">{subscriptionData.subscriptionData.subscription_status}</p>
                   </div>
                   
                   <div className="space-y-2">
                     <p className="text-sm font-medium">Next Renewal Date</p>
-                    <p className="text-md">
-                      {subscriptionData.projectData.project_subscriptions?.[0]?.next_renewal_date || 'N/A'}
-                    </p>
+                    <p className="text-md">{subscriptionData.subscriptionData.next_renewal_date}</p>
                   </div>
                 </div>
               </CardContent>
