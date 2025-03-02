@@ -61,7 +61,7 @@ const TestSubscription = () => {
       
       console.log('Fetching data for project:', selectedProjectId, 'Month:', selectedMonth);
       
-      // 1. First get the latest subscription details - THIS IS CRITICAL
+      // 1. Get the latest subscription details - for fixed metadata
       const { data: subscriptionDetails, error: subscriptionError } = await supabase
         .from('project_subscriptions')
         .select('*')
@@ -70,8 +70,8 @@ const TestSubscription = () => {
         .limit(1)
         .maybeSingle();
       
-      // Add detailed logging to see what's coming back from the database
-      console.log('Raw subscription details query result:', subscriptionDetails);
+      // Log subscription details for debugging
+      console.log('Subscription details from database:', subscriptionDetails);
         
       if (subscriptionError) {
         console.error('Error fetching subscription details:', subscriptionError);
@@ -103,8 +103,26 @@ const TestSubscription = () => {
         throw projectError;
       }
       
-      // 2. Define default subscription values and actual values
-      // IMPORTANT: Use the subscription object directly without optional chaining each field
+      // 2. Get usage data from the usage_view - simplified!
+      const { data: usageData, error: usageError } = await supabase
+        .from('usage_view')
+        .select('*')
+        .eq('project_id', selectedProjectId)
+        .eq('month_year', selectedMonth)
+        .maybeSingle();
+        
+      if (usageError) {
+        console.error('Error fetching usage data:', usageError);
+        toast({
+          title: "Error loading usage data",
+          description: usageError.message,
+          variant: "destructive",
+        });
+      }
+      
+      console.log('Usage data from view:', usageData);
+      
+      // 3. Define default subscription values
       const defaultSubscriptionValues = {
         hours_spent: 0,
         hours_allotted: 0,
@@ -117,14 +135,13 @@ const TestSubscription = () => {
         data_source: "unknown"
       };
 
-      // Create the base subscription data object
-      let subscriptionDataObject;
+      // 4. Create the subscription data object
+      let subscriptionDataObject = { ...defaultSubscriptionValues };
       
+      // Add subscription details if available
       if (subscriptionDetails) {
-        // If we have subscription details, use them directly
         subscriptionDataObject = {
-          ...defaultSubscriptionValues,
-          hours_allotted: subscriptionDetails.hours_allotted,
+          ...subscriptionDataObject,
           subscription_status: subscriptionDetails.subscription_status,
           next_renewal_date: subscriptionDetails.next_renewal_date,
           billing_cycle: subscriptionDetails.billing_cycle,
@@ -132,19 +149,42 @@ const TestSubscription = () => {
           auto_renew: subscriptionDetails.auto_renew,
           max_concurrent_tasks: subscriptionDetails.max_concurrent_tasks
         };
-        console.log('Created subscription data with actual values:', subscriptionDataObject);
-      } else {
-        // If no subscription details, use default values
-        subscriptionDataObject = defaultSubscriptionValues;
-        console.log('No subscription details found, using defaults');
       }
-
-      // 3. Prepare base response object
-      const result = {
+      
+      // Add usage data if available
+      if (usageData) {
+        subscriptionDataObject.hours_spent = usageData.hours_spent || 0;
+        subscriptionDataObject.hours_allotted = usageData.hours_allotted || 0;
+        subscriptionDataObject.data_source = isCurrentMonth ? "live" : "historical";
+      } else {
+        subscriptionDataObject.data_source = "no data";
+      }
+      
+      console.log('Final subscription data object:', subscriptionDataObject);
+      
+      // 5. Prepare the task data for current month only (for debugging purposes)
+      let tasksData = [];
+      if (isCurrentMonth) {
+        const { data: rawTaskData, error: rawTaskError } = await supabase
+          .from('tasks')
+          .select('id, details, actual_hours_spent, created_at')
+          .eq('project_id', selectedProjectId)
+          .gte('created_at', startDate.toISOString())
+          .lte('created_at', endDate.toISOString());
+        
+        if (rawTaskError) {
+          console.error('Error in raw task query:', rawTaskError);
+        } else {
+          tasksData = rawTaskData || [];
+        }
+      }
+      
+      // 6. Return the final result object
+      return {
         projectData,
         subscriptionData: subscriptionDataObject,
         rawData: {
-          tasks: [],
+          tasks: tasksData,
           query: {
             project_id: selectedProjectId,
             start_date: startDate.toISOString(),
@@ -152,78 +192,6 @@ const TestSubscription = () => {
           }
         }
       };
-      
-      // 4. For past months, check subscription_usage table for hours data only
-      if (!isCurrentMonth) {
-        console.log('Looking for historical data for', selectedMonth);
-        
-        const { data: usageData, error: usageError } = await supabase
-          .from('subscription_usage')
-          .select('*')
-          .eq('project_id', selectedProjectId)
-          .eq('month_year', selectedMonth)
-          .maybeSingle();
-          
-        if (usageError) {
-          console.error('Error fetching historical usage data:', usageError);
-        }
-        
-        if (usageData) {
-          console.log('Found historical usage data:', usageData);
-          // Only update the hours-related fields
-          result.subscriptionData.hours_spent = usageData.hours_spent || 0;
-          result.subscriptionData.hours_allotted = usageData.hours_allotted || 0;
-          result.subscriptionData.data_source = "historical";
-          
-          // No task data for historical months
-          result.rawData.tasks = [];
-        } else {
-          // No historical data found
-          console.log('No historical data found for month:', selectedMonth);
-          result.subscriptionData.data_source = "no data";
-        }
-        
-        return result;
-      } 
-      
-      // 5. For current month, calculate hours from tasks
-      console.log('Calculating live data for current month');
-      
-      const { data: tasksData, error: tasksError } = await supabase
-        .from('tasks')
-        .select('actual_hours_spent')
-        .eq('project_id', selectedProjectId)
-        .gte('created_at', startDate.toISOString())
-        .lte('created_at', endDate.toISOString());
-        
-      if (tasksError) {
-        console.error('Error fetching tasks data:', tasksError);
-      } else if (tasksData) {
-        // Only update the hours-related fields
-        result.subscriptionData.hours_spent = tasksData.reduce((sum, task) => 
-          sum + (task.actual_hours_spent || 0), 0);
-        result.subscriptionData.data_source = "live";
-        console.log('Live hours calculation:', result.subscriptionData.hours_spent);
-      }
-      
-      // 6. Fetch raw task data for current month only
-      const { data: rawTaskData, error: rawTaskError } = await supabase
-        .from('tasks')
-        .select('id, details, actual_hours_spent, created_at')
-        .eq('project_id', selectedProjectId)
-        .gte('created_at', startDate.toISOString())
-        .lte('created_at', endDate.toISOString());
-      
-      if (rawTaskError) {
-        console.error('Error in raw task query:', rawTaskError);
-      } else {
-        result.rawData.tasks = rawTaskData || [];
-      }
-      
-      // Final log of the entire result for debugging
-      console.log('Final result object:', JSON.stringify(result.subscriptionData, null, 2));
-      
-      return result;
     },
     enabled: !!selectedProjectId,
   });
