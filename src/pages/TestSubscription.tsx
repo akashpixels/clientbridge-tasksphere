@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,8 +61,7 @@ const TestSubscription = () => {
       
       console.log('Fetching data for project:', selectedProjectId, 'Month:', selectedMonth);
       
-      // 1. First get the latest subscription details - this will be used for ALL months
-      // This contains subscription status, billing cycle, renewal date, etc.
+      // 1. First get the latest subscription details - THIS IS CRITICAL
       const { data: subscriptionDetails, error: subscriptionError } = await supabase
         .from('project_subscriptions')
         .select('*')
@@ -69,6 +69,9 @@ const TestSubscription = () => {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
+      
+      // Add detailed logging to see what's coming back from the database
+      console.log('Raw subscription details query result:', subscriptionDetails);
         
       if (subscriptionError) {
         console.error('Error fetching subscription details:', subscriptionError);
@@ -79,8 +82,6 @@ const TestSubscription = () => {
         });
       }
       
-      console.log('Subscription details from DB:', subscriptionDetails);
-
       // Get basic project data
       const { data: projectData, error: projectError } = await supabase
         .from('projects')
@@ -102,22 +103,46 @@ const TestSubscription = () => {
         throw projectError;
       }
       
-      // 2. Prepare base response object with subscription details
-      // These subscription details remain constant regardless of month
+      // 2. Define default subscription values and actual values
+      // IMPORTANT: Use the subscription object directly without optional chaining each field
+      const defaultSubscriptionValues = {
+        hours_spent: 0,
+        hours_allotted: 0,
+        subscription_status: "unknown",
+        next_renewal_date: null,
+        billing_cycle: null,
+        start_date: null,
+        auto_renew: false,
+        max_concurrent_tasks: 1,
+        data_source: "unknown"
+      };
+
+      // Create the base subscription data object
+      let subscriptionDataObject;
+      
+      if (subscriptionDetails) {
+        // If we have subscription details, use them directly
+        subscriptionDataObject = {
+          ...defaultSubscriptionValues,
+          hours_allotted: subscriptionDetails.hours_allotted,
+          subscription_status: subscriptionDetails.subscription_status,
+          next_renewal_date: subscriptionDetails.next_renewal_date,
+          billing_cycle: subscriptionDetails.billing_cycle,
+          start_date: subscriptionDetails.start_date,
+          auto_renew: subscriptionDetails.auto_renew,
+          max_concurrent_tasks: subscriptionDetails.max_concurrent_tasks
+        };
+        console.log('Created subscription data with actual values:', subscriptionDataObject);
+      } else {
+        // If no subscription details, use default values
+        subscriptionDataObject = defaultSubscriptionValues;
+        console.log('No subscription details found, using defaults');
+      }
+
+      // 3. Prepare base response object
       const result = {
         projectData,
-        subscriptionData: {
-          hours_spent: 0,
-          hours_allotted: subscriptionDetails?.hours_allotted || 0,
-          data_source: "unknown",
-          // Always use the subscription details for these fields, regardless of month
-          subscription_status: subscriptionDetails?.subscription_status || "unknown",
-          next_renewal_date: subscriptionDetails?.next_renewal_date || null,
-          billing_cycle: subscriptionDetails?.billing_cycle || null,
-          start_date: subscriptionDetails?.start_date || null,
-          auto_renew: subscriptionDetails?.auto_renew !== undefined ? subscriptionDetails.auto_renew : false,
-          max_concurrent_tasks: subscriptionDetails?.max_concurrent_tasks || 1
-        },
+        subscriptionData: subscriptionDataObject,
         rawData: {
           tasks: [],
           query: {
@@ -128,7 +153,7 @@ const TestSubscription = () => {
         }
       };
       
-      // 3. For past months, check subscription_usage table for hours data only
+      // 4. For past months, check subscription_usage table for hours data only
       if (!isCurrentMonth) {
         console.log('Looking for historical data for', selectedMonth);
         
@@ -145,7 +170,7 @@ const TestSubscription = () => {
         
         if (usageData) {
           console.log('Found historical usage data:', usageData);
-          // Only update the hours usage data, keep subscription details intact
+          // Only update the hours-related fields
           result.subscriptionData.hours_spent = usageData.hours_spent || 0;
           result.subscriptionData.hours_allotted = usageData.hours_allotted || 0;
           result.subscriptionData.data_source = "historical";
@@ -161,7 +186,7 @@ const TestSubscription = () => {
         return result;
       } 
       
-      // 4. For current month, calculate hours from tasks
+      // 5. For current month, calculate hours from tasks
       console.log('Calculating live data for current month');
       
       const { data: tasksData, error: tasksError } = await supabase
@@ -174,14 +199,14 @@ const TestSubscription = () => {
       if (tasksError) {
         console.error('Error fetching tasks data:', tasksError);
       } else if (tasksData) {
-        // Only update the hours_spent, keep subscription details intact
+        // Only update the hours-related fields
         result.subscriptionData.hours_spent = tasksData.reduce((sum, task) => 
           sum + (task.actual_hours_spent || 0), 0);
         result.subscriptionData.data_source = "live";
         console.log('Live hours calculation:', result.subscriptionData.hours_spent);
       }
       
-      // 5. Fetch raw task data for current month only
+      // 6. Fetch raw task data for current month only
       const { data: rawTaskData, error: rawTaskError } = await supabase
         .from('tasks')
         .select('id, details, actual_hours_spent, created_at')
@@ -194,6 +219,9 @@ const TestSubscription = () => {
       } else {
         result.rawData.tasks = rawTaskData || [];
       }
+      
+      // Final log of the entire result for debugging
+      console.log('Final result object:', JSON.stringify(result.subscriptionData, null, 2));
       
       return result;
     },
