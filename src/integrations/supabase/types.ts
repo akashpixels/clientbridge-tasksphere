@@ -1239,10 +1239,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      update_in_progress_tasks: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
     }
     Enums: {
       attachment_type: "image" | "document" | "other"
