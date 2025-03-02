@@ -1,10 +1,15 @@
+
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Database } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
 
-type Project = Database['public']['Tables']['projects']['Row'] & {
-  client: {
+type Project = {
+  id: string;
+  name: string;
+  logo_url: string;
+  due_date: string | null;
+  client_admin: {
     id: string;
+    business_name: string;
     user_profiles: {
       first_name: string;
       last_name: string;
@@ -45,9 +50,9 @@ export const ProjectTableRow = ({ project }: ProjectTableRowProps) => {
         </div>
       </TableCell>
       <TableCell>
-        {project.client?.user_profiles ? 
-          `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
-          : 'No Client'}
+        {project.client_admin?.user_profiles ? 
+          `${project.client_admin.user_profiles.first_name} ${project.client_admin.user_profiles.last_name}` : 
+          project.client_admin?.business_name || 'No Client'}
       </TableCell>
       <TableCell>
         {project.status?.name && (

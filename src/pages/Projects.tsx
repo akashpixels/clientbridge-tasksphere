@@ -1,13 +1,18 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
 import { ProjectFilters } from "@/components/projects/ProjectFilters";
 import { ProjectList } from "@/components/projects/ProjectList";
 
-type Project = Database['public']['Tables']['projects']['Row'] & {
-  client: {
+type Project = {
+  id: string;
+  name: string;
+  logo_url: string;
+  due_date: string | null;
+  client_admin: {
     id: string;
+    business_name: string;
     user_profiles: {
       first_name: string;
       last_name: string;
@@ -41,9 +46,10 @@ const Projects = () => {
         .from('projects')
         .select(`
           *,
-          client:clients(
+          client_admin:client_admins(
             id,
-            user_profiles!clients_id_fkey(
+            business_name,
+            user_profiles(
               first_name,
               last_name
             )
@@ -90,8 +96,12 @@ const Projects = () => {
 
     switch (sortConfig.key) {
       case 'client':
-        aValue = a.client?.user_profiles ? `${a.client.user_profiles.first_name} ${a.client.user_profiles.last_name}` : '';
-        bValue = b.client?.user_profiles ? `${b.client.user_profiles.first_name} ${b.client.user_profiles.last_name}` : '';
+        aValue = a.client_admin?.user_profiles ? 
+          `${a.client_admin.user_profiles.first_name} ${a.client_admin.user_profiles.last_name}` : 
+          a.client_admin?.business_name || '';
+        bValue = b.client_admin?.user_profiles ? 
+          `${b.client_admin.user_profiles.first_name} ${b.client_admin.user_profiles.last_name}` : 
+          b.client_admin?.business_name || '';
         break;
       case 'status':
         aValue = a.status?.name || '';

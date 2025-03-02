@@ -80,7 +80,7 @@ export type Database = {
         }
         Relationships: []
       }
-      clients: {
+      client_admins: {
         Row: {
           business_name: string
           created_at: string
@@ -116,7 +116,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "clients_id_fkey"
+            foreignKeyName: "client_admins_id_fkey"
             columns: ["id"]
             isOneToOne: true
             referencedRelation: "user_profiles"
@@ -533,8 +533,8 @@ export type Database = {
           billing_cycle: Database["public"]["Enums"]["billing_cycle_enum"]
           created_at: string
           hours_allotted: number
-          hours_spent: number | null
           id: string
+          max_concurrent_tasks: number
           next_renewal_date: string
           project_id: string
           start_date: string
@@ -546,8 +546,8 @@ export type Database = {
           billing_cycle?: Database["public"]["Enums"]["billing_cycle_enum"]
           created_at?: string
           hours_allotted?: number
-          hours_spent?: number | null
           id?: string
+          max_concurrent_tasks?: number
           next_renewal_date: string
           project_id: string
           start_date?: string
@@ -559,8 +559,8 @@ export type Database = {
           billing_cycle?: Database["public"]["Enums"]["billing_cycle_enum"]
           created_at?: string
           hours_allotted?: number
-          hours_spent?: number | null
           id?: string
+          max_concurrent_tasks?: number
           next_renewal_date?: string
           project_id?: string
           start_date?: string
@@ -603,7 +603,7 @@ export type Database = {
       }
       projects: {
         Row: {
-          client_id: string | null
+          client_admin_id: string | null
           created_at: string
           details: string | null
           due_date: string | null
@@ -624,7 +624,7 @@ export type Database = {
           uses_phases: boolean
         }
         Insert: {
-          client_id?: string | null
+          client_admin_id?: string | null
           created_at?: string
           details?: string | null
           due_date?: string | null
@@ -645,7 +645,7 @@ export type Database = {
           uses_phases?: boolean
         }
         Update: {
-          client_id?: string | null
+          client_admin_id?: string | null
           created_at?: string
           details?: string | null
           due_date?: string | null
@@ -667,10 +667,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "projects_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "projects_client_admin_id_fkey"
+            columns: ["client_admin_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "client_admins"
             referencedColumns: ["id"]
           },
           {
@@ -685,6 +685,63 @@ export type Database = {
             columns: ["status_id"]
             isOneToOne: false
             referencedRelation: "task_statuses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_usage: {
+        Row: {
+          created_at: string
+          hours_allotted: number
+          hours_spent: number
+          id: string
+          metadata: Json | null
+          month_year: string
+          notes: string | null
+          project_id: string
+          status: string | null
+          subscription_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hours_allotted: number
+          hours_spent: number
+          id?: string
+          metadata?: Json | null
+          month_year: string
+          notes?: string | null
+          project_id: string
+          status?: string | null
+          subscription_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hours_allotted?: number
+          hours_spent?: number
+          id?: string
+          metadata?: Json | null
+          month_year?: string
+          notes?: string | null
+          project_id?: string
+          status?: string | null
+          subscription_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_usage_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_usage_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "project_subscriptions"
             referencedColumns: ["id"]
           },
         ]
@@ -1048,7 +1105,7 @@ export type Database = {
       }
       user_profiles: {
         Row: {
-          client_id: string | null
+          client_admin_id: string | null
           created_at: string
           first_name: string
           gender: Database["public"]["Enums"]["gender_enum"]
@@ -1060,7 +1117,7 @@ export type Database = {
           username: string
         }
         Insert: {
-          client_id?: string | null
+          client_admin_id?: string | null
           created_at?: string
           first_name: string
           gender: Database["public"]["Enums"]["gender_enum"]
@@ -1072,7 +1129,7 @@ export type Database = {
           username: string
         }
         Update: {
-          client_id?: string | null
+          client_admin_id?: string | null
           created_at?: string
           first_name?: string
           gender?: Database["public"]["Enums"]["gender_enum"]
@@ -1085,10 +1142,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_profiles_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "user_profiles_client_admin_id_fkey"
+            columns: ["client_admin_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -1150,6 +1207,10 @@ export type Database = {
           priority_level_id: number
         }
         Returns: number
+      }
+      calculate_monthly_subscription_usage: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       calculate_start_time: {
         Args: {

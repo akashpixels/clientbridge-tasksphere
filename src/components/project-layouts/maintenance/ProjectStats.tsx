@@ -6,6 +6,7 @@ interface ProjectStatsProps {
   project: Tables<"projects"> & {
     project_subscriptions?: {
       hours_allotted: number;
+      hours_spent: number; // This comes from either live calculation or historical data
       subscription_status: string;
       next_renewal_date: string;
     }[];
@@ -19,9 +20,13 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
 
   const subscription = project.project_subscriptions?.[0];
   const hoursAllotted = subscription?.hours_allotted || 0;
+  
+  // Use hours_spent from subscription if available (for historical data)
+  // Otherwise use monthlyHours (for current month live calculation)
+  const hoursSpent = subscription?.hours_spent ?? monthlyHours;
 
   const hoursPercentage = Math.min(
-    Math.round((monthlyHours / hoursAllotted) * 100),
+    Math.round((hoursSpent / hoursAllotted) * 100),
     100
   );
 
@@ -44,7 +49,6 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
     <div className="flex gap-4">
       
      {/* Hours Progress Card */}
-
       <div 
         className="relative w-[160px] h-[108px] border border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 overflow-hidden text-gray-900"
         style={{
@@ -52,12 +56,11 @@ const ProjectStats = ({ project, selectedMonth, monthlyHours }: ProjectStatsProp
           transition: "background 0.5s ease"
         }}
       >
-
         {/* Hours Label */}
         <p className="text-[11px] font-medium text-gray-500">Hours Used</p>
 
         {/* Percentage Display */}
-        <p className="text-xl font-semibold">{monthlyHours?.toFixed(1) || "0"} / {hoursAllotted}</p>
+        <p className="text-xl font-semibold">{hoursSpent?.toFixed(1) || "0"} / {hoursAllotted}</p>
 
         {/* Hours Spent & Total */}
         <p className="text-[11px] text-gray-400">{hoursPercentage}%</p>

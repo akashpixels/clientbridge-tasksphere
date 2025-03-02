@@ -3,11 +3,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import CredentialsTab from "./shared/CredentialsTab";
+import TeamTab from "./shared/TeamTab";
 
 interface DefaultLayoutProps {
   project: Tables<"projects"> & {
-    client: {
+    client_admin: {
       id: string;
+      business_name: string;
       user_profiles: {
         first_name: string;
         last_name: string;
@@ -35,9 +37,9 @@ const DefaultLayout = ({ project }: DefaultLayoutProps) => {
           <div>
             <h1 className="text-2xl font-semibold">{project.name}</h1>
             <p className="text-gray-500">
-              {project.client?.user_profiles ? 
-                `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
-                : 'No Client'}
+              {project.client_admin?.user_profiles ? 
+                `${project.client_admin.user_profiles.first_name} ${project.client_admin.user_profiles.last_name}` 
+                : project.client_admin?.business_name || 'No Client'}
             </p>
           </div>
         </div>
@@ -90,9 +92,7 @@ const DefaultLayout = ({ project }: DefaultLayoutProps) => {
         </TabsContent>
 
         <TabsContent value="team">
-          <Card className="p-6">
-            <p>Team content coming soon...</p>
-          </Card>
+          <TeamTab projectId={project.id} />
         </TabsContent>
 
         <TabsContent value="credentials">

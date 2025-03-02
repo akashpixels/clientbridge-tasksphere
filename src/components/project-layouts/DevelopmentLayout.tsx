@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
@@ -5,8 +6,9 @@ import CredentialsTab from "./shared/CredentialsTab";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
-    client: {
+    client_admin: {
       id: string;
+      business_name: string;
       user_profiles: {
         first_name: string;
         last_name: string;
@@ -41,9 +43,9 @@ const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
           <div>
             <h1 className="text-2xl font-semibold">{project.name}</h1>
             <p className="text-gray-500">
-              {project.client?.user_profiles ? 
-                `${project.client.user_profiles.first_name} ${project.client.user_profiles.last_name}` 
-                : 'No Client'}
+              {project.client_admin?.user_profiles ? 
+                `${project.client_admin.user_profiles.first_name} ${project.client_admin.user_profiles.last_name}` 
+                : project.client_admin?.business_name || 'No Client'}
             </p>
           </div>
         </div>
