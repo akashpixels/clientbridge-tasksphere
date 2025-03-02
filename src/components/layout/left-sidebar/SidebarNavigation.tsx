@@ -1,29 +1,30 @@
 
-import { Home, Folders, Users, CheckSquare, Users2, Beaker } from "lucide-react";
-import { NavLink } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { BarChart3, FileText, Home, Layers, Users } from "lucide-react";
 import NavigationItem from "./NavigationItem";
 
-const SidebarNavigation = () => {
+interface SidebarNavigationProps {
+  isOpen: boolean;
+}
 
+const SidebarNavigation = ({ isOpen }: SidebarNavigationProps) => {
   return (
-    <nav className="flex flex-col flex-1 px-4 py-4">
-      <ul className="flex flex-col gap-1">
-        <NavigationItem to="/" icon={<Home />}>Dashboard</NavigationItem>
-        <NavigationItem to="/projects" icon={<Folders />}>Projects</NavigationItem>
-        <NavigationItem to="/clients" icon={<Users />}>Clients</NavigationItem>
-        <NavigationItem to="/tasks" icon={<CheckSquare />}>Tasks</NavigationItem>
-        <NavigationItem to="/team" icon={<Users2 />}>Team</NavigationItem>
-        
-        {/* Add test subscription link */}
-        <li className="mt-4 pt-4 border-t border-border">
-          <NavigationItem to="/test-subscription" icon={<Beaker className="h-4 w-4" />}>
-            <span className="flex items-center gap-2">
-              Test Subscription
-              <span className="bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded">Debug</span>
-            </span>
-          </NavigationItem>
-        </li>
+    <nav className="mt-2 space-y-1">
+      <ul className={`space-y-1 ${!isOpen && 'flex flex-col items-center'}`}>
+        <NavigationItem to="/" icon={<Home />}>
+          {isOpen ? 'Dashboard' : ''}
+        </NavigationItem>
+        <NavigationItem to="/projects" icon={<Layers />}>
+          {isOpen ? 'Projects' : ''}
+        </NavigationItem>
+        <NavigationItem to="/tasks" icon={<FileText />}>
+          {isOpen ? 'Tasks' : ''}
+        </NavigationItem>
+        <NavigationItem to="/clients" icon={<Users />}>
+          {isOpen ? 'Clients' : ''}
+        </NavigationItem>
+        <NavigationItem to="/test-subscription" icon={<BarChart3 />}>
+          {isOpen ? 'Test Subscription' : ''}
+        </NavigationItem>
       </ul>
     </nav>
   );

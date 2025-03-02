@@ -10,6 +10,8 @@ interface NavigationItemProps {
 }
 
 const NavigationItem = ({ to, icon, children }: NavigationItemProps) => {
+  const isEmpty = React.Children.count(children) === 0 || children === '';
+
   return (
     <li>
       <NavLink
@@ -17,6 +19,7 @@ const NavigationItem = ({ to, icon, children }: NavigationItemProps) => {
         className={({ isActive }) =>
           cn(
             "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+            isEmpty ? "justify-center" : "",
             isActive
               ? "bg-primary/10 text-primary font-medium"
               : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -24,7 +27,7 @@ const NavigationItem = ({ to, icon, children }: NavigationItemProps) => {
         }
       >
         <span className="flex-shrink-0 w-5 h-5">{icon}</span>
-        <span>{children}</span>
+        {!isEmpty && <span>{children}</span>}
       </NavLink>
     </li>
   );
