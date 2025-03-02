@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Test2 = () => {
   const { toast } = useToast();
@@ -35,21 +36,21 @@ const Test2 = () => {
   });
   
   // Fetch project data when a project is selected
-  const { data: projectData, isLoading: projectLoading } = useQuery({
+  const { data: projectData, isLoading: projectLoading, error: projectError } = useQuery({
     queryKey: ['test2-project-data', selectedProjectId],
     queryFn: async () => {
       if (!selectedProjectId) return null;
       
-      // Get subscription details
+      // Get subscription details - using maybeSingle() instead of single()
       const { data: subscriptionDetails, error: subscriptionError } = await supabase
         .from('project_subscriptions')
         .select('*')
         .eq('project_id', selectedProjectId)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
       
-      if (subscriptionError) {
+      if (subscriptionError && subscriptionError.code !== 'PGRST116') {
         console.error('Error fetching subscription details:', subscriptionError);
         toast({
           title: "Error loading subscription details",
@@ -79,9 +80,18 @@ const Test2 = () => {
         throw projectError;
       }
       
+      // Create default subscription data if none exists
+      const defaultSubscription = {
+        subscription_status: "unknown",
+        billing_cycle: null,
+        start_date: null,
+        next_renewal_date: null,
+        auto_renew: false
+      };
+      
       return {
         project,
-        subscription: subscriptionDetails
+        subscription: subscriptionDetails || defaultSubscription
       };
     },
     enabled: !!selectedProjectId,
@@ -124,6 +134,24 @@ const Test2 = () => {
           </div>
         </CardContent>
       </Card>
+
+      {projectError && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>
+            Error loading project data. Please try again later.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {projectLoading && selectedProjectId && (
+        <Card>
+          <CardContent className="py-6">
+            <div className="flex items-center justify-center">
+              <p>Loading project details...</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       {selectedProjectId && projectData && (
         <Card>
@@ -162,7 +190,7 @@ const Test2 = () => {
                 
                 <div className="space-y-2">
                   <Label>Billing Cycle</Label>
-                  <p className="text-gray-700 capitalize">{projectData.subscription.billing_cycle}</p>
+                  <p className="text-gray-700 capitalize">{projectData.subscription.billing_cycle || 'Not set'}</p>
                 </div>
                 
                 <div className="space-y-2">
