@@ -1235,7 +1235,7 @@ export type Database = {
       }
       should_queue_task: {
         Args: {
-          project_id: string
+          p_project_id: string
         }
         Returns: boolean
       }
