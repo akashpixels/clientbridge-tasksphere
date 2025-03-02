@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,23 +60,29 @@ const TestSubscription = () => {
       
       console.log('Fetching data for project:', selectedProjectId, 'Month:', selectedMonth);
       
-      // 1. Get basic project and subscription data
+      // 1. Get current subscription data directly 
+      // This will be used for both current and past months
+      const { data: subscriptionDetails, error: subscriptionError } = await supabase
+        .from('project_subscriptions')
+        .select('*')
+        .eq('project_id', selectedProjectId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+        
+      if (subscriptionError) {
+        console.error('Error fetching subscription details:', subscriptionError);
+      }
+      
+      console.log('Subscription details from DB:', subscriptionDetails);
+
+      // Get basic project data
       const { data: projectData, error: projectError } = await supabase
         .from('projects')
         .select(`
           *,
           client_admin:client_admins(id, business_name),
-          status:task_statuses(name, color_hex),
-          project_subscriptions(
-            id, 
-            subscription_status,
-            hours_allotted,
-            next_renewal_date,
-            billing_cycle,
-            start_date,
-            auto_renew,
-            max_concurrent_tasks
-          )
+          status:task_statuses(name, color_hex)
         `)
         .eq('id', selectedProjectId)
         .single();
@@ -92,30 +97,19 @@ const TestSubscription = () => {
         throw projectError;
       }
       
-      console.log('Base project data:', projectData);
-      
-      // Get subscription details from project
-      const subscriptionDetails = projectData.project_subscriptions?.[0] || {
-        hours_allotted: 0,
-        subscription_status: "unknown",
-        next_renewal_date: null,
-        billing_cycle: null,
-        start_date: null,
-        auto_renew: false
-      };
-      
-      // 2. Prepare response object
+      // 2. Prepare response object with actual subscription details
       const result = {
         projectData,
         subscriptionData: {
           hours_spent: 0,
-          hours_allotted: subscriptionDetails.hours_allotted || 0,
+          hours_allotted: subscriptionDetails?.hours_allotted || 0,
           data_source: "unknown",
-          subscription_status: subscriptionDetails.subscription_status || "unknown",
-          next_renewal_date: subscriptionDetails.next_renewal_date || null,
-          billing_cycle: subscriptionDetails.billing_cycle || null,
-          start_date: subscriptionDetails.start_date || null,
-          auto_renew: subscriptionDetails.auto_renew !== undefined ? subscriptionDetails.auto_renew : false
+          subscription_status: subscriptionDetails?.subscription_status || "unknown",
+          next_renewal_date: subscriptionDetails?.next_renewal_date || null,
+          billing_cycle: subscriptionDetails?.billing_cycle || null,
+          start_date: subscriptionDetails?.start_date || null,
+          auto_renew: subscriptionDetails?.auto_renew !== undefined ? subscriptionDetails.auto_renew : false,
+          max_concurrent_tasks: subscriptionDetails?.max_concurrent_tasks || 1
         },
         rawData: {
           tasks: [],
@@ -155,40 +149,41 @@ const TestSubscription = () => {
           console.log('No historical data found for month:', selectedMonth);
           result.subscriptionData.data_source = "no data";
         }
+        
+        return result;
       } 
+      
       // 4. For current month, calculate from tasks
-      else {
-        console.log('Calculating live data for current month');
+      console.log('Calculating live data for current month');
+      
+      const { data: tasksData, error: tasksError } = await supabase
+        .from('tasks')
+        .select('actual_hours_spent')
+        .eq('project_id', selectedProjectId)
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString());
         
-        const { data: tasksData, error: tasksError } = await supabase
-          .from('tasks')
-          .select('actual_hours_spent')
-          .eq('project_id', selectedProjectId)
-          .gte('created_at', startDate.toISOString())
-          .lte('created_at', endDate.toISOString());
-          
-        if (tasksError) {
-          console.error('Error fetching tasks data:', tasksError);
-        } else if (tasksData) {
-          result.subscriptionData.hours_spent = tasksData.reduce((sum, task) => 
-            sum + (task.actual_hours_spent || 0), 0);
-          result.subscriptionData.data_source = "live";
-          console.log('Live hours calculation:', result.subscriptionData.hours_spent);
-        }
-        
-        // 5. Fetch raw task data for current month only
-        const { data: rawTaskData, error: rawTaskError } = await supabase
-          .from('tasks')
-          .select('id, details, actual_hours_spent, created_at')
-          .eq('project_id', selectedProjectId)
-          .gte('created_at', startDate.toISOString())
-          .lte('created_at', endDate.toISOString());
-        
-        if (rawTaskError) {
-          console.error('Error in raw task query:', rawTaskError);
-        } else {
-          result.rawData.tasks = rawTaskData || [];
-        }
+      if (tasksError) {
+        console.error('Error fetching tasks data:', tasksError);
+      } else if (tasksData) {
+        result.subscriptionData.hours_spent = tasksData.reduce((sum, task) => 
+          sum + (task.actual_hours_spent || 0), 0);
+        result.subscriptionData.data_source = "live";
+        console.log('Live hours calculation:', result.subscriptionData.hours_spent);
+      }
+      
+      // 5. Fetch raw task data for current month only
+      const { data: rawTaskData, error: rawTaskError } = await supabase
+        .from('tasks')
+        .select('id, details, actual_hours_spent, created_at')
+        .eq('project_id', selectedProjectId)
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString());
+      
+      if (rawTaskError) {
+        console.error('Error in raw task query:', rawTaskError);
+      } else {
+        result.rawData.tasks = rawTaskData || [];
       }
       
       return result;
