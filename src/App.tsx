@@ -1,69 +1,55 @@
 
-import Auth from "@/pages/Auth";
-import Index from "@/pages/Index";
-import Projects from "@/pages/Projects";
-import ProjectDetails from "@/pages/ProjectDetails";
-import Clients from "@/pages/Clients";
-import Tasks from "@/pages/Tasks";
-import Team from "@/pages/Team";
-import NotFound from "@/pages/NotFound";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "@/hooks/use-auth";
-import Layout from "@/components/layout/Layout";
-import { Toaster } from "@/components/ui/toaster"
-import { ThemeProvider } from "@/components/theme-provider"
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./components/auth/AuthProvider";
+import { LayoutProvider } from "./context/layout";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Layout from "./components/layout/Layout";
+import Index from "./pages/Index";
+import Projects from "./pages/Projects";
+import ProjectDetails from "./pages/ProjectDetails";
+import Tasks from "./pages/Tasks";
+import Team from "./pages/Team";
+import Clients from "./pages/Clients";
+import Auth from "./pages/Auth";
+import NotFound from "./pages/NotFound";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import TestSubscription from "@/pages/TestSubscription";
 
-const queryClient = new QueryClient();
+// Create a client outside of the component
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
-function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { authState, loading } = useAuth();
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  return <>{children}</>;
-}
-
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { authState } = useAuth();
-
-  if (!authState) {
-    return <Navigate to="/auth" />;
-  }
-
-  return <>{children}</>;
-}
-
-function App() {
-  const { authState, loading } = useAuth();
-
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider defaultTheme="light">
-          <BrowserRouter>
+      <Router>
+        <AuthProvider>
+          <LayoutProvider>
             <Routes>
               <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-                <Route index element={<Index />} />
-                <Route path="projects" element={<Projects />} />
-                <Route path="projects/:id" element={<ProjectDetails />} />
-                <Route path="test-subscription" element={<TestSubscription />} />
-                <Route path="clients" element={<Clients />} />
-                <Route path="tasks" element={<Tasks />} />
-                <Route path="team" element={<Team />} />
+              <Route element={<ProtectedRoute />}>
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/projects/:id" element={<ProjectDetails />} />
+                  <Route path="/tasks" element={<Tasks />} />
+                  <Route path="/team" element={<Team />} />
+                  <Route path="/clients" element={<Clients />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
               </Route>
-              <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-          <Toaster />
-        </ThemeProvider>
-      </AuthProvider>
+          </LayoutProvider>
+        </AuthProvider>
+      </Router>
     </QueryClientProvider>
   );
-}
+};
 
 export default App;

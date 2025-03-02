@@ -22,11 +22,6 @@ interface DevelopmentLayoutProps {
       hours_spent: number | null;
       hours_allotted: number;
     }[];
-    subscription_data?: {
-      hours_spent: number;
-      hours_allotted: number;
-      data_source: string;
-    };
   };
 }
 

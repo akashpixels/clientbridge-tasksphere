@@ -18,7 +18,6 @@ interface ProjectHeaderProps {
       id: string;
       subscription_status: string;
       hours_allotted: number;
-      hours_spent: number; // This is required by the component
       next_renewal_date: string;
     }[];
     subscription_data?: {
@@ -44,8 +43,8 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
 
   // Get subscription data
   const subscriptionData = project.subscription_data || {
-    hours_spent: 0,
-    hours_allotted: 0,
+    hours_spent: monthlyHours,
+    hours_allotted: project.project_subscriptions?.[0]?.hours_allotted || 0,
     data_source: "unknown"
   };
   
@@ -54,17 +53,11 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
     ? Math.min(Math.round((subscriptionData.hours_spent / subscriptionData.hours_allotted) * 100), 100)
     : 0;
 
-  // Directly get subscription status from project_subscriptions
-  const subscriptionStatus = project.project_subscriptions?.[0]?.subscription_status || "unknown";
-  const nextRenewalDate = project.project_subscriptions?.[0]?.next_renewal_date || "unknown";
-
   console.log("ProjectHeader rendering with data:", {
     selectedMonth,
     subscriptionData,
     monthlyHours,
-    usagePercentage,
-    subscriptionStatus,
-    nextRenewalDate
+    usagePercentage
   });
 
   return (
@@ -103,11 +96,11 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange, monthlyHours }: 
             </li>
             <li className="flex justify-between">
               <span className="text-gray-500">Status:</span>
-              <span className="font-medium text-gray-900">{subscriptionStatus}</span>
+              <span className="font-medium text-gray-900">{project.project_subscriptions?.[0]?.subscription_status || "unknown"}</span>
             </li>
             <li className="flex justify-between">
               <span className="text-gray-500">Next Renewal:</span>
-              <span className="font-medium text-gray-900">{nextRenewalDate}</span>
+              <span className="font-medium text-gray-900">{project.project_subscriptions?.[0]?.next_renewal_date || "unknown"}</span>
             </li>
             <li className="flex justify-between text-xs text-gray-400">
               <span>Data Source:</span>
