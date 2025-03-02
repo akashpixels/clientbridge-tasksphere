@@ -1213,7 +1213,7 @@ export type Database = {
       }
       calculate_hours_spent: {
         Args: {
-          created_at: string
+          actual_start: string
           task_completed_at: string
           priority_level_id: number
         }
