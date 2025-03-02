@@ -152,6 +152,9 @@ const ProjectDetails = () => {
           ...sub,
           hours_spent: monthlyHours // Add hours_spent to match the expected type
         }));
+      } else {
+        // Ensure we have at least an empty array if no subscriptions
+        enhancedProject.project_subscriptions = [];
       }
       
       console.log('Enhanced project data with subscription info:', enhancedProject);
