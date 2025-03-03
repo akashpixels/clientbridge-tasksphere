@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import CredentialsTab from "./shared/CredentialsTab";
 import TeamTab from "./shared/TeamTab";
+import { NewTaskButton } from "./maintenance/NewTaskButton";
 
 interface DefaultLayoutProps {
   project: Tables<"projects"> & {
@@ -46,13 +47,16 @@ const DefaultLayout = ({ project }: DefaultLayoutProps) => {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="tasks">Tasks</TabsTrigger>
-          <TabsTrigger value="team">Team</TabsTrigger>
-          <TabsTrigger value="credentials">Credentials</TabsTrigger>
-          <TabsTrigger value="files">Files</TabsTrigger>
-        </TabsList>
+        <div className="flex justify-between items-center mb-4">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="tasks">Tasks</TabsTrigger>
+            <TabsTrigger value="team">Team</TabsTrigger>
+            <TabsTrigger value="credentials">Credentials</TabsTrigger>
+            <TabsTrigger value="files">Files</TabsTrigger>
+          </TabsList>
+          <NewTaskButton />
+        </div>
 
         <TabsContent value="overview">
           <Card className="p-6">

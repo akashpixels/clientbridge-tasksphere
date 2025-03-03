@@ -619,6 +619,7 @@ export type Database = {
           status_id: number | null
           status_options: Json
           task_fields: Json
+          task_type_options: Json | null
           types: Json | null
           updated_at: string
           uses_phases: boolean
@@ -640,6 +641,7 @@ export type Database = {
           status_id?: number | null
           status_options?: Json
           task_fields?: Json
+          task_type_options?: Json | null
           types?: Json | null
           updated_at?: string
           uses_phases?: boolean
@@ -661,6 +663,7 @@ export type Database = {
           status_id?: number | null
           status_options?: Json
           task_fields?: Json
+          task_type_options?: Json | null
           types?: Json | null
           updated_at?: string
           uses_phases?: boolean
