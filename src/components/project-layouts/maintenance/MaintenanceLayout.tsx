@@ -13,6 +13,7 @@ import TaskCommentThread from "./comments/TaskCommentThread";
 import CredentialsTab from "../shared/CredentialsTab";
 import FilesTab from "../shared/FilesTab";
 import TeamTab from "../shared/TeamTab";
+import { NewTaskButton } from "./NewTaskButton";
 
 interface MaintenanceLayoutProps {
   project: Tables<"projects"> & {
@@ -168,9 +169,7 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
             <TabsTrigger value="credentials">Credentials</TabsTrigger>
             <TabsTrigger value="files">Files</TabsTrigger>
           </TabsList>
-          <button className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md">
-            New Task
-          </button>
+          <NewTaskButton />
         </div>
 
         <TabsContent value="tasks">
