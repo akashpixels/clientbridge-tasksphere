@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
@@ -238,37 +239,47 @@ export const TimelineVisualization = ({
     }
   };
 
+  // Consistent height for all elements
+  const nodeHeight = "h-6";
+  const nodeIconSize = 24;
+  
+  // Define consistent styles
   const pillClassName = compact 
-    ? "w-12 h-6 rounded-full border border-gray-300 text-[10px]" 
-    : "w-16 h-8 rounded-full border border-gray-300 text-xs";
+    ? `${nodeHeight} w-12 rounded-full border border-gray-300 text-[10px] flex items-center justify-center` 
+    : `${nodeHeight} w-16 rounded-full border border-gray-300 text-xs flex items-center justify-center`;
 
-  const timeClassName = compact ? "text-[9px] mt-1.5" : "text-[10px] mt-2";
+  const timeClassName = compact ? "text-[9px] mt-1" : "text-[10px] mt-1";
 
   return <div className="sticky top-0 bg-background z-10 border-b">
-      <div className="py-1">
+      <div className="py-2">
         <div className="relative">
+          {/* Horizontal line - precisely centered to the nodes */}
           <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
           
-          <div className="absolute top-0 left-1/4 -translate-x-1/2 text-[9px] text-gray-500 font-medium">
+          {/* Time labels above the line */}
+          <div className="absolute top-[-12px] left-1/4 -translate-x-1/2 text-[9px] text-gray-500 font-medium">
             {getTimeBetweenNodes('start')}
           </div>
           
-          <div className="absolute top-0 right-1/4 -translate-x-1/2 text-[9px] text-gray-500 font-medium">
+          <div className="absolute top-[-12px] right-1/4 -translate-x-1/2 text-[9px] text-gray-500 font-medium">
             {getTimeBetweenNodes('eta')}
           </div>
           
-          <div className="flex justify-between items-center my-2">
+          {/* The main timeline with nodes */}
+          <div className="flex justify-between items-center my-3">
+            {/* Current time node */}
             <div className="flex flex-col items-center z-10">
-              <div className="relative flex items-center justify-center">
-                <Circle className="w-5 h-5 text-primary fill-white stroke-[1.5]" />
+              <div className={`relative flex items-center justify-center ${nodeHeight}`}>
+                <Circle className={`w-${nodeIconSize/4} h-${nodeIconSize/4} text-primary fill-white stroke-[1.5]`} />
               </div>
               <div className={timeClassName + " text-gray-700"}>
                 {timelineEstimate?.currentTime || "--"}
               </div>
             </div>
             
+            {/* Start time node */}
             <div className="flex flex-col items-center z-10">
-              <div className={`${compact ? 'w-14 h-6' : 'w-18 h-7'} rounded-full border border-gray-300 bg-white flex items-center justify-center ${compact ? 'text-[10px]' : 'text-xs'} font-medium text-gray-700`}>
+              <div className={pillClassName + " bg-white text-gray-700 font-medium"}>
                 Start time
               </div>
               <div className={timeClassName + " text-gray-700"}>
@@ -276,8 +287,9 @@ export const TimelineVisualization = ({
               </div>
             </div>
             
+            {/* ETA node */}
             <div className="flex flex-col items-center z-10">
-              <div className={`${pillClassName} border-gray-300 bg-white flex items-center justify-center font-medium text-gray-700`}>
+              <div className={`${pillClassName} bg-white font-medium text-gray-700`}>
                 ETA
               </div>
               <div className={timeClassName + " text-gray-700"}>
