@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatDuration } from "@/lib/date-utils";
 
@@ -24,6 +24,9 @@ export const PriorityDial = ({ priorityLevels, value, onChange, compact = false 
 
   // Sort priority levels by id to ensure correct order
   const sortedLevels = [...priorityLevels].sort((a, b) => a.id - b.id);
+  
+  // Get the currently selected priority level
+  const selectedLevel = sortedLevels.find(level => level.id === value);
   
   // Calculate the angle based on the selected priority
   const getRotationAngle = (levelId: number) => {
@@ -65,7 +68,7 @@ export const PriorityDial = ({ priorityLevels, value, onChange, compact = false 
   const width = 300;
   const height = compact ? 120 : 160;
   const radius = compact ? 100 : 120;
-  const arcWidth = compact ? 20 : 30;
+  const arcWidth = compact ? 16 : 24; // Reduced arc width 
   const needleLength = radius - 10;
 
   // Get selected priority level rotation
@@ -91,10 +94,17 @@ export const PriorityDial = ({ priorityLevels, value, onChange, compact = false 
           strokeLinecap="round"
         />
         
-        {/* Priority level arcs */}
+        {/* Priority level arcs - with gaps between them */}
         {sortedLevels.map((level, i) => {
-          const startAngle = -85 + (i * (170 / (sortedLevels.length - 1))) - (170 / (2 * (sortedLevels.length - 1)));
-          const endAngle = -85 + (i * (170 / (sortedLevels.length - 1))) + (170 / (2 * (sortedLevels.length - 1)));
+          // Calculate each arc's angle with a small gap
+          const arcSpan = 170 / sortedLevels.length; // Total span divided by number of levels
+          const gapSize = 3; // Degrees of gap between arcs
+          const arcSize = arcSpan - gapSize; // Arc size with gap
+          
+          const midAngle = -85 + (i * arcSpan);
+          const startAngle = midAngle - (arcSize / 2);
+          const endAngle = midAngle + (arcSize / 2);
+          
           const isSelected = level.id === value;
           
           // Start and end points of the arc
@@ -160,23 +170,21 @@ export const PriorityDial = ({ priorityLevels, value, onChange, compact = false 
         <circle cx={width / 2} cy={height} r={compact ? 6 : 8} fill="#1f2937" />
       </svg>
       
-      {/* Priority level labels */}
-      <div className="flex justify-between w-full mt-1 px-4 text-xs text-muted-foreground">
-        {sortedLevels.map((level) => (
+      {/* Only show the selected priority level label */}
+      {selectedLevel && (
+        <div className="flex justify-center w-full mt-2 px-4">
           <div 
-            key={level.id} 
-            className="flex flex-col items-center cursor-pointer"
-            onClick={() => onChange(level.id)}
+            className="flex flex-col items-center"
             style={{ 
-              color: level.id === value ? level.color : 'inherit',
-              fontWeight: level.id === value ? 'bold' : 'normal'
+              color: selectedLevel.color,
+              fontWeight: 'bold'
             }}
           >
-            <div className="w-1.5 h-1.5 rounded-full mb-1" style={{ backgroundColor: level.color }} />
-            <span className={compact ? "text-[10px]" : "text-xs"}>{level.name}</span>
+            <div className="w-2 h-2 rounded-full mb-1" style={{ backgroundColor: selectedLevel.color }} />
+            <span className="text-sm">{selectedLevel.name}</span>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

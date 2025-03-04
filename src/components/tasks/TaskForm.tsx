@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,9 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TimelineVisualization } from "./TimelineVisualization";
 import { HelpCircle, Monitor, Smartphone, MonitorSmartphone, Upload, Link, X } from "lucide-react";
-import { formatDuration } from "@/lib/date-utils";
-import { Slider } from "@/components/ui/slider";
 import { PriorityDial } from "./PriorityDial";
+import { ComplexitySelector } from "./ComplexitySelector";
 
 const taskFormSchema = z.object({
   details: z.string().min(10, {
@@ -332,9 +330,13 @@ export const TaskForm = ({
             }) => <FormItem className="space-y-2">
                   <FormLabel className="text-xs text-muted-foreground">Complexity Level</FormLabel>
                   <FormControl>
-                    <div className="pt-1">
-                      <Slider min={1} max={5} step={1} value={[field.value || 3]} onValueChange={vals => field.onChange(vals[0])} className="w-full" />
-                      <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                    <div className="pt-4 pb-3">
+                      <ComplexitySelector 
+                        complexityLevels={complexityLevels} 
+                        value={field.value || 3} 
+                        onChange={field.onChange}
+                      />
+                      <div className="flex justify-between text-[10px] text-muted-foreground mt-2">
                         <span>Basic</span>
                         <span>Easy</span>
                         <span>Standard</span>
