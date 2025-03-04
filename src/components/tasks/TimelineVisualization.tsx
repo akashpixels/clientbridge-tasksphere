@@ -282,7 +282,7 @@ export const TimelineVisualization = ({
               <div className="h-[22px] w-[40px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
                 Start
               </div>
-              <div className="text-[9px] mt-0.5 text-gray-500 text-right min-h-[24px]">
+              <div className="text-[9px] mt-0.5 text-gray-500 text-center min-h-[24px]">
                 {formatTimeWithLineBreak(formatTimelineTime(timelineEstimate?.startTime))}
               </div>
             </div>
