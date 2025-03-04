@@ -14,6 +14,7 @@ import { TimelineVisualization } from "./TimelineVisualization";
 import { HelpCircle, Monitor, Smartphone, MonitorSmartphone, Upload, Link, X } from "lucide-react";
 import { PriorityDial } from "./PriorityDial";
 import { ComplexitySelector } from "./ComplexitySelector";
+import { formatDuration } from "@/lib/date-utils";
 
 const taskFormSchema = z.object({
   details: z.string().min(10, {
