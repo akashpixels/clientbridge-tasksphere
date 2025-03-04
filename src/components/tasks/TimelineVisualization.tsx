@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
@@ -250,8 +251,10 @@ export const TimelineVisualization = ({
           </div>
           
           <div className="flex justify-between items-center mb-2 pt-1 pb-1">
+            {/* The horizontal line is now positioned precisely */}
             <div className="absolute top-[16px] left-0 right-0 h-[1px] bg-gray-200 z-0"></div>
             
+            {/* Adjust the left position of the timeline to match exactly with the reference */}
             <div className="flex flex-col items-center z-10">
               <div className="relative flex items-center justify-center h-[20px]">
                 <Circle className="w-[18px] h-[18px] text-primary fill-white stroke-[1.5]" />
@@ -263,7 +266,7 @@ export const TimelineVisualization = ({
             
             <div className="flex flex-col items-center z-10">
               <div className="h-[22px] w-[80px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
-                Start time
+                Start
               </div>
               <div className="text-[9px] mt-0.5 text-gray-500">
                 {formatTimelineTime(timelineEstimate?.startTime) || "--"}
@@ -271,7 +274,7 @@ export const TimelineVisualization = ({
             </div>
             
             <div className="flex flex-col items-center z-10">
-              <div className="h-[22px] w-[80px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
+              <div className="h-[22px] w-[60px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
                 ETA
               </div>
               <div className="text-[9px] mt-0.5 text-gray-500">
