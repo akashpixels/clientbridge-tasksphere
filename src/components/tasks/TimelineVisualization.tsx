@@ -256,12 +256,12 @@ export const TimelineVisualization = ({
   return <div className="sticky top-0 bg-background z-10 border-b">
       <div className="py-3">
         <div className="relative">
-          {/* Move hour indicators above the horizontal line */}
-          <div className="absolute top-[-10px] left-1/4 -translate-x-1/2 text-[9px] text-gray-400 font-medium">
+          {/* Repositioned hour indicators with updated positions */}
+          <div className="absolute top-[-8px] left-[15%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
             {getTimeBetweenNodes('start')}
           </div>
           
-          <div className="absolute top-[-10px] right-1/4 -translate-x-1/2 text-[9px] text-gray-400 font-medium">
+          <div className="absolute top-[-8px] left-[60%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
             {getTimeBetweenNodes('eta')}
           </div>
           
