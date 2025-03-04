@@ -349,9 +349,7 @@ export const TaskForm = ({
                   </div>
                 </FormControl>
                 
-                <div className="text-xs text-muted-foreground">
-                  {complexityLevels.find(level => level.id === field.value) ? getComplexityTooltip(complexityLevels.find(level => level.id === field.value)) : "Standard completion time"}
-                </div>
+                
                 <FormMessage />
               </FormItem>} />
 
