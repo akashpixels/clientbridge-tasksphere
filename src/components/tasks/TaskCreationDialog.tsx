@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { TaskForm } from "./TaskForm";
 import { useToast } from "@/hooks/use-toast";
@@ -70,13 +70,6 @@ export const TaskCreationDialog = ({ open, onOpenChange }: TaskCreationDialogPro
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg h-[75vh] max-h-[800px] flex flex-col overflow-hidden p-0">
-        <DialogHeader className="px-6 pt-6 pb-2 sticky top-0 bg-background z-10">
-          <DialogTitle>Create New Task</DialogTitle>
-          <DialogDescription>
-            Fill in the details to create a new task. Timeline estimates will update as you make selections.
-          </DialogDescription>
-        </DialogHeader>
-        
         <ScrollArea className="flex-1 px-6 pb-2">
           <TaskForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
         </ScrollArea>

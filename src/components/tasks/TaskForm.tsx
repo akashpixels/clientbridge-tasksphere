@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +23,6 @@ import { formatDuration } from "@/lib/date-utils";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 
-// Form schema with validations
 const taskFormSchema = z.object({
   details: z.string()
     .min(10, { message: "Task details must be at least 10 characters" })
@@ -68,7 +66,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
     },
   });
 
-  // Fetch project details including task_type_options
   useEffect(() => {
     const fetchProject = async () => {
       if (!projectId) return;
@@ -94,7 +91,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
     fetchProject();
   }, [projectId]);
 
-  // Fetch task types with filtering based on project options
   useEffect(() => {
     const fetchTaskTypes = async () => {
       const { data, error } = await supabase
@@ -123,7 +119,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
     }
   }, [project]);
 
-  // Fetch priority levels
   useEffect(() => {
     const fetchPriorityLevels = async () => {
       const { data, error } = await supabase
@@ -142,7 +137,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
     fetchPriorityLevels();
   }, []);
 
-  // Fetch complexity levels
   useEffect(() => {
     const fetchComplexityLevels = async () => {
       const { data, error } = await supabase
@@ -162,7 +156,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
     fetchComplexityLevels();
   }, []);
 
-  // Update timeline parameters when form values change
   useEffect(() => {
     const subscription = form.watch((value) => {
       setTimelineParams({
@@ -176,17 +169,13 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
   }, [form.watch]);
 
   const handleFormSubmit = (values: TaskFormValues) => {
-    // If there's an uploaded image file, we need to handle it
     if (imageFile) {
-      // In a real implementation, you would upload the file to your server or a service like Supabase Storage
-      // For now, we'll just pass the values to the parent component
       console.log("Image file to upload:", imageFile);
     }
     
     onSubmit(values);
   };
 
-  // Helper function to get tooltip content for complexity
   const getComplexityTooltip = (level: any) => {
     if (!level) return "";
     const multiplier = level.multiplier;
@@ -200,7 +189,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
     }
   };
 
-  // Helper function to get tooltip content for priority
   const getPriorityTooltip = (level: any) => {
     if (!level) return "";
     const timeToStart = level.time_to_start ? formatDuration(level.time_to_start) : "immediate";
@@ -209,25 +197,22 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
     return `${timeToStart} delay, ${multiplier}`;
   };
 
-  // Get selected complexity level name
   const getSelectedComplexityName = () => {
     const complexityId = form.watch("complexity_level_id");
     const selectedLevel = complexityLevels.find(level => level.id === complexityId);
     return selectedLevel?.name || "Standard";
   };
 
-  // Handle image file upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
       const imageUrl = URL.createObjectURL(file);
       setImagePreview(imageUrl);
-      form.setValue("image_url", ""); // Clear the image URL field
+      form.setValue("image_url", "");
     }
   };
 
-  // Handle image URL input
   const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
     form.setValue("image_url", url);
@@ -235,7 +220,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
     setImagePreview(url);
   };
 
-  // Clear image
   const clearImage = () => {
     setImageFile(null);
     setImagePreview('');
@@ -244,19 +228,15 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-5">
-        {/* Timeline visualization at the top */}
-        <div className="bg-muted/30 rounded-lg p-3 mb-4">
-          <TimelineVisualization 
-            taskTypeId={timelineParams.taskTypeId} 
-            priorityLevelId={timelineParams.priorityLevelId}
-            complexityLevelId={timelineParams.complexityLevelId}
-            projectId={projectId}
-          />
-        </div>
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+        <TimelineVisualization 
+          taskTypeId={timelineParams.taskTypeId} 
+          priorityLevelId={timelineParams.priorityLevelId}
+          complexityLevelId={timelineParams.complexityLevelId}
+          projectId={projectId}
+        />
 
-        <div className="space-y-5">
-          {/* Task Details */}
+        <div className="space-y-5 pt-2">
           <FormField
             control={form.control}
             name="details"
@@ -275,7 +255,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
             )}
           />
 
-          {/* Task Type */}
           <FormField
             control={form.control}
             name="task_type_id"
@@ -332,7 +311,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
             )}
           />
 
-          {/* Priority Level as Pills */}
           <FormField
             control={form.control}
             name="priority_level_id"
@@ -391,7 +369,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
             )}
           />
 
-          {/* Complexity Level as Slider */}
           <FormField
             control={form.control}
             name="complexity_level_id"
@@ -442,7 +419,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
             )}
           />
 
-          {/* Target Device as Icons */}
           <FormField
             control={form.control}
             name="target_device"
@@ -518,7 +494,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
             )}
           />
 
-          {/* Image Upload/Link Field (New) */}
           <FormItem>
             <FormLabel>Image Reference (Optional)</FormLabel>
             <div className="space-y-3">

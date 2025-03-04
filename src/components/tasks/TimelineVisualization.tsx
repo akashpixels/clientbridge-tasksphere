@@ -2,9 +2,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
-import { Info, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TimelineVisualizationProps {
   taskTypeId?: number | null;
@@ -252,68 +251,63 @@ export const TimelineVisualization = ({
   }
 
   if (!taskTypeId || !priorityLevelId || !timelineEstimate) {
-    return (
-      <div className="flex flex-col items-center justify-center text-center h-full text-muted-foreground p-6">
-        <Info size={30} className="mb-2" />
-        <h4 className="text-sm font-medium">Timeline Preview</h4>
-        <p className="text-xs">Select task details to see timeline estimates</p>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="space-y-4">
-      {/* Timeline labels */}
-      <div className="flex justify-between items-center text-xs font-medium text-muted-foreground">
-        <span>Now</span>
-        <span>Start Time</span>
-        <span>ETA</span>
+    <div className="sticky top-0 bg-background z-10 border-b">
+      {/* Queue Position */}
+      <div className="border-b px-6 py-3 text-center">
+        <div className="text-sm font-medium">
+          Queue Position: #{timelineEstimate.queuePosition + 1}
+        </div>
       </div>
       
       {/* Timeline visualization */}
-      <div className="relative">
-        <div className="flex justify-between items-center">
-          {/* Now dot */}
-          <div className="flex flex-col items-center z-10">
-            <div className="w-3 h-3 rounded-full bg-primary"></div>
-            <div className="text-xs mt-1">{timelineEstimate.currentTime}</div>
-          </div>
-          
-          {/* Estimated effort label (middle) */}
-          <div className="absolute top-1 left-1/4 right-1/4 text-xs text-center font-medium">
-            Estimated Effort: {timelineEstimate.taskInfo.hoursNeeded} hours
-          </div>
-          
-          {/* Start time dot */}
-          <div className="flex flex-col items-center z-10">
-            <div className="w-3 h-3 rounded-full bg-secondary"></div>
-            <div className="text-xs mt-1">{timelineEstimate.startTime}</div>
-          </div>
-          
-          {/* ETA dot */}
-          <div className="flex flex-col items-center z-10">
-            <div className="w-3 h-3 rounded-full bg-secondary"></div>
-            <div className="text-xs mt-1">{timelineEstimate.eta}</div>
-          </div>
+      <div className="px-6 py-4 space-y-4">
+        {/* Timeline labels */}
+        <div className="flex justify-between items-center text-xs font-medium text-muted-foreground">
+          <span>Now</span>
+          <span>Start Time</span>
+          <span>ETA</span>
         </div>
         
-        {/* Connecting line */}
-        <div className="absolute top-1.5 left-0 right-0 h-0.5 bg-muted -z-0"></div>
-      </div>
-      
-      {/* Queue position */}
-      <div className="text-xs text-center font-medium mt-1">
-        Queue Position: #{timelineEstimate.queuePosition + 1}
-      </div>
-
-      {timelineEstimate.taskInfo.isOverdue && (
-        <div className="flex items-start text-yellow-600 text-xs p-2 bg-yellow-50 rounded-md border border-yellow-200">
-          <AlertTriangle size={14} className="mt-0.5 mr-1 flex-shrink-0" />
-          <span>
-            This task may take longer than expected. Consider adjusting priority or complexity.
-          </span>
+        {/* Timeline visualization */}
+        <div className="relative">
+          <div className="flex justify-between items-center">
+            {/* Now dot */}
+            <div className="flex flex-col items-center z-10">
+              <div className="w-4 h-4 rounded-full bg-primary border-2 border-background"></div>
+              <div className="text-xs mt-1">{timelineEstimate.currentTime}</div>
+            </div>
+            
+            {/* Start time dot */}
+            <div className="flex flex-col items-center z-10">
+              <div className="w-4 h-4 rounded-full bg-secondary border-2 border-background"></div>
+              <div className="text-xs mt-1">{timelineEstimate.startTime}</div>
+              <div className="text-xs font-medium mt-1">{timelineEstimate.taskInfo.hoursNeeded} hrs</div>
+            </div>
+            
+            {/* ETA dot */}
+            <div className="flex flex-col items-center z-10">
+              <div className="w-4 h-4 rounded-full bg-secondary border-2 border-background"></div>
+              <div className="text-xs mt-1">{timelineEstimate.eta}</div>
+            </div>
+          </div>
+          
+          {/* Connecting line - more visible */}
+          <div className="absolute top-2 left-0 right-0 h-[2px] bg-border -z-0"></div>
         </div>
-      )}
+
+        {timelineEstimate.taskInfo.isOverdue && (
+          <div className="flex items-start text-yellow-600 text-xs p-2 bg-yellow-50 rounded-md border border-yellow-200">
+            <AlertTriangle size={14} className="mt-0.5 mr-1 flex-shrink-0" />
+            <span>
+              This task may take longer than expected. Consider adjusting priority or complexity.
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
