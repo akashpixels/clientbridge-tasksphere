@@ -39,3 +39,20 @@ export function formatDuration(duration: string): string {
   
   return result;
 }
+
+// New function to format timeline dates in the specific format we need
+export function formatTimelineTime(date: string | Date | null): string {
+  if (!date) return "--";
+  try {
+    const parsedDate = typeof date === "string" ? parseISO(date) : date;
+    return format(parsedDate, "haaa, MMM dd").toLowerCase();
+  } catch (e) {
+    return typeof date === "string" ? date : "--";
+  }
+}
+
+// New function to format hour differences
+export function formatHourDifference(hours: number | null): string {
+  if (hours === null || isNaN(Number(hours))) return "--";
+  return `${Math.round(hours)} Hrs`;
+}
