@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TimelineVisualization } from "./TimelineVisualization";
-import { HelpCircle, Monitor, Smartphone, MonitorSmartphone } from "lucide-react";
+import { HelpCircle, Monitor, Smartphone, MonitorSmartphone, Upload, Link, X } from "lucide-react";
 import { formatDuration } from "@/lib/date-utils";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
@@ -33,10 +33,8 @@ const taskFormSchema = z.object({
   priority_level_id: z.coerce.number(),
   complexity_level_id: z.coerce.number().default(3),
   target_device: z.enum(["Desktop", "Mobile", "Both"]).default("Both"),
-  assigned_user_id: z.string().optional(),
   reference_links: z.array(z.string().url({ message: "Must be a valid URL" })).optional(),
-  images: z.array(z.any()).optional(),
-  dependent_task_id: z.string().optional(),
+  image_url: z.string().url({ message: "Must be a valid URL" }).optional().or(z.string().length(0)),
 });
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
@@ -52,12 +50,13 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
   const [priorityLevels, setPriorityLevels] = useState<any[]>([]);
   const [complexityLevels, setComplexityLevels] = useState<any[]>([]);
   const [project, setProject] = useState<any>(null);
-  const [projectUsers, setProjectUsers] = useState<any[]>([]);
   const [timelineParams, setTimelineParams] = useState<any>({
     taskTypeId: null,
     priorityLevelId: null,
     complexityLevelId: 3,
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
@@ -65,6 +64,7 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
       details: "",
       complexity_level_id: 3,
       target_device: "Both",
+      image_url: "",
     },
   });
 
@@ -162,34 +162,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
     fetchComplexityLevels();
   }, []);
 
-  // Fetch users assigned to the project
-  useEffect(() => {
-    const fetchProjectUsers = async () => {
-      if (!projectId) return;
-      
-      const { data, error } = await supabase
-        .from('project_assignees')
-        .select(`
-          user_id,
-          user_profiles:user_id(
-            id,
-            first_name,
-            last_name
-          )
-        `)
-        .eq('project_id', projectId);
-      
-      if (error) {
-        console.error("Error fetching project users:", error);
-        return;
-      }
-      
-      setProjectUsers(data.map(item => item.user_profiles));
-    };
-    
-    fetchProjectUsers();
-  }, [projectId]);
-
   // Update timeline parameters when form values change
   useEffect(() => {
     const subscription = form.watch((value) => {
@@ -204,6 +176,13 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
   }, [form.watch]);
 
   const handleFormSubmit = (values: TaskFormValues) => {
+    // If there's an uploaded image file, we need to handle it
+    if (imageFile) {
+      // In a real implementation, you would upload the file to your server or a service like Supabase Storage
+      // For now, we'll just pass the values to the parent component
+      console.log("Image file to upload:", imageFile);
+    }
+    
     onSubmit(values);
   };
 
@@ -237,6 +216,32 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
     return selectedLevel?.name || "Standard";
   };
 
+  // Handle image file upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const imageUrl = URL.createObjectURL(file);
+      setImagePreview(imageUrl);
+      form.setValue("image_url", ""); // Clear the image URL field
+    }
+  };
+
+  // Handle image URL input
+  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    form.setValue("image_url", url);
+    setImageFile(null);
+    setImagePreview(url);
+  };
+
+  // Clear image
+  const clearImage = () => {
+    setImageFile(null);
+    setImagePreview('');
+    form.setValue("image_url", "");
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-5">
@@ -250,307 +255,321 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="space-y-4">
-            {/* Task Details */}
-            <FormField
-              control={form.control}
-              name="details"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Task Details</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Describe what needs to be done..." 
-                      className="min-h-[120px]" 
-                      {...field} 
+        <div className="space-y-5">
+          {/* Task Details */}
+          <FormField
+            control={form.control}
+            name="details"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Task Details</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Describe what needs to be done..." 
+                    className="min-h-[120px]" 
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Task Type */}
+          <FormField
+            control={form.control}
+            name="task_type_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  Task Type
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle size={16} className="text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Affects time estimate and scheduling</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </FormLabel>
+                <FormControl>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value?.toString()}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select task type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {taskTypes.length > 0 && taskTypes.reduce((acc: any[], type: any) => {
+                        const categoryExists = acc.some(item => item.category === type.category);
+                        
+                        if (!categoryExists) {
+                          acc.push({
+                            category: type.category,
+                            items: taskTypes.filter(t => t.category === type.category)
+                          });
+                        }
+                        
+                        return acc;
+                      }, []).map((categoryGroup: any) => (
+                        <div key={categoryGroup.category} className="mb-2">
+                          <div className="px-2 py-1.5 text-xs font-semibold bg-muted">{categoryGroup.category}</div>
+                          {categoryGroup.items.map((type: any) => (
+                            <SelectItem key={type.id} value={type.id.toString()}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </div>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Priority Level as Pills */}
+          <FormField
+            control={form.control}
+            name="priority_level_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  Priority Level
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle size={16} className="text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Affects queue position and start time</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </FormLabel>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {priorityLevels.map(level => (
+                    <TooltipProvider key={level.id}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge
+                            variant="outline"
+                            className={`cursor-pointer px-3 py-1 hover:bg-muted transition-colors ${
+                              field.value === level.id 
+                                ? `bg-opacity-20 bg-${level.color || 'gray'}-100 ring-1 ring-${level.color || 'gray'}-200` 
+                                : ''
+                            }`}
+                            style={{
+                              backgroundColor: field.value === level.id ? `${level.color}15` : '',
+                              borderColor: field.value === level.id ? level.color : '',
+                              color: field.value === level.id ? level.color : ''
+                            }}
+                            onClick={() => field.onChange(level.id)}
+                          >
+                            <div className="flex items-center">
+                              <span 
+                                className="w-2 h-2 rounded-full mr-1.5 flex-shrink-0"
+                                style={{ backgroundColor: level.color || '#888888' }}
+                              />
+                              {level.name}
+                            </div>
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{getPriorityTooltip(level)}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ))}
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Complexity Level as Slider */}
+          <FormField
+            control={form.control}
+            name="complexity_level_id"
+            render={({ field }) => (
+              <FormItem className="space-y-4">
+                <div>
+                  <FormLabel className="flex items-center gap-2">
+                    Complexity Level
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle size={16} className="text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Affects effort and completion time</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </FormLabel>
+                  <div className="text-sm mt-1">{getSelectedComplexityName()}</div>
+                </div>
+                
+                <FormControl>
+                  <div className="pt-2">
+                    <Slider
+                      min={1}
+                      max={5}
+                      step={1}
+                      value={[field.value || 3]}
+                      onValueChange={(vals) => field.onChange(vals[0])}
+                      className="w-full"
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Task Type */}
-            <FormField
-              control={form.control}
-              name="task_type_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    Task Type
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <HelpCircle size={16} className="text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Affects time estimate and scheduling</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </FormLabel>
-                  <FormControl>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value?.toString()}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select task type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {taskTypes.length > 0 && taskTypes.reduce((acc: any[], type: any) => {
-                          const categoryExists = acc.some(item => item.category === type.category);
-                          
-                          if (!categoryExists) {
-                            acc.push({
-                              category: type.category,
-                              items: taskTypes.filter(t => t.category === type.category)
-                            });
-                          }
-                          
-                          return acc;
-                        }, []).map((categoryGroup: any) => (
-                          <div key={categoryGroup.category} className="mb-2">
-                            <div className="px-2 py-1.5 text-xs font-semibold bg-muted">{categoryGroup.category}</div>
-                            {categoryGroup.items.map((type: any) => (
-                              <SelectItem key={type.id} value={type.id.toString()}>
-                                {type.name}
-                              </SelectItem>
-                            ))}
-                          </div>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Assigned User */}
-            <FormField
-              control={form.control}
-              name="assigned_user_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Assigned User (Optional)</FormLabel>
-                  <FormControl>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select user (optional)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {projectUsers.map(user => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.first_name} {user.last_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Reference Links - Placeholder, would need additional implementation for array field */}
-            <div className="space-y-2">
-              <FormLabel className="block">Reference Links (Optional)</FormLabel>
-              <Input type="url" placeholder="Add reference links (click + to add more)" />
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            {/* Priority Level as Pills */}
-            <FormField
-              control={form.control}
-              name="priority_level_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    Priority Level
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <HelpCircle size={16} className="text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Affects queue position and start time</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </FormLabel>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {priorityLevels.map(level => (
-                      <TooltipProvider key={level.id}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Badge
-                              variant="outline"
-                              className={`cursor-pointer px-3 py-1 hover:bg-muted transition-colors ${
-                                field.value === level.id 
-                                  ? `bg-opacity-20 bg-${level.color || 'gray'}-100 ring-1 ring-${level.color || 'gray'}-200` 
-                                  : ''
-                              }`}
-                              style={{
-                                backgroundColor: field.value === level.id ? `${level.color}15` : '',
-                                borderColor: field.value === level.id ? level.color : '',
-                                color: field.value === level.id ? level.color : ''
-                              }}
-                              onClick={() => field.onChange(level.id)}
-                            >
-                              <div className="flex items-center">
-                                <span 
-                                  className="w-2 h-2 rounded-full mr-1.5 flex-shrink-0"
-                                  style={{ backgroundColor: level.color || '#888888' }}
-                                />
-                                {level.name}
-                              </div>
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{getPriorityTooltip(level)}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Complexity Level as Slider */}
-            <FormField
-              control={form.control}
-              name="complexity_level_id"
-              render={({ field }) => (
-                <FormItem className="space-y-4">
-                  <div>
-                    <FormLabel className="flex items-center gap-2">
-                      Complexity Level
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <HelpCircle size={16} className="text-muted-foreground" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Affects effort and completion time</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </FormLabel>
-                    <div className="text-sm mt-1">{getSelectedComplexityName()}</div>
-                  </div>
-                  
-                  <FormControl>
-                    <div className="pt-2">
-                      <Slider
-                        min={1}
-                        max={5}
-                        step={1}
-                        value={[field.value || 3]}
-                        onValueChange={(vals) => field.onChange(vals[0])}
-                        className="w-full"
-                      />
-                      <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
-                        <span>Easy</span>
-                        <span>Standard</span>
-                        <span>Complex</span>
-                      </div>
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
+                      <span>Easy</span>
+                      <span>Standard</span>
+                      <span>Complex</span>
                     </div>
-                  </FormControl>
-                  
-                  <div className="text-xs text-muted-foreground">
-                    {complexityLevels.find(level => level.id === field.value)
-                      ? getComplexityTooltip(complexityLevels.find(level => level.id === field.value))
-                      : "Standard completion time"}
                   </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                </FormControl>
+                
+                <div className="text-xs text-muted-foreground">
+                  {complexityLevels.find(level => level.id === field.value)
+                    ? getComplexityTooltip(complexityLevels.find(level => level.id === field.value))
+                    : "Standard completion time"}
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            {/* Target Device as Icons */}
-            <FormField
-              control={form.control}
-              name="target_device"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Target Device</FormLabel>
-                  <div className="flex gap-3 mt-2">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div
-                            className={`flex flex-col items-center p-2 rounded-md cursor-pointer border ${
-                              field.value === 'Desktop' 
-                                ? 'bg-primary/10 border-primary' 
-                                : 'border-input hover:bg-accent'
-                            }`}
-                            onClick={() => field.onChange('Desktop')}
-                          >
-                            <Monitor size={20} className="mb-1" />
-                            <span className="text-xs">Desktop</span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Desktop view only</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div
-                            className={`flex flex-col items-center p-2 rounded-md cursor-pointer border ${
-                              field.value === 'Mobile' 
-                                ? 'bg-primary/10 border-primary' 
-                                : 'border-input hover:bg-accent'
-                            }`}
-                            onClick={() => field.onChange('Mobile')}
-                          >
-                            <Smartphone size={20} className="mb-1" />
-                            <span className="text-xs">Mobile</span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Mobile view only</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div
-                            className={`flex flex-col items-center p-2 rounded-md cursor-pointer border ${
-                              field.value === 'Both' 
-                                ? 'bg-primary/10 border-primary' 
-                                : 'border-input hover:bg-accent'
-                            }`}
-                            onClick={() => field.onChange('Both')}
-                          >
-                            <MonitorSmartphone size={20} className="mb-1" />
-                            <span className="text-xs">Both</span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Responsive - works on all devices</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+          {/* Target Device as Icons */}
+          <FormField
+            control={form.control}
+            name="target_device"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Target Device</FormLabel>
+                <div className="flex gap-3 mt-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={`flex flex-col items-center p-2 rounded-md cursor-pointer border ${
+                            field.value === 'Desktop' 
+                              ? 'bg-primary/10 border-primary' 
+                              : 'border-input hover:bg-accent'
+                          }`}
+                          onClick={() => field.onChange('Desktop')}
+                        >
+                          <Monitor size={20} className="mb-1" />
+                          <span className="text-xs">Desktop</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Desktop view only</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={`flex flex-col items-center p-2 rounded-md cursor-pointer border ${
+                            field.value === 'Mobile' 
+                              ? 'bg-primary/10 border-primary' 
+                              : 'border-input hover:bg-accent'
+                          }`}
+                          onClick={() => field.onChange('Mobile')}
+                        >
+                          <Smartphone size={20} className="mb-1" />
+                          <span className="text-xs">Mobile</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Mobile view only</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={`flex flex-col items-center p-2 rounded-md cursor-pointer border ${
+                            field.value === 'Both' 
+                              ? 'bg-primary/10 border-primary' 
+                              : 'border-input hover:bg-accent'
+                          }`}
+                          onClick={() => field.onChange('Both')}
+                        >
+                          <MonitorSmartphone size={20} className="mb-1" />
+                          <span className="text-xs">Both</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Responsive - works on all devices</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Image Upload/Link Field (New) */}
+          <FormItem>
+            <FormLabel>Image Reference (Optional)</FormLabel>
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <div className="relative border border-input rounded-md p-2 flex-1">
+                  <Input
+                    type="url"
+                    placeholder="Paste image URL here"
+                    value={form.watch("image_url") || ""}
+                    onChange={handleImageUrlChange}
+                    className="border-0 p-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  />
+                  <div className="absolute right-2 top-2.5 text-muted-foreground">
+                    <Link size={16} />
                   </div>
-                  <FormMessage />
-                </FormItem>
+                </div>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="image-upload"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={handleImageUpload}
+                  />
+                  <Button type="button" variant="outline" className="h-10 px-3 gap-2">
+                    <Upload size={16} />
+                    <span className="sr-only sm:not-sr-only">Upload</span>
+                  </Button>
+                </div>
+              </div>
+              
+              {imagePreview && (
+                <div className="relative inline-block">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="max-h-40 rounded-md border border-input" 
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+                    onClick={clearImage}
+                  >
+                    <X size={14} />
+                  </Button>
+                </div>
               )}
-            />
-          </div>
+            </div>
+          </FormItem>
         </div>
 
         <Button type="submit" disabled={isSubmitting} className="w-full mt-6">

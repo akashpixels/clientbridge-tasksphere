@@ -28,6 +28,10 @@ export const TaskCreationDialog = ({ open, onOpenChange }: TaskCreationDialogPro
         throw new Error(userError.message);
       }
       
+      // Handle potential image upload to storage (skipped in this implementation)
+      // In production, you would upload the image to Supabase Storage first
+      // then add the resulting URL to the task data
+      
       const taskData = {
         ...formData,
         project_id: projectId,
@@ -64,7 +68,7 @@ export const TaskCreationDialog = ({ open, onOpenChange }: TaskCreationDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Create New Task</DialogTitle>
           <DialogDescription>

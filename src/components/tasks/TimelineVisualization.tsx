@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
-import { Info, AlertTriangle, Monitor, Smartphone } from "lucide-react";
+import { Info, AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -242,14 +242,6 @@ export const TimelineVisualization = ({
     calculateTimeline();
   }, [taskType, priorityLevel, complexityLevel, queuePosition]);
 
-  const TimelineDot = ({ label, time, active = false }: { label: string, time: string, active?: boolean }) => (
-    <div className="flex flex-col items-center">
-      <div className="text-xs text-center mb-1">{label}</div>
-      <div className={`w-3 h-3 rounded-full ${active ? 'bg-primary' : 'bg-secondary'} mb-1`}></div>
-      <div className="text-xs text-center">{time}</div>
-    </div>
-  );
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -271,26 +263,47 @@ export const TimelineVisualization = ({
 
   return (
     <div className="space-y-4">
+      {/* Timeline labels */}
+      <div className="flex justify-between items-center text-xs font-medium text-muted-foreground">
+        <span>Now</span>
+        <span>Start Time</span>
+        <span>ETA</span>
+      </div>
+      
       {/* Timeline visualization */}
       <div className="relative">
-        <div className="flex justify-between items-center pb-2">
-          <TimelineDot label="Now" time={timelineEstimate.currentTime} active />
-          <TimelineDot label="Start Time" time={timelineEstimate.startTime} />
-          <TimelineDot label="ETA" time={timelineEstimate.eta} />
+        <div className="flex justify-between items-center">
+          {/* Now dot */}
+          <div className="flex flex-col items-center z-10">
+            <div className="w-3 h-3 rounded-full bg-primary"></div>
+            <div className="text-xs mt-1">{timelineEstimate.currentTime}</div>
+          </div>
+          
+          {/* Estimated effort label (middle) */}
+          <div className="absolute top-1 left-1/4 right-1/4 text-xs text-center font-medium">
+            Estimated Effort: {timelineEstimate.taskInfo.hoursNeeded} hours
+          </div>
+          
+          {/* Start time dot */}
+          <div className="flex flex-col items-center z-10">
+            <div className="w-3 h-3 rounded-full bg-secondary"></div>
+            <div className="text-xs mt-1">{timelineEstimate.startTime}</div>
+          </div>
+          
+          {/* ETA dot */}
+          <div className="flex flex-col items-center z-10">
+            <div className="w-3 h-3 rounded-full bg-secondary"></div>
+            <div className="text-xs mt-1">{timelineEstimate.eta}</div>
+          </div>
         </div>
         
         {/* Connecting line */}
-        <div className="absolute top-7 left-0 right-0 h-0.5 bg-muted -z-10"></div>
-        
-        {/* Estimated effort label */}
-        <div className="text-xs text-center text-muted-foreground mt-4">
-          Estimated Effort: {timelineEstimate.taskInfo.hoursNeeded} hours
-        </div>
-        
-        {/* Queue position */}
-        <div className="text-xs text-center font-medium mt-1">
-          Queue Position: #{timelineEstimate.queuePosition + 1}
-        </div>
+        <div className="absolute top-1.5 left-0 right-0 h-0.5 bg-muted -z-0"></div>
+      </div>
+      
+      {/* Queue position */}
+      <div className="text-xs text-center font-medium mt-1">
+        Queue Position: #{timelineEstimate.queuePosition + 1}
       </div>
 
       {timelineEstimate.taskInfo.isOverdue && (
