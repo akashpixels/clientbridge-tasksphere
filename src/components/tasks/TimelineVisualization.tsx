@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
 import { AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
 
 interface TimelineVisualizationProps {
   taskTypeId?: number | null;
@@ -213,6 +214,7 @@ export const TimelineVisualization = ({
         
       } catch (error) {
         console.error("Error calculating timeline:", error);
+        const now = new Date();
         setTimelineEstimate({
           currentTime: format(now, 'h:mm a'),
           startTime: null,
@@ -248,18 +250,8 @@ export const TimelineVisualization = ({
       return timelineEstimate.startTime ? "02 Hrs" : "--";
     } else {
       return timelineEstimate.eta && timelineEstimate.taskInfo.hoursNeeded 
-        ? `${Math.round(timelineEstimate.taskInfo.hoursNeeded)} Hrs` 
+        ? formatHourDifference(timelineEstimate.taskInfo.hoursNeeded)
         : "--";
-    }
-  };
-
-  const formatTimelineDate = (dateString: string | null) => {
-    if (!dateString) return "--";
-    try {
-      const date = new Date(dateString.replace(/(\d+)(am|pm)/i, '$1 $2'));
-      return format(date, "haaa, MMM dd").toLowerCase();
-    } catch (e) {
-      return dateString;
     }
   };
 
@@ -298,7 +290,7 @@ export const TimelineVisualization = ({
                 Start time
               </div>
               <div className="text-xs mt-3 text-gray-700">
-                {formatTimelineDate(timelineEstimate?.startTime) || "--"}
+                {formatTimelineTime(timelineEstimate?.startTime) || "--"}
               </div>
             </div>
             
@@ -307,7 +299,7 @@ export const TimelineVisualization = ({
                 ETA
               </div>
               <div className="text-xs mt-3 text-gray-700">
-                {formatTimelineDate(timelineEstimate?.eta) || "--"}
+                {formatTimelineTime(timelineEstimate?.eta) || "--"}
               </div>
             </div>
           </div>
