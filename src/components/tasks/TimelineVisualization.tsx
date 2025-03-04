@@ -258,37 +258,41 @@ export const TimelineVisualization = ({
           </div>
 
 
-          
-    <div className="flex justify-between items-center my-2 relative">
-  {/* Left Circle */}
-  <div className="flex flex-col items-center z-10">
-    <Circle className="w-5 h-5 text-primary fill-white stroke-[1.5]" />
-    <div className={timeClassName + " text-gray-700"}>
-      {timelineEstimate?.currentTime || "--"}
-    </div>
-  </div>
+<div className="relative my-2">
+  {/* Line behind */}
+  <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
 
-  {/* Middle Line */}
-  <div className="absolute left-0 right-0 top-1/2 h-[1px] bg-gray-300 -z-0"></div>
+  {/* Timeline elements */}
+  <div className="flex justify-between items-center relative z-10">
+    
+    {/* Left Circle */}
+    <div className="flex flex-col items-center">
+      <Circle className="w-5 h-5 text-primary fill-white stroke-[1.5]" />
+      <div className={timeClassName + " text-gray-700"}>
+        {timelineEstimate?.currentTime || "--"}
+      </div>
+    </div>
 
-  {/* Start Time Pill */}
-  <div className="flex flex-col items-center z-10">
-    <div className={`${compact ? 'w-14 h-6' : 'w-18 h-7'} rounded-full border border-gray-300 bg-white flex items-center justify-center ${compact ? 'text-[10px]' : 'text-xs'} font-medium text-gray-700`}>
-      Start time
+    {/* Start Time Pill */}
+    <div className="flex flex-col items-center">
+      <div className={`${compact ? 'w-14 h-6' : 'w-18 h-7'} rounded-full border border-gray-300 bg-white flex items-center justify-center ${compact ? 'text-[10px]' : 'text-xs'} font-medium text-gray-700`}>
+        Start time
+      </div>
+      <div className={timeClassName + " text-gray-700"}>
+        {formatTimelineTime(timelineEstimate?.startTime) || "--"}
+      </div>
     </div>
-    <div className={timeClassName + " text-gray-700"}>
-      {formatTimelineTime(timelineEstimate?.startTime) || "--"}
-    </div>
-  </div>
 
-  {/* ETA Pill */}
-  <div className="flex flex-col items-center z-10">
-    <div className={`${pillClassName} border-gray-300 bg-white flex items-center justify-center font-medium text-gray-700`}>
-      ETA
+    {/* ETA Pill */}
+    <div className="flex flex-col items-center">
+      <div className={`${pillClassName} border-gray-300 bg-white flex items-center justify-center font-medium text-gray-700`}>
+        ETA
+      </div>
+      <div className={timeClassName + " text-gray-700"}>
+        {formatTimelineTime(timelineEstimate?.eta) || "--"}
+      </div>
     </div>
-    <div className={timeClassName + " text-gray-700"}>
-      {formatTimelineTime(timelineEstimate?.eta) || "--"}
-    </div>
+
   </div>
 </div>
 
