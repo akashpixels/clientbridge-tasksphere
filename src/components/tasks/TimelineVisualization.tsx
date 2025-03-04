@@ -257,7 +257,7 @@ export const TimelineVisualization = ({
             {/* First column with vertical line positioned exactly at start of horizontal line */}
             <div className="flex flex-col items-start z-10 pl-0">
               <div className="relative h-[20px] flex items-center">
-                <div className="w-[2px] h-[16px] bg-primary absolute left-0"></div>
+                <div className="w-[1px] h-[16px] bg-gray-300 absolute left-0 top-[0px]"></div>
               </div>
               <div className="text-[9px] mt-0.5 text-gray-500">
                 {timelineEstimate?.currentTime || "--"}
