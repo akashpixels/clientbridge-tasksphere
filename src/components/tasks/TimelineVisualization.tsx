@@ -251,15 +251,13 @@ export const TimelineVisualization = ({
           </div>
           
           <div className="flex justify-between items-center mb-2 pt-1 pb-1 relative">
-            {/* The horizontal line now starts exactly from the left edge */}
+            {/* The horizontal line */}
             <div className="absolute top-[16px] left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
             
             {/* First column with vertical line positioned exactly at start of horizontal line */}
             <div className="flex flex-col items-start z-10 pl-0">
               <div className="relative h-[20px] flex items-center">
-               
-                <div className="w-[1.5px] h-[13px] bg-gray-300 absolute left-0 top-[5px]"></div>
-
+                <div className="w-[1px] h-[13px] bg-gray-300 absolute left-0 top-[0px]"></div>
               </div>
               <div className="text-[9px] mt-0.5 text-gray-500">
                 {timelineEstimate?.currentTime || "--"}
@@ -275,9 +273,12 @@ export const TimelineVisualization = ({
               </div>
             </div>
             
-            <div className="flex flex-col items-center z-10">
-              <div className="h-[22px] w-[35px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
-                ETA
+            {/* ETA pill positioned absolutely at the right end of horizontal line */}
+            <div className="flex flex-col items-end z-10 pr-0">
+              <div className="relative h-[20px] flex items-center">
+                <div className="h-[22px] w-[35px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600 absolute right-0">
+                  ETA
+                </div>
               </div>
               <div className="text-[9px] mt-0.5 text-gray-500">
                 {formatTimelineTime(timelineEstimate?.eta) || "--"}
