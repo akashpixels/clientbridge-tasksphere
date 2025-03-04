@@ -265,7 +265,7 @@ export const TimelineVisualization = ({
             </div>
             
             <div className="flex flex-col items-center z-10">
-              <div className="h-[22px] w-[80px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
+              <div className="h-[22px] w-[40px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
                 Start
               </div>
               <div className="text-[9px] mt-0.5 text-gray-500">
@@ -274,7 +274,7 @@ export const TimelineVisualization = ({
             </div>
             
             <div className="flex flex-col items-center z-10">
-              <div className="h-[22px] w-[60px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
+              <div className="h-[22px] w-[35px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
                 ETA
               </div>
               <div className="text-[9px] mt-0.5 text-gray-500">
