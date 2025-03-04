@@ -261,7 +261,7 @@ export const TimelineVisualization = ({
             {getTimeBetweenNodes('start')}
           </div>
           
-          <div className="absolute top-[-0px] left-[70%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
+          <div className="absolute top-[-0px] left-[65%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
             {getTimeBetweenNodes('eta')}
           </div>
           
