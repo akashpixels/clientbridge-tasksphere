@@ -6,6 +6,7 @@ import { TaskForm } from "./TaskForm";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TaskCreationDialogProps {
   open: boolean;
@@ -68,17 +69,19 @@ export const TaskCreationDialog = ({ open, onOpenChange }: TaskCreationDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-lg h-[75vh] max-h-[800px] flex flex-col overflow-hidden p-0">
+        <DialogHeader className="px-6 pt-6 pb-2 sticky top-0 bg-background z-10">
           <DialogTitle>Create New Task</DialogTitle>
           <DialogDescription>
             Fill in the details to create a new task. Timeline estimates will update as you make selections.
           </DialogDescription>
         </DialogHeader>
         
-        <TaskForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        <ScrollArea className="flex-1 px-6 pb-2">
+          <TaskForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        </ScrollArea>
         
-        <DialogFooter className="mt-4">
+        <DialogFooter className="px-6 py-4 border-t sticky bottom-0 bg-background z-10">
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
