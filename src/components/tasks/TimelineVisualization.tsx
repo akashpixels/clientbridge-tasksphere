@@ -251,7 +251,7 @@ export const TimelineVisualization = ({
             {getTimeBetweenNodes('eta')}
           </div>
           
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center my-[7px]">
             <div className="flex flex-col items-center z-10">
               <div className={`${pillClassName} border-primary bg-white flex items-center justify-center font-medium text-primary`}>
                 Now
