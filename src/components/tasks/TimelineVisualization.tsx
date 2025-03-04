@@ -250,13 +250,13 @@ export const TimelineVisualization = ({
             {getTimeBetweenNodes('eta')}
           </div>
           
-          <div className="flex justify-between items-center mb-2 pt-1 pb-1">
-            {/* The horizontal line positioned to start at the vertical line */}
+          <div className="flex justify-between items-center mb-2 pt-1 pb-1 relative">
+            {/* The horizontal line now starts exactly from the left edge */}
             <div className="absolute top-[16px] left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
             
-            {/* Vertical line marker instead of circle */}
-            <div className="flex flex-col items-center z-10">
-              <div className="relative flex items-center justify-center h-[20px]">
+            {/* First column with vertical line positioned exactly at start of horizontal line */}
+            <div className="flex flex-col items-start z-10 pl-0">
+              <div className="relative h-[20px] flex items-center">
                 <div className="w-[2px] h-[16px] bg-primary absolute left-0"></div>
               </div>
               <div className="text-[9px] mt-0.5 text-gray-500">
