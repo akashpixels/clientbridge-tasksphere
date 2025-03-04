@@ -272,7 +272,7 @@ export const TimelineVisualization = ({
             {/* First column with vertical line positioned exactly at start of horizontal line */}
             <div className="flex flex-col items-start z-10 pl-0">
               <div className="relative h-[20px] flex items-center">
-                <div className="w-[1px] h-[13px] bg-gray-300 absolute left-0 top-[5px]"></div>
+                <div className="w-[1px] h-[13px] bg-gray-300 absolute left-0 top-[-8px]"></div>
               </div>
               {/* Removed current time display */}
             </div>
