@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -271,12 +272,12 @@ export const TaskForm = ({
             <FormField control={form.control} name="target_device" render={({
             field
           }) => <FormItem>
-                  <div className="flex gap-3 mt-0 justify-center">
+                  <div className="flex gap-5 mt-0 justify-center">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div 
-                            className={`flex items-center justify-center p-2 rounded-md cursor-pointer ${field.value === 'Desktop' ? 'text-black' : 'text-gray-300'}`}
+                            className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'Desktop' ? 'text-black' : 'text-gray-300'}`}
                             onClick={() => field.onChange('Desktop')}
                           >
                             <Monitor size={24} />
@@ -292,7 +293,7 @@ export const TaskForm = ({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div 
-                            className={`flex items-center justify-center p-2 rounded-md cursor-pointer ${field.value === 'Mobile' ? 'text-black' : 'text-gray-300'}`}
+                            className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'Mobile' ? 'text-black' : 'text-gray-300'}`}
                             onClick={() => field.onChange('Mobile')}
                           >
                             <Smartphone size={24} />
@@ -308,7 +309,7 @@ export const TaskForm = ({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div 
-                            className={`flex items-center justify-center p-2 rounded-md cursor-pointer ${field.value === 'Both' ? 'text-black' : 'text-gray-300'}`}
+                            className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'Both' ? 'text-black' : 'text-gray-300'}`}
                             onClick={() => field.onChange('Both')}
                           >
                             <MonitorSmartphone size={24} />
@@ -328,17 +329,17 @@ export const TaskForm = ({
           field
         }) => <FormItem>
                 <FormControl>
-                  <div className="flex flex-wrap gap-2 mt-1">
+                  <div className="flex flex-nowrap gap-1 mt-1 overflow-x-auto text-xs">
                     {priorityLevels.map(level => <TooltipProvider key={level.id}>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Badge variant="outline" className={`cursor-pointer px-3 py-1 hover:bg-muted transition-colors ${field.value === level.id ? `bg-opacity-20 bg-${level.color || 'gray'}-100 ring-1 ring-${level.color || 'gray'}-200` : ''}`} style={{
+                            <Badge variant="outline" className={`cursor-pointer px-2 py-0.5 whitespace-nowrap hover:bg-muted transition-colors ${field.value === level.id ? `bg-opacity-20 bg-${level.color || 'gray'}-100 ring-1 ring-${level.color || 'gray'}-200` : ''}`} style={{
                       backgroundColor: field.value === level.id ? `${level.color}15` : '',
                       borderColor: field.value === level.id ? level.color : '',
                       color: field.value === level.id ? level.color : ''
                     }} onClick={() => field.onChange(level.id)}>
                               <div className="flex items-center">
-                                <span className="w-2 h-2 rounded-full mr-1.5 flex-shrink-0" style={{
+                                <span className="w-2 h-2 rounded-full mr-1 flex-shrink-0" style={{
                           backgroundColor: level.color || '#888888'
                         }} />
                                 {level.name}
@@ -357,17 +358,19 @@ export const TaskForm = ({
 
           <FormField control={form.control} name="complexity_level_id" render={({
           field
-        }) => <FormItem className="space-y-4">
+        }) => <FormItem className="space-y-3">
                 <div>
                   <div className="text-sm">{getSelectedComplexityName()}</div>
                 </div>
                 
                 <FormControl>
-                  <div className="pt-2">
+                  <div className="pt-1">
                     <Slider min={1} max={5} step={1} value={[field.value || 3]} onValueChange={vals => field.onChange(vals[0])} className="w-full" />
-                    <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                      <span>Basic</span>
                       <span>Easy</span>
                       <span>Standard</span>
+                      <span>Advanced</span>
                       <span>Complex</span>
                     </div>
                   </div>
