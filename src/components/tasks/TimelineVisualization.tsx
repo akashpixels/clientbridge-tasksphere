@@ -247,7 +247,7 @@ export const TimelineVisualization = ({
   return <div className="sticky top-0 bg-background z-10 border-b">
       <div className="py-1">
         <div className="relative">
-          <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
+          <div className="absolute  left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
           
           <div className="absolute top-0 left-1/4 -translate-x-1/2 text-[9px] text-gray-500 font-medium">
             {getTimeBetweenNodes('start')}
