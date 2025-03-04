@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { TaskForm } from "./TaskForm";
@@ -68,7 +68,7 @@ export const TaskCreationDialog = ({ open, onOpenChange }: TaskCreationDialogPro
         <DialogHeader>
           <DialogTitle>Create New Task</DialogTitle>
           <DialogDescription>
-            Fill in the details below to create a new task. Timeline estimates will update as you make selections.
+            Fill in the details to create a new task. Timeline estimates will update as you make selections.
           </DialogDescription>
         </DialogHeader>
         

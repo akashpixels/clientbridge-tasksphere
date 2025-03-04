@@ -2,8 +2,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
-import { Info, Clock, Calendar, AlertTriangle } from "lucide-react";
+import { Info, AlertTriangle, Monitor, Smartphone } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TimelineVisualizationProps {
   taskTypeId?: number | null;
@@ -13,13 +14,10 @@ interface TimelineVisualizationProps {
 }
 
 interface TimelineEstimate {
+  currentTime: string;
   startTime: string;
   eta: string;
   queuePosition: number;
-  workingHoursInfo: {
-    start: string;
-    end: string;
-  };
   taskInfo: {
     hoursNeeded: number;
     isOverdue: boolean;
@@ -150,10 +148,6 @@ export const TimelineVisualization = ({
       }
       
       try {
-        // Working hours
-        const workingStart = "10:00";
-        const workingEnd = "18:00";
-        
         // Current time
         const now = new Date();
         
@@ -227,13 +221,10 @@ export const TimelineVisualization = ({
         const isOverdue = priorityLevel.id >= 4 && differenceInHours(eta, now) > 48;
         
         setTimelineEstimate({
-          startTime: format(startTime, 'MMM d, yyyy h:mm a'),
-          eta: format(eta, 'MMM d, yyyy h:mm a'),
+          currentTime: format(now, 'h:mm a'),
+          startTime: format(startTime, 'h:mm a, MMM d'),
+          eta: format(eta, 'h:mm a, MMM d'),
           queuePosition,
-          workingHoursInfo: {
-            start: workingStart,
-            end: workingEnd,
-          },
           taskInfo: {
             hoursNeeded: Math.round(hoursNeeded * 10) / 10, // Round to 1 decimal
             isOverdue
@@ -251,13 +242,19 @@ export const TimelineVisualization = ({
     calculateTimeline();
   }, [taskType, priorityLevel, complexityLevel, queuePosition]);
 
+  const TimelineDot = ({ label, time, active = false }: { label: string, time: string, active?: boolean }) => (
+    <div className="flex flex-col items-center">
+      <div className="text-xs text-center mb-1">{label}</div>
+      <div className={`w-3 h-3 rounded-full ${active ? 'bg-primary' : 'bg-secondary'} mb-1`}></div>
+      <div className="text-xs text-center">{time}</div>
+    </div>
+  );
+
   if (isLoading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-10 w-full" />
       </div>
     );
   }
@@ -265,62 +262,43 @@ export const TimelineVisualization = ({
   if (!taskTypeId || !priorityLevelId || !timelineEstimate) {
     return (
       <div className="flex flex-col items-center justify-center text-center h-full text-muted-foreground p-6">
-        <Info size={40} className="mb-2" />
-        <h4 className="text-lg font-medium">Timeline Preview</h4>
-        <p>Select a task type and priority level to see timeline estimates</p>
+        <Info size={30} className="mb-2" />
+        <h4 className="text-sm font-medium">Timeline Preview</h4>
+        <p className="text-xs">Select task details to see timeline estimates</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-background p-3 rounded-md shadow-sm">
-            <div className="flex items-center text-muted-foreground mb-1">
-              <Clock size={14} className="mr-1" />
-              <span className="text-xs">PROBABLE START TIME</span>
-            </div>
-            <p className="text-sm font-medium">{timelineEstimate.startTime}</p>
-          </div>
-          
-          <div className="bg-background p-3 rounded-md shadow-sm">
-            <div className="flex items-center text-muted-foreground mb-1">
-              <Calendar size={14} className="mr-1" />
-              <span className="text-xs">ESTIMATED COMPLETION</span>
-            </div>
-            <p className="text-sm font-medium">{timelineEstimate.eta}</p>
-          </div>
+    <div className="space-y-4">
+      {/* Timeline visualization */}
+      <div className="relative">
+        <div className="flex justify-between items-center pb-2">
+          <TimelineDot label="Now" time={timelineEstimate.currentTime} active />
+          <TimelineDot label="Start Time" time={timelineEstimate.startTime} />
+          <TimelineDot label="ETA" time={timelineEstimate.eta} />
         </div>
-
-        <div className="bg-background p-3 rounded-md shadow-sm">
-          <h5 className="text-sm font-medium mb-1">Estimated Effort</h5>
-          <p className="text-sm">{timelineEstimate.taskInfo.hoursNeeded} hours</p>
+        
+        {/* Connecting line */}
+        <div className="absolute top-7 left-0 right-0 h-0.5 bg-muted -z-10"></div>
+        
+        {/* Estimated effort label */}
+        <div className="text-xs text-center text-muted-foreground mt-4">
+          Estimated Effort: {timelineEstimate.taskInfo.hoursNeeded} hours
         </div>
-
-        <div className="bg-background p-3 rounded-md shadow-sm">
-          <h5 className="text-sm font-medium mb-1">Queue Position</h5>
-          <p className="text-sm">#{timelineEstimate.queuePosition + 1} in queue</p>
+        
+        {/* Queue position */}
+        <div className="text-xs text-center font-medium mt-1">
+          Queue Position: #{timelineEstimate.queuePosition + 1}
         </div>
-      </div>
-
-      <div className="bg-background p-3 rounded-md shadow-sm">
-        <h5 className="text-sm font-medium mb-2">Working Hours</h5>
-        <p className="text-sm">
-          Work is performed between {timelineEstimate.workingHoursInfo.start} and {timelineEstimate.workingHoursInfo.end}.
-          Tasks are processed during these hours only.
-        </p>
       </div>
 
       {timelineEstimate.taskInfo.isOverdue && (
-        <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md shadow-sm">
-          <div className="flex items-center text-yellow-700 mb-1">
-            <AlertTriangle size={14} className="mr-1" />
-            <span className="text-xs font-medium">ATTENTION</span>
-          </div>
-          <p className="text-sm text-yellow-700">
+        <div className="flex items-start text-yellow-600 text-xs p-2 bg-yellow-50 rounded-md border border-yellow-200">
+          <AlertTriangle size={14} className="mt-0.5 mr-1 flex-shrink-0" />
+          <span>
             This task may take longer than expected. Consider adjusting priority or complexity.
-          </p>
+          </span>
         </div>
       )}
     </div>

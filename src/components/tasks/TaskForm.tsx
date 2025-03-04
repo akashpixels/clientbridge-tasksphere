@@ -19,8 +19,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TimelineVisualization } from "./TimelineVisualization";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Monitor, Smartphone, MonitorSmartphone } from "lucide-react";
 import { formatDuration } from "@/lib/date-utils";
+import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
 
 // Form schema with validations
 const taskFormSchema = z.object({
@@ -228,10 +230,27 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
     return `${timeToStart} delay, ${multiplier}`;
   };
 
+  // Get selected complexity level name
+  const getSelectedComplexityName = () => {
+    const complexityId = form.watch("complexity_level_id");
+    const selectedLevel = complexityLevels.find(level => level.id === complexityId);
+    return selectedLevel?.name || "Standard";
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-5">
+        {/* Timeline visualization at the top */}
+        <div className="bg-muted/30 rounded-lg p-3 mb-4">
+          <TimelineVisualization 
+            taskTypeId={timelineParams.taskTypeId} 
+            priorityLevelId={timelineParams.priorityLevelId}
+            complexityLevelId={timelineParams.complexityLevelId}
+            projectId={projectId}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-4">
             {/* Task Details */}
             <FormField
@@ -293,7 +312,7 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
                           return acc;
                         }, []).map((categoryGroup: any) => (
                           <div key={categoryGroup.category} className="mb-2">
-                            <div className="px-2 py-1.5 text-sm font-semibold bg-muted">{categoryGroup.category}</div>
+                            <div className="px-2 py-1.5 text-xs font-semibold bg-muted">{categoryGroup.category}</div>
                             {categoryGroup.items.map((type: any) => (
                               <SelectItem key={type.id} value={type.id.toString()}>
                                 {type.name}
@@ -301,139 +320,6 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
                             ))}
                           </div>
                         ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Priority Level */}
-            <FormField
-              control={form.control}
-              name="priority_level_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    Priority Level
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <HelpCircle size={16} className="text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Affects queue position and start time</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </FormLabel>
-                  <FormControl>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value?.toString()}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select priority" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {priorityLevels.map(level => (
-                          <TooltipProvider key={level.id}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <SelectItem value={level.id.toString()}>
-                                  <div className="flex items-center">
-                                    <span 
-                                      className="w-3 h-3 rounded-full mr-2"
-                                      style={{ backgroundColor: level.color || '#888888' }}
-                                    />
-                                    {level.name}
-                                  </div>
-                                </SelectItem>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{getPriorityTooltip(level)}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Complexity Level */}
-            <FormField
-              control={form.control}
-              name="complexity_level_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    Complexity Level
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <HelpCircle size={16} className="text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Affects effort and completion time</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </FormLabel>
-                  <FormControl>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value?.toString() || "3"}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select complexity" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {complexityLevels.map(level => (
-                          <TooltipProvider key={level.id}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <SelectItem value={level.id.toString()}>
-                                  {level.name}
-                                </SelectItem>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{getComplexityTooltip(level)}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Target Device */}
-            <FormField
-              control={form.control}
-              name="target_device"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Target Device</FormLabel>
-                  <FormControl>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select target device" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Desktop">Desktop</SelectItem>
-                        <SelectItem value="Mobile">Mobile</SelectItem>
-                        <SelectItem value="Both">Both</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -476,22 +362,198 @@ export const TaskForm = ({ onSubmit, isSubmitting }: TaskFormProps) => {
               <FormLabel className="block">Reference Links (Optional)</FormLabel>
               <Input type="url" placeholder="Add reference links (click + to add more)" />
             </div>
-
           </div>
           
-          {/* Timeline Visualization Column */}
-          <div className="bg-muted/40 rounded-lg p-4">
-            <h3 className="text-lg font-medium mb-4">Timeline Visualization</h3>
-            <TimelineVisualization 
-              taskTypeId={timelineParams.taskTypeId} 
-              priorityLevelId={timelineParams.priorityLevelId}
-              complexityLevelId={timelineParams.complexityLevelId}
-              projectId={projectId}
+          <div className="space-y-4">
+            {/* Priority Level as Pills */}
+            <FormField
+              control={form.control}
+              name="priority_level_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    Priority Level
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle size={16} className="text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Affects queue position and start time</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </FormLabel>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {priorityLevels.map(level => (
+                      <TooltipProvider key={level.id}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge
+                              variant="outline"
+                              className={`cursor-pointer px-3 py-1 hover:bg-muted transition-colors ${
+                                field.value === level.id 
+                                  ? `bg-opacity-20 bg-${level.color || 'gray'}-100 ring-1 ring-${level.color || 'gray'}-200` 
+                                  : ''
+                              }`}
+                              style={{
+                                backgroundColor: field.value === level.id ? `${level.color}15` : '',
+                                borderColor: field.value === level.id ? level.color : '',
+                                color: field.value === level.id ? level.color : ''
+                              }}
+                              onClick={() => field.onChange(level.id)}
+                            >
+                              <div className="flex items-center">
+                                <span 
+                                  className="w-2 h-2 rounded-full mr-1.5 flex-shrink-0"
+                                  style={{ backgroundColor: level.color || '#888888' }}
+                                />
+                                {level.name}
+                              </div>
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{getPriorityTooltip(level)}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ))}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Complexity Level as Slider */}
+            <FormField
+              control={form.control}
+              name="complexity_level_id"
+              render={({ field }) => (
+                <FormItem className="space-y-4">
+                  <div>
+                    <FormLabel className="flex items-center gap-2">
+                      Complexity Level
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle size={16} className="text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Affects effort and completion time</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </FormLabel>
+                    <div className="text-sm mt-1">{getSelectedComplexityName()}</div>
+                  </div>
+                  
+                  <FormControl>
+                    <div className="pt-2">
+                      <Slider
+                        min={1}
+                        max={5}
+                        step={1}
+                        value={[field.value || 3]}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
+                        <span>Easy</span>
+                        <span>Standard</span>
+                        <span>Complex</span>
+                      </div>
+                    </div>
+                  </FormControl>
+                  
+                  <div className="text-xs text-muted-foreground">
+                    {complexityLevels.find(level => level.id === field.value)
+                      ? getComplexityTooltip(complexityLevels.find(level => level.id === field.value))
+                      : "Standard completion time"}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Target Device as Icons */}
+            <FormField
+              control={form.control}
+              name="target_device"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Target Device</FormLabel>
+                  <div className="flex gap-3 mt-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={`flex flex-col items-center p-2 rounded-md cursor-pointer border ${
+                              field.value === 'Desktop' 
+                                ? 'bg-primary/10 border-primary' 
+                                : 'border-input hover:bg-accent'
+                            }`}
+                            onClick={() => field.onChange('Desktop')}
+                          >
+                            <Monitor size={20} className="mb-1" />
+                            <span className="text-xs">Desktop</span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Desktop view only</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={`flex flex-col items-center p-2 rounded-md cursor-pointer border ${
+                              field.value === 'Mobile' 
+                                ? 'bg-primary/10 border-primary' 
+                                : 'border-input hover:bg-accent'
+                            }`}
+                            onClick={() => field.onChange('Mobile')}
+                          >
+                            <Smartphone size={20} className="mb-1" />
+                            <span className="text-xs">Mobile</span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Mobile view only</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={`flex flex-col items-center p-2 rounded-md cursor-pointer border ${
+                              field.value === 'Both' 
+                                ? 'bg-primary/10 border-primary' 
+                                : 'border-input hover:bg-accent'
+                            }`}
+                            onClick={() => field.onChange('Both')}
+                          >
+                            <MonitorSmartphone size={20} className="mb-1" />
+                            <span className="text-xs">Both</span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Responsive - works on all devices</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
         </div>
 
-        <Button type="submit" disabled={isSubmitting} className="w-full">
+        <Button type="submit" disabled={isSubmitting} className="w-full mt-6">
           {isSubmitting ? "Creating..." : "Create Task"}
         </Button>
       </form>
