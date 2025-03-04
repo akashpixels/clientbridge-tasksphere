@@ -40,7 +40,7 @@ export function formatDuration(duration: string): string {
   return result;
 }
 
-// New function to format timeline dates in the specific format we need
+// Format timeline dates in the specific format we need
 export function formatTimelineTime(date: string | Date | null): string {
   if (!date) return "--";
   try {
@@ -51,8 +51,12 @@ export function formatTimelineTime(date: string | Date | null): string {
   }
 }
 
-// New function to format hour differences
+// Format hour differences for timeline display
 export function formatHourDifference(hours: number | null): string {
   if (hours === null || isNaN(Number(hours))) return "--";
-  return `${Math.round(hours)} Hrs`;
+  
+  // Round to one decimal place if not a whole number
+  const formattedHours = Number.isInteger(hours) ? hours : Math.round(hours * 10) / 10;
+  
+  return `${formattedHours} Hrs`;
 }

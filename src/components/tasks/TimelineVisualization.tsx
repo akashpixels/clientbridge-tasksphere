@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
@@ -19,6 +20,7 @@ interface TimelineEstimate {
   queuePosition: number;
   taskInfo: {
     hoursNeeded: number | null;
+    timeToStart: number | null;
     isOverdue: boolean;
   };
 }
@@ -141,23 +143,31 @@ export const TimelineVisualization = ({
         let startTime: Date | null = null;
         let eta: Date | null = null;
         let hoursNeeded: number | null = null;
+        let timeToStart: number | null = null;
         let isOverdue = false;
         
         if (taskType && priorityLevel && complexityLevel) {
           startTime = new Date();
+          
+          // Extract time_to_start from priority level (format: HH:MM:SS)
           if (priorityLevel.time_to_start) {
             const timeToStartMatch = priorityLevel.time_to_start.match(/(\d+):(\d+):(\d+)/);
             if (timeToStartMatch) {
               const hours = parseInt(timeToStartMatch[1]);
               const minutes = parseInt(timeToStartMatch[2]);
               
+              // Store the time_to_start in hours for display
+              timeToStart = hours + (minutes / 60);
+              
               startTime = addHours(startTime, hours);
               startTime = addMinutes(startTime, minutes);
             }
           }
           
+          // Add queue delay (30 minutes per task in queue)
           startTime = addMinutes(startTime, queuePosition * 30);
           
+          // Adjust for work hours (10am - 6pm)
           const currentHour = startTime.getHours();
           if (currentHour < 10) {
             startTime.setHours(10, 0, 0, 0);
@@ -166,7 +176,8 @@ export const TimelineVisualization = ({
             startTime.setHours(10, 0, 0, 0);
           }
           
-          hoursNeeded = 1;
+          // Calculate hours needed based on task type, priority and complexity
+          hoursNeeded = 1; // Default
           if (taskType.base_duration) {
             const baseDurationMatch = taskType.base_duration.match(/(\d+):(\d+):(\d+)/);
             if (baseDurationMatch) {
@@ -176,6 +187,7 @@ export const TimelineVisualization = ({
             }
           }
           
+          // Apply multipliers from priority and complexity
           if (priorityLevel.multiplier) {
             hoursNeeded *= priorityLevel.multiplier;
           }
@@ -184,9 +196,11 @@ export const TimelineVisualization = ({
             hoursNeeded *= complexityLevel.multiplier;
           }
           
+          // Calculate ETA based on start time + hours needed
           eta = new Date(startTime);
           eta = addHours(eta, hoursNeeded);
           
+          // Adjust for work hours
           const etaHour = eta.getHours();
           const workingHoursInDay = 8;
           if (etaHour >= 18) {
@@ -198,6 +212,7 @@ export const TimelineVisualization = ({
             eta.setHours(10 + remainingHours, eta.getMinutes(), 0, 0);
           }
           
+          // Check if task is potentially overdue
           isOverdue = priorityLevel.id >= 4 && differenceInHours(eta, now) > 48;
         }
         
@@ -208,6 +223,7 @@ export const TimelineVisualization = ({
           queuePosition,
           taskInfo: {
             hoursNeeded: hoursNeeded ? Math.round(hoursNeeded * 10) / 10 : null,
+            timeToStart: timeToStart,
             isOverdue
           }
         });
@@ -222,6 +238,7 @@ export const TimelineVisualization = ({
           queuePosition,
           taskInfo: {
             hoursNeeded: null,
+            timeToStart: null,
             isOverdue: false
           }
         });
@@ -244,14 +261,14 @@ export const TimelineVisualization = ({
   }
 
   const getTimeBetweenNodes = (nodeType: 'start' | 'eta') => {
-    if (!timelineEstimate?.taskInfo.hoursNeeded) return "--";
-    
     if (nodeType === 'start') {
-      return timelineEstimate.startTime ? "02 Hrs" : "--";
+      // Show time to start from priority level
+      if (!timelineEstimate?.taskInfo.timeToStart) return "--";
+      return `${formatHourDifference(timelineEstimate.taskInfo.timeToStart)}`;
     } else {
-      return timelineEstimate.eta && timelineEstimate.taskInfo.hoursNeeded 
-        ? formatHourDifference(timelineEstimate.taskInfo.hoursNeeded)
-        : "--";
+      // Show hours needed for the task
+      if (!timelineEstimate?.taskInfo.hoursNeeded) return "--";
+      return formatHourDifference(timelineEstimate.taskInfo.hoursNeeded);
     }
   };
 
