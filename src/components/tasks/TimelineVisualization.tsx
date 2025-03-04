@@ -257,11 +257,11 @@ export const TimelineVisualization = ({
       <div className="py-3">
         <div className="relative">
           {/* Repositioned hour indicators with updated positions */}
-          <div className="absolute top-[-8px] left-[15%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
+          <div className="absolute top-[-0px] left-[15%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
             {getTimeBetweenNodes('start')}
           </div>
           
-          <div className="absolute top-[-8px] left-[60%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
+          <div className="absolute top-[-0px] left-[70%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
             {getTimeBetweenNodes('eta')}
           </div>
           
