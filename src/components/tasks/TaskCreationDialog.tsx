@@ -1,7 +1,7 @@
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { TaskForm } from "./TaskForm";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { CustomTaskForm } from "./CustomTaskForm";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
@@ -69,13 +69,9 @@ export const TaskCreationDialog = ({ open, onOpenChange }: TaskCreationDialogPro
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg h-[75vh] max-h-[800px] flex flex-col overflow-hidden p-0">
-        <DialogHeader className="px-6 pt-6">
-          <DialogTitle>Create New Task</DialogTitle>
-        </DialogHeader>
-        <ScrollArea className="flex-1 px-6 pb-6">
-          <TaskForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        <ScrollArea className="flex-1 px-6 py-6">
+          <CustomTaskForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
         </ScrollArea>
-        {/* Footer with cancel button has been removed */}
       </DialogContent>
     </Dialog>
   );
