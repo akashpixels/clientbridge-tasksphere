@@ -252,7 +252,7 @@ export const TimelineVisualization = ({
           
           <div className="flex justify-between items-center mb-2 pt-1 pb-1">
             {/* The horizontal line is now positioned precisely */}
-            <div className="absolute top-[16px] left-0 right-0 h-[1px] bg-gray-400 z-0"></div>
+            <div className="absolute top-[16px] left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
             
             {/* Adjust the left position of the timeline to match exactly with the reference */}
             <div className="flex flex-col items-center z-10">
