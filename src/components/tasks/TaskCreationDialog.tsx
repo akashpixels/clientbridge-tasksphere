@@ -1,12 +1,11 @@
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { TaskForm } from "./TaskForm";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TaskForm } from "./TaskForm";
 
 interface TaskCreationDialogProps {
   open: boolean;
@@ -17,6 +16,37 @@ export const TaskCreationDialog = ({ open, onOpenChange }: TaskCreationDialogPro
   const { toast } = useToast();
   const { id: projectId } = useParams<{ id: string }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [queuePosition, setQueuePosition] = useState(0);
+
+  // Fetch the queue position when the dialog opens
+  const fetchQueuePosition = async () => {
+    if (!projectId) return;
+    
+    try {
+      const { count, error } = await supabase
+        .from('tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('project_id', projectId)
+        .in('current_status_id', [1, 2, 3]); // Open, Pending, In Progress
+      
+      if (error) {
+        console.error("Error fetching queue position:", error);
+        return;
+      }
+      
+      setQueuePosition(count || 0);
+    } catch (error) {
+      console.error("Error in fetchQueuePosition:", error);
+    }
+  };
+
+  // When the dialog opens, fetch the queue position
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      fetchQueuePosition();
+    }
+    onOpenChange(newOpen);
+  };
 
   const handleSubmit = async (formData: any) => {
     if (!projectId) return;
@@ -68,17 +98,15 @@ export const TaskCreationDialog = ({ open, onOpenChange }: TaskCreationDialogPro
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg h-[75vh] max-h-[800px] flex flex-col overflow-hidden p-0">
-        <ScrollArea className="flex-1 px-6 pb-2">
-          <TaskForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        <ScrollArea className="flex-1 px-6 py-4">
+          <TaskForm 
+            onSubmit={handleSubmit} 
+            isSubmitting={isSubmitting} 
+            queuePosition={queuePosition}
+          />
         </ScrollArea>
-        
-        <DialogFooter className="px-6 py-4 border-t sticky bottom-0 bg-background z-10">
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
