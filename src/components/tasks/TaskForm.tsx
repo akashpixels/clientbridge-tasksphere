@@ -15,6 +15,7 @@ import { HelpCircle, Monitor, Smartphone, MonitorSmartphone, Upload, Link, X } f
 import { formatDuration } from "@/lib/date-utils";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
+
 const taskFormSchema = z.object({
   details: z.string().min(10, {
     message: "Task details must be at least 10 characters"
@@ -32,12 +33,15 @@ const taskFormSchema = z.object({
     message: "Must be a valid URL"
   }).optional().or(z.string().length(0))
 });
+
 type TaskFormValues = z.infer<typeof taskFormSchema>;
+
 interface TaskFormProps {
   onSubmit: (data: TaskFormValues) => void;
   isSubmitting: boolean;
   queuePosition: number;
 }
+
 export const TaskForm = ({
   onSubmit,
   isSubmitting,
@@ -68,6 +72,7 @@ export const TaskForm = ({
       image_url: ""
     }
   });
+
   useEffect(() => {
     const fetchProject = async () => {
       if (!projectId) return;
@@ -87,6 +92,7 @@ export const TaskForm = ({
     };
     fetchProject();
   }, [projectId]);
+
   useEffect(() => {
     const fetchTaskTypes = async () => {
       const {
@@ -108,6 +114,7 @@ export const TaskForm = ({
       fetchTaskTypes();
     }
   }, [project]);
+
   useEffect(() => {
     const fetchPriorityLevels = async () => {
       const {
@@ -122,6 +129,7 @@ export const TaskForm = ({
     };
     fetchPriorityLevels();
   }, []);
+
   useEffect(() => {
     const fetchComplexityLevels = async () => {
       const {
@@ -136,6 +144,7 @@ export const TaskForm = ({
     };
     fetchComplexityLevels();
   }, []);
+
   useEffect(() => {
     const subscription = form.watch(value => {
       setTimelineParams({
@@ -146,12 +155,14 @@ export const TaskForm = ({
     });
     return () => subscription.unsubscribe();
   }, [form.watch]);
+
   const handleFormSubmit = (values: TaskFormValues) => {
     if (imageFile) {
       console.log("Image file to upload:", imageFile);
     }
     onSubmit(values);
   };
+
   const getComplexityTooltip = (level: any) => {
     if (!level) return "";
     const multiplier = level.multiplier;
@@ -163,17 +174,20 @@ export const TaskForm = ({
       return `${Math.round((multiplier - 1) * 100)}% longer completion`;
     }
   };
+
   const getPriorityTooltip = (level: any) => {
     if (!level) return "";
     const timeToStart = level.time_to_start ? formatDuration(level.time_to_start) : "immediate";
     const multiplier = level.multiplier ? `${level.multiplier}x duration` : "standard duration";
     return `${timeToStart} delay, ${multiplier}`;
   };
+
   const getSelectedComplexityName = () => {
     const complexityId = form.watch("complexity_level_id");
     const selectedLevel = complexityLevels.find(level => level.id === complexityId);
     return selectedLevel?.name || "Standard";
   };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -183,17 +197,20 @@ export const TaskForm = ({
       form.setValue("image_url", "");
     }
   };
+
   const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
     form.setValue("image_url", url);
     setImageFile(null);
     setImagePreview(url);
   };
+
   const clearImage = () => {
     setImageFile(null);
     setImagePreview('');
     form.setValue("image_url", "");
   };
+
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <TimelineVisualization taskTypeId={timelineParams.taskTypeId} priorityLevelId={timelineParams.priorityLevelId} complexityLevelId={timelineParams.complexityLevelId} projectId={projectId} />
@@ -254,13 +271,15 @@ export const TaskForm = ({
             <FormField control={form.control} name="target_device" render={({
             field
           }) => <FormItem>
-                  <div className="flex gap-3 mt-0">
+                  <div className="flex gap-3 mt-0 justify-center">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className={`flex flex-col items-center p-2 rounded-md cursor-pointer border ${field.value === 'Desktop' ? 'bg-primary/10 border-primary' : 'border-input hover:bg-accent'}`} onClick={() => field.onChange('Desktop')}>
-                            <Monitor size={20} className="mb-1" />
-                            <span className="text-xs">Desktop</span>
+                          <div 
+                            className={`flex items-center justify-center p-2 rounded-md cursor-pointer ${field.value === 'Desktop' ? 'text-black' : 'text-gray-300'}`}
+                            onClick={() => field.onChange('Desktop')}
+                          >
+                            <Monitor size={24} />
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -272,9 +291,11 @@ export const TaskForm = ({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className={`flex flex-col items-center p-2 rounded-md cursor-pointer border ${field.value === 'Mobile' ? 'bg-primary/10 border-primary' : 'border-input hover:bg-accent'}`} onClick={() => field.onChange('Mobile')}>
-                            <Smartphone size={20} className="mb-1" />
-                            <span className="text-xs">Mobile</span>
+                          <div 
+                            className={`flex items-center justify-center p-2 rounded-md cursor-pointer ${field.value === 'Mobile' ? 'text-black' : 'text-gray-300'}`}
+                            onClick={() => field.onChange('Mobile')}
+                          >
+                            <Smartphone size={24} />
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -286,9 +307,11 @@ export const TaskForm = ({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className={`flex flex-col items-center p-2 rounded-md cursor-pointer border ${field.value === 'Both' ? 'bg-primary/10 border-primary' : 'border-input hover:bg-accent'}`} onClick={() => field.onChange('Both')}>
-                            <MonitorSmartphone size={20} className="mb-1" />
-                            <span className="text-xs">Both</span>
+                          <div 
+                            className={`flex items-center justify-center p-2 rounded-md cursor-pointer ${field.value === 'Both' ? 'text-black' : 'text-gray-300'}`}
+                            onClick={() => field.onChange('Both')}
+                          >
+                            <MonitorSmartphone size={24} />
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
