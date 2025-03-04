@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +14,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { TimelineVisualization } from "./TimelineVisualization";
 import { HelpCircle, Monitor, Smartphone, MonitorSmartphone, Upload, Link, X } from "lucide-react";
 import { formatDuration } from "@/lib/date-utils";
-import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { PriorityDial } from "./PriorityDial";
 
@@ -213,7 +213,13 @@ export const TaskForm = ({
 
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        <TimelineVisualization taskTypeId={timelineParams.taskTypeId} priorityLevelId={timelineParams.priorityLevelId} complexityLevelId={timelineParams.complexityLevelId} projectId={projectId} />
+        <TimelineVisualization 
+          taskTypeId={timelineParams.taskTypeId} 
+          priorityLevelId={timelineParams.priorityLevelId} 
+          complexityLevelId={timelineParams.complexityLevelId} 
+          projectId={projectId}
+          compact={true} 
+        />
 
         <div className="space-y-5 pt-2">
           <FormField control={form.control} name="details" render={({
@@ -303,38 +309,43 @@ export const TaskForm = ({
                 </FormItem>} />
           </div>
 
-          <FormField control={form.control} name="priority_level_id" render={({
-          field
-        }) => <FormItem>
-                <FormControl>
-                  <div className="mt-2">
-                    <PriorityDial 
-                      priorityLevels={priorityLevels} 
-                      value={field.value} 
-                      onChange={field.onChange} 
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>} />
-
-          <FormField control={form.control} name="complexity_level_id" render={({
-          field
-        }) => <FormItem className="space-y-2">                
-                <FormControl>
-                  <div className="pt-1">
-                    <Slider min={1} max={5} step={1} value={[field.value || 3]} onValueChange={vals => field.onChange(vals[0])} className="w-full" />
-                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                      <span>Basic</span>
-                      <span>Easy</span>
-                      <span>Standard</span>
-                      <span>Advanced</span>
-                      <span>Complex</span>
+          <div className="grid grid-cols-2 gap-4">
+            <FormField control={form.control} name="priority_level_id" render={({
+            field
+            }) => <FormItem>
+                  <FormLabel className="text-xs text-muted-foreground">Priority Level</FormLabel>
+                  <FormControl>
+                    <div className="mt-1">
+                      <PriorityDial 
+                        priorityLevels={priorityLevels} 
+                        value={field.value} 
+                        onChange={field.onChange}
+                        compact={true}
+                      />
                     </div>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>} />
+
+            <FormField control={form.control} name="complexity_level_id" render={({
+            field
+            }) => <FormItem className="space-y-2">
+                  <FormLabel className="text-xs text-muted-foreground">Complexity Level</FormLabel>
+                  <FormControl>
+                    <div className="pt-1">
+                      <Slider min={1} max={5} step={1} value={[field.value || 3]} onValueChange={vals => field.onChange(vals[0])} className="w-full" />
+                      <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                        <span>Basic</span>
+                        <span>Easy</span>
+                        <span>Standard</span>
+                        <span>Advanced</span>
+                        <span>Complex</span>
+                      </div>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>} />
+          </div>
 
           <FormItem>
             <FormLabel>Image Reference (Optional)</FormLabel>

@@ -10,6 +10,7 @@ interface TimelineVisualizationProps {
   priorityLevelId?: number | null;
   complexityLevelId?: number | null;
   projectId?: string;
+  compact?: boolean;
 }
 
 interface TimelineEstimate {
@@ -28,7 +29,8 @@ export const TimelineVisualization = ({
   taskTypeId,
   priorityLevelId,
   complexityLevelId = 3,
-  projectId
+  projectId,
+  compact = false
 }: TimelineVisualizationProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [taskType, setTaskType] = useState<any>(null);
@@ -271,44 +273,52 @@ export const TimelineVisualization = ({
     }
   };
 
+  const pillClassName = compact 
+    ? "w-12 h-6 rounded-full border-2 text-xs" 
+    : "w-16 h-8 rounded-full border-2 text-sm";
+  
+  const timeClassName = compact
+    ? "text-[10px] mt-2"
+    : "text-xs mt-3";
+
   return (
     <div className="sticky top-0 bg-background z-10 border-b">
-      <div className="px-6 py-6 space-y-6">
+      <div className={`px-4 ${compact ? 'py-4' : 'py-6'} space-y-4`}>
         <div className="relative">
           <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-[2px] bg-gray-300 z-0"></div>
           
-          <div className="absolute top-0 left-1/4 -translate-x-1/2 text-xs text-gray-500 font-medium">
+          <div className="absolute top-0 left-1/4 -translate-x-1/2 text-[10px] text-gray-500 font-medium">
             {getTimeBetweenNodes('start')}
           </div>
           
-          <div className="absolute top-0 right-1/4 -translate-x-1/2 text-xs text-gray-500 font-medium">
+          <div className="absolute top-0 right-1/4 -translate-x-1/2 text-[10px] text-gray-500 font-medium">
             {getTimeBetweenNodes('eta')}
           </div>
           
           <div className="flex justify-between items-center">
             <div className="flex flex-col items-center z-10">
-              <div className="w-16 h-8 rounded-full border-2 border-primary bg-white flex items-center justify-center text-sm font-medium text-primary">
+              <div className={`${pillClassName} border-primary bg-white flex items-center justify-center font-medium text-primary`}>
                 Now
               </div>
-              <div className="text-xs mt-3 text-gray-700">
+              <div className={timeClassName + " text-gray-700"}>
                 {timelineEstimate?.currentTime || "--"}
               </div>
             </div>
             
             <div className="flex flex-col items-center z-10">
-              <div className="w-20 h-8 rounded-full border-2 border-gray-400 bg-white flex items-center justify-center text-sm font-medium text-gray-700">
+              <div className={`${compact ? 'w-14 h-6' : 'w-20 h-8'} rounded-full border-2 border-gray-400 bg-white flex items-center justify-center ${compact ? 'text-xs' : 'text-sm'} font-medium text-gray-700`}>
                 Start time
               </div>
-              <div className="text-xs mt-3 text-gray-700">
+              <div className={timeClassName + " text-gray-700"}>
                 {formatTimelineTime(timelineEstimate?.startTime) || "--"}
               </div>
             </div>
             
             <div className="flex flex-col items-center z-10">
-              <div className="w-16 h-8 rounded-full border-2 border-gray-400 bg-white flex items-center justify-center text-sm font-medium text-gray-700">
+              <div className={`${pillClassName} border-gray-400 bg-white flex items-center justify-center font-medium text-gray-700`}>
                 ETA
               </div>
-              <div className="text-xs mt-3 text-gray-700">
+              <div className={timeClassName + " text-gray-700"}>
                 {formatTimelineTime(timelineEstimate?.eta) || "--"}
               </div>
             </div>
@@ -316,7 +326,7 @@ export const TimelineVisualization = ({
         </div>
 
         {timelineEstimate?.taskInfo.isOverdue && (
-          <div className="flex items-start text-yellow-600 text-xs p-2 bg-yellow-50 rounded-md border border-yellow-200 mt-4">
+          <div className="flex items-start text-yellow-600 text-xs p-2 bg-yellow-50 rounded-md border border-yellow-200 mt-2">
             <AlertTriangle size={14} className="mt-0.5 mr-1 flex-shrink-0" />
             <span>
               This task may take longer than expected. Consider adjusting priority or complexity.

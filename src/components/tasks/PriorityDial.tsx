@@ -15,9 +15,10 @@ interface PriorityDialProps {
   priorityLevels: PriorityLevel[];
   value: number;
   onChange: (value: number) => void;
+  compact?: boolean;
 }
 
-export const PriorityDial = ({ priorityLevels, value, onChange }: PriorityDialProps) => {
+export const PriorityDial = ({ priorityLevels, value, onChange, compact = false }: PriorityDialProps) => {
   const [hoveredLevel, setHoveredLevel] = useState<number | null>(null);
   const dialRef = useRef<SVGSVGElement>(null);
 
@@ -62,9 +63,9 @@ export const PriorityDial = ({ priorityLevels, value, onChange }: PriorityDialPr
 
   // SVG parameters
   const width = 300;
-  const height = 160;
-  const radius = 120;
-  const arcWidth = 30;
+  const height = compact ? 120 : 160;
+  const radius = compact ? 100 : 120;
+  const arcWidth = compact ? 20 : 30;
   const needleLength = radius - 10;
 
   // Get selected priority level rotation
@@ -138,7 +139,7 @@ export const PriorityDial = ({ priorityLevels, value, onChange }: PriorityDialPr
         })}
         
         {/* Center point */}
-        <circle cx={width / 2} cy={height} r={5} fill="#1f2937" />
+        <circle cx={width / 2} cy={height} r={compact ? 3 : 5} fill="#1f2937" />
         
         {/* Needle */}
         <line 
@@ -147,7 +148,7 @@ export const PriorityDial = ({ priorityLevels, value, onChange }: PriorityDialPr
           x2={width / 2 + needleLength * Math.sin((rotationAngle * Math.PI) / 180)}
           y2={height - needleLength * Math.cos((rotationAngle * Math.PI) / 180)}
           stroke="#1f2937"
-          strokeWidth={3}
+          strokeWidth={compact ? 2 : 3}
           strokeLinecap="round"
           style={{ 
             transformOrigin: `${width / 2}px ${height}px`,
@@ -156,7 +157,7 @@ export const PriorityDial = ({ priorityLevels, value, onChange }: PriorityDialPr
         />
         
         {/* Needle center */}
-        <circle cx={width / 2} cy={height} r={8} fill="#1f2937" />
+        <circle cx={width / 2} cy={height} r={compact ? 6 : 8} fill="#1f2937" />
       </svg>
       
       {/* Priority level labels */}
@@ -172,7 +173,7 @@ export const PriorityDial = ({ priorityLevels, value, onChange }: PriorityDialPr
             }}
           >
             <div className="w-1.5 h-1.5 rounded-full mb-1" style={{ backgroundColor: level.color }} />
-            <span>{level.name}</span>
+            <span className={compact ? "text-[10px]" : "text-xs"}>{level.name}</span>
           </div>
         ))}
       </div>
