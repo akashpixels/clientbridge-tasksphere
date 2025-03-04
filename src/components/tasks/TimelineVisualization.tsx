@@ -239,6 +239,20 @@ export const TimelineVisualization = ({
     }
   };
 
+  // Function to format time with a line break after AM/PM
+  const formatTimeWithLineBreak = (timeString: string | null): React.ReactNode => {
+    if (!timeString) return "--";
+    
+    const parts = timeString.split(', ');
+    if (parts.length !== 2) return timeString;
+    
+    return (
+      <>
+        {parts[0]}<br />{parts[1]}
+      </>
+    );
+  };
+
   return <div className="sticky top-0 bg-background z-10 border-b">
       <div className="py-3">
         <div className="relative">
@@ -259,17 +273,16 @@ export const TimelineVisualization = ({
               <div className="relative h-[20px] flex items-center">
                 <div className="w-[1px] h-[13px] bg-gray-300 absolute left-0 top-[5px]"></div>
               </div>
-              <div className="text-[9px] mt-0.5 text-gray-500">
-                {timelineEstimate?.currentTime || "--"}
-              </div>
+              {/* Removed current time display */}
             </div>
             
-            <div className="flex flex-col items-center z-10">
+            {/* Start pill positioned at 35% from the left */}
+            <div className="absolute left-[35%] -translate-x-1/2 z-10 flex flex-col items-center">
               <div className="h-[22px] w-[40px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
                 Start
               </div>
-              <div className="text-[9px] mt-0.5 text-gray-500">
-                {formatTimelineTime(timelineEstimate?.startTime) || "--"}
+              <div className="text-[9px] mt-0.5 text-gray-500 text-right">
+                {formatTimeWithLineBreak(formatTimelineTime(timelineEstimate?.startTime))}
               </div>
             </div>
             
@@ -280,8 +293,8 @@ export const TimelineVisualization = ({
                   ETA
                 </div>
               </div>
-              <div className="text-[9px] mt-0.5 text-gray-500">
-                {formatTimelineTime(timelineEstimate?.eta) || "--"}
+              <div className="text-[9px] mt-0.5 text-gray-500 text-right">
+                {formatTimeWithLineBreak(formatTimelineTime(timelineEstimate?.eta))}
               </div>
             </div>
           </div>

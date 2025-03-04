@@ -45,7 +45,7 @@ export function formatTimelineTime(date: string | Date | null): string {
   if (!date) return "--";
   try {
     const parsedDate = typeof date === "string" ? parseISO(date) : date;
-    return format(parsedDate, "haaa, MMM dd").toLowerCase();
+    return format(parsedDate, "haaa, MMM d").toLowerCase();
   } catch (e) {
     return typeof date === "string" ? date : "--";
   }
