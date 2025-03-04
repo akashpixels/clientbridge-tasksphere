@@ -258,7 +258,7 @@ export const TimelineVisualization = ({
             <div className="flex flex-col items-start z-10 pl-0">
               <div className="relative h-[20px] flex items-center">
                
-                <div className="w-[1.5px] h-[13px] bg-gray-300 absolute left-0 top-[16px]"></div>
+                <div className="w-[1.5px] h-[13px] bg-gray-300 absolute left-0 top-[5px]"></div>
 
               </div>
               <div className="text-[9px] mt-0.5 text-gray-500">
