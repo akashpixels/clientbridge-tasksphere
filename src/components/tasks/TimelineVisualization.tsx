@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
@@ -274,15 +273,9 @@ export const TimelineVisualization = ({
 
   return (
     <div className="sticky top-0 bg-background z-10 border-b">
-      <div className="border-b px-6 py-3 text-center">
-        <div className="text-sm font-medium">
-          Queue Position: #{(timelineEstimate?.queuePosition || 0) + 1}
-        </div>
-      </div>
-      
       <div className="px-6 py-6 space-y-6">
         <div className="relative">
-          <div className="absolute top-6 left-0 right-0 h-[2px] bg-gray-300 z-0"></div>
+          <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-[2px] bg-gray-300 z-0"></div>
           
           <div className="absolute top-0 left-1/4 -translate-x-1/2 text-xs text-gray-500 font-medium">
             {getTimeBetweenNodes('start')}
