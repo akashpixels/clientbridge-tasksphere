@@ -11,11 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TimelineVisualization } from "./TimelineVisualization";
-import { HelpCircle, Monitor, Smartphone, MonitorSmartphone, Upload, Link, X } from "lucide-react";
+import { Upload, X, Link as LinkIcon, Plus } from "lucide-react";
 import { PriorityDial } from "./PriorityDial";
-import { ComplexitySelector } from "./ComplexitySelector";
 import { formatDuration } from "@/lib/date-utils";
 
+// Update the schema to support arrays of URLs
 const taskFormSchema = z.object({
   details: z.string().min(10, {
     message: "Task details must be at least 10 characters"
@@ -28,10 +28,10 @@ const taskFormSchema = z.object({
   target_device: z.enum(["Desktop", "Mobile", "Both"]).default("Both"),
   reference_links: z.array(z.string().url({
     message: "Must be a valid URL"
-  })).optional(),
-  image_url: z.string().url({
+  })).default([]),
+  image_urls: z.array(z.string().url({
     message: "Must be a valid URL"
-  }).optional().or(z.string().length(0))
+  })).default([])
 });
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
@@ -46,11 +46,7 @@ export const TaskForm = ({
   isSubmitting,
   queuePosition
 }: TaskFormProps) => {
-  const {
-    id: projectId
-  } = useParams<{
-    id: string;
-  }>();
+  const { id: projectId } = useParams<{ id: string }>();
   const [taskTypes, setTaskTypes] = useState<any[]>([]);
   const [priorityLevels, setPriorityLevels] = useState<any[]>([]);
   const [complexityLevels, setComplexityLevels] = useState<any[]>([]);
@@ -60,15 +56,18 @@ export const TaskForm = ({
     priorityLevelId: null,
     complexityLevelId: 3
   });
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [newReferenceLink, setNewReferenceLink] = useState("");
+  const [newImageUrl, setNewImageUrl] = useState("");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
       details: "",
       complexity_level_id: 3,
       target_device: "Both",
-      image_url: ""
+      reference_links: [],
+      image_urls: []
     }
   });
 
@@ -155,63 +154,45 @@ export const TaskForm = ({
     return () => subscription.unsubscribe();
   }, [form.watch]);
 
-  const handleFormSubmit = (values: TaskFormValues) => {
-    if (imageFile) {
-      console.log("Image file to upload:", imageFile);
-    }
-    onSubmit(values);
-  };
-
-  const getComplexityTooltip = (level: any) => {
-    if (!level) return "";
-    const multiplier = level.multiplier;
-    if (multiplier < 1) {
-      return `${Math.round((1 - multiplier) * 100)}% faster completion`;
-    } else if (multiplier === 1) {
-      return "Standard completion time";
-    } else {
-      return `${Math.round((multiplier - 1) * 100)}% longer completion`;
-    }
-  };
-
-  const getPriorityTooltip = (level: any) => {
-    if (!level) return "";
-    const timeToStart = level.time_to_start ? formatDuration(level.time_to_start) : "immediate";
-    const multiplier = level.multiplier ? `${level.multiplier}x duration` : "standard duration";
-    return `${timeToStart} delay, ${multiplier}`;
-  };
-
-  const getSelectedComplexityName = () => {
-    const complexityId = form.watch("complexity_level_id");
-    const selectedLevel = complexityLevels.find(level => level.id === complexityId);
-    return selectedLevel?.name || "Standard";
-  };
-
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const imageUrl = URL.createObjectURL(file);
-      setImagePreview(imageUrl);
-      form.setValue("image_url", "");
+    const files = e.target.files;
+    if (files) {
+      setImageFiles(prev => [...prev, ...Array.from(files)]);
     }
   };
 
-  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
-    form.setValue("image_url", url);
-    setImageFile(null);
-    setImagePreview(url);
+  const removeImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const clearImage = () => {
-    setImageFile(null);
-    setImagePreview('');
-    form.setValue("image_url", "");
+  const addReferenceLink = () => {
+    if (newReferenceLink && /^https?:\/\/.+/.test(newReferenceLink)) {
+      const currentLinks = form.getValues("reference_links");
+      form.setValue("reference_links", [...currentLinks, newReferenceLink]);
+      setNewReferenceLink("");
+    }
+  };
+
+  const removeReferenceLink = (index: number) => {
+    const currentLinks = form.getValues("reference_links");
+    form.setValue("reference_links", currentLinks.filter((_, i) => i !== index));
+  };
+
+  const addImageUrl = () => {
+    if (newImageUrl && /^https?:\/\/.+/.test(newImageUrl)) {
+      const currentUrls = form.getValues("image_urls");
+      form.setValue("image_urls", [...currentUrls, newImageUrl]);
+      setNewImageUrl("");
+    }
+  };
+
+  const removeImageUrl = (index: number) => {
+    const currentUrls = form.getValues("image_urls");
+    form.setValue("image_urls", currentUrls.filter((_, i) => i !== index));
   };
 
   return <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <TimelineVisualization 
           taskTypeId={timelineParams.taskTypeId} 
           priorityLevelId={timelineParams.priorityLevelId} 
@@ -221,26 +202,29 @@ export const TaskForm = ({
         />
 
         <div className="space-y-5 pt-2">
-          <FormField control={form.control} name="details" render={({
-          field
-        }) => <FormItem>
-                <FormControl>
-                  <Textarea placeholder="Describe what needs to be done..." className="min-h-[120px]" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>} />
+          <FormField control={form.control} name="details" render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Textarea 
+                  placeholder="Describe what needs to be done..." 
+                  className="min-h-[100px]" 
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
 
           <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="task_type_id" render={({
-            field
-          }) => <FormItem>
-                  <FormControl>
-                    <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select task type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {taskTypes.length > 0 && taskTypes.reduce((acc: any[], type: any) => {
+            <FormField control={form.control} name="task_type_id" render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Task type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {taskTypes.length > 0 && taskTypes.reduce((acc: any[], type: any) => {
                     const categoryExists = acc.some(item => item.category === type.category);
                     if (!categoryExists) {
                       acc.push({
@@ -255,13 +239,36 @@ export const TaskForm = ({
                                 {type.name}
                               </SelectItem>)}
                           </div>)}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>} />
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
             
-            <FormField control={form.control} name="target_device" render={({
+            <FormField control={form.control} name="complexity_level_id" render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Complexity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {complexityLevels.map(level => (
+                        <SelectItem key={level.id} value={level.id.toString()}>
+                          {level.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+          </div>
+
+          
+          <FormField control={form.control} name="target_device" render={({
             field
           }) => <FormItem>
                   <div className="flex gap-5 mt-0 justify-center">
@@ -306,10 +313,9 @@ export const TaskForm = ({
                   </div>
                   <FormMessage />
                 </FormItem>} />
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="priority_level_id" render={({
+          
+          <FormField control={form.control} name="priority_level_id" render={({
             field
             }) => <FormItem>
                   <FormLabel className="text-xs text-muted-foreground">Priority Level</FormLabel>
@@ -326,50 +332,94 @@ export const TaskForm = ({
                   <FormMessage />
                 </FormItem>} />
 
-            <FormField control={form.control} name="complexity_level_id" render={({
-            field
-            }) => <FormItem className="space-y-2">
-                  <FormLabel className="text-xs text-muted-foreground">Complexity Level</FormLabel>
-                  <FormControl>
-                    <div className="pt-2 pb-2">
-                      <ComplexitySelector 
-                        complexityLevels={complexityLevels} 
-                        value={field.value || 3} 
-                        onChange={field.onChange}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>} />
+          {/* Reference Links */}
+          <div>
+            <div className="flex gap-2 mb-2">
+              <Input
+                type="url"
+                value={newReferenceLink}
+                onChange={(e) => setNewReferenceLink(e.target.value)}
+                placeholder="Paste reference link URL"
+                className="flex-1"
+              />
+              <Button type="button" size="icon" variant="outline" onClick={addReferenceLink}>
+                <Plus size={16} />
+              </Button>
+            </div>
+            {form.watch("reference_links").map((link, index) => (
+              <div key={index} className="flex items-center gap-2 mb-2">
+                <div className="flex-1 text-sm truncate">{link}</div>
+                <Button type="button" variant="ghost" size="sm" onClick={() => removeReferenceLink(index)}>
+                  <X size={14} />
+                </Button>
+              </div>
+            ))}
           </div>
 
-          <FormItem>
-            <FormLabel>Image Reference (Optional)</FormLabel>
-            <div className="space-y-3">
-              <div className="flex gap-2">
-                <div className="relative border border-input rounded-md p-2 flex-1">
-                  <Input type="url" placeholder="Paste image URL here" value={form.watch("image_url") || ""} onChange={handleImageUrlChange} className="border-0 p-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0" />
-                  <div className="absolute right-2 top-2.5 text-muted-foreground">
-                    <Link size={16} />
-                  </div>
-                </div>
-                <div className="relative">
-                  <input type="file" accept="image/*" id="image-upload" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleImageUpload} />
-                  <Button type="button" variant="outline" className="h-10 px-3 gap-2">
-                    <Upload size={16} />
-                    <span className="sr-only sm:not-sr-only">Upload</span>
-                  </Button>
-                </div>
-              </div>
-              
-              {imagePreview && <div className="relative inline-block">
-                  <img src={imagePreview} alt="Preview" className="max-h-40 rounded-md border border-input" />
-                  <Button type="button" variant="destructive" size="sm" className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full" onClick={clearImage}>
+          {/* Image URLs and Uploads */}
+          <div>
+            <div className="flex gap-2 mb-2">
+              <Input
+                type="url"
+                value={newImageUrl}
+                onChange={(e) => setNewImageUrl(e.target.value)}
+                placeholder="Paste image URL"
+                className="flex-1"
+              />
+              <Button type="button" size="icon" variant="outline" onClick={addImageUrl}>
+                <Plus size={16} />
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {form.watch("image_urls").map((url, index) => (
+                <div key={index} className="relative group">
+                  <img src={url} alt="" className="w-full h-24 object-cover rounded-md" />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+                    onClick={() => removeImageUrl(index)}
+                  >
                     <X size={14} />
                   </Button>
-                </div>}
+                </div>
+              ))}
+              {imageFiles.map((file, index) => (
+                <div key={index} className="relative group">
+                  <img src={URL.createObjectURL(file)} alt="" className="w-full h-24 object-cover rounded-md" />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+                    onClick={() => removeImage(index)}
+                  >
+                    <X size={14} />
+                  </Button>
+                </div>
+              ))}
             </div>
-          </FormItem>
+
+            <div className="mt-2">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                id="image-upload"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+              <label htmlFor="image-upload">
+                <Button type="button" variant="outline" className="w-full" asChild>
+                  <span>
+                    <Upload size={16} />
+                  </span>
+                </Button>
+              </label>
+            </div>
+          </div>
         </div>
 
         <Button type="submit" disabled={isSubmitting} className="w-full mt-6">
