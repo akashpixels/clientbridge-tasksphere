@@ -231,17 +231,17 @@ export const TimelineVisualization = ({
 
   const getTimeBetweenNodes = (nodeType: 'start' | 'eta') => {
     if (nodeType === 'start') {
-      if (!timelineEstimate?.taskInfo.timeToStart) return "--";
+      if (!timelineEstimate?.taskInfo.timeToStart) return "";
       return `${formatHourDifference(timelineEstimate.taskInfo.timeToStart)}`;
     } else {
-      if (!timelineEstimate?.taskInfo.hoursNeeded) return "--";
+      if (!timelineEstimate?.taskInfo.hoursNeeded) return "";
       return formatHourDifference(timelineEstimate.taskInfo.hoursNeeded);
     }
   };
 
   // Function to format time with a line break after AM/PM
   const formatTimeWithLineBreak = (timeString: string | null): React.ReactNode => {
-    if (!timeString) return "--";
+    if (!timeString) return "";
     
     const parts = timeString.split(', ');
     if (parts.length !== 2) return timeString;
@@ -257,15 +257,15 @@ export const TimelineVisualization = ({
       <div className="py-3">
         <div className="relative">
           {/* Repositioned hour indicators with updated positions */}
-          <div className="absolute top-[-0px] left-[15%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
+          <div className="absolute top-[-8px] left-[15%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
             {getTimeBetweenNodes('start')}
           </div>
           
-          <div className="absolute top-[-0px] left-[65%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
+          <div className="absolute top-[-8px] left-[60%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
             {getTimeBetweenNodes('eta')}
           </div>
           
-          <div className="flex justify-between items-center mb-2 pt-1 pb-1 relative">
+          <div className="flex justify-between items-center mb-2 pt-1 pb-1 relative min-h-[32px]">
             {/* The horizontal line */}
             <div className="absolute top-[16px] left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
             
@@ -282,7 +282,7 @@ export const TimelineVisualization = ({
               <div className="h-[22px] w-[40px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
                 Start
               </div>
-              <div className="text-[9px] mt-0.5 text-gray-500 text-right">
+              <div className="text-[9px] mt-0.5 text-gray-500 text-right min-h-[24px]">
                 {formatTimeWithLineBreak(formatTimelineTime(timelineEstimate?.startTime))}
               </div>
             </div>
@@ -294,7 +294,7 @@ export const TimelineVisualization = ({
                   ETA
                 </div>
               </div>
-              <div className="text-[9px] mt-0.5 text-gray-500 text-right">
+              <div className="text-[9px] mt-0.5 text-gray-500 text-right min-h-[24px]">
                 {formatTimeWithLineBreak(formatTimelineTime(timelineEstimate?.eta))}
               </div>
             </div>
