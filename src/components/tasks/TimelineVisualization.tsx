@@ -247,7 +247,7 @@ export const TimelineVisualization = ({
   return <div className="sticky top-0 bg-background z-10 border-b">
       <div className="py-1">
         <div className="relative">
-          <div className="absolute  left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
+
           
           <div className="absolute top-0 left-1/4 -translate-x-1/2 text-[9px] text-gray-500 font-medium">
             {getTimeBetweenNodes('start')}
@@ -256,35 +256,43 @@ export const TimelineVisualization = ({
           <div className="absolute top-0 right-1/4 -translate-x-1/2 text-[9px] text-gray-500 font-medium">
             {getTimeBetweenNodes('eta')}
           </div>
+
+
           
-          <div className="flex justify-between items-center my-2">
-            <div className="flex flex-col items-center z-10">
-              <div className="relative flex items-center justify-center">
-                <Circle className="w-5 h-5 text-primary fill-white stroke-[1.5]" />
-              </div>
-              <div className={timeClassName + " text-gray-700"}>
-                {timelineEstimate?.currentTime || "--"}
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center z-10">
-              <div className={`${compact ? 'w-14 h-6' : 'w-18 h-7'} rounded-full border border-gray-300 bg-white flex items-center justify-center ${compact ? 'text-[10px]' : 'text-xs'} font-medium text-gray-700`}>
-                Start time
-              </div>
-              <div className={timeClassName + " text-gray-700"}>
-                {formatTimelineTime(timelineEstimate?.startTime) || "--"}
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center z-10">
-              <div className={`${pillClassName} border-gray-300 bg-white flex items-center justify-center font-medium text-gray-700`}>
-                ETA
-              </div>
-              <div className={timeClassName + " text-gray-700"}>
-                {formatTimelineTime(timelineEstimate?.eta) || "--"}
-              </div>
-            </div>
-          </div>
+    <div className="flex justify-between items-center my-2 relative">
+  {/* Left Circle */}
+  <div className="flex flex-col items-center z-10">
+    <Circle className="w-5 h-5 text-primary fill-white stroke-[1.5]" />
+    <div className={timeClassName + " text-gray-700"}>
+      {timelineEstimate?.currentTime || "--"}
+    </div>
+  </div>
+
+  {/* Middle Line */}
+  <div className="absolute left-0 right-0 top-1/2 h-[1px] bg-gray-300 -z-0"></div>
+
+  {/* Start Time Pill */}
+  <div className="flex flex-col items-center z-10">
+    <div className={`${compact ? 'w-14 h-6' : 'w-18 h-7'} rounded-full border border-gray-300 bg-white flex items-center justify-center ${compact ? 'text-[10px]' : 'text-xs'} font-medium text-gray-700`}>
+      Start time
+    </div>
+    <div className={timeClassName + " text-gray-700"}>
+      {formatTimelineTime(timelineEstimate?.startTime) || "--"}
+    </div>
+  </div>
+
+  {/* ETA Pill */}
+  <div className="flex flex-col items-center z-10">
+    <div className={`${pillClassName} border-gray-300 bg-white flex items-center justify-center font-medium text-gray-700`}>
+      ETA
+    </div>
+    <div className={timeClassName + " text-gray-700"}>
+      {formatTimelineTime(timelineEstimate?.eta) || "--"}
+    </div>
+  </div>
+</div>
+
+          
         </div>
 
         {timelineEstimate?.taskInfo.isOverdue && <div className="flex items-start text-yellow-600 text-xs p-2 bg-yellow-50 rounded-md border border-yellow-200 mt-2">
