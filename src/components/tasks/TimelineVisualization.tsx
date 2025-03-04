@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
-import { AlertTriangle, Circle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
 
@@ -251,13 +251,13 @@ export const TimelineVisualization = ({
           </div>
           
           <div className="flex justify-between items-center mb-2 pt-1 pb-1">
-            {/* The horizontal line is now positioned precisely */}
+            {/* The horizontal line positioned to start at the vertical line */}
             <div className="absolute top-[16px] left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
             
-            {/* Adjust the left position of the timeline to match exactly with the reference */}
+            {/* Vertical line marker instead of circle */}
             <div className="flex flex-col items-center z-10">
               <div className="relative flex items-center justify-center h-[20px]">
-                <Circle className="w-[18px] h-[18px] text-primary fill-white stroke-[1.5]" />
+                <div className="w-[2px] h-[16px] bg-primary absolute left-0"></div>
               </div>
               <div className="text-[9px] mt-0.5 text-gray-500">
                 {timelineEstimate?.currentTime || "--"}
