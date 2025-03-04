@@ -15,6 +15,8 @@ import { HelpCircle, Monitor, Smartphone, MonitorSmartphone, Upload, Link, X } f
 import { formatDuration } from "@/lib/date-utils";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
+import { PriorityDial } from "./PriorityDial";
+
 const taskFormSchema = z.object({
   details: z.string().min(10, {
     message: "Task details must be at least 10 characters"
@@ -32,12 +34,14 @@ const taskFormSchema = z.object({
     message: "Must be a valid URL"
   }).optional().or(z.string().length(0))
 });
+
 type TaskFormValues = z.infer<typeof taskFormSchema>;
 interface TaskFormProps {
   onSubmit: (data: TaskFormValues) => void;
   isSubmitting: boolean;
   queuePosition: number;
 }
+
 export const TaskForm = ({
   onSubmit,
   isSubmitting,
@@ -68,6 +72,7 @@ export const TaskForm = ({
       image_url: ""
     }
   });
+
   useEffect(() => {
     const fetchProject = async () => {
       if (!projectId) return;
@@ -87,6 +92,7 @@ export const TaskForm = ({
     };
     fetchProject();
   }, [projectId]);
+
   useEffect(() => {
     const fetchTaskTypes = async () => {
       const {
@@ -108,6 +114,7 @@ export const TaskForm = ({
       fetchTaskTypes();
     }
   }, [project]);
+
   useEffect(() => {
     const fetchPriorityLevels = async () => {
       const {
@@ -122,6 +129,7 @@ export const TaskForm = ({
     };
     fetchPriorityLevels();
   }, []);
+
   useEffect(() => {
     const fetchComplexityLevels = async () => {
       const {
@@ -136,6 +144,7 @@ export const TaskForm = ({
     };
     fetchComplexityLevels();
   }, []);
+
   useEffect(() => {
     const subscription = form.watch(value => {
       setTimelineParams({
@@ -146,12 +155,14 @@ export const TaskForm = ({
     });
     return () => subscription.unsubscribe();
   }, [form.watch]);
+
   const handleFormSubmit = (values: TaskFormValues) => {
     if (imageFile) {
       console.log("Image file to upload:", imageFile);
     }
     onSubmit(values);
   };
+
   const getComplexityTooltip = (level: any) => {
     if (!level) return "";
     const multiplier = level.multiplier;
@@ -163,17 +174,20 @@ export const TaskForm = ({
       return `${Math.round((multiplier - 1) * 100)}% longer completion`;
     }
   };
+
   const getPriorityTooltip = (level: any) => {
     if (!level) return "";
     const timeToStart = level.time_to_start ? formatDuration(level.time_to_start) : "immediate";
     const multiplier = level.multiplier ? `${level.multiplier}x duration` : "standard duration";
     return `${timeToStart} delay, ${multiplier}`;
   };
+
   const getSelectedComplexityName = () => {
     const complexityId = form.watch("complexity_level_id");
     const selectedLevel = complexityLevels.find(level => level.id === complexityId);
     return selectedLevel?.name || "Standard";
   };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -183,17 +197,20 @@ export const TaskForm = ({
       form.setValue("image_url", "");
     }
   };
+
   const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
     form.setValue("image_url", url);
     setImageFile(null);
     setImagePreview(url);
   };
+
   const clearImage = () => {
     setImageFile(null);
     setImagePreview('');
     form.setValue("image_url", "");
   };
+
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <TimelineVisualization taskTypeId={timelineParams.taskTypeId} priorityLevelId={timelineParams.priorityLevelId} complexityLevelId={timelineParams.complexityLevelId} projectId={projectId} />
@@ -212,18 +229,6 @@ export const TaskForm = ({
             <FormField control={form.control} name="task_type_id" render={({
             field
           }) => <FormItem>
-                  <div className="flex items-center gap-2">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Affects time estimate and scheduling</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
                   <FormControl>
                     <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
                       <SelectTrigger>
@@ -302,28 +307,12 @@ export const TaskForm = ({
           field
         }) => <FormItem>
                 <FormControl>
-                  <div className="flex flex-nowrap gap-1 mt-1 overflow-x-auto text-xs">
-                    {priorityLevels.map(level => <TooltipProvider key={level.id}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Badge variant="outline" className={`cursor-pointer px-2 py-0.5 whitespace-nowrap hover:bg-muted transition-colors ${field.value === level.id ? `bg-opacity-20 bg-${level.color || 'gray'}-100 ring-1 ring-${level.color || 'gray'}-200` : ''}`} style={{
-                      backgroundColor: field.value === level.id ? `${level.color}15` : '',
-                      borderColor: field.value === level.id ? level.color : '',
-                      color: field.value === level.id ? level.color : ''
-                    }} onClick={() => field.onChange(level.id)}>
-                              <div className="flex items-center">
-                                <span className="w-2 h-2 rounded-full mr-1 flex-shrink-0" style={{
-                          backgroundColor: level.color || '#888888'
-                        }} />
-                                {level.name}
-                              </div>
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{getPriorityTooltip(level)}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>)}
+                  <div className="mt-2">
+                    <PriorityDial 
+                      priorityLevels={priorityLevels} 
+                      value={field.value} 
+                      onChange={field.onChange} 
+                    />
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -331,11 +320,7 @@ export const TaskForm = ({
 
           <FormField control={form.control} name="complexity_level_id" render={({
           field
-        }) => <FormItem className="space-y-3">
-                <div>
-                  
-                </div>
-                
+        }) => <FormItem className="space-y-2">                
                 <FormControl>
                   <div className="pt-1">
                     <Slider min={1} max={5} step={1} value={[field.value || 3]} onValueChange={vals => field.onChange(vals[0])} className="w-full" />
@@ -348,8 +333,6 @@ export const TaskForm = ({
                     </div>
                   </div>
                 </FormControl>
-                
-                
                 <FormMessage />
               </FormItem>} />
 
