@@ -331,19 +331,12 @@ export const TaskForm = ({
             }) => <FormItem className="space-y-2">
                   <FormLabel className="text-xs text-muted-foreground">Complexity Level</FormLabel>
                   <FormControl>
-                    <div className="pt-4 pb-3">
+                    <div className="pt-2 pb-2">
                       <ComplexitySelector 
                         complexityLevels={complexityLevels} 
                         value={field.value || 3} 
                         onChange={field.onChange}
                       />
-                      <div className="flex justify-between text-[10px] text-muted-foreground mt-2">
-                        <span>Basic</span>
-                        <span>Easy</span>
-                        <span>Standard</span>
-                        <span>Advanced</span>
-                        <span>Complex</span>
-                      </div>
                     </div>
                   </FormControl>
                   <FormMessage />
