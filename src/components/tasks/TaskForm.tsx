@@ -234,7 +234,7 @@ export const TaskForm = ({
                     <SelectTrigger className="text-muted-foreground">
                       <SelectValue placeholder="Task type" />
                     </SelectTrigger>
-                    <SelectContent className="bg-yellow-200"">
+                    <SelectContent className="bg-yellow-200">
                       {taskTypes.length > 0 && taskTypes.reduce((acc: any[], type: any) => {
                     const categoryExists = acc.some(item => item.category === type.category);
                     if (!categoryExists) {
