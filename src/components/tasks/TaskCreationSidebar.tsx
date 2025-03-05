@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,9 +38,9 @@ export const TaskCreationSidebar = () => {
   };
 
   // Fetch queue position when component mounts
-  useState(() => {
+  useEffect(() => {
     fetchQueuePosition();
-  });
+  }, []);
 
   const handleFormSubmit = (data: any) => {
     setFormData(data);
@@ -103,7 +103,7 @@ export const TaskCreationSidebar = () => {
           queuePosition={queuePosition}
         />
       </ScrollArea>
-      <div className="px-4 py-3 border-t mt-auto">
+      <div className="px-4 py-3 border-t sticky bottom-0 bg-white">
         <Button 
           type="button" 
           onClick={handleSubmit} 

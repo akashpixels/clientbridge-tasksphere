@@ -405,10 +405,6 @@ export const TaskForm = ({
             </div>
           </div>
         </div>
-
-        <Button type="submit" disabled={isSubmitting} className="w-full mt-6">
-          {isSubmitting ? "Creating..." : `Create Task (#${queuePosition + 1})`}
-        </Button>
       </form>
     </Form>;
 };
