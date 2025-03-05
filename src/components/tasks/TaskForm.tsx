@@ -214,7 +214,7 @@ export const TaskForm = ({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <TimelineVisualization taskTypeId={timelineParams.taskTypeId} priorityLevelId={timelineParams.priorityLevelId} complexityLevelId={timelineParams.complexityLevelId} projectId={projectId} compact={true} />
 
-        <div className="space-y-5 pt-2 py-0">
+        <div className="space-y-5  py-0">
           <FormField control={form.control} name="details" render={({
           field
         }) => <FormItem>
