@@ -9,19 +9,11 @@ import { useLayout } from "@/context/layout";
 import { X } from "lucide-react";
 
 export const TaskCreationSidebar = () => {
-  const {
-    toast
-  } = useToast();
-  const {
-    id: projectId
-  } = useParams<{
-    id: string;
-  }>();
+  const { toast } = useToast();
+  const { id: projectId } = useParams<{ id: string; }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [queuePosition, setQueuePosition] = useState(0);
-  const {
-    closeRightSidebar
-  } = useLayout();
+  const { closeRightSidebar } = useLayout();
   const [formData, setFormData] = useState<any>(null);
 
   const fetchQueuePosition = async () => {
@@ -95,7 +87,9 @@ export const TaskCreationSidebar = () => {
 
   return <div className="flex flex-col h-full overflow-hidden">
       <div className="flex justify-between items-center px-4 py-[10px] border-b bg-[#fcfcfc] sticky top-0 z-10">
-        <h2 className="font-semibold text-[14px]">Create New Task</h2>
+        <h2 className="font-semibold text-[14px]">
+          {queuePosition > 0 ? `# ${queuePosition} task${queuePosition > 1 ? 's' : ''} ahead of this` : 'First in queue'}
+        </h2>
         <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
           <X size={18} />
         </Button>
@@ -105,7 +99,7 @@ export const TaskCreationSidebar = () => {
       </ScrollArea>
       <div className="px-4 py-3 border-t sticky bottom-0 bg-white z-10">
         <Button type="button" onClick={handleSubmit} disabled={isSubmitting} className="w-full">
-          {isSubmitting ? "Creating..." : `Create Task (#${queuePosition + 1})`}
+          {isSubmitting ? "Creating..." : "Create Task"}
         </Button>
       </div>
     </div>;
