@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,11 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TimelineVisualization } from "./TimelineVisualization";
-import { Upload, X, Link as LinkIcon, Plus, Monitor, Smartphone, MonitorSmartphone } from "lucide-react";
+import { Upload, X, Link as LinkIcon, Plus, Monitor, Smartphone, MonitorSmartphone, ImageIcon } from "lucide-react";
 import { PriorityDial } from "./PriorityDial";
 import { formatDuration } from "@/lib/date-utils";
 
-// Update the schema to support arrays of URLs
 const taskFormSchema = z.object({
   details: z.string().min(10, {
     message: "Task details must be at least 10 characters"
@@ -162,6 +160,37 @@ export const TaskForm = ({
     }
   };
 
+  const handleImagePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    
+    if (items) {
+      let pastedImage = false;
+      
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+          const blob = items[i].getAsFile();
+          if (blob) {
+            setImageFiles(prev => [...prev, blob]);
+            pastedImage = true;
+          }
+        }
+      }
+
+      if (!pastedImage) {
+        const text = e.clipboardData.getData('text/plain');
+        if (text && /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|svg)$/i.test(text)) {
+          form.setValue("image_urls", [...form.getValues("image_urls"), text]);
+          setNewImageUrl("");
+          pastedImage = true;
+        }
+      }
+
+      if (pastedImage) {
+        e.preventDefault();
+      }
+    }
+  };
+
   const removeImage = (index: number) => {
     setImageFiles(prev => prev.filter((_, i) => i !== index));
   };
@@ -268,7 +297,6 @@ export const TaskForm = ({
             )} />
           </div>
 
-          
           <FormField control={form.control} name="target_device" render={({
             field
           }) => <FormItem>
@@ -315,7 +343,6 @@ export const TaskForm = ({
                   <FormMessage />
                 </FormItem>} />
 
-          
           <FormField control={form.control} name="priority_level_id" render={({
             field
             }) => <FormItem>
@@ -333,7 +360,6 @@ export const TaskForm = ({
                   <FormMessage />
                 </FormItem>} />
 
-          {/* Reference Links */}
           <div>
             <div className="flex gap-2 mb-2">
               <Input
@@ -357,68 +383,69 @@ export const TaskForm = ({
             ))}
           </div>
 
-          {/* Image URLs and Uploads */}
           <div>
             <div className="flex gap-2 mb-2">
-              <Input
-                type="url"
-                value={newImageUrl}
-                onChange={(e) => setNewImageUrl(e.target.value)}
-                placeholder="Paste image URL"
-                className="flex-1"
-              />
-              <Button type="button" size="icon" variant="outline" onClick={addImageUrl}>
+              <div className="relative flex-1">
+                <Input
+                  type="text"
+                  value={newImageUrl}
+                  onChange={(e) => setNewImageUrl(e.target.value)}
+                  placeholder="Upload or paste image/URL"
+                  className="pr-10 w-full"
+                  onPaste={handleImagePaste}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  id="image-upload"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+                <label htmlFor="image-upload" className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer">
+                  <Upload size={16} className="text-gray-500 hover:text-gray-700" />
+                </label>
+              </div>
+              <Button 
+                type="button" 
+                size="icon" 
+                variant="outline" 
+                onClick={addImageUrl}
+                disabled={!newImageUrl}
+              >
                 <Plus size={16} />
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-2">
               {form.watch("image_urls").map((url, index) => (
                 <div key={index} className="relative group">
-                  <img src={url} alt="" className="w-full h-24 object-cover rounded-md" />
+                  <img src={url} alt="" className="w-12 h-12 object-cover rounded-md" />
                   <Button
                     type="button"
                     variant="destructive"
                     size="sm"
-                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+                    className="absolute -top-2 -right-2 h-5 w-5 p-0 rounded-full"
                     onClick={() => removeImageUrl(index)}
                   >
-                    <X size={14} />
+                    <X size={12} />
                   </Button>
                 </div>
               ))}
               {imageFiles.map((file, index) => (
                 <div key={index} className="relative group">
-                  <img src={URL.createObjectURL(file)} alt="" className="w-full h-24 object-cover rounded-md" />
+                  <img src={URL.createObjectURL(file)} alt="" className="w-12 h-12 object-cover rounded-md" />
                   <Button
                     type="button"
                     variant="destructive"
                     size="sm"
-                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+                    className="absolute -top-2 -right-2 h-5 w-5 p-0 rounded-full"
                     onClick={() => removeImage(index)}
                   >
-                    <X size={14} />
+                    <X size={12} />
                   </Button>
                 </div>
               ))}
-            </div>
-
-            <div className="mt-2">
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                id="image-upload"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-              <label htmlFor="image-upload">
-                <Button type="button" variant="outline" className="w-full" asChild>
-                  <span>
-                    <Upload size={16} />
-                  </span>
-                </Button>
-              </label>
             </div>
           </div>
         </div>
