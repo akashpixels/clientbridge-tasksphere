@@ -16,9 +16,7 @@ import { PriorityDial } from "./PriorityDial";
 import { formatDuration } from "@/lib/date-utils";
 
 const taskFormSchema = z.object({
-  details: z.string().min(10, {
-    message: "Task details must be at least 10 characters"
-  }).max(1000, {
+  details: z.string().max(1000, {
     message: "Task details must be less than 1000 characters"
   }),
   task_type_id: z.coerce.number({
