@@ -11,9 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TimelineVisualization } from "./TimelineVisualization";
-import { Upload, X, Plus, Monitor, Smartphone, MonitorSmartphone, HelpCircle } from "lucide-react";
+import { Upload, X, Plus, Monitor, Smartphone, MonitorSmartphone } from "lucide-react";
 import { PriorityDial } from "./PriorityDial";
 import { formatDuration } from "@/lib/date-utils";
+
 const taskFormSchema = z.object({
   details: z.string().min(10, {
     message: "Task details must be at least 10 characters"
@@ -31,12 +32,15 @@ const taskFormSchema = z.object({
     message: "Must be a valid URL"
   })).default([])
 });
+
 type TaskFormValues = z.infer<typeof taskFormSchema>;
+
 interface TaskFormProps {
   onSubmit: (data: TaskFormValues) => void;
   isSubmitting: boolean;
   queuePosition: number;
 }
+
 export const TaskForm = ({
   onSubmit,
   isSubmitting,
@@ -59,16 +63,19 @@ export const TaskForm = ({
   const [newReferenceLink, setNewReferenceLink] = useState("");
   const [newImageUrl, setNewImageUrl] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
       details: "",
       complexity_level_id: 3,
+      priority_level_id: 3,
       target_device: "Both",
       reference_links: [],
       image_urls: []
     }
   });
+
   useEffect(() => {
     const fetchProject = async () => {
       if (!projectId) return;
@@ -88,6 +95,7 @@ export const TaskForm = ({
     };
     fetchProject();
   }, [projectId]);
+
   useEffect(() => {
     const fetchTaskTypes = async () => {
       const {
@@ -109,6 +117,7 @@ export const TaskForm = ({
       fetchTaskTypes();
     }
   }, [project]);
+
   useEffect(() => {
     const fetchPriorityLevels = async () => {
       const {
@@ -123,6 +132,7 @@ export const TaskForm = ({
     };
     fetchPriorityLevels();
   }, []);
+
   useEffect(() => {
     const fetchComplexityLevels = async () => {
       const {
@@ -137,6 +147,7 @@ export const TaskForm = ({
     };
     fetchComplexityLevels();
   }, []);
+
   useEffect(() => {
     const subscription = form.watch(value => {
       setTimelineParams({
@@ -147,12 +158,14 @@ export const TaskForm = ({
     });
     return () => subscription.unsubscribe();
   }, [form.watch]);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
       setImageFiles(prev => [...prev, ...Array.from(files)]);
     }
   };
+
   const handleImagePaste = (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
     if (items) {
@@ -179,9 +192,11 @@ export const TaskForm = ({
       }
     }
   };
+
   const removeImage = (index: number) => {
     setImageFiles(prev => prev.filter((_, i) => i !== index));
   };
+
   const addReferenceLink = () => {
     if (newReferenceLink && /^https?:\/\/.+/.test(newReferenceLink)) {
       const currentLinks = form.getValues("reference_links");
@@ -189,10 +204,12 @@ export const TaskForm = ({
       setNewReferenceLink("");
     }
   };
+
   const removeReferenceLink = (index: number) => {
     const currentLinks = form.getValues("reference_links");
     form.setValue("reference_links", currentLinks.filter((_, i) => i !== index));
   };
+
   const addImageUrl = () => {
     if (newImageUrl && /^https?:\/\/.+/.test(newImageUrl)) {
       const currentUrls = form.getValues("image_urls");
@@ -200,21 +217,24 @@ export const TaskForm = ({
       setNewImageUrl("");
     }
   };
+
   const removeImageUrl = (index: number) => {
     const currentUrls = form.getValues("image_urls");
     form.setValue("image_urls", currentUrls.filter((_, i) => i !== index));
   };
+
   const getPriorityTooltip = (level: any) => {
     if (!level) return "";
     const timeToStart = level.time_to_start ? formatDuration(level.time_to_start) : "immediate";
     const multiplier = level.multiplier ? `${level.multiplier}x duration` : "standard duration";
     return `${timeToStart} delay, ${multiplier}`;
   };
+
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <TimelineVisualization taskTypeId={timelineParams.taskTypeId} priorityLevelId={timelineParams.priorityLevelId} complexityLevelId={timelineParams.complexityLevelId} projectId={projectId} compact={true} />
 
-        <div className="space-y-5  py-0">
+        <div className="space-y-5 py-0">
           <FormField control={form.control} name="details" render={({
           field
         }) => <FormItem>
@@ -320,29 +340,21 @@ export const TaskForm = ({
                   <FormMessage />
                 </FormItem>} />
 
-          <FormField control={form.control} name="priority_level_id" render={({
-          field
-        }) => <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  Priority Level
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle size={16} className="text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Affects queue position and start time</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </FormLabel>
-                <FormControl>
-                  <div className="mt-1">
-                    <PriorityDial priorityLevels={priorityLevels} value={field.value} onChange={field.onChange} />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>} />
+          <div className="py-4 border-t border-b border-gray-200">
+            <FormField control={form.control} name="priority_level_id" render={({
+            field
+          }) => <FormItem>
+                  <FormLabel className="text-gray-500 text-xs mb-2">
+                    Priority Level
+                  </FormLabel>
+                  <FormControl>
+                    <div className="mt-1">
+                      <PriorityDial priorityLevels={priorityLevels} value={field.value} onChange={field.onChange} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>} />
+          </div>
 
           <div>
             <div className="flex gap-2 mb-2">

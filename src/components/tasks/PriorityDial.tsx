@@ -41,7 +41,7 @@ export const PriorityDial = ({ priorityLevels, value, onChange }: PriorityDialPr
                 style={{
                   backgroundColor: value === level.id ? `${level.color}15` : '',
                   borderColor: value === level.id ? level.color : '',
-                  color: value === level.id ? level.color : ''
+                  color: value === level.id ? level.color : '#8E9196'
                 }}
                 onClick={() => onChange(level.id)}
               >
