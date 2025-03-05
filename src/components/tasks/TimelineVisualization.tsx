@@ -224,7 +224,7 @@ export const TimelineVisualization = ({
       </>;
   };
   return <div className="sticky top-0 bg-background z-10">
-      <div className="pt-3 pb-0">
+      <div className="pt-7 pb-0">
         <div className="relative">
           <div className="absolute top-[-8px] left-[15%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
             {getTimeBetweenNodes('start')}
