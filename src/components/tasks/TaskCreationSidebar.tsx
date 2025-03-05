@@ -26,7 +26,7 @@ export const TaskCreationSidebar = () => {
       } = await supabase.from('tasks').select('*', {
         count: 'exact',
         head: true
-      }).eq('project_id', projectId).in('current_status_id', [1, 2, 3, 7]); // Open, Pending, In Progress, In Queue
+      }).eq('project_id', projectId).in('current_status_id', [1, 2, 3, 6, 7]); // Open, Pending, In Progress, Awaiting Input, In Queue
 
       if (error) {
         console.error("Error fetching queue position:", error);
