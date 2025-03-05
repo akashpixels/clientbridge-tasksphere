@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TimelineVisualization } from "./TimelineVisualization";
-import { Upload, X, Plus, Monitor, Smartphone, MonitorSmartphone } from "lucide-react";
+import { Upload, X, Plus, Monitor, Smartphone, MonitorSmartphone, Loader2 } from "lucide-react";
 import { PriorityDial } from "./PriorityDial";
 import { formatDuration } from "@/lib/date-utils";
 
@@ -21,7 +21,9 @@ const taskFormSchema = z.object({
   }).max(1000, {
     message: "Task details must be less than 1000 characters"
   }),
-  task_type_id: z.coerce.number(),
+  task_type_id: z.coerce.number({
+    required_error: "Task type is required"
+  }),
   priority_level_id: z.coerce.number().default(3),
   complexity_level_id: z.coerce.number().default(3),
   target_device: z.enum(["Desktop", "Mobile", "Both"]).default("Both"),
@@ -72,7 +74,8 @@ export const TaskForm = ({
       target_device: "Both",
       reference_links: [],
       image_urls: []
-    }
+    },
+    mode: "onChange"
   });
 
   useEffect(() => {
@@ -230,9 +233,13 @@ export const TaskForm = ({
   };
 
   const handleFormSubmit = (data: TaskFormValues) => {
+    console.log("Form submission data:", data);
     onSubmit(data);
   };
 
+  const isFormValid = form.formState.isValid;
+  const errors = form.formState.errors;
+  
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <TimelineVisualization taskTypeId={timelineParams.taskTypeId} priorityLevelId={timelineParams.priorityLevelId} complexityLevelId={timelineParams.complexityLevelId} projectId={projectId} compact={true} />
@@ -253,7 +260,7 @@ export const TaskForm = ({
           }) => <FormItem>
                 <FormControl>
                   <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
-                    <SelectTrigger className="text-muted-foreground">
+                    <SelectTrigger className={`text-muted-foreground ${errors.task_type_id ? 'border-red-500' : ''}`}>
                       <SelectValue placeholder="Task type" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#fcfcfc]">
@@ -410,9 +417,23 @@ export const TaskForm = ({
         </div>
 
         <div className="px-4 py-3 border-t sticky bottom-0 bg-white z-10 mt-4 -mx-4">
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Creating..." : "Create Task"}
+          <Button 
+            type="submit" 
+            disabled={isSubmitting || !isFormValid} 
+            className="w-full"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : "Create Task"}
           </Button>
+          {!isFormValid && Object.keys(errors).length > 0 && (
+            <p className="text-red-500 text-xs mt-2 text-center">
+              Please fill in all required fields correctly
+            </p>
+          )}
         </div>
       </form>
     </Form>;
