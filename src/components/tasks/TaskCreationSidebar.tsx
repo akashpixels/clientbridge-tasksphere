@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -25,7 +26,7 @@ export const TaskCreationSidebar = () => {
       } = await supabase.from('tasks').select('*', {
         count: 'exact',
         head: true
-      }).eq('project_id', projectId).in('current_status_id', [1, 2, 3]); // Open, Pending, In Progress
+      }).eq('project_id', projectId).in('current_status_id', [1, 2, 3, 7]); // Open, Pending, In Progress, In Queue
 
       if (error) {
         console.error("Error fetching queue position:", error);
