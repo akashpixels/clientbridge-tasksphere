@@ -234,7 +234,7 @@ export const TaskForm = ({
                     <SelectTrigger className="text-muted-foreground">
                       <SelectValue placeholder="Task type" />
                     </SelectTrigger>
-                    <SelectContent className="bg-yellow-200">
+                    <SelectContent className="bg-[#fcfcfc]">
                       {taskTypes.length > 0 && taskTypes.reduce((acc: any[], type: any) => {
                     const categoryExists = acc.some(item => item.category === type.category);
                     if (!categoryExists) {
@@ -264,7 +264,7 @@ export const TaskForm = ({
                     <SelectTrigger className="text-muted-foreground">
                       <SelectValue placeholder="Complexity" />
                     </SelectTrigger>
-                    <SelectContent className="bg-popover">
+                    <SelectContent className="bg-[#fcfcfc]">
                       {complexityLevels.map(level => <SelectItem key={level.id} value={level.id.toString()}>
                           {level.name}
                         </SelectItem>)}
