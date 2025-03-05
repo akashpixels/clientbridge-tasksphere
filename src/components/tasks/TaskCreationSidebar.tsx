@@ -1,90 +1,72 @@
 
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TaskForm } from "./TaskForm";
+import { useLayout } from "@/context/layout";
+import { X } from "lucide-react";
 
-interface TaskCreationDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export const TaskCreationDialog = ({ open, onOpenChange }: TaskCreationDialogProps) => {
+export const TaskCreationSidebar = () => {
   const { toast } = useToast();
   const { id: projectId } = useParams<{ id: string }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [queuePosition, setQueuePosition] = useState(0);
+  const { closeRightSidebar } = useLayout();
 
-  // Fetch the queue position when the dialog opens
+  // Fetch the queue position when the sidebar opens
   const fetchQueuePosition = async () => {
     if (!projectId) return;
-    
     try {
       const { count, error } = await supabase
         .from('tasks')
         .select('*', { count: 'exact', head: true })
         .eq('project_id', projectId)
         .in('current_status_id', [1, 2, 3]); // Open, Pending, In Progress
-      
+
       if (error) {
         console.error("Error fetching queue position:", error);
         return;
       }
-      
       setQueuePosition(count || 0);
     } catch (error) {
       console.error("Error in fetchQueuePosition:", error);
     }
   };
 
-  // When the dialog opens, fetch the queue position
-  const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen) {
-      fetchQueuePosition();
-    }
-    onOpenChange(newOpen);
-  };
+  // Fetch queue position when component mounts
+  useState(() => {
+    fetchQueuePosition();
+  });
 
   const handleSubmit = async (formData: any) => {
     if (!projectId) return;
-    
     setIsSubmitting(true);
     try {
       const { data: userData, error: userError } = await supabase.auth.getUser();
-      
       if (userError) {
         throw new Error(userError.message);
       }
-      
-      // Handle potential image upload to storage (skipped in this implementation)
-      // In production, you would upload the image to Supabase Storage first
-      // then add the resulting URL to the task data
-      
       const taskData = {
         ...formData,
         project_id: projectId,
         created_by: userData.user?.id
       };
-
       const { data, error } = await supabase
         .from('tasks')
         .insert(taskData)
         .select()
         .single();
-
       if (error) {
         throw error;
       }
-
       toast({
         title: "Task created successfully",
         description: "Your task has been added to the queue."
       });
-      
-      onOpenChange(false);
+      closeRightSidebar();
     } catch (error: any) {
       console.error("Error creating task:", error);
       toast({
@@ -98,16 +80,24 @@ export const TaskCreationDialog = ({ open, onOpenChange }: TaskCreationDialogPro
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg h-[75vh] max-h-[800px] flex flex-col overflow-hidden p-0">
-        <ScrollArea className="flex-1 px-6 py-4">
-          <TaskForm 
-            onSubmit={handleSubmit} 
-            isSubmitting={isSubmitting} 
-            queuePosition={queuePosition}
-          />
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+    <div className="flex flex-col h-full">
+      <div className="flex justify-between items-center border-b py-[10px] px-4">
+        <h2 className="font-semibold text-[14px]">Create New Task</h2>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={closeRightSidebar}
+        >
+          <X size={18} />
+        </Button>
+      </div>
+      <ScrollArea className="flex-1 px-4 py-2">
+        <TaskForm 
+          onSubmit={handleSubmit} 
+          isSubmitting={isSubmitting} 
+          queuePosition={queuePosition}
+        />
+      </ScrollArea>
+    </div>
   );
 };
