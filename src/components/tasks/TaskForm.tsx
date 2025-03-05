@@ -220,7 +220,7 @@ export const TaskForm = ({
           field
         }) => <FormItem>
               <FormControl>
-                <Textarea placeholder="Describe what needs to be done..." className="min-h-[100px]" {...field} />
+                <Textarea placeholder="Describe what needs to be done..." className="min-h-[100px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>} />
