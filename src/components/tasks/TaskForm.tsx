@@ -234,6 +234,10 @@ export const TaskForm = ({
 
   const handleFormSubmit = (data: TaskFormValues) => {
     console.log("Form submission data:", data);
+    if (!form.formState.isValid) {
+      console.error("Form is invalid, not submitting");
+      return;
+    }
     onSubmit(data);
   };
 

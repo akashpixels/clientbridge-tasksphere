@@ -56,9 +56,11 @@ export const TaskCreationSidebar = () => {
         throw new Error(userError.message);
       }
       
-      // Prepare task data for submission
+      // Prepare task data for submission by excluding fields that don't exist in the tasks table
+      const { image_urls, ...taskDataWithoutImages } = formData;
+      
       const taskData = {
-        ...formData,
+        ...taskDataWithoutImages,
         project_id: projectId,
         created_by: userData.user?.id
       };
