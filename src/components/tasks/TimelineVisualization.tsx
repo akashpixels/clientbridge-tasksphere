@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
@@ -239,7 +238,6 @@ export const TimelineVisualization = ({
     }
   };
 
-  // Function to format time with a line break after AM/PM
   const formatTimeWithLineBreak = (timeString: string | null): React.ReactNode => {
     if (!timeString) return "";
     
@@ -253,10 +251,9 @@ export const TimelineVisualization = ({
     );
   };
 
-  return <div className="sticky top-0 bg-background z-10 border-b">
+  return <div className="sticky top-0 bg-background z-10">
       <div className="py-3">
         <div className="relative">
-          {/* Repositioned hour indicators with updated positions */}
           <div className="absolute top-[-8px] left-[15%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
             {getTimeBetweenNodes('start')}
           </div>
@@ -266,18 +263,14 @@ export const TimelineVisualization = ({
           </div>
           
           <div className="flex justify-between items-center mb-2 pt-1 pb-1 relative min-h-[32px]">
-            {/* The horizontal line */}
             <div className="absolute top-[16px] left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
             
-            {/* First column with vertical line positioned exactly at start of horizontal line */}
             <div className="flex flex-col items-start z-10 pl-0">
               <div className="relative h-[20px] flex items-center">
                 <div className="w-[1px] h-[13px] bg-gray-300 absolute left-0 top-[-8px]"></div>
               </div>
-              {/* Removed current time display */}
             </div>
             
-            {/* Start pill positioned at 35% from the left */}
             <div className="absolute left-[35%] -translate-x-1/2 z-10 flex flex-col items-center">
               <div className="h-[22px] w-[40px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
                 Start
@@ -287,7 +280,6 @@ export const TimelineVisualization = ({
               </div>
             </div>
             
-            {/* ETA pill positioned absolutely at the right end of horizontal line */}
             <div className="flex flex-col items-end z-10 pr-0">
               <div className="relative h-[20px] flex items-center">
                 <div className="h-[22px] w-[35px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600 absolute right-0">
