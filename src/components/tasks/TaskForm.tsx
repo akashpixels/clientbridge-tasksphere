@@ -419,8 +419,15 @@ export const TaskForm = ({
 
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-2">
               {form.watch("image_urls").map((url, index) => (
-                <div key={index} className="relative group">
-                  <img src={url} alt="" className="w-12 h-12 object-cover rounded-md" />
+                <div key={`url-${index}`} className="relative group">
+                  <img 
+                    src={url} 
+                    alt="" 
+                    className="w-[50px] h-[50px] object-cover rounded-md" 
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/50?text=Error';
+                    }}
+                  />
                   <Button
                     type="button"
                     variant="destructive"
@@ -433,8 +440,12 @@ export const TaskForm = ({
                 </div>
               ))}
               {imageFiles.map((file, index) => (
-                <div key={index} className="relative group">
-                  <img src={URL.createObjectURL(file)} alt="" className="w-12 h-12 object-cover rounded-md" />
+                <div key={`file-${index}`} className="relative group">
+                  <img 
+                    src={URL.createObjectURL(file)} 
+                    alt="" 
+                    className="w-[50px] h-[50px] object-cover rounded-md" 
+                  />
                   <Button
                     type="button"
                     variant="destructive"
