@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { TaskForm } from "./TaskForm";
 import { useLayout } from "@/context/layout";
 import { X } from "lucide-react";
+
 export const TaskCreationSidebar = () => {
   const {
     toast
@@ -49,9 +50,11 @@ export const TaskCreationSidebar = () => {
   useEffect(() => {
     fetchQueuePosition();
   }, []);
+
   const handleFormSubmit = (data: any) => {
     setFormData(data);
   };
+
   const handleSubmit = async () => {
     if (!projectId || !formData) return;
     setIsSubmitting(true);
@@ -91,6 +94,7 @@ export const TaskCreationSidebar = () => {
       setIsSubmitting(false);
     }
   };
+
   return <div className="flex flex-col h-full">
       <div className="flex justify-between items-center px-4 py-[10px] border-b bg-[#fcfcfc]">
         <h2 className="font-semibold text-[14px]">Create New Task</h2>
@@ -98,7 +102,7 @@ export const TaskCreationSidebar = () => {
           <X size={18} />
         </Button>
       </div>
-      <ScrollArea className="flex-1 px-4 py-2">
+      <ScrollArea className="flex-1 px-6 py-4">
         <TaskForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} queuePosition={queuePosition} />
       </ScrollArea>
       <div className="px-4 py-3 border-t sticky bottom-0 bg-white">
