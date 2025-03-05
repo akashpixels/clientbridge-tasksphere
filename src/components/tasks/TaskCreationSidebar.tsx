@@ -15,6 +15,7 @@ export const TaskCreationSidebar = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [queuePosition, setQueuePosition] = useState(0);
   const { closeRightSidebar } = useLayout();
+  const [formData, setFormData] = useState<any>(null);
 
   // Fetch the queue position when the sidebar opens
   const fetchQueuePosition = async () => {
@@ -41,8 +42,12 @@ export const TaskCreationSidebar = () => {
     fetchQueuePosition();
   });
 
-  const handleSubmit = async (formData: any) => {
-    if (!projectId) return;
+  const handleFormSubmit = (data: any) => {
+    setFormData(data);
+  };
+
+  const handleSubmit = async () => {
+    if (!projectId || !formData) return;
     setIsSubmitting(true);
     try {
       const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -93,11 +98,21 @@ export const TaskCreationSidebar = () => {
       </div>
       <ScrollArea className="flex-1 px-4 py-2">
         <TaskForm 
-          onSubmit={handleSubmit} 
+          onSubmit={handleFormSubmit} 
           isSubmitting={isSubmitting} 
           queuePosition={queuePosition}
         />
       </ScrollArea>
+      <div className="px-4 py-3 border-t mt-auto">
+        <Button 
+          type="button" 
+          onClick={handleSubmit} 
+          disabled={isSubmitting} 
+          className="w-full"
+        >
+          {isSubmitting ? "Creating..." : `Create Task (#${queuePosition + 1})`}
+        </Button>
+      </div>
     </div>
   );
 };

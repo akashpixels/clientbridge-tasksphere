@@ -22,7 +22,7 @@ const taskFormSchema = z.object({
     message: "Task details must be less than 1000 characters"
   }),
   task_type_id: z.coerce.number(),
-  priority_level_id: z.coerce.number(),
+  priority_level_id: z.coerce.number().default(3),
   complexity_level_id: z.coerce.number().default(3),
   target_device: z.enum(["Desktop", "Mobile", "Both"]).default("Both"),
   reference_links: z.array(z.string().url({
@@ -250,10 +250,10 @@ export const TaskForm = ({
           }) => <FormItem>
                 <FormControl>
                   <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
-                    <SelectTrigger>
+                    <SelectTrigger className="text-muted-foreground">
                       <SelectValue placeholder="Task type" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-popover">
                       {taskTypes.length > 0 && taskTypes.reduce((acc: any[], type: any) => {
                     const categoryExists = acc.some(item => item.category === type.category);
                     if (!categoryExists) {
@@ -280,10 +280,10 @@ export const TaskForm = ({
           }) => <FormItem>
                 <FormControl>
                   <Select onValueChange={value => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
-                    <SelectTrigger>
+                    <SelectTrigger className="text-muted-foreground">
                       <SelectValue placeholder="Complexity" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-popover">
                       {complexityLevels.map(level => <SelectItem key={level.id} value={level.id.toString()}>
                           {level.name}
                         </SelectItem>)}
@@ -340,18 +340,20 @@ export const TaskForm = ({
                   <FormMessage />
                 </FormItem>} />
 
-          <div className="py-4 border-t border-b border-gray-200">
+          <div className="mt-8 mb-8">
             <FormField control={form.control} name="priority_level_id" render={({
             field
           }) => <FormItem>
-                  <FormLabel className="text-gray-500 text-xs mb-2">
+                  <FormLabel className="text-gray-500 text-xs mb-4">
                     Priority Level
                   </FormLabel>
-                  <FormControl>
-                    <div className="mt-1">
-                      <PriorityDial priorityLevels={priorityLevels} value={field.value} onChange={field.onChange} />
-                    </div>
-                  </FormControl>
+                  <div className="py-4 px-0 mt-2 border-t border-b border-gray-200">
+                    <FormControl>
+                      <div className="mt-1">
+                        <PriorityDial priorityLevels={priorityLevels} value={field.value} onChange={field.onChange} />
+                      </div>
+                    </FormControl>
+                  </div>
                   <FormMessage />
                 </FormItem>} />
           </div>
