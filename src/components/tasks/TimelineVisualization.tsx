@@ -4,7 +4,6 @@ import { format, addHours, addDays, addMinutes, differenceInHours } from "date-f
 import { AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
-
 interface TimelineVisualizationProps {
   taskTypeId?: number | null;
   priorityLevelId?: number | null;
@@ -12,7 +11,6 @@ interface TimelineVisualizationProps {
   projectId?: string;
   compact?: boolean;
 }
-
 interface TimelineEstimate {
   currentTime: string;
   startTime: string | null;
@@ -24,7 +22,6 @@ interface TimelineEstimate {
     isOverdue: boolean;
   };
 }
-
 export const TimelineVisualization = ({
   taskTypeId,
   priorityLevelId,
@@ -38,7 +35,6 @@ export const TimelineVisualization = ({
   const [complexityLevel, setComplexityLevel] = useState<any>(null);
   const [queuePosition, setQueuePosition] = useState(0);
   const [timelineEstimate, setTimelineEstimate] = useState<TimelineEstimate | null>(null);
-
   useEffect(() => {
     const fetchTaskType = async () => {
       if (!taskTypeId) return;
@@ -58,7 +54,6 @@ export const TimelineVisualization = ({
       setTaskType(null);
     }
   }, [taskTypeId]);
-
   useEffect(() => {
     const fetchPriorityLevel = async () => {
       if (!priorityLevelId) return;
@@ -78,7 +73,6 @@ export const TimelineVisualization = ({
       setPriorityLevel(null);
     }
   }, [priorityLevelId]);
-
   useEffect(() => {
     const fetchComplexityLevel = async () => {
       if (!complexityLevelId) return;
@@ -98,7 +92,6 @@ export const TimelineVisualization = ({
       setComplexityLevel(null);
     }
   }, [complexityLevelId]);
-
   useEffect(() => {
     const fetchQueuePosition = async () => {
       if (!projectId) return;
@@ -109,7 +102,6 @@ export const TimelineVisualization = ({
         count: 'exact',
         head: true
       }).eq('project_id', projectId).in('current_status_id', [1, 2, 3]);
-
       if (error) {
         console.error("Error fetching queue position:", error);
         return;
@@ -120,7 +112,6 @@ export const TimelineVisualization = ({
       fetchQueuePosition();
     }
   }, [projectId]);
-
   useEffect(() => {
     const calculateTimeline = async () => {
       try {
@@ -130,10 +121,8 @@ export const TimelineVisualization = ({
         let hoursNeeded: number | null = null;
         let timeToStart: number | null = null;
         let isOverdue = false;
-
         if (taskType && priorityLevel && complexityLevel) {
           startTime = new Date();
-
           if (priorityLevel.time_to_start) {
             const timeToStartMatch = priorityLevel.time_to_start.match(/(\d+):(\d+):(\d+)/);
             if (timeToStartMatch) {
@@ -144,9 +133,7 @@ export const TimelineVisualization = ({
               startTime = addMinutes(startTime, minutes);
             }
           }
-
           startTime = addMinutes(startTime, queuePosition * 30);
-
           const currentHour = startTime.getHours();
           if (currentHour < 10) {
             startTime.setHours(10, 0, 0, 0);
@@ -154,7 +141,6 @@ export const TimelineVisualization = ({
             startTime = addDays(startTime, 1);
             startTime.setHours(10, 0, 0, 0);
           }
-
           hoursNeeded = 1;
           if (taskType.base_duration) {
             const baseDurationMatch = taskType.base_duration.match(/(\d+):(\d+):(\d+)/);
@@ -164,17 +150,14 @@ export const TimelineVisualization = ({
               hoursNeeded = hours + minutes / 60;
             }
           }
-
           if (priorityLevel.multiplier) {
             hoursNeeded *= priorityLevel.multiplier;
           }
           if (complexityLevel.multiplier) {
             hoursNeeded *= complexityLevel.multiplier;
           }
-
           eta = new Date(startTime);
           eta = addHours(eta, hoursNeeded);
-
           const etaHour = eta.getHours();
           const workingHoursInDay = 8;
           if (etaHour >= 18) {
@@ -184,10 +167,8 @@ export const TimelineVisualization = ({
             eta = addDays(eta, daysToAdd);
             eta.setHours(10 + remainingHours, eta.getMinutes(), 0, 0);
           }
-
           isOverdue = priorityLevel.id >= 4 && differenceInHours(eta, now) > 48;
         }
-
         setTimelineEstimate({
           currentTime: format(now, 'h:mm a'),
           startTime: startTime ? format(startTime, 'h:mm a, MMM d') : null,
@@ -216,18 +197,15 @@ export const TimelineVisualization = ({
       }
       setIsLoading(false);
     };
-
     setIsLoading(true);
     calculateTimeline();
   }, [taskType, priorityLevel, complexityLevel, queuePosition]);
-
   if (isLoading) {
     return <div className="space-y-4">
         <Skeleton className="h-6 w-full" />
         <Skeleton className="h-10 w-full" />
       </div>;
   }
-
   const getTimeBetweenNodes = (nodeType: 'start' | 'eta') => {
     if (nodeType === 'start') {
       if (!timelineEstimate?.taskInfo.timeToStart) return "";
@@ -237,22 +215,16 @@ export const TimelineVisualization = ({
       return formatHourDifference(timelineEstimate.taskInfo.hoursNeeded);
     }
   };
-
   const formatTimeWithLineBreak = (timeString: string | null): React.ReactNode => {
     if (!timeString) return "";
-    
     const parts = timeString.split(', ');
     if (parts.length !== 2) return timeString;
-    
-    return (
-      <>
+    return <>
         {parts[0]}<br />{parts[1]}
-      </>
-    );
+      </>;
   };
-
   return <div className="sticky top-0 bg-background z-10">
-      <div className="py-3">
+      <div className="pt-3 pb-0">
         <div className="relative">
           <div className="absolute top-[-8px] left-[15%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
             {getTimeBetweenNodes('start')}
