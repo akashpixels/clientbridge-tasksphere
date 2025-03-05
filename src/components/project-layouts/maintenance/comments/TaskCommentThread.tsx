@@ -121,13 +121,15 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <CommentList 
-        comments={comments} 
-        onFileClick={handleFileClick}
-      />
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
+        <CommentList 
+          comments={comments} 
+          onFileClick={handleFileClick}
+        />
+      </div>
 
-      <div className="border-t p-4">
+      <div className="border-t p-4 bg-white">
         <CommentInputRequest
           isInputResponse={!!pendingInputRequest}
           isRequestingInput={isRequestingInput}

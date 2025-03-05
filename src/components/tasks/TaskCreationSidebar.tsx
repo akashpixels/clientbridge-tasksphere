@@ -24,7 +24,6 @@ export const TaskCreationSidebar = () => {
   } = useLayout();
   const [formData, setFormData] = useState<any>(null);
 
-  // Fetch the queue position when the sidebar opens
   const fetchQueuePosition = async () => {
     if (!projectId) return;
     try {
@@ -46,7 +45,6 @@ export const TaskCreationSidebar = () => {
     }
   };
 
-  // Fetch queue position when component mounts
   useEffect(() => {
     fetchQueuePosition();
   }, []);
@@ -95,17 +93,17 @@ export const TaskCreationSidebar = () => {
     }
   };
 
-  return <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center px-4 py-[10px] border-b bg-[#fcfcfc]">
+  return <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex justify-between items-center px-4 py-[10px] border-b bg-[#fcfcfc] sticky top-0 z-10">
         <h2 className="font-semibold text-[14px]">Create New Task</h2>
         <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
           <X size={18} />
         </Button>
       </div>
-      <ScrollArea className="flex-1 px-4 py-2">
+      <ScrollArea className="flex-1 px-4 py-2 overflow-y-auto">
         <TaskForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} queuePosition={queuePosition} />
       </ScrollArea>
-      <div className="px-4 py-3 border-t sticky bottom-0 bg-white">
+      <div className="px-4 py-3 border-t sticky bottom-0 bg-white z-10">
         <Button type="button" onClick={handleSubmit} disabled={isSubmitting} className="w-full">
           {isSubmitting ? "Creating..." : `Create Task (#${queuePosition + 1})`}
         </Button>
