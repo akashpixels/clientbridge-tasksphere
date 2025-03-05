@@ -14,7 +14,6 @@ import { TimelineVisualization } from "./TimelineVisualization";
 import { Upload, X, Plus, Monitor, Smartphone, MonitorSmartphone, HelpCircle } from "lucide-react";
 import { PriorityDial } from "./PriorityDial";
 import { formatDuration } from "@/lib/date-utils";
-
 const taskFormSchema = z.object({
   details: z.string().min(10, {
     message: "Task details must be at least 10 characters"
@@ -32,20 +31,22 @@ const taskFormSchema = z.object({
     message: "Must be a valid URL"
   })).default([])
 });
-
 type TaskFormValues = z.infer<typeof taskFormSchema>;
 interface TaskFormProps {
   onSubmit: (data: TaskFormValues) => void;
   isSubmitting: boolean;
   queuePosition: number;
 }
-
 export const TaskForm = ({
   onSubmit,
   isSubmitting,
   queuePosition
 }: TaskFormProps) => {
-  const { id: projectId } = useParams<{ id: string }>();
+  const {
+    id: projectId
+  } = useParams<{
+    id: string;
+  }>();
   const [taskTypes, setTaskTypes] = useState<any[]>([]);
   const [priorityLevels, setPriorityLevels] = useState<any[]>([]);
   const [complexityLevels, setComplexityLevels] = useState<any[]>([]);
@@ -58,7 +59,6 @@ export const TaskForm = ({
   const [newReferenceLink, setNewReferenceLink] = useState("");
   const [newImageUrl, setNewImageUrl] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
@@ -69,7 +69,6 @@ export const TaskForm = ({
       image_urls: []
     }
   });
-
   useEffect(() => {
     const fetchProject = async () => {
       if (!projectId) return;
@@ -89,7 +88,6 @@ export const TaskForm = ({
     };
     fetchProject();
   }, [projectId]);
-
   useEffect(() => {
     const fetchTaskTypes = async () => {
       const {
@@ -111,7 +109,6 @@ export const TaskForm = ({
       fetchTaskTypes();
     }
   }, [project]);
-
   useEffect(() => {
     const fetchPriorityLevels = async () => {
       const {
@@ -126,7 +123,6 @@ export const TaskForm = ({
     };
     fetchPriorityLevels();
   }, []);
-
   useEffect(() => {
     const fetchComplexityLevels = async () => {
       const {
@@ -141,7 +137,6 @@ export const TaskForm = ({
     };
     fetchComplexityLevels();
   }, []);
-
   useEffect(() => {
     const subscription = form.watch(value => {
       setTimelineParams({
@@ -152,20 +147,16 @@ export const TaskForm = ({
     });
     return () => subscription.unsubscribe();
   }, [form.watch]);
-
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
       setImageFiles(prev => [...prev, ...Array.from(files)]);
     }
   };
-
   const handleImagePaste = (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
-    
     if (items) {
       let pastedImage = false;
-      
       for (let i = 0; i < items.length; i++) {
         if (items[i].type.indexOf("image") !== -1) {
           const blob = items[i].getAsFile();
@@ -175,7 +166,6 @@ export const TaskForm = ({
           }
         }
       }
-
       if (!pastedImage) {
         const text = e.clipboardData.getData('text/plain');
         if (text && /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|svg)$/i.test(text)) {
@@ -184,17 +174,14 @@ export const TaskForm = ({
           pastedImage = true;
         }
       }
-
       if (pastedImage) {
         e.preventDefault();
       }
     }
   };
-
   const removeImage = (index: number) => {
     setImageFiles(prev => prev.filter((_, i) => i !== index));
   };
-
   const addReferenceLink = () => {
     if (newReferenceLink && /^https?:\/\/.+/.test(newReferenceLink)) {
       const currentLinks = form.getValues("reference_links");
@@ -202,12 +189,10 @@ export const TaskForm = ({
       setNewReferenceLink("");
     }
   };
-
   const removeReferenceLink = (index: number) => {
     const currentLinks = form.getValues("reference_links");
     form.setValue("reference_links", currentLinks.filter((_, i) => i !== index));
   };
-
   const addImageUrl = () => {
     if (newImageUrl && /^https?:\/\/.+/.test(newImageUrl)) {
       const currentUrls = form.getValues("image_urls");
@@ -215,46 +200,34 @@ export const TaskForm = ({
       setNewImageUrl("");
     }
   };
-
   const removeImageUrl = (index: number) => {
     const currentUrls = form.getValues("image_urls");
     form.setValue("image_urls", currentUrls.filter((_, i) => i !== index));
   };
-
   const getPriorityTooltip = (level: any) => {
     if (!level) return "";
     const timeToStart = level.time_to_start ? formatDuration(level.time_to_start) : "immediate";
     const multiplier = level.multiplier ? `${level.multiplier}x duration` : "standard duration";
     return `${timeToStart} delay, ${multiplier}`;
   };
-
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <TimelineVisualization 
-          taskTypeId={timelineParams.taskTypeId} 
-          priorityLevelId={timelineParams.priorityLevelId} 
-          complexityLevelId={timelineParams.complexityLevelId} 
-          projectId={projectId}
-          compact={true} 
-        />
+        <TimelineVisualization taskTypeId={timelineParams.taskTypeId} priorityLevelId={timelineParams.priorityLevelId} complexityLevelId={timelineParams.complexityLevelId} projectId={projectId} compact={true} />
 
-        <div className="space-y-5 pt-2">
-          <FormField control={form.control} name="details" render={({ field }) => (
-            <FormItem>
+        <div className="space-y-5 pt-2 py-0">
+          <FormField control={form.control} name="details" render={({
+          field
+        }) => <FormItem>
               <FormControl>
-                <Textarea 
-                  placeholder="Describe what needs to be done..." 
-                  className="min-h-[100px]" 
-                  {...field} 
-                />
+                <Textarea placeholder="Describe what needs to be done..." className="min-h-[100px]" {...field} />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )} />
+            </FormItem>} />
 
           <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="task_type_id" render={({ field }) => (
-              <FormItem>
+            <FormField control={form.control} name="task_type_id" render={({
+            field
+          }) => <FormItem>
                 <FormControl>
                   <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
                     <SelectTrigger>
@@ -280,33 +253,30 @@ export const TaskForm = ({
                   </Select>
                 </FormControl>
                 <FormMessage />
-              </FormItem>
-            )} />
+              </FormItem>} />
             
-            <FormField control={form.control} name="complexity_level_id" render={({ field }) => (
-              <FormItem>
+            <FormField control={form.control} name="complexity_level_id" render={({
+            field
+          }) => <FormItem>
                 <FormControl>
-                  <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
+                  <Select onValueChange={value => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
                     <SelectTrigger>
                       <SelectValue placeholder="Complexity" />
                     </SelectTrigger>
                     <SelectContent>
-                      {complexityLevels.map(level => (
-                        <SelectItem key={level.id} value={level.id.toString()}>
+                      {complexityLevels.map(level => <SelectItem key={level.id} value={level.id.toString()}>
                           {level.name}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </FormControl>
                 <FormMessage />
-              </FormItem>
-            )} />
+              </FormItem>} />
           </div>
 
           <FormField control={form.control} name="target_device" render={({
-            field
-          }) => <FormItem>
+          field
+        }) => <FormItem>
                   <div className="flex gap-5 mt-0 justify-center">
                     <TooltipProvider>
                       <Tooltip>
@@ -350,11 +320,9 @@ export const TaskForm = ({
                   <FormMessage />
                 </FormItem>} />
 
-          <FormField 
-            control={form.control} 
-            name="priority_level_id" 
-            render={({ field }) => (
-              <FormItem>
+          <FormField control={form.control} name="priority_level_id" render={({
+          field
+        }) => <FormItem>
                 <FormLabel className="flex items-center gap-2">
                   Priority Level
                   <TooltipProvider>
@@ -370,115 +338,56 @@ export const TaskForm = ({
                 </FormLabel>
                 <FormControl>
                   <div className="mt-1">
-                    <PriorityDial 
-                      priorityLevels={priorityLevels} 
-                      value={field.value} 
-                      onChange={field.onChange}
-                    />
+                    <PriorityDial priorityLevels={priorityLevels} value={field.value} onChange={field.onChange} />
                   </div>
                 </FormControl>
                 <FormMessage />
-              </FormItem>
-            )} 
-          />
+              </FormItem>} />
 
           <div>
             <div className="flex gap-2 mb-2">
-              <Input
-                type="url"
-                value={newReferenceLink}
-                onChange={(e) => setNewReferenceLink(e.target.value)}
-                placeholder="Paste reference link URL"
-                className="flex-1"
-              />
+              <Input type="url" value={newReferenceLink} onChange={e => setNewReferenceLink(e.target.value)} placeholder="Paste reference link URL" className="flex-1" />
               <Button type="button" size="icon" variant="outline" onClick={addReferenceLink}>
                 <Plus size={16} />
               </Button>
             </div>
-            {form.watch("reference_links").map((link, index) => (
-              <div key={index} className="flex items-center gap-2 mb-2">
+            {form.watch("reference_links").map((link, index) => <div key={index} className="flex items-center gap-2 mb-2">
                 <div className="flex-1 text-sm truncate">{link}</div>
                 <Button type="button" variant="ghost" size="sm" onClick={() => removeReferenceLink(index)}>
                   <X size={14} />
                 </Button>
-              </div>
-            ))}
+              </div>)}
           </div>
 
           <div>
             <div className="flex gap-2 mb-2">
               <div className="relative flex-1">
-                <Input
-                  type="text"
-                  value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                  placeholder="Upload or paste image/URL"
-                  className="pr-10 w-full"
-                  onPaste={handleImagePaste}
-                />
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  id="image-upload"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
+                <Input type="text" value={newImageUrl} onChange={e => setNewImageUrl(e.target.value)} placeholder="Upload or paste image/URL" className="pr-10 w-full" onPaste={handleImagePaste} />
+                <input type="file" accept="image/*" multiple id="image-upload" className="hidden" onChange={handleImageUpload} />
                 <label htmlFor="image-upload" className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer">
                   <Upload size={16} className="text-gray-500 hover:text-gray-700" />
                 </label>
               </div>
-              <Button 
-                type="button" 
-                size="icon" 
-                variant="outline" 
-                onClick={addImageUrl}
-                disabled={!newImageUrl}
-              >
+              <Button type="button" size="icon" variant="outline" onClick={addImageUrl} disabled={!newImageUrl}>
                 <Plus size={16} />
               </Button>
             </div>
 
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-2">
-              {form.watch("image_urls").map((url, index) => (
-                <div key={`url-${index}`} className="relative group">
-                  <img 
-                    src={url} 
-                    alt="" 
-                    className="w-[50px] h-[50px] object-cover rounded-md" 
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/50?text=Error';
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    className="absolute -top-2 -right-2 h-5 w-5 p-0 rounded-full"
-                    onClick={() => removeImageUrl(index)}
-                  >
+              {form.watch("image_urls").map((url, index) => <div key={`url-${index}`} className="relative group">
+                  <img src={url} alt="" className="w-[50px] h-[50px] object-cover rounded-md" onError={e => {
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/50?text=Error';
+              }} />
+                  <Button type="button" variant="destructive" size="sm" className="absolute -top-2 -right-2 h-5 w-5 p-0 rounded-full" onClick={() => removeImageUrl(index)}>
                     <X size={12} />
                   </Button>
-                </div>
-              ))}
-              {imageFiles.map((file, index) => (
-                <div key={`file-${index}`} className="relative group">
-                  <img 
-                    src={URL.createObjectURL(file)} 
-                    alt="" 
-                    className="w-[50px] h-[50px] object-cover rounded-md" 
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    className="absolute -top-2 -right-2 h-5 w-5 p-0 rounded-full"
-                    onClick={() => removeImage(index)}
-                  >
+                </div>)}
+              {imageFiles.map((file, index) => <div key={`file-${index}`} className="relative group">
+                  <img src={URL.createObjectURL(file)} alt="" className="w-[50px] h-[50px] object-cover rounded-md" />
+                  <Button type="button" variant="destructive" size="sm" className="absolute -top-2 -right-2 h-5 w-5 p-0 rounded-full" onClick={() => removeImage(index)}>
                     <X size={12} />
                   </Button>
-                </div>
-              ))}
+                </div>)}
             </div>
           </div>
         </div>
