@@ -102,7 +102,7 @@ export const TaskCreationSidebar = () => {
           <X size={18} />
         </Button>
       </div>
-      <ScrollArea className="flex-1 px-6 py-4">
+      <ScrollArea className="flex-1 px-4 py-2">
         <TaskForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} queuePosition={queuePosition} />
       </ScrollArea>
       <div className="px-4 py-3 border-t sticky bottom-0 bg-white">
