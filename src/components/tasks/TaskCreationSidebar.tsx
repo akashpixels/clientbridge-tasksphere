@@ -81,7 +81,7 @@ export const TaskCreationSidebar = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center border-b py-[10px] px-4">
+      <div className="flex justify-between items-center px-4 py-[10px]">
         <h2 className="font-semibold text-[14px]">Create New Task</h2>
         <Button 
           variant="ghost" 

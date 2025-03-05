@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TimelineVisualization } from "./TimelineVisualization";
-import { Upload, X, Link as LinkIcon, Plus, Monitor, Smartphone, MonitorSmartphone, ImageIcon } from "lucide-react";
+import { Upload, X, Plus, Monitor, Smartphone, MonitorSmartphone, HelpCircle } from "lucide-react";
 import { PriorityDial } from "./PriorityDial";
 import { formatDuration } from "@/lib/date-utils";
 
@@ -221,6 +221,13 @@ export const TaskForm = ({
     form.setValue("image_urls", currentUrls.filter((_, i) => i !== index));
   };
 
+  const getPriorityTooltip = (level: any) => {
+    if (!level) return "";
+    const timeToStart = level.time_to_start ? formatDuration(level.time_to_start) : "immediate";
+    const multiplier = level.multiplier ? `${level.multiplier}x duration` : "standard duration";
+    return `${timeToStart} delay, ${multiplier}`;
+  };
+
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <TimelineVisualization 
@@ -343,22 +350,37 @@ export const TaskForm = ({
                   <FormMessage />
                 </FormItem>} />
 
-          <FormField control={form.control} name="priority_level_id" render={({
-            field
-            }) => <FormItem>
-                  <FormLabel className="text-xs text-muted-foreground">Priority Level</FormLabel>
-                  <FormControl>
-                    <div className="mt-1">
-                      <PriorityDial 
-                        priorityLevels={priorityLevels} 
-                        value={field.value} 
-                        onChange={field.onChange}
-                        compact={true}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>} />
+          <FormField 
+            control={form.control} 
+            name="priority_level_id" 
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  Priority Level
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle size={16} className="text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Affects queue position and start time</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </FormLabel>
+                <FormControl>
+                  <div className="mt-1">
+                    <PriorityDial 
+                      priorityLevels={priorityLevels} 
+                      value={field.value} 
+                      onChange={field.onChange}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} 
+          />
 
           <div>
             <div className="flex gap-2 mb-2">
