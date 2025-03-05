@@ -14,6 +14,7 @@ import { TimelineVisualization } from "./TimelineVisualization";
 import { Upload, X, Plus, Monitor, Smartphone, MonitorSmartphone } from "lucide-react";
 import { PriorityDial } from "./PriorityDial";
 import { formatDuration } from "@/lib/date-utils";
+
 const taskFormSchema = z.object({
   details: z.string().min(10, {
     message: "Task details must be at least 10 characters"
@@ -31,12 +32,15 @@ const taskFormSchema = z.object({
     message: "Must be a valid URL"
   })).default([])
 });
+
 type TaskFormValues = z.infer<typeof taskFormSchema>;
+
 interface TaskFormProps {
   onSubmit: (data: TaskFormValues) => void;
   isSubmitting: boolean;
   queuePosition: number;
 }
+
 export const TaskForm = ({
   onSubmit,
   isSubmitting,
@@ -70,6 +74,7 @@ export const TaskForm = ({
       image_urls: []
     }
   });
+
   useEffect(() => {
     const fetchProject = async () => {
       if (!projectId) return;
@@ -89,6 +94,7 @@ export const TaskForm = ({
     };
     fetchProject();
   }, [projectId]);
+
   useEffect(() => {
     const fetchTaskTypes = async () => {
       const {
@@ -110,6 +116,7 @@ export const TaskForm = ({
       fetchTaskTypes();
     }
   }, [project]);
+
   useEffect(() => {
     const fetchPriorityLevels = async () => {
       const {
@@ -124,6 +131,7 @@ export const TaskForm = ({
     };
     fetchPriorityLevels();
   }, []);
+
   useEffect(() => {
     const fetchComplexityLevels = async () => {
       const {
@@ -138,6 +146,7 @@ export const TaskForm = ({
     };
     fetchComplexityLevels();
   }, []);
+
   useEffect(() => {
     const subscription = form.watch(value => {
       setTimelineParams({
@@ -148,12 +157,14 @@ export const TaskForm = ({
     });
     return () => subscription.unsubscribe();
   }, [form.watch]);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
       setImageFiles(prev => [...prev, ...Array.from(files)]);
     }
   };
+
   const handleImagePaste = (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
     if (items) {
@@ -180,9 +191,11 @@ export const TaskForm = ({
       }
     }
   };
+
   const removeImage = (index: number) => {
     setImageFiles(prev => prev.filter((_, i) => i !== index));
   };
+
   const addReferenceLink = () => {
     if (newReferenceLink && /^https?:\/\/.+/.test(newReferenceLink)) {
       const currentLinks = form.getValues("reference_links");
@@ -190,10 +203,12 @@ export const TaskForm = ({
       setNewReferenceLink("");
     }
   };
+
   const removeReferenceLink = (index: number) => {
     const currentLinks = form.getValues("reference_links");
     form.setValue("reference_links", currentLinks.filter((_, i) => i !== index));
   };
+
   const addImageUrl = () => {
     if (newImageUrl && /^https?:\/\/.+/.test(newImageUrl)) {
       const currentUrls = form.getValues("image_urls");
@@ -201,18 +216,25 @@ export const TaskForm = ({
       setNewImageUrl("");
     }
   };
+
   const removeImageUrl = (index: number) => {
     const currentUrls = form.getValues("image_urls");
     form.setValue("image_urls", currentUrls.filter((_, i) => i !== index));
   };
+
   const getPriorityTooltip = (level: any) => {
     if (!level) return "";
     const timeToStart = level.time_to_start ? formatDuration(level.time_to_start) : "immediate";
     const multiplier = level.multiplier ? `${level.multiplier}x duration` : "standard duration";
     return `${timeToStart} delay, ${multiplier}`;
   };
+
+  const handleFormSubmit = (data: TaskFormValues) => {
+    onSubmit(data);
+  };
+
   return <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <TimelineVisualization taskTypeId={timelineParams.taskTypeId} priorityLevelId={timelineParams.priorityLevelId} complexityLevelId={timelineParams.complexityLevelId} projectId={projectId} compact={true} />
 
         <div className="space-y-5 py-0">
@@ -385,6 +407,12 @@ export const TaskForm = ({
                 </div>)}
             </div>
           </div>
+        </div>
+
+        <div className="px-4 py-3 border-t sticky bottom-0 bg-white z-10 mt-4 -mx-4">
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? "Creating..." : "Create Task"}
+          </Button>
         </div>
       </form>
     </Form>;

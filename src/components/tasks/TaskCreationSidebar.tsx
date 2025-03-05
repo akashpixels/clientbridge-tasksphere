@@ -15,7 +15,6 @@ export const TaskCreationSidebar = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [queuePosition, setQueuePosition] = useState(0);
   const { closeRightSidebar } = useLayout();
-  const [formData, setFormData] = useState<any>(null);
 
   const fetchQueuePosition = async () => {
     if (!projectId) return;
@@ -42,12 +41,8 @@ export const TaskCreationSidebar = () => {
     fetchQueuePosition();
   }, []);
 
-  const handleFormSubmit = (data: any) => {
-    setFormData(data);
-  };
-
-  const handleSubmit = async () => {
-    if (!projectId || !formData) return;
+  const handleSubmit = async (formData: any) => {
+    if (!projectId) return;
     setIsSubmitting(true);
     try {
       const {
@@ -96,12 +91,7 @@ export const TaskCreationSidebar = () => {
         </Button>
       </div>
       <ScrollArea className="flex-1 px-4 py-2 overflow-y-auto">
-        <TaskForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} queuePosition={queuePosition} />
+        <TaskForm onSubmit={handleSubmit} isSubmitting={isSubmitting} queuePosition={queuePosition} />
       </ScrollArea>
-      <div className="px-4 py-3 border-t sticky bottom-0 bg-white z-10">
-        <Button type="button" onClick={handleSubmit} disabled={isSubmitting} className="w-full">
-          {isSubmitting ? "Creating..." : "Create Task"}
-        </Button>
-      </div>
     </div>;
 };
