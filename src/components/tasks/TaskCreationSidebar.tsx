@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { TaskForm } from "./TaskForm";
 import { useLayout } from "@/context/layout";
 import { X } from "lucide-react";
+
 export const TaskCreationSidebar = () => {
   const {
     toast
@@ -98,8 +99,10 @@ export const TaskCreationSidebar = () => {
           <X size={18} />
         </Button>
       </div>
-      <ScrollArea className="flex-1 px-4 py-2">
-        <TaskForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} queuePosition={queuePosition} />
+      <ScrollArea className="flex-1">
+        <div className="px-6 py-4">
+          <TaskForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} queuePosition={queuePosition} />
+        </div>
       </ScrollArea>
       <div className="px-4 py-3 border-t sticky bottom-0 bg-white">
         <Button type="button" onClick={handleSubmit} disabled={isSubmitting} className="w-full">
