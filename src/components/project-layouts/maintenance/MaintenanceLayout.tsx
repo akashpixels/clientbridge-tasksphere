@@ -14,6 +14,7 @@ import CredentialsTab from "../shared/CredentialsTab";
 import FilesTab from "../shared/FilesTab";
 import TeamTab from "../shared/TeamTab";
 import { NewTaskButton } from "./NewTaskButton";
+import { TaskQueue } from "@/components/tasks/TaskQueue";
 
 interface MaintenanceLayoutProps {
   project: Tables<"projects"> & {
@@ -188,34 +189,38 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
         </TabsContent>
 
         <TabsContent value="overview">
-          <Card className="p-6">
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium">Project Details</h3>
-                <p className="text-gray-500 mt-1">{project.details || 'No details provided'}</p>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <Card className="p-6">
+              <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium">Status</h4>
-                  <span 
-                    className="inline-block px-2 py-1 rounded-full text-xs mt-1"
-                    style={{
-                      backgroundColor: `${project.status?.color_hex}15`,
-                      color: project.status?.color_hex
-                    }}
-                  >
-                    {project.status?.name || 'Unknown'}
-                  </span>
+                  <h3 className="text-lg font-medium">Project Details</h3>
+                  <p className="text-gray-500 mt-1">{project.details || 'No details provided'}</p>
                 </div>
                 
-                <div>
-                  <h4 className="font-medium">Progress</h4>
-                  <p className="text-gray-500 mt-1">{project.progress || 0}%</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-medium">Status</h4>
+                    <span 
+                      className="inline-block px-2 py-1 rounded-full text-xs mt-1"
+                      style={{
+                        backgroundColor: `${project.status?.color_hex}15`,
+                        color: project.status?.color_hex
+                      }}
+                    >
+                      {project.status?.name || 'Unknown'}
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium">Progress</h4>
+                    <p className="text-gray-500 mt-1">{project.progress || 0}%</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+            
+            <TaskQueue projectId={project.id} />
+          </div>
         </TabsContent>
 
         <TabsContent value="team">
