@@ -1347,6 +1347,13 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_correct_queue_position: {
+        Args: {
+          p_project_id: string
+          p_priority_level_id: number
+        }
+        Returns: number
+      }
       calculate_eta: {
         Args: {
           created_at: string
