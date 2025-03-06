@@ -31,6 +31,8 @@ interface TasksTabContentProps {
     } | null;
     task_code?: string;
     queue_position?: number;
+    start_time?: string | null;
+    eta?: string | null;
   })[];
   sortConfig: {
     key: string;

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
@@ -148,7 +147,6 @@ export const TimelineVisualization = ({
         let hoursNeeded: number | null = null;
         let timeToStart: number | null = null;
         let isOverdue = false;
-        let queueDelay = 0;
         
         // Get active tasks count
         const activeCount = await fetchQueueCount();
@@ -166,9 +164,9 @@ export const TimelineVisualization = ({
             }
           }
           
-          // Apply queue delay if provided
+          // Apply queue delay if provided - updated calculation based on SQL function
           if (queuePosition !== null && queuePosition > maxConcurrentTasks) {
-            queueDelay = (queuePosition - maxConcurrentTasks) * 30; // 30 minutes per position beyond max_concurrent_tasks
+            const queueDelay = (queuePosition - maxConcurrentTasks) * 30; // 30 minutes per position beyond max_concurrent_tasks
             startTime = addMinutes(startTime, queueDelay);
           }
           
@@ -192,7 +190,7 @@ export const TimelineVisualization = ({
               const minutes = parseInt(baseDurationMatch[2]);
               const baseDuration = hours + minutes / 60;
               
-              // Apply complexity multiplier
+              // Apply complexity multiplier (priority multiplier removed)
               if (complexityLevel.multiplier) {
                 hoursNeeded = baseDuration * complexityLevel.multiplier;
               } else {

@@ -1,10 +1,15 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Clock } from "lucide-react";
+import { format, parseISO, isValid } from "date-fns";
+import { Tooltip } from "@/components/ui/tooltip";
+import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 interface TaskQueueProps {
   projectId: string;
 }
+
 interface Task {
   id: string;
   task_code: string;
@@ -23,6 +28,7 @@ interface Task {
   start_time: string | null;
   eta: string | null;
 }
+
 export const TaskQueue = ({
   projectId
 }: TaskQueueProps) => {
@@ -46,6 +52,7 @@ export const TaskQueue = ({
         console.error("Error fetching project concurrency:", err);
       }
     };
+    
     const fetchTasks = async () => {
       setIsLoading(true);
       try {
@@ -112,6 +119,18 @@ export const TaskQueue = ({
     return task.status.color_hex || '#9CA3AF';
   };
 
+  // Helper function to format date for display
+  const formatDateTime = (dateString: string | null) => {
+    if (!dateString) return null;
+    try {
+      const date = parseISO(dateString);
+      if (!isValid(date)) return null;
+      return format(date, "MMM d, h:mm a");
+    } catch (e) {
+      return null;
+    }
+  };
+
   // Split tasks into active (Open, Paused, In Progress) and queued
   const activeTasks = tasks.filter(task => [1, 2, 3].includes(task.current_status_id));
   const queuedTasks = tasks.filter(task => task.current_status_id === 7);
@@ -155,41 +174,84 @@ export const TaskQueue = ({
     return null;
   }
   const taskRows = generateTaskRows();
-  return <div className="w-[300px] bg-background border border-border/40 rounded-lg shadow-sm">
-      
-      <div className="p-4">
-        {isLoading ? <div className="flex items-center justify-center py-2">
-            <Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
-            <p className="text-sm">Loading...</p>
-          </div> : error ? <div className="flex items-center text-red-500 py-2">
-            <AlertCircle className="h-4 w-4 mr-2" />
-            <p className="text-sm">{error}</p>
-          </div> : <div className="space-y-2">
-            {taskRows.map((row, rowIndex) => <div key={rowIndex} className="flex flex-wrap gap-1">
-                {row.map(task => {
-            const isActive = [1, 2, 3].includes(task.current_status_id);
-            const colorToUse = isActive ? getStatusColor(task) : getPriorityColor(task);
-            return <div key={task.id} className="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium" style={{
-              backgroundColor: `${colorToUse}15`,
-              borderColor: colorToUse,
-              color: colorToUse
-            }}>
-                      <span className="flex items-center">
-                        <span className="w-1.5 h-1.5 rounded-full mr-1" style={{
-                  backgroundColor: colorToUse
-                }} />
-                        {task.task_code}
-                        {task.queue_position !== null && <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-sm">
-                            #{task.queue_position}
-                          </span>}
-                        {isActive && <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
-                            {task.status?.name}
-                          </span>}
-                      </span>
-                    </div>;
-          })}
-              </div>)}
-          </div>}
+  return (
+    <TooltipProvider>
+      <div className="w-[300px] bg-background border border-border/40 rounded-lg shadow-sm">
+        <div className="p-4">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-2">
+              <Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
+              <p className="text-sm">Loading...</p>
+            </div>
+          ) : error ? (
+            <div className="flex items-center text-red-500 py-2">
+              <AlertCircle className="h-4 w-4 mr-2" />
+              <p className="text-sm">{error}</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {taskRows.map((row, rowIndex) => (
+                <div key={rowIndex} className="flex flex-wrap gap-1">
+                  {row.map(task => {
+                    const isActive = [1, 2, 3].includes(task.current_status_id);
+                    const colorToUse = isActive ? getStatusColor(task) : getPriorityColor(task);
+                    const startTime = formatDateTime(task.start_time);
+                    
+                    return (
+                      <Tooltip key={task.id}>
+                        <TooltipTrigger asChild>
+                          <div 
+                            className="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium cursor-help" 
+                            style={{
+                              backgroundColor: `${colorToUse}15`,
+                              borderColor: colorToUse,
+                              color: colorToUse
+                            }}
+                          >
+                            <span className="flex items-center">
+                              <span className="w-1.5 h-1.5 rounded-full mr-1" style={{
+                                backgroundColor: colorToUse
+                              }} />
+                              {task.task_code}
+                              {task.queue_position !== null && task.current_status_id === 7 && (
+                                <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-sm">
+                                  #{task.queue_position}
+                                </span>
+                              )}
+                              {isActive && (
+                                <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
+                                  {task.status?.name}
+                                </span>
+                              )}
+                              {task.start_time && (
+                                <Clock className="ml-1 h-2 w-2" />
+                              )}
+                            </span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="p-2 max-w-[200px] text-xs">
+                          <p className="font-medium mb-1">{task.details}</p>
+                          {startTime && (
+                            <p className="text-gray-500">Start: {startTime}</p>
+                          )}
+                          {formatDateTime(task.eta) && (
+                            <p className="text-gray-500">ETA: {formatDateTime(task.eta)}</p>
+                          )}
+                          <p className="text-gray-500 mt-1">
+                            {isActive ? task.status?.name : (
+                              <>Queued (#{task.queue_position})</>
+                            )}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>;
+    </TooltipProvider>
+  );
 };
