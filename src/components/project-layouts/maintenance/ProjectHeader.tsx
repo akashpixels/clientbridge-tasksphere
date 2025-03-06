@@ -1,8 +1,8 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import ProjectStats from "./ProjectStats";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subMonths } from "date-fns";
+import { TaskQueue } from "@/components/tasks/TaskQueue";
 
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
@@ -49,19 +49,17 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
         </div>
       </div>
       <div className="flex items-center gap-4">
-        
+        <TaskQueue projectId={project.id} />
         <ProjectStats 
           project={project} 
           selectedMonth={selectedMonth}
         />
-        
         <div className="bg-[#fcfcfc]">
           <Select
             value={selectedMonth}
             onValueChange={onMonthChange}
           >
-           <SelectTrigger className="w-[108px] h-[108px] flex flex-col items-center justify-between p-4 rounded-[4px] border border-gray-200 focus:ring-0 focus:border-gray-200 bg-transparent">
-
+            <SelectTrigger className="w-[108px] h-[108px] flex flex-col items-center justify-between p-4 rounded-[4px] border border-gray-200 focus:ring-0 focus:border-gray-200 bg-transparent">
               <SelectValue placeholder="Select month">
                 {selectedMonth && (
                   <div className="flex flex-col items-center">
@@ -71,7 +69,6 @@ const ProjectHeader = ({ project, selectedMonth, onMonthChange }: ProjectHeaderP
                     <span className="text-sm text-gray-500">
                       {format(new Date(selectedMonth), 'yyyy')}
                     </span>
-                   
                   </div>
                 )}
               </SelectValue>

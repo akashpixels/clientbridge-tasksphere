@@ -218,8 +218,6 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
                 </div>
               </div>
             </Card>
-            
-            <TaskQueue projectId={project.id} />
           </div>
         </TabsContent>
 

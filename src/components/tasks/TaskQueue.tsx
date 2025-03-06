@@ -162,25 +162,25 @@ export const TaskQueue = ({ projectId }: TaskQueueProps) => {
   const taskRows = generateTaskRows();
 
   return (
-    <Card className="shadow-sm">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Task Queue</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="w-[300px] bg-background border border-border/40 rounded-lg shadow-sm">
+      <div className="px-4 py-2 border-b border-border/40">
+        <h3 className="text-sm font-medium">Task Queue</h3>
+      </div>
+      <div className="p-4">
         {isLoading ? (
-          <div className="flex items-center justify-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
-            <p>Loading tasks...</p>
+          <div className="flex items-center justify-center py-2">
+            <Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
+            <p className="text-sm">Loading...</p>
           </div>
         ) : error ? (
-          <div className="flex items-center text-red-500 py-4">
-            <AlertCircle className="h-6 w-6 mr-2" />
-            <p>{error}</p>
+          <div className="flex items-center text-red-500 py-2">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <p className="text-sm">{error}</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {taskRows.map((row, rowIndex) => (
-              <div key={rowIndex} className="flex flex-wrap gap-2 py-1">
+              <div key={rowIndex} className="flex flex-wrap gap-1">
                 {row.map((task) => {
                   const isActive = [1, 2, 3].includes(task.current_status_id);
                   const colorToUse = isActive ? getStatusColor(task) : getPriorityColor(task);
@@ -188,7 +188,7 @@ export const TaskQueue = ({ projectId }: TaskQueueProps) => {
                   return (
                     <div 
                       key={task.id}
-                      className="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium"
+                      className="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium"
                       style={{
                         backgroundColor: `${colorToUse}15`,
                         borderColor: colorToUse,
@@ -197,7 +197,7 @@ export const TaskQueue = ({ projectId }: TaskQueueProps) => {
                     >
                       <span className="flex items-center">
                         <span 
-                          className="w-2 h-2 rounded-full mr-1.5"
+                          className="w-1.5 h-1.5 rounded-full mr-1"
                           style={{ backgroundColor: colorToUse }}
                         />
                         {task.task_code}
@@ -219,7 +219,7 @@ export const TaskQueue = ({ projectId }: TaskQueueProps) => {
             ))}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
