@@ -153,7 +153,7 @@ export const TaskQueue = ({
   const taskRows = generateTaskRows();
   return <div className="w-[300px] bg-background border border-border/40 rounded-lg shadow-sm">
       
-      <div className="p-4 bg-[transparent#] bg-[#fcfcfc]">
+      <div className="p-4">
         {isLoading ? <div className="flex items-center justify-center py-2">
             <Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
             <p className="text-sm">Loading...</p>
