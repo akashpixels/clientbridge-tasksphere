@@ -214,7 +214,9 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
 
   // Check if there are tasks with missing start times
   const hasMissingStartTimes = tasks.some(task => 
-    (task.current_status_id === 1 || task.current_status_id === 3) && !task.start_time
+    !task.start_time && (task.current_status_id === 1 || 
+                        task.current_status_id === 3 || 
+                        task.current_status_id === 7)
   );
 
   // Check for queue issues - now using our improved detection logic

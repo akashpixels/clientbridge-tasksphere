@@ -60,3 +60,48 @@ export function formatHourDifference(hours: number | null): string {
   
   return `${formattedHours} Hrs`;
 }
+
+// New function to get time status based on start and eta times
+export function getTimeStatusInfo(start: string | null, eta: string | null): {
+  status: string;
+  statusClass: string;
+} {
+  if (!start || !eta) return { status: 'Not scheduled', statusClass: 'text-gray-500' };
+  
+  try {
+    const startDate = parseISO(start);
+    const etaDate = parseISO(eta);
+    
+    if (!isValid(startDate) || !isValid(etaDate)) {
+      return { status: 'Invalid dates', statusClass: 'text-gray-500' };
+    }
+    
+    const now = new Date();
+    
+    // Task hasn't started yet
+    if (startDate > now) {
+      return { status: 'Upcoming', statusClass: 'text-blue-500' };
+    }
+    
+    // Task is in progress
+    if (now < etaDate) {
+      return { status: 'In Progress', statusClass: 'text-green-500' };
+    }
+    
+    // Task is overdue
+    return { status: 'Overdue', statusClass: 'text-amber-500' };
+  } catch (e) {
+    return { status: 'Error parsing dates', statusClass: 'text-red-500' };
+  }
+}
+
+// Function to check if a date is valid
+export function isValidDate(dateString: string | null): boolean {
+  if (!dateString) return false;
+  try {
+    const date = parseISO(dateString);
+    return isValid(date);
+  } catch (e) {
+    return false;
+  }
+}
