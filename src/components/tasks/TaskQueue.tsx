@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, AlertCircle } from "lucide-react";
 
@@ -77,21 +76,28 @@ export const TaskQueue = ({ projectId }: TaskQueueProps) => {
     };
   }, [projectId]);
 
+  // Group tasks by priority
+  const groupedTasks = queuedTasks.reduce((acc, task) => {
+    const priorityName = task.priority?.name || 'Unknown';
+    if (!acc[priorityName]) {
+      acc[priorityName] = [];
+    }
+    acc[priorityName].push(task);
+    return acc;
+  }, {} as Record<string, QueuedTask[]>);
+
   // Helper function to get priority color
-  const getPriorityColor = (task: QueuedTask) => {
-    if (!task.priority) return '#9CA3AF'; // Default gray
-    
+  const getPriorityColor = (priorityName: string) => {
     const priorityColors: Record<string, string> = {
       'Very Low': '#6EE7B7',
-      'Low': '#22C55E',
-      'Normal': '#FBBF24',
-      'Medium': '#F97316',
-      'High': '#EF4444',
-      'Critical': '#B91C1C'
+      'Low': '#9CA3AF',
+      'Normal': '#3B82F6',
+      'Medium': '#F59E0B',
+      'High': '#F97316',
+      'Critical': '#EF4444'
     };
     
-    const priorityName = task.priority.name;
-    return priorityColors[priorityName] || task.priority.color || '#9CA3AF';
+    return priorityColors[priorityName] || '#9CA3AF'; // Default gray
   };
 
   // If there are no tasks in queue, we don't show the component at all
@@ -116,27 +122,30 @@ export const TaskQueue = ({ projectId }: TaskQueueProps) => {
             <p>{error}</p>
           </div>
         ) : (
-          <div className="flex flex-wrap gap-2">
-            {queuedTasks.map((task) => (
-              <div 
-                key={task.id}
-                className="relative"
-              >
-                <Badge
-                  className="text-xs px-2 py-1 font-normal"
-                  style={{
-                    backgroundColor: getPriorityColor(task),
-                    color: '#fff',
-                  }}
-                >
-                  <span className="mr-1 font-semibold">{task.task_code}</span>
-                  <span className="max-w-[100px] truncate hidden sm:inline">
-                    {task.details}
-                  </span>
-                </Badge>
-                <span className="absolute -top-2 -right-2 bg-slate-800 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                  {task.queue_position}
-                </span>
+          <div className="space-y-4">
+            {Object.entries(groupedTasks).map(([priorityName, tasks]) => (
+              <div key={priorityName} className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {tasks.map((task) => (
+                    <div 
+                      key={task.id}
+                      className="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium"
+                      style={{
+                        backgroundColor: `${getPriorityColor(priorityName)}15`,
+                        borderColor: getPriorityColor(priorityName),
+                        color: getPriorityColor(priorityName)
+                      }}
+                    >
+                      <span className="flex items-center">
+                        <span 
+                          className="w-2 h-2 rounded-full mr-1.5"
+                          style={{ backgroundColor: getPriorityColor(priorityName) }}
+                        />
+                        {task.task_code}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
