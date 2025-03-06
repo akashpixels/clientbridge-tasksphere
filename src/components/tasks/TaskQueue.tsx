@@ -201,6 +201,11 @@ export const TaskQueue = ({ projectId }: TaskQueueProps) => {
                           style={{ backgroundColor: colorToUse }}
                         />
                         {task.task_code}
+                        {task.queue_position && (
+                          <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-sm">
+                            #{task.queue_position}
+                          </span>
+                        )}
                         {isActive && (
                           <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
                             {task.status?.name}
