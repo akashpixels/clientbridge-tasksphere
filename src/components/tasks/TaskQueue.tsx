@@ -1,12 +1,10 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, AlertCircle, Clock, ArrowUpDown } from "lucide-react";
+import { Loader2, AlertCircle, Clock } from "lucide-react";
 import { format, parseISO, isValid } from "date-fns";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 
 interface TaskQueueProps {
   projectId: string;
@@ -38,44 +36,6 @@ export const TaskQueue = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [maxConcurrentTasks, setMaxConcurrentTasks] = useState(2); // Default to 2 rows
-  const [isFixingQueue, setIsFixingQueue] = useState(false);
-  const { toast } = useToast();
-
-  // Function to fix queue positions
-  const fixQueuePositions = async () => {
-    setIsFixingQueue(true);
-    try {
-      const { data, error } = await supabase.rpc('fix_existing_queues');
-      
-      if (error) {
-        console.error("Error fixing queue positions:", error);
-        toast({
-          title: "Error",
-          description: "Failed to fix queue positions: " + error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      console.log("Fixed queue positions:", data);
-      toast({
-        title: "Queue positions fixed",
-        description: "Task queue order has been updated based on priority",
-      });
-      
-      // Refresh tasks data
-      fetchTasks();
-    } catch (err: any) {
-      console.error("Error fixing queue positions:", err);
-      toast({
-        title: "Error",
-        description: "Failed to fix queue positions: " + err.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsFixingQueue(false);
-    }
-  };
 
   useEffect(() => {
     const fetchProjectConcurrency = async () => {
@@ -93,6 +53,43 @@ export const TaskQueue = ({
       }
     };
     
+    const fetchTasks = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch both active and queued tasks
+        const {
+          data,
+          error
+        } = await supabase.from('tasks').select(`
+            id, 
+            task_code, 
+            details, 
+            queue_position, 
+            priority_level_id,
+            current_status_id,
+            start_time,
+            eta,
+            priority:priority_levels(name, color),
+            status:task_statuses!tasks_current_status_id_fkey(name, color_hex)
+          `).eq('project_id', projectId).in('current_status_id', [1, 2, 3, 7]) // Active (Open, Paused, In Progress) and Queue status
+        .order('current_status_id', {
+          ascending: true
+        }) // Active tasks first
+        .order('queue_position', {
+          ascending: true
+        }); // Then by queue position
+
+        if (error) {
+          throw error;
+        }
+        setTasks(data || []);
+      } catch (err: any) {
+        console.error("Error fetching tasks:", err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     fetchProjectConcurrency();
     fetchTasks();
 
@@ -109,44 +106,6 @@ export const TaskQueue = ({
       supabase.removeChannel(subscription);
     };
   }, [projectId]);
-
-  const fetchTasks = async () => {
-    setIsLoading(true);
-    try {
-      // Fetch both active and queued tasks
-      const {
-        data,
-        error
-      } = await supabase.from('tasks').select(`
-          id, 
-          task_code, 
-          details, 
-          queue_position, 
-          priority_level_id,
-          current_status_id,
-          start_time,
-          eta,
-          priority:priority_levels(name, color),
-          status:task_statuses!tasks_current_status_id_fkey(name, color_hex)
-        `).eq('project_id', projectId).in('current_status_id', [1, 2, 3, 7]) // Active (Open, Paused, In Progress) and Queue status
-      .order('current_status_id', {
-        ascending: true
-      }) // Active tasks first
-      .order('queue_position', {
-        ascending: true
-      }); // Then by queue position
-
-      if (error) {
-        throw error;
-      }
-      setTasks(data || []);
-    } catch (err: any) {
-      console.error("Error fetching tasks:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // Helper function to get priority color
   const getPriorityColor = (task: Task) => {
@@ -175,37 +134,6 @@ export const TaskQueue = ({
   // Split tasks into active (Open, Paused, In Progress) and queued
   const activeTasks = tasks.filter(task => [1, 2, 3].includes(task.current_status_id));
   const queuedTasks = tasks.filter(task => task.current_status_id === 7);
-
-  // Check if there are potential queue issues
-  const hasQueueIssues = () => {
-    if (queuedTasks.length === 0) return false;
-    
-    // Check for duplicate or missing queue positions
-    const positions = queuedTasks.map(task => task.queue_position).filter(Boolean) as number[];
-    const uniquePositions = new Set(positions);
-    
-    // Check if any position is null or <= 0
-    const hasInvalidPosition = queuedTasks.some(task => 
-      task.queue_position === null || task.queue_position <= 0
-    );
-    
-    // Check for priority inversions
-    let lastPriority = 0;
-    let hasPriorityInversion = false;
-    
-    queuedTasks.forEach((task, index) => {
-      if (index === 0) {
-        lastPriority = task.priority_level_id;
-      } else {
-        if (task.priority_level_id < lastPriority) {
-          hasPriorityInversion = true;
-        }
-        lastPriority = task.priority_level_id;
-      }
-    });
-    
-    return hasInvalidPosition || positions.length !== uniquePositions.size || hasPriorityInversion;
-  };
 
   // Function to split tasks into rows based on max_concurrent_tasks
   const generateTaskRows = () => {
@@ -249,25 +177,6 @@ export const TaskQueue = ({
   return (
     <TooltipProvider>
       <div className="w-full bg-background border border-border/40 rounded-lg shadow-sm">
-        <div className="flex justify-between items-center px-4 py-2 border-b">
-          <h3 className="text-sm font-medium">Task Queue</h3>
-          {hasQueueIssues() && (
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="text-xs h-7 px-2"
-              onClick={fixQueuePositions}
-              disabled={isFixingQueue}
-            >
-              {isFixingQueue ? (
-                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-              ) : (
-                <ArrowUpDown className="h-3 w-3 mr-1" />
-              )}
-              Fix Queue Order
-            </Button>
-          )}
-        </div>
         <div className="p-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-2">
@@ -330,10 +239,7 @@ export const TaskQueue = ({
                           )}
                           <p className="text-gray-500 mt-1">
                             {isActive ? task.status?.name : (
-                              <>
-                                Queued (#{task.queue_position}) - 
-                                {task.priority?.name || `Priority ${task.priority_level_id}`}
-                              </>
+                              <>Queued (#{task.queue_position})</>
                             )}
                           </p>
                         </TooltipContent>

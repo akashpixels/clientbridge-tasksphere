@@ -7,7 +7,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDateTime } from "@/lib/date-utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
 
 interface QueueTimelineProps {
   projectId: string;
@@ -37,101 +36,44 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
-  // Function to trigger start time recalculation for tasks with null start_time
-  const updateTaskStartTimes = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('update-task-status');
-      
-      if (error) {
-        console.error("Error invoking function:", error);
-        return;
-      }
-      
-      console.log("Updated task statuses:", data);
-      toast({
-        title: "Task start times updated",
-        description: "Task timeline has been recalculated",
-      });
-      
-      // Refresh task data
-      fetchTasks();
-    } catch (err) {
-      console.error("Error updating task start times:", err);
-    }
-  };
-
-  // Function to fix queue positions
-  const fixQueuePositions = async () => {
-    try {
-      const { data, error } = await supabase.rpc('fix_existing_queues');
-      
-      if (error) {
-        console.error("Error fixing queue positions:", error);
-        toast({
-          title: "Error",
-          description: "Failed to fix queue positions: " + error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      console.log("Fixed queue positions:", data);
-      toast({
-        title: "Queue positions fixed",
-        description: "Task queue order has been updated based on priority",
-      });
-      
-      // Refresh task data
-      fetchTasks();
-    } catch (err: any) {
-      console.error("Error fixing queue positions:", err);
-      toast({
-        title: "Error",
-        description: "Failed to fix queue positions: " + err.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const fetchTasks = async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select(`
-          id, 
-          task_code, 
-          details, 
-          created_at,
-          start_time,
-          eta,
-          current_status_id,
-          priority_level_id,
-          queue_position,
-          priority:priority_levels(name, color),
-          status:task_statuses!tasks_current_status_id_fkey(name, color_hex)
-        `)
-        .eq('project_id', projectId)
-        .in('current_status_id', [1, 2, 3, 7]) // Active and Queue status
-        .order('start_time', { ascending: true });
-
-      if (error) {
-        throw error;
-      }
-      
-      console.log('Timeline tasks:', data);
-      setTasks(data || []);
-    } catch (err: any) {
-      console.error("Error fetching tasks:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
   useEffect(() => {
+    const fetchTasks = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('tasks')
+          .select(`
+            id, 
+            task_code, 
+            details, 
+            created_at,
+            start_time,
+            eta,
+            current_status_id,
+            priority_level_id,
+            queue_position,
+            priority:priority_levels(name, color),
+            status:task_statuses!tasks_current_status_id_fkey(name, color_hex)
+          `)
+          .eq('project_id', projectId)
+          .in('current_status_id', [1, 2, 3, 7]) // Active and Queue status
+          .order('start_time', { ascending: true });
+
+        if (error) {
+          throw error;
+        }
+        
+        console.log('Timeline tasks:', data);
+        setTasks(data || []);
+      } catch (err: any) {
+        console.error("Error fetching tasks:", err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
     fetchTasks();
 
     // Set up real-time subscription for task changes
@@ -202,16 +144,6 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
     return task.priority.color || '#9CA3AF';
   };
 
-  // Check if there are tasks with missing start times
-  const hasMissingStartTimes = tasks.some(task => 
-    (task.current_status_id === 1 || task.current_status_id === 3) && !task.start_time
-  );
-
-  // Count tasks with missing queue positions or potentially incorrect ordering
-  const hasQueueIssues = tasks.some(task => 
-    task.current_status_id === 7 && (!task.queue_position || task.queue_position <= 0)
-  );
-
   if (isLoading) {
     return (
       <Card>
@@ -260,26 +192,8 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader>
         <CardTitle>Task Queue Timeline</CardTitle>
-        <div className="flex gap-2">
-          {hasMissingStartTimes && (
-            <button 
-              onClick={updateTaskStartTimes}
-              className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-            >
-              Update Start Times
-            </button>
-          )}
-          {hasQueueIssues && (
-            <button 
-              onClick={fixQueuePositions}
-              className="px-2 py-1 text-xs bg-amber-100 text-amber-700 rounded hover:bg-amber-200"
-            >
-              Fix Queue Positions
-            </button>
-          )}
-        </div>
       </CardHeader>
       <CardContent>
         <div className="relative">

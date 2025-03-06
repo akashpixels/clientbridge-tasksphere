@@ -1366,22 +1366,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      calculate_start_time:
-        | {
-            Args: {
-              created_at: string
-              priority_id: number
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              created_at: string
-              priority_id: number
-              project_id: string
-            }
-            Returns: string
-          }
+      calculate_start_time: {
+        Args: {
+          created_at: string
+          priority_id: number
+        }
+        Returns: string
+      }
       count_active_tasks: {
         Args: {
           project_id: string
@@ -1397,10 +1388,6 @@ export type Database = {
           p_project_id: string
         }
         Returns: boolean
-      }
-      update_in_progress_tasks: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
       }
       validate_queue_integrity: {
         Args: {

@@ -159,19 +159,8 @@ export const TimelineVisualization = ({
               const hours = parseInt(timeToStartMatch[1]);
               const minutes = parseInt(timeToStartMatch[2]);
               timeToStart = hours + minutes / 60;
-              
-              // Apply the new case-based logic for start time calculation
-              
-              // Case 1: No active tasks ahead - just add time_to_start
-              if (activeCount === 0) {
-                startTime = addHours(startTime, hours);
-                startTime = addMinutes(startTime, minutes);
-              } 
-              // Case 2 & 3: There are active or queued tasks ahead
-              else {
-                // Just add a standard delay - this is a simplified version of what the database function does
-                startTime = addHours(startTime, Math.max(1, hours));
-              }
+              startTime = addHours(startTime, hours);
+              startTime = addMinutes(startTime, minutes);
             }
           }
           
