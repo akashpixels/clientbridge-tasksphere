@@ -74,14 +74,13 @@ export const TaskQueue = ({
           `).eq('project_id', projectId).in('current_status_id', [1, 2, 3, 7]) // Active (Open, Paused, In Progress) and Queue status
         .order('current_status_id', {
           ascending: true
-        }) // Active tasks first
-        .order('queue_position', {
-          ascending: true
-        }); // Then by queue position
+        }); // Active tasks first
 
         if (error) {
           throw error;
         }
+        
+        console.log("Fetched raw tasks:", data);
         setTasks(data || []);
       } catch (err: any) {
         console.error("Error fetching tasks:", err);
@@ -99,7 +98,8 @@ export const TaskQueue = ({
       schema: 'public',
       table: 'tasks',
       filter: `project_id=eq.${projectId} AND current_status_id=in.(1,2,3,7)`
-    }, () => {
+    }, (payload) => {
+      console.log("Real-time task update received:", payload);
       fetchTasks();
     }).subscribe();
     return () => {
@@ -133,7 +133,32 @@ export const TaskQueue = ({
 
   // Split tasks into active (Open, Paused, In Progress) and queued
   const activeTasks = tasks.filter(task => [1, 2, 3].includes(task.current_status_id));
-  const queuedTasks = tasks.filter(task => task.current_status_id === 7);
+  console.log("Active tasks:", activeTasks);
+  
+  // Sort queued tasks based on priority_level_id (lower values = higher priority)
+  const queuedTasks = tasks
+    .filter(task => task.current_status_id === 7)
+    .sort((a, b) => {
+      // First by priority level (lower id = higher priority)
+      if (a.priority_level_id !== b.priority_level_id) {
+        return a.priority_level_id - b.priority_level_id;
+      }
+      
+      // Then by queue position
+      if (a.queue_position !== null && b.queue_position !== null) {
+        return a.queue_position - b.queue_position;
+      }
+      
+      // Finally by task code
+      return (a.task_code || '').localeCompare(b.task_code || '');
+    });
+  
+  console.log("Queued tasks after client-side sort:", queuedTasks.map(t => ({
+    code: t.task_code,
+    priority_id: t.priority_level_id,
+    priority_name: t.priority?.name,
+    queue_pos: t.queue_position
+  })));
 
   // Function to split tasks into rows based on max_concurrent_tasks
   const generateTaskRows = () => {
@@ -166,6 +191,7 @@ export const TaskQueue = ({
         direction = 1;
       }
     });
+    
     return rows;
   };
 
@@ -173,7 +199,18 @@ export const TaskQueue = ({
   if (!isLoading && tasks.length === 0) {
     return null;
   }
+  
   const taskRows = generateTaskRows();
+  
+  console.log("Task rows for rendering:", taskRows.map(row => 
+    row.map(t => ({
+      code: t.task_code, 
+      status: t.current_status_id,
+      priority_id: t.priority_level_id,
+      priority: t.priority?.name
+    }))
+  ));
+  
   return (
     <TooltipProvider>
       <div className="w-[300px] bg-background border border-border/40 rounded-lg shadow-sm">
@@ -218,6 +255,11 @@ export const TaskQueue = ({
                                   #{task.queue_position}
                                 </span>
                               )}
+                              {task.current_status_id === 7 && task.priority?.name && (
+                                <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
+                                  {task.priority.name}
+                                </span>
+                              )}
                               {isActive && (
                                 <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
                                   {task.status?.name}
@@ -239,7 +281,12 @@ export const TaskQueue = ({
                           )}
                           <p className="text-gray-500 mt-1">
                             {isActive ? task.status?.name : (
-                              <>Queued (#{task.queue_position})</>
+                              <>
+                                Queued (#{task.queue_position}) 
+                                <span className="font-medium ml-1">
+                                  {task.priority?.name}
+                                </span>
+                              </>
                             )}
                           </p>
                         </TooltipContent>
