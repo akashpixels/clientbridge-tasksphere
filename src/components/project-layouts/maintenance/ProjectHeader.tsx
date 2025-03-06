@@ -1,8 +1,10 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import ProjectStats from "./ProjectStats";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subMonths } from "date-fns";
 import { TaskQueue } from "@/components/tasks/TaskQueue";
+
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
     client_admin: {
@@ -17,6 +19,7 @@ interface ProjectHeaderProps {
   selectedMonth: string;
   onMonthChange: (month: string) => void;
 }
+
 const ProjectHeader = ({
   project,
   selectedMonth,
@@ -32,6 +35,7 @@ const ProjectHeader = ({
       label: format(date, 'MMM yyyy')
     };
   });
+  
   return <div className="flex items-center justify-between w-full gap-4">
       <div className="flex items-center gap-4">
         {project.logo_url && <img src={project.logo_url} alt={`${project.name} logo`} className="w-16 h-16 object-contain rounded-lg" />}
@@ -43,7 +47,9 @@ const ProjectHeader = ({
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <TaskQueue projectId={project.id} />
+        <div className="w-[400px]">
+          <TaskQueue projectId={project.id} />
+        </div>
         <ProjectStats project={project} selectedMonth={selectedMonth} />
         <div className="bg-[#fcfcfc]">
           <Select value={selectedMonth} onValueChange={onMonthChange}>
@@ -69,4 +75,5 @@ const ProjectHeader = ({
       </div>
     </div>;
 };
+
 export default ProjectHeader;

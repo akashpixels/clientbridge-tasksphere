@@ -14,7 +14,7 @@ import CredentialsTab from "../shared/CredentialsTab";
 import FilesTab from "../shared/FilesTab";
 import TeamTab from "../shared/TeamTab";
 import { NewTaskButton } from "./NewTaskButton";
-import { TaskQueue } from "@/components/tasks/TaskQueue";
+import { QueueTimeline } from "./QueueTimeline";
 
 interface MaintenanceLayoutProps {
   project: Tables<"projects"> & {
@@ -189,7 +189,7 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
         </TabsContent>
 
         <TabsContent value="overview">
-          <div className="space-y-4">
+          <div className="space-y-6">
             <Card className="p-6">
               <div className="space-y-4">
                 <div>
@@ -218,6 +218,8 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
                 </div>
               </div>
             </Card>
+
+            <QueueTimeline projectId={project.id} />
           </div>
         </TabsContent>
 

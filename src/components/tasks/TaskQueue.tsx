@@ -176,7 +176,7 @@ export const TaskQueue = ({
   const taskRows = generateTaskRows();
   return (
     <TooltipProvider>
-      <div className="w-[300px] bg-background border border-border/40 rounded-lg shadow-sm">
+      <div className="w-full bg-background border border-border/40 rounded-lg shadow-sm">
         <div className="p-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-2">
