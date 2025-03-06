@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Clock, Calendar, ArrowRight, AlertCircle } from "lucide-react";
+import { Clock, Calendar, ArrowRight, AlertCircle, Hash, Flag } from "lucide-react";
 import { format, parseISO, isValid, addHours } from "date-fns";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ interface Task {
   eta: string | null;
   current_status_id: number;
   priority_level_id: number;
+  queue_position: number | null;
   priority: {
     name: string;
     color: string;
@@ -51,6 +52,7 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
             eta,
             current_status_id,
             priority_level_id,
+            queue_position,
             priority:priority_levels(name, color),
             status:task_statuses!tasks_current_status_id_fkey(name, color_hex)
           `)
@@ -136,6 +138,12 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
     return task.status.color_hex || '#9CA3AF';
   };
 
+  // Get priority color
+  const getPriorityColor = (task: Task): string => {
+    if (!task.priority) return '#9CA3AF'; // Default gray
+    return task.priority.color || '#9CA3AF';
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -197,6 +205,7 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
             {tasks.map((task, index) => {
               const timeStatus = calculateTimeStatus(task.start_time, task.eta);
               const statusColor = getStatusColor(task);
+              const priorityColor = getPriorityColor(task);
               
               return (
                 <div key={task.id} className="relative pl-6">
@@ -209,8 +218,8 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
                   {/* Task content */}
                   <div className="flex flex-col space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <span className="font-semibold mr-2">{task.task_code}</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-semibold">{task.task_code}</span>
                         <Badge 
                           className="text-xs"
                           style={{
@@ -221,6 +230,26 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
                         >
                           {task.status?.name || 'Unknown'}
                         </Badge>
+                        
+                        {/* Queue Position Badge */}
+                        {task.queue_position && (
+                          <div className="flex items-center text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                            <Hash className="h-3 w-3 mr-1" />
+                            <span>Queue: {task.queue_position}</span>
+                          </div>
+                        )}
+                        
+                        {/* Priority Level Badge */}
+                        <div 
+                          className="flex items-center text-xs px-2 py-0.5 rounded-full"
+                          style={{
+                            backgroundColor: `${priorityColor}15`,
+                            color: priorityColor
+                          }}
+                        >
+                          <Flag className="h-3 w-3 mr-1" />
+                          <span>P{task.priority_level_id}: {task.priority?.name || 'Unknown'}</span>
+                        </div>
                       </div>
                       <span className={`text-xs ${timeStatus.statusClass}`}>
                         {timeStatus.status}
