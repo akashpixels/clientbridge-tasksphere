@@ -1379,21 +1379,11 @@ export type Database = {
         }
         Returns: number
       }
-      fix_existing_queues: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       should_queue_task: {
         Args: {
           p_project_id: string
         }
         Returns: boolean
-      }
-      validate_queue_integrity: {
-        Args: {
-          project_id: string
-        }
-        Returns: undefined
       }
     }
     Enums: {

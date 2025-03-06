@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertCircle, Clock } from "lucide-react";
@@ -55,6 +56,7 @@ export const TaskQueue = ({
     const fetchTasks = async () => {
       setIsLoading(true);
       try {
+        // Fetch both active and queued tasks
         const {
           data,
           error
@@ -72,13 +74,14 @@ export const TaskQueue = ({
           `).eq('project_id', projectId).in('current_status_id', [1, 2, 3, 7]) // Active (Open, Paused, In Progress) and Queue status
         .order('current_status_id', {
           ascending: true
-        }); // Active tasks first
+        }) // Active tasks first
+        .order('queue_position', {
+          ascending: true
+        }); // Then by queue position
 
         if (error) {
           throw error;
         }
-        
-        console.log("Fetched raw tasks:", data);
         setTasks(data || []);
       } catch (err: any) {
         console.error("Error fetching tasks:", err);
@@ -90,13 +93,13 @@ export const TaskQueue = ({
     fetchProjectConcurrency();
     fetchTasks();
 
+    // Set up real-time subscription for task changes
     const subscription = supabase.channel('tasks_changes').on('postgres_changes', {
       event: '*',
       schema: 'public',
       table: 'tasks',
       filter: `project_id=eq.${projectId} AND current_status_id=in.(1,2,3,7)`
-    }, (payload) => {
-      console.log("Real-time task update received:", payload);
+    }, () => {
       fetchTasks();
     }).subscribe();
     return () => {
@@ -104,16 +107,19 @@ export const TaskQueue = ({
     };
   }, [projectId]);
 
+  // Helper function to get priority color
   const getPriorityColor = (task: Task) => {
     if (!task.priority) return '#9CA3AF'; // Default gray
     return task.priority.color || '#9CA3AF';
   };
 
+  // Helper function to get status color
   const getStatusColor = (task: Task) => {
     if (!task.status) return '#9CA3AF'; // Default gray
     return task.status.color_hex || '#9CA3AF';
   };
 
+  // Helper function to format date for display
   const formatDateTime = (dateString: string | null) => {
     if (!dateString) return null;
     try {
@@ -125,48 +131,33 @@ export const TaskQueue = ({
     }
   };
 
+  // Split tasks into active (Open, Paused, In Progress) and queued
   const activeTasks = tasks.filter(task => [1, 2, 3].includes(task.current_status_id));
-  console.log("Active tasks:", activeTasks);
-  
-  const queuedTasks = tasks
-    .filter(task => task.current_status_id === 7)
-    .sort((a, b) => {
-      if (a.priority_level_id !== b.priority_level_id) {
-        return b.priority_level_id - a.priority_level_id;
-      }
-      
-      if (a.queue_position !== null && b.queue_position !== null) {
-        return a.queue_position - b.queue_position;
-      }
-      
-      return (a.task_code || '').localeCompare(b.task_code || '');
-    });
-  
-  console.log("Queued tasks after client-side sort:", queuedTasks.map(t => ({
-    code: t.task_code,
-    priority_id: t.priority_level_id,
-    priority_name: t.priority?.name,
-    queue_pos: t.queue_position
-  })));
+  const queuedTasks = tasks.filter(task => task.current_status_id === 7);
 
+  // Function to split tasks into rows based on max_concurrent_tasks
   const generateTaskRows = () => {
     const rows: Task[][] = Array.from({
       length: maxConcurrentTasks
     }, () => []);
 
+    // First, distribute active tasks evenly at the start of each row
     activeTasks.forEach((task, index) => {
       const rowIndex = index % maxConcurrentTasks;
       rows[rowIndex].push(task);
     });
 
+    // Then, add queued tasks in a snake pattern
     let currentRow = 0;
-    let direction = 1;
+    let direction = 1; // 1 for forward, -1 for backward
 
     queuedTasks.forEach(task => {
       rows[currentRow].push(task);
 
+      // Move to next row based on direction
       currentRow += direction;
 
+      // Change direction if we hit the top or bottom row
       if (currentRow >= maxConcurrentTasks) {
         currentRow = maxConcurrentTasks - 1;
         direction = -1;
@@ -175,25 +166,14 @@ export const TaskQueue = ({
         direction = 1;
       }
     });
-    
     return rows;
   };
 
+  // If there are no tasks, we don't show the component at all
   if (!isLoading && tasks.length === 0) {
     return null;
   }
-  
   const taskRows = generateTaskRows();
-  
-  console.log("Task rows for rendering:", taskRows.map(row => 
-    row.map(t => ({
-      code: t.task_code, 
-      status: t.current_status_id,
-      priority_id: t.priority_level_id,
-      priority: t.priority?.name
-    }))
-  ));
-  
   return (
     <TooltipProvider>
       <div className="w-[300px] bg-background border border-border/40 rounded-lg shadow-sm">
@@ -238,11 +218,6 @@ export const TaskQueue = ({
                                   #{task.queue_position}
                                 </span>
                               )}
-                              {task.current_status_id === 7 && task.priority?.name && (
-                                <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
-                                  {task.priority.name}
-                                </span>
-                              )}
                               {isActive && (
                                 <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
                                   {task.status?.name}
@@ -264,12 +239,7 @@ export const TaskQueue = ({
                           )}
                           <p className="text-gray-500 mt-1">
                             {isActive ? task.status?.name : (
-                              <>
-                                Queued (#{task.queue_position}) 
-                                <span className="font-medium ml-1">
-                                  {task.priority?.name}
-                                </span>
-                              </>
+                              <>Queued (#{task.queue_position})</>
                             )}
                           </p>
                         </TooltipContent>
