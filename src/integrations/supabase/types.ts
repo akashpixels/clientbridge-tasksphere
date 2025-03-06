@@ -1007,9 +1007,11 @@ export type Database = {
           last_status_id: number | null
           priority_level_id: number
           project_id: string
+          queue_position: number | null
           reference_links: Json | null
           start_time: string | null
           target_device: Database["public"]["Enums"]["device_type"]
+          task_code: string | null
           task_completed_at: string | null
           task_type_id: number
           updated_at: string
@@ -1032,9 +1034,11 @@ export type Database = {
           last_status_id?: number | null
           priority_level_id?: number
           project_id: string
+          queue_position?: number | null
           reference_links?: Json | null
           start_time?: string | null
           target_device?: Database["public"]["Enums"]["device_type"]
+          task_code?: string | null
           task_completed_at?: string | null
           task_type_id: number
           updated_at?: string
@@ -1057,9 +1061,11 @@ export type Database = {
           last_status_id?: number | null
           priority_level_id?: number
           project_id?: string
+          queue_position?: number | null
           reference_links?: Json | null
           start_time?: string | null
           target_device?: Database["public"]["Enums"]["device_type"]
+          task_code?: string | null
           task_completed_at?: string | null
           task_type_id?: number
           updated_at?: string

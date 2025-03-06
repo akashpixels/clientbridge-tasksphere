@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -41,6 +42,8 @@ interface TasksTableProps {
       first_name: string;
       last_name: string;
     } | null;
+    task_code?: string;
+    queue_position?: number;
   })[];
   sortConfig: {
     key: string;
@@ -147,6 +150,14 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
         <TableRow>
           <TableHead 
             className="cursor-pointer"
+            onClick={() => onSort('task_code')}
+          >
+            Task Code {sortConfig.key === 'task_code' && (
+              sortConfig.direction === 'asc' ? <ArrowUp className="inline w-4 h-4" /> : <ArrowDown className="inline w-4 h-4" />
+            )}
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer"
             onClick={() => onSort('status')}
           >
             Status {sortConfig.key === 'status' && (
@@ -197,6 +208,19 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
               setRightSidebarContent(<TaskCommentThread taskId={task.id} />);
             }}
           >
+            <TableCell>
+              <Badge 
+                variant="outline" 
+                className="font-mono text-xs"
+              >
+                {task.task_code || '—'}
+                {task.queue_position && (
+                  <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
+                    #{task.queue_position}
+                  </span>
+                )}
+              </Badge>
+            </TableCell>
             <TableCell>
               <div className="flex flex-col items-start gap-1">
                 <span 

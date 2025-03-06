@@ -25,6 +25,8 @@ interface TimelineTask {
   task_type_id: number;
   channel_load: number;
   total_tasks_in_project: number;
+  task_code?: string;
+  queue_position?: number;
   task_type?: {
     name: string;
   } | null;
@@ -54,7 +56,7 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
             id, details, calculated_start_time, calculated_eta, 
             channel_id, position_in_channel, timeline_status,
             priority_level_id, complexity_level_id, task_type_id,
-            channel_load, total_tasks_in_project,
+            channel_load, total_tasks_in_project, task_code, queue_position,
             task_type:task_types(name),
             priority:priority_levels(name, color),
             status:task_statuses!tasks_current_status_id_fkey(name, color_hex)
@@ -161,9 +163,21 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
                             onClick={() => setSelectedTask(task)}
                           >
                             <div className="flex justify-between items-start mb-2">
-                              <span className="text-sm font-medium truncate max-w-[70%]">
-                                {task.details}
-                              </span>
+                              <div className="flex gap-2 items-center">
+                                {task.task_code && (
+                                  <Badge variant="outline" className="font-mono text-xs">
+                                    {task.task_code}
+                                    {task.queue_position && (
+                                      <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
+                                        #{task.queue_position}
+                                      </span>
+                                    )}
+                                  </Badge>
+                                )}
+                                <span className="text-sm font-medium truncate max-w-[70%]">
+                                  {task.details}
+                                </span>
+                              </div>
                               <Badge className={getStatusColor(task.timeline_status)}>
                                 {task.timeline_status.replace('_', ' ')}
                               </Badge>
@@ -191,7 +205,19 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
           {selectedTask && (
             <Card className="p-4">
               <div className="mb-4">
-                <h4 className="text-lg font-medium">{selectedTask.details}</h4>
+                <div className="flex gap-2 items-center mb-1">
+                  {selectedTask.task_code && (
+                    <Badge variant="outline" className="font-mono text-xs">
+                      {selectedTask.task_code}
+                      {selectedTask.queue_position && (
+                        <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
+                          #{selectedTask.queue_position}
+                        </span>
+                      )}
+                    </Badge>
+                  )}
+                  <h4 className="text-lg font-medium">{selectedTask.details}</h4>
+                </div>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge className={getStatusColor(selectedTask.timeline_status)}>
                     {selectedTask.timeline_status.replace('_', ' ')}

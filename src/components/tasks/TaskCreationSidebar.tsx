@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { TaskForm } from "./TaskForm";
 import { useLayout } from "@/context/layout";
 import { X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export const TaskCreationSidebar = () => {
   const { toast } = useToast();
@@ -108,6 +109,23 @@ export const TaskCreationSidebar = () => {
     setCreatedTaskData(null);
   };
 
+  // Determine if the task is queued and get the priority level name
+  const getPriorityName = async (priorityId: number) => {
+    try {
+      const { data, error } = await supabase
+        .from('priority_levels')
+        .select('name')
+        .eq('id', priorityId)
+        .single();
+        
+      if (error) throw error;
+      return data?.name || 'Unknown';
+    } catch (error) {
+      console.error('Error fetching priority name:', error);
+      return 'Unknown';
+    }
+  };
+
   return <div className="flex flex-col h-full overflow-hidden">
       <div className="flex justify-between items-center px-4 py-[10px] border-b bg-[#fcfcfc] sticky top-0 z-10">
         <h2 className="font-semibold text-[14px]">
@@ -128,8 +146,21 @@ export const TaskCreationSidebar = () => {
               <p className="text-green-800 text-sm mb-2">Your task has been successfully created and added to the queue.</p>
               <div className="text-sm space-y-2 mt-4">
                 <h3 className="font-medium">Task Details:</h3>
-                <p><span className="font-medium">Description:</span> {createdTaskData?.details}</p>
-                <p><span className="font-medium">Queue Position:</span> {queuePosition + 1}</p>
+                <div className="flex gap-2 items-center">
+                  {createdTaskData?.task_code && (
+                    <Badge variant="outline" className="font-mono text-xs">
+                      {createdTaskData.task_code}
+                      {createdTaskData.queue_position && (
+                        <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
+                          #{createdTaskData.queue_position}
+                        </span>
+                      )}
+                    </Badge>
+                  )}
+                  <p><span className="font-medium">Description:</span> {createdTaskData?.details}</p>
+                </div>
+                <p><span className="font-medium">Status:</span> {createdTaskData?.current_status_id === 7 ? 'Queued' : 'Open'}</p>
+                <p><span className="font-medium">Priority:</span> {createdTaskData?.priority_level_id}</p>
               </div>
             </div>
             
