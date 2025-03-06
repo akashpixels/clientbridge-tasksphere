@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertCircle, Clock } from "lucide-react";
@@ -56,7 +55,6 @@ export const TaskQueue = ({
     const fetchTasks = async () => {
       setIsLoading(true);
       try {
-        // Fetch both active and queued tasks
         const {
           data,
           error
@@ -92,7 +90,6 @@ export const TaskQueue = ({
     fetchProjectConcurrency();
     fetchTasks();
 
-    // Set up real-time subscription for task changes
     const subscription = supabase.channel('tasks_changes').on('postgres_changes', {
       event: '*',
       schema: 'public',
@@ -107,19 +104,16 @@ export const TaskQueue = ({
     };
   }, [projectId]);
 
-  // Helper function to get priority color
   const getPriorityColor = (task: Task) => {
     if (!task.priority) return '#9CA3AF'; // Default gray
     return task.priority.color || '#9CA3AF';
   };
 
-  // Helper function to get status color
   const getStatusColor = (task: Task) => {
     if (!task.status) return '#9CA3AF'; // Default gray
     return task.status.color_hex || '#9CA3AF';
   };
 
-  // Helper function to format date for display
   const formatDateTime = (dateString: string | null) => {
     if (!dateString) return null;
     try {
@@ -131,25 +125,20 @@ export const TaskQueue = ({
     }
   };
 
-  // Split tasks into active (Open, Paused, In Progress) and queued
   const activeTasks = tasks.filter(task => [1, 2, 3].includes(task.current_status_id));
   console.log("Active tasks:", activeTasks);
   
-  // Sort queued tasks based on priority_level_id (lower values = higher priority)
   const queuedTasks = tasks
     .filter(task => task.current_status_id === 7)
     .sort((a, b) => {
-      // First by priority level (lower id = higher priority)
       if (a.priority_level_id !== b.priority_level_id) {
-        return a.priority_level_id - b.priority_level_id;
+        return b.priority_level_id - a.priority_level_id;
       }
       
-      // Then by queue position
       if (a.queue_position !== null && b.queue_position !== null) {
         return a.queue_position - b.queue_position;
       }
       
-      // Finally by task code
       return (a.task_code || '').localeCompare(b.task_code || '');
     });
   
@@ -160,29 +149,24 @@ export const TaskQueue = ({
     queue_pos: t.queue_position
   })));
 
-  // Function to split tasks into rows based on max_concurrent_tasks
   const generateTaskRows = () => {
     const rows: Task[][] = Array.from({
       length: maxConcurrentTasks
     }, () => []);
 
-    // First, distribute active tasks evenly at the start of each row
     activeTasks.forEach((task, index) => {
       const rowIndex = index % maxConcurrentTasks;
       rows[rowIndex].push(task);
     });
 
-    // Then, add queued tasks in a snake pattern
     let currentRow = 0;
-    let direction = 1; // 1 for forward, -1 for backward
+    let direction = 1;
 
     queuedTasks.forEach(task => {
       rows[currentRow].push(task);
 
-      // Move to next row based on direction
       currentRow += direction;
 
-      // Change direction if we hit the top or bottom row
       if (currentRow >= maxConcurrentTasks) {
         currentRow = maxConcurrentTasks - 1;
         direction = -1;
@@ -195,7 +179,6 @@ export const TaskQueue = ({
     return rows;
   };
 
-  // If there are no tasks, we don't show the component at all
   if (!isLoading && tasks.length === 0) {
     return null;
   }
