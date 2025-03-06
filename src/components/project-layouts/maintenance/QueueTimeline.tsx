@@ -46,6 +46,11 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
       
       if (error) {
         console.error("Error invoking function:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update task start times: " + error.message,
+          variant: "destructive",
+        });
         return;
       }
       
@@ -57,8 +62,13 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
       
       // Refresh task data
       fetchTasks();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error updating task start times:", err);
+      toast({
+        title: "Error",
+        description: "Failed to update task start times: " + err.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -207,9 +217,20 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
     (task.current_status_id === 1 || task.current_status_id === 3) && !task.start_time
   );
 
-  // Count tasks with missing queue positions or potentially incorrect ordering
+  // Check for queue issues - now using our improved detection logic
   const hasQueueIssues = tasks.some(task => 
-    task.current_status_id === 7 && (!task.queue_position || task.queue_position <= 0)
+    task.current_status_id === 7 && (
+      !task.queue_position || 
+      task.queue_position <= 0 ||
+      // Check if any task with higher priority (lower priority_level_id) 
+      // has a higher queue position (which is wrong)
+      tasks.some(otherTask => 
+        otherTask.current_status_id === 7 &&
+        otherTask.id !== task.id &&
+        otherTask.priority_level_id < task.priority_level_id &&
+        (otherTask.queue_position || 0) > (task.queue_position || 0)
+      )
+    )
   );
 
   if (isLoading) {

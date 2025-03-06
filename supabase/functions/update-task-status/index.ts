@@ -1,49 +1,56 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
-Deno.serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
-  }
+serve(async (req) => {
+  // Initialize Supabase client with service role key for admin access
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  console.log("Processing request to update task status");
 
   try {
-    // Create Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
-    // Call the update_in_progress_tasks function
-    const { data, error } = await supabaseClient.rpc('update_in_progress_tasks')
+    // Call the database function to update tasks with missing start times
+    const { data, error } = await supabase.rpc("update_in_progress_tasks");
 
     if (error) {
-      console.error('Error updating task statuses:', error)
-      throw error
+      console.error("Error updating task status:", error.message);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: error.message,
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 500,
+        }
+      );
     }
 
-    console.log('Successfully checked and updated task statuses')
-
+    console.log("Task status updated successfully:", data);
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({
+        success: true,
+        data,
+      }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
         status: 200,
       }
-    )
-  } catch (error) {
-    console.error('Error:', error)
+    );
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    console.error("Exception while updating task status:", errorMessage);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({
+        success: false,
+        error: errorMessage,
+      }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
         status: 500,
       }
-    )
+    );
   }
-})
+});
