@@ -6,8 +6,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+type QueuedTask = {
+  id: string;
+  task_code?: string | null;
+  details: string;
+  queue_position?: number | null;
+  priority_level_id: number;
+  project_id: string;
+  priority?: {
+    name: string;
+    color: string;
+  } | null;
+};
+
+type GroupedTasks = Record<string, QueuedTask[]>;
+
 const Tasks = () => {
-  const [queuedTasks, setQueuedTasks] = useState<any[]>([]);
+  const [queuedTasks, setQueuedTasks] = useState<QueuedTask[]>([]);
   
   useEffect(() => {
     const fetchQueuedTasks = async () => {
@@ -53,7 +68,7 @@ const Tasks = () => {
   }, []);
   
   // Group tasks by project
-  const groupedTasks = queuedTasks.reduce((acc: Record<string, any[]>, task) => {
+  const groupedTasks: GroupedTasks = queuedTasks.reduce((acc: GroupedTasks, task) => {
     const projectId = task.project_id;
     if (!acc[projectId]) {
       acc[projectId] = [];
@@ -63,7 +78,7 @@ const Tasks = () => {
   }, {});
   
   // Helper function to get priority color
-  const getPriorityColor = (task: any) => {
+  const getPriorityColor = (task: QueuedTask) => {
     if (!task.priority) return '#9CA3AF'; // Default gray
     
     const priorityColors: Record<string, string> = {

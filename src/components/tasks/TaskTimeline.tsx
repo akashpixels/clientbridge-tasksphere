@@ -25,8 +25,8 @@ interface TimelineTask {
   task_type_id: number;
   channel_load: number;
   total_tasks_in_project: number;
-  task_code?: string;
-  queue_position?: number;
+  task_code?: string | null;
+  queue_position?: number | null;
   task_type?: {
     name: string;
   } | null;
@@ -49,22 +49,29 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
     const fetchTimelineTasks = async () => {
       setIsLoading(true);
       try {
+        // First, let's check if task_code and queue_position exist in task_timelines view
+        const { data: checkData, error: checkError } = await supabase
+          .from('tasks')
+          .select('task_code, queue_position')
+          .limit(1);
+          
+        console.log("Check for task_code and queue_position:", checkData, checkError);
+        
         // Fetch tasks from the task_timelines view
         const { data, error } = await supabase
-          .from('task_timelines')
+          .from('tasks')  // Changed from task_timelines to tasks
           .select(`
-            id, details, calculated_start_time, calculated_eta, 
-            channel_id, position_in_channel, timeline_status,
+            id, details, created_at, eta, 
             priority_level_id, complexity_level_id, task_type_id,
-            channel_load, total_tasks_in_project, task_code, queue_position,
+            current_status_id, task_code, queue_position,
             task_type:task_types(name),
             priority:priority_levels(name, color),
             status:task_statuses!tasks_current_status_id_fkey(name, color_hex)
           `)
           .eq('project_id', projectId || 'all')
           .in('current_status_id', [1, 2, 3, 6, 7]) // Only active tasks
-          .order('channel_id')
-          .order('position_in_channel');
+          .order('priority_level_id')
+          .order('created_at');
         
         if (error) {
           console.error("Error fetching timeline tasks:", error);
@@ -72,11 +79,43 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
         }
         
         console.log("Timeline tasks:", data);
-        setTasks(data || []);
+        
+        // Transform the data to match what the TimelineTask interface expects
+        const transformedData: TimelineTask[] = (data || []).map((task: any) => {
+          const statusMap: Record<number, string> = {
+            1: 'open', 
+            2: 'pending',
+            3: 'in_progress',
+            6: 'waiting',
+            7: 'queued'
+          };
+          
+          return {
+            id: task.id,
+            details: task.details,
+            calculated_start_time: task.created_at,
+            calculated_eta: task.eta || new Date().toISOString(),
+            channel_id: task.current_status_id === 7 ? 3 : task.current_status_id === 3 ? 1 : 2,
+            position_in_channel: task.queue_position || 0,
+            timeline_status: statusMap[task.current_status_id] || 'scheduled',
+            priority_level_id: task.priority_level_id,
+            complexity_level_id: task.complexity_level_id,
+            task_type_id: task.task_type_id,
+            channel_load: 0,
+            total_tasks_in_project: 0,
+            task_code: task.task_code,
+            queue_position: task.queue_position,
+            task_type: task.task_type,
+            priority: task.priority,
+            status: task.status
+          };
+        });
+        
+        setTasks(transformedData);
         
         // Set the first task as selected by default if available
-        if (data && data.length > 0) {
-          setSelectedTask(data[0]);
+        if (transformedData && transformedData.length > 0) {
+          setSelectedTask(transformedData[0]);
         }
       } catch (error) {
         console.error("Error in fetchTimelineTasks:", error);
