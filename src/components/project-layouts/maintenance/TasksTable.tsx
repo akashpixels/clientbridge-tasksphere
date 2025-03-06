@@ -1,4 +1,3 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -59,6 +58,10 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
 
   const formatETA = (date: string) => {
     return format(new Date(date), "h.mmaaa do MMM");
+  };
+
+  const formatDateTime = (date: string) => {
+    return format(new Date(date), "MMM d, h:mm a");
   };
 
   const getStatusColor = (status: { name: string | null, color_hex: string | null }) => {
@@ -190,9 +193,19 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
           </TableHead>
           <TableHead 
             className="cursor-pointer"
+            onClick={() => onSort('start_time')}
+          >
+            Start Time {sortConfig.key === 'start_time' && (
+              sortConfig.direction === 'asc' ? <ArrowUp className="inline w-4 h-4" /> : <ArrowDown className="inline w-4 h-4" />
+            )}
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer"
             onClick={() => onSort('eta')}
           >
-            ETA
+            ETA {sortConfig.key === 'eta' && (
+              sortConfig.direction === 'asc' ? <ArrowUp className="inline w-4 h-4" /> : <ArrowDown className="inline w-4 h-4" />
+            )}
           </TableHead>
           <TableHead>Links</TableHead>
           <TableHead>Assets</TableHead>
@@ -297,10 +310,21 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
               </TooltipProvider>
             </TableCell>
             <TableCell className="text-left">
+              {task.start_time ? (
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-gray-600">{format(new Date(task.start_time), "h:mm a")}</span>
+                  <span className="text-xs text-gray-700">{format(new Date(task.start_time), "MMM d")}</span>
+                </div>
+              ) : (
+                <span className="text-xs text-gray-700">Not set</span>
+              )}
+            </TableCell>
+            
+            <TableCell className="text-left">
               {task.eta ? (
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-xs text-gray-600">{format(new Date(task.eta), "h.mmaaa")}</span>
-                  <span className="text-xs text-gray-700">{format(new Date(task.eta), "do MMM")}</span>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-gray-600">{format(new Date(task.eta), "h:mm a")}</span>
+                  <span className="text-xs text-gray-700">{format(new Date(task.eta), "MMM d")}</span>
                 </div>
               ) : (
                 <span className="text-xs text-gray-700">Not set</span>

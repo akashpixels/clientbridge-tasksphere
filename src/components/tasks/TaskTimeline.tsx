@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -49,19 +48,10 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
     const fetchTimelineTasks = async () => {
       setIsLoading(true);
       try {
-        // First, let's check if task_code and queue_position exist in task_timelines view
-        const { data: checkData, error: checkError } = await supabase
-          .from('tasks')
-          .select('task_code, queue_position')
-          .limit(1);
-          
-        console.log("Check for task_code and queue_position:", checkData, checkError);
-        
-        // Fetch tasks from the task_timelines view
         const { data, error } = await supabase
-          .from('tasks')  // Changed from task_timelines to tasks
+          .from('tasks')
           .select(`
-            id, details, created_at, eta, 
+            id, details, created_at, eta, start_time,
             priority_level_id, complexity_level_id, task_type_id,
             current_status_id, task_code, queue_position,
             task_type:task_types(name),
@@ -80,7 +70,6 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
         
         console.log("Timeline tasks:", data);
         
-        // Transform the data to match what the TimelineTask interface expects
         const transformedData: TimelineTask[] = (data || []).map((task: any) => {
           const statusMap: Record<number, string> = {
             1: 'open', 
@@ -90,12 +79,14 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
             7: 'queued'
           };
           
+          let channelId = task.current_status_id === 7 ? 3 : task.current_status_id === 3 ? 1 : 2;
+          
           return {
             id: task.id,
             details: task.details,
-            calculated_start_time: task.created_at,
+            calculated_start_time: task.start_time || task.created_at,
             calculated_eta: task.eta || new Date().toISOString(),
-            channel_id: task.current_status_id === 7 ? 3 : task.current_status_id === 3 ? 1 : 2,
+            channel_id: channelId,
             position_in_channel: task.queue_position || 0,
             timeline_status: statusMap[task.current_status_id] || 'scheduled',
             priority_level_id: task.priority_level_id,
@@ -113,7 +104,6 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
         
         setTasks(transformedData);
         
-        // Set the first task as selected by default if available
         if (transformedData && transformedData.length > 0) {
           setSelectedTask(transformedData[0]);
         }
@@ -125,6 +115,19 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
     };
     
     fetchTimelineTasks();
+    
+    const subscription = supabase.channel('timeline_tasks_changes').on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'tasks',
+      filter: `project_id=eq.${projectId}`
+    }, () => {
+      fetchTimelineTasks();
+    }).subscribe();
+    
+    return () => {
+      supabase.removeChannel(subscription);
+    };
   }, [projectId]);
 
   const getStatusColor = (status: string) => {
@@ -168,7 +171,6 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Task lanes */}
             {[1, 2, 3].map(channelId => {
               const channelTasks = tasks.filter(t => t.channel_id === channelId);
               const channelTitle = channelId === 1 ? "In Progress" : 
@@ -240,7 +242,6 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
             })}
           </div>
           
-          {/* Task details with timeline visualization */}
           {selectedTask && (
             <Card className="p-4">
               <div className="mb-4">
@@ -271,6 +272,8 @@ export const TaskTimeline = ({ projectId }: TaskTimelineProps) => {
                 taskTypeId={selectedTask.task_type_id}
                 priorityLevelId={selectedTask.priority_level_id}
                 complexityLevelId={selectedTask.complexity_level_id}
+                projectId={projectId}
+                queuePosition={selectedTask.queue_position}
                 compact={true}
               />
             </Card>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
@@ -11,13 +12,14 @@ interface TimelineVisualizationProps {
   complexityLevelId?: number | null;
   projectId?: string;
   compact?: boolean;
+  queuePosition?: number | null;
 }
 
 interface TimelineEstimate {
   currentTime: string;
   startTime: string | null;
   eta: string | null;
-  queuePosition: number;
+  queuePosition: number | null;
   taskInfo: {
     hoursNeeded: number | null;
     timeToStart: number | null;
@@ -30,13 +32,14 @@ export const TimelineVisualization = ({
   priorityLevelId,
   complexityLevelId = 3,
   projectId,
-  compact = false
+  compact = false,
+  queuePosition = null
 }: TimelineVisualizationProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [taskType, setTaskType] = useState<any>(null);
   const [priorityLevel, setPriorityLevel] = useState<any>(null);
   const [complexityLevel, setComplexityLevel] = useState<any>(null);
-  const [queuePosition, setQueuePosition] = useState(0);
+  const [maxConcurrentTasks, setMaxConcurrentTasks] = useState(1);
   const [timelineEstimate, setTimelineEstimate] = useState<TimelineEstimate | null>(null);
 
   useEffect(() => {
@@ -100,7 +103,28 @@ export const TimelineVisualization = ({
   }, [complexityLevelId]);
 
   useEffect(() => {
-    const fetchQueuePosition = async () => {
+    const fetchProjectConcurrency = async () => {
+      if (!projectId) return;
+      try {
+        const {
+          data,
+          error
+        } = await supabase.from('projects').select('max_concurrent_tasks').eq('id', projectId).single();
+        if (error) throw error;
+        if (data && data.max_concurrent_tasks) {
+          setMaxConcurrentTasks(data.max_concurrent_tasks);
+        }
+      } catch (err: any) {
+        console.error("Error fetching project concurrency:", err);
+      }
+    };
+    if (projectId) {
+      fetchProjectConcurrency();
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    const fetchQueueCount = async () => {
       if (!projectId) return;
       const {
         count,
@@ -113,14 +137,9 @@ export const TimelineVisualization = ({
         console.error("Error fetching queue position:", error);
         return;
       }
-      setQueuePosition(count || 0);
+      return count || 0;
     };
-    if (projectId) {
-      fetchQueuePosition();
-    }
-  }, [projectId]);
 
-  useEffect(() => {
     const calculateTimeline = async () => {
       try {
         const now = new Date();
@@ -129,6 +148,11 @@ export const TimelineVisualization = ({
         let hoursNeeded: number | null = null;
         let timeToStart: number | null = null;
         let isOverdue = false;
+        let queueDelay = 0;
+        
+        // Get active tasks count
+        const activeCount = await fetchQueueCount();
+        
         if (taskType && priorityLevel && complexityLevel) {
           startTime = new Date();
           if (priorityLevel.time_to_start) {
@@ -141,7 +165,14 @@ export const TimelineVisualization = ({
               startTime = addMinutes(startTime, minutes);
             }
           }
-          startTime = addMinutes(startTime, queuePosition * 30);
+          
+          // Apply queue delay if provided
+          if (queuePosition !== null && queuePosition > maxConcurrentTasks) {
+            queueDelay = (queuePosition - maxConcurrentTasks) * 30; // 30 minutes per position beyond max_concurrent_tasks
+            startTime = addMinutes(startTime, queueDelay);
+          }
+          
+          // Handle working hours
           const currentHour = startTime.getHours();
           if (currentHour < 10) {
             startTime.setHours(10, 0, 0, 0);
@@ -149,23 +180,32 @@ export const TimelineVisualization = ({
             startTime = addDays(startTime, 1);
             startTime.setHours(10, 0, 0, 0);
           }
-          hoursNeeded = 1;
+          
+          // Calculate hours needed based on new formula: time_to_start + (base_duration * complexity_multiplier)
+          hoursNeeded = 0;
+          
+          // Add base duration
           if (taskType.base_duration) {
             const baseDurationMatch = taskType.base_duration.match(/(\d+):(\d+):(\d+)/);
             if (baseDurationMatch) {
               const hours = parseInt(baseDurationMatch[1]);
               const minutes = parseInt(baseDurationMatch[2]);
-              hoursNeeded = hours + minutes / 60;
+              const baseDuration = hours + minutes / 60;
+              
+              // Apply complexity multiplier
+              if (complexityLevel.multiplier) {
+                hoursNeeded = baseDuration * complexityLevel.multiplier;
+              } else {
+                hoursNeeded = baseDuration;
+              }
             }
           }
-          if (priorityLevel.multiplier) {
-            hoursNeeded *= priorityLevel.multiplier;
-          }
-          if (complexityLevel.multiplier) {
-            hoursNeeded *= complexityLevel.multiplier;
-          }
+          
+          // Calculate ETA
           eta = new Date(startTime);
           eta = addHours(eta, hoursNeeded);
+          
+          // Handle working hours for ETA
           const etaHour = eta.getHours();
           const workingHoursInDay = 8;
           if (etaHour >= 18) {
@@ -175,13 +215,16 @@ export const TimelineVisualization = ({
             eta = addDays(eta, daysToAdd);
             eta.setHours(10 + remainingHours, eta.getMinutes(), 0, 0);
           }
+          
+          // Determine if task will be overdue
           isOverdue = priorityLevel.id >= 4 && differenceInHours(eta, now) > 48;
         }
+        
         setTimelineEstimate({
           currentTime: format(now, 'h:mm a'),
           startTime: startTime ? format(startTime, 'h:mm a, MMM d') : null,
           eta: eta ? format(eta, 'h:mm a, MMM d') : null,
-          queuePosition,
+          queuePosition: queuePosition,
           taskInfo: {
             hoursNeeded: hoursNeeded ? Math.round(hoursNeeded * 10) / 10 : null,
             timeToStart: timeToStart,
@@ -195,7 +238,7 @@ export const TimelineVisualization = ({
           currentTime: format(now, 'h:mm a'),
           startTime: null,
           eta: null,
-          queuePosition,
+          queuePosition: queuePosition,
           taskInfo: {
             hoursNeeded: null,
             timeToStart: null,
@@ -207,7 +250,7 @@ export const TimelineVisualization = ({
     };
     setIsLoading(true);
     calculateTimeline();
-  }, [taskType, priorityLevel, complexityLevel, queuePosition]);
+  }, [taskType, priorityLevel, complexityLevel, queuePosition, maxConcurrentTasks, projectId]);
 
   if (isLoading) {
     return <div className="space-y-4">
@@ -283,6 +326,14 @@ export const TimelineVisualization = ({
               This task may take longer than expected. Consider adjusting priority or complexity.
             </span>
           </div>}
+          
+        {timelineEstimate?.queuePosition !== null && timelineEstimate.queuePosition > maxConcurrentTasks && (
+          <div className="flex items-center text-blue-600 text-xs p-2 bg-blue-50 rounded-md border border-blue-200 mt-2">
+            <span>
+              Queue position #{timelineEstimate.queuePosition} (adds {(timelineEstimate.queuePosition - maxConcurrentTasks) * 30} min delay)
+            </span>
+          </div>
+        )}
       </div>
     </div>;
 };

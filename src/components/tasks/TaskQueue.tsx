@@ -1,6 +1,6 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, AlertCircle } from "lucide-react";
 interface TaskQueueProps {
   projectId: string;
@@ -20,6 +20,8 @@ interface Task {
     name: string;
     color_hex: string | null;
   } | null;
+  start_time: string | null;
+  eta: string | null;
 }
 export const TaskQueue = ({
   projectId
@@ -58,6 +60,8 @@ export const TaskQueue = ({
             queue_position, 
             priority_level_id,
             current_status_id,
+            start_time,
+            eta,
             priority:priority_levels(name, color),
             status:task_statuses!tasks_current_status_id_fkey(name, color_hex)
           `).eq('project_id', projectId).in('current_status_id', [1, 2, 3, 7]) // Active (Open, Paused, In Progress) and Queue status
@@ -175,7 +179,7 @@ export const TaskQueue = ({
                   backgroundColor: colorToUse
                 }} />
                         {task.task_code}
-                        {task.queue_position && <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-sm">
+                        {task.queue_position !== null && <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-sm">
                             #{task.queue_position}
                           </span>}
                         {isActive && <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
