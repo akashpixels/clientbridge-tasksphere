@@ -1,4 +1,3 @@
-
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./components/auth/AuthProvider";
@@ -41,6 +40,11 @@ const App = () => {
                   <Route path="/tasks" element={<Tasks />} />
                   <Route path="/team" element={<Team />} />
                   <Route path="/clients" element={<Clients />} />
+                  <Route path="/projects/:id/quick-action" element={
+                    <ProtectedRoute>
+                      <QuickAction />
+                    </ProtectedRoute>
+                  } />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Route>
