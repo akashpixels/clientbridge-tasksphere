@@ -57,13 +57,32 @@ export const TaskCreationSidebar = () => {
         throw new Error(userError.message);
       }
       
+      // Get all tasks in queue to determine next position
+      const { data: queuedTasks, error: queueError } = await supabase
+        .from('tasks')
+        .select('queue_position')
+        .eq('project_id', projectId)
+        .eq('current_status_id', 7) // In Queue status
+        .order('queue_position', { ascending: false });
+      
+      if (queueError) {
+        console.error("Error fetching queue positions:", queueError);
+      }
+      
+      // Calculate next queue position
+      const nextQueuePosition = queueedTasks && queueedTasks.length > 0 && queueedTasks[0].queue_position
+        ? queueedTasks[0].queue_position + 1
+        : 1;
+      
       // Prepare task data for submission by excluding fields that don't exist in the tasks table
       const { image_urls, ...taskDataWithoutImages } = formData;
       
       const taskData = {
         ...taskDataWithoutImages,
         project_id: projectId,
-        created_by: userData.user?.id
+        created_by: userData.user?.id,
+        current_status_id: 7, // Set to "In Queue" status
+        queue_position: nextQueuePosition
       };
       
       console.log("Sending task data to supabase:", taskData);
