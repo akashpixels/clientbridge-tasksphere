@@ -42,7 +42,7 @@ export const TaskCreationSidebar = () => {
 
   useEffect(() => {
     fetchQueuePosition();
-  }, []);
+  }, [projectId]);
 
   const handleSubmit = async (formData: any) => {
     if (!projectId) return;
