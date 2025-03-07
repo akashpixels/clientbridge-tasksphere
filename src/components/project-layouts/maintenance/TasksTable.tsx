@@ -18,7 +18,6 @@ import {
 import { useLayout } from "@/context/layout";
 import { Badge } from "@/components/ui/badge";
 import TaskCommentThread from "./comments/TaskCommentThread";
-import { TaskActions } from "./TaskActions";
 
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
@@ -52,10 +51,9 @@ interface TasksTableProps {
   onSort: (key: string) => void;
   onImageClick: (image: string, images: string[]) => void;
   onCommentClick: (taskId: string) => void;
-  onTaskUpdate?: () => void;
 }
 
-const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick, onTaskUpdate }: TasksTableProps) => {
+const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }: TasksTableProps) => {
   const { setRightSidebarContent } = useLayout();
 
   const formatETA = (date: string) => {
@@ -211,7 +209,6 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick, o
           </TableHead>
           <TableHead>Links</TableHead>
           <TableHead>Assets</TableHead>
-          <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -219,12 +216,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick, o
           <TableRow 
             key={task.id}
             className="cursor-pointer hover:bg-muted/50"
-            onClick={(e) => {
-              if ((e.target as HTMLElement).closest('button')) {
-                e.stopPropagation();
-                return;
-              }
-              
+            onClick={() => {
               onCommentClick(task.id);
               setRightSidebarContent(<TaskCommentThread taskId={task.id} />);
             }}
@@ -352,10 +344,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick, o
                     <div
                       key={index}
                       className="w-8 h-8 relative cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onImageClick(image as string, task.images as string[]);
-                      }}
+                      onClick={() => onImageClick(image as string, task.images as string[])}
                     >
                       <img 
                         src={image as string}
@@ -367,15 +356,6 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick, o
                   ))
                 )}
               </div>
-            </TableCell>
-            
-            <TableCell onClick={(e) => e.stopPropagation()}>
-              <TaskActions 
-                taskId={task.id} 
-                taskCode={task.task_code || ''} 
-                currentStatusId={task.current_status_id} 
-                onStatusChange={onTaskUpdate}
-              />
             </TableCell>
           </TableRow>
         ))}

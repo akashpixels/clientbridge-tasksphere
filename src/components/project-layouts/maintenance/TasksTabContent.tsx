@@ -5,7 +5,6 @@ import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertCircle } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 
 interface TasksTabContentProps {
   isLoadingTasks: boolean;
@@ -52,7 +51,6 @@ const TasksTabContent = ({
   onImageClick,
   onCommentClick,
 }: TasksTabContentProps) => {
-  const queryClient = useQueryClient();
   
   // Add diagnostic output
   useEffect(() => {
@@ -98,11 +96,6 @@ const TasksTabContent = ({
     };
   }, []);
 
-  const handleTaskUpdate = () => {
-    // Invalidate and refetch tasks data
-    queryClient.invalidateQueries({ queryKey: ['tasks'] });
-  };
-
   return (
     <Card className="p-0">
       {isLoadingTasks ? (
@@ -118,7 +111,6 @@ const TasksTabContent = ({
             onSort={onSort}
             onImageClick={onImageClick}
             onCommentClick={onCommentClick}
-            onTaskUpdate={handleTaskUpdate}
           />
         </div>
       ) : (
