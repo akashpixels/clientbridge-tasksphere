@@ -70,8 +70,8 @@ export const TaskCreationSidebar = () => {
       }
       
       // Calculate next queue position
-      const nextQueuePosition = queueedTasks && queueedTasks.length > 0 && queueedTasks[0].queue_position
-        ? queueedTasks[0].queue_position + 1
+      const nextQueuePosition = queuedTasks && queuedTasks.length > 0 && queuedTasks[0].queue_position
+        ? queuedTasks[0].queue_position + 1
         : 1;
       
       // Prepare task data for submission by excluding fields that don't exist in the tasks table
