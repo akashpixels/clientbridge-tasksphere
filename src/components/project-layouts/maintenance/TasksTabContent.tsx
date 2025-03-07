@@ -62,11 +62,13 @@ const TasksTabContent = ({
       try {
         const { data, error } = await supabase
           .from('tasks')
-          .select('id, details, task_code, queue_position')
+          .select('id, details, task_code, queue_position, current_status_id')
           .limit(5);
           
-        console.log("Direct tasks access test:", data?.length || 0, data);
-        console.log("Direct tasks access error:", error);
+        console.log("Direct tasks access test:", data?.length || 0);
+        if (error) {
+          console.error("Direct tasks access error:", error);
+        }
       } catch (e) {
         console.error("Error in direct tasks check:", e);
       }
@@ -75,6 +77,7 @@ const TasksTabContent = ({
     checkTasksAccess();
   }, [tasks, isLoadingTasks]);
   
+  // Setup real-time subscription for comment changes
   useEffect(() => {
     const channel = supabase
       .channel('comments-changes')
@@ -123,7 +126,7 @@ const TasksTabContent = ({
           <div className="mt-4 p-3 bg-gray-50 rounded-md text-sm text-left">
             <p className="font-medium">Debugging information:</p>
             <p className="mt-1 text-xs">Project ID: {window.location.pathname.split('/').pop()}</p>
-            <p className="mt-1 text-xs">RLS Status: Temporarily disabled</p>
+            <p className="mt-1 text-xs">Status: Simplified timeline calculation active</p>
           </div>
         </div>
       )}

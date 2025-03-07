@@ -1354,13 +1354,6 @@ export type Database = {
         }
         Returns: number
       }
-      calculate_eta: {
-        Args: {
-          created_at: string
-          hours_needed: number
-        }
-        Returns: string
-      }
       calculate_hours_spent: {
         Args: {
           actual_start: string
@@ -1373,41 +1366,24 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      calculate_start_time:
-        | {
-            Args: {
-              created_at: string
-              priority_id: number
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              created_at: string
-              priority_id: number
-              project_id: string
-            }
-            Returns: string
-          }
+      calculate_start_time: {
+        Args: {
+          created_at: string
+          priority_id: number
+        }
+        Returns: string
+      }
       count_active_tasks: {
         Args: {
           project_id: string
         }
         Returns: number
       }
-      fix_existing_queues: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       should_queue_task: {
         Args: {
           p_project_id: string
         }
         Returns: boolean
-      }
-      update_in_progress_tasks: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
       }
       validate_queue_integrity: {
         Args: {
