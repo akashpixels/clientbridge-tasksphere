@@ -75,19 +75,36 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
   // Function to fix queue positions
   const fixQueuePositions = async () => {
     try {
-      const { data, error } = await supabase.rpc('fix_existing_queues');
+      // First get all queued tasks for this project
+      const { data: queuedTasks, error: fetchError } = await supabase
+        .from('tasks')
+        .select('id, priority_level_id, queue_position')
+        .eq('project_id', projectId)
+        .eq('current_status_id', 7) // Queued status
+        .order('priority_level_id', { ascending: true }) // Lower number = higher priority
+        .order('created_at', { ascending: true }); // First come, first served within same priority
       
-      if (error) {
-        console.error("Error fixing queue positions:", error);
+      if (fetchError) throw fetchError;
+      
+      if (!queuedTasks || queuedTasks.length === 0) {
         toast({
-          title: "Error",
-          description: "Failed to fix queue positions: " + error.message,
-          variant: "destructive",
+          title: "No queue updates needed",
+          description: "There are no tasks in the queue to reorder.",
         });
         return;
       }
       
-      console.log("Fixed queue positions:", data);
+      // Assign new queue positions
+      const updatePromises = queuedTasks.map((task, index) => {
+        return supabase
+          .from('tasks')
+          .update({ queue_position: index + 1 })
+          .eq('id', task.id);
+      });
+      
+      // Wait for all updates to complete
+      await Promise.all(updatePromises);
+      
       toast({
         title: "Queue positions fixed",
         description: "Task queue order has been updated based on priority",
