@@ -5,7 +5,6 @@ import { Tables } from "@/integrations/supabase/types";
 import CredentialsTab from "./shared/CredentialsTab";
 import TeamTab from "./shared/TeamTab";
 import { NewTaskButton } from "./maintenance/NewTaskButton";
-import { TaskQueue } from "@/components/tasks/TaskQueue";
 
 interface DefaultLayoutProps {
   project: Tables<"projects"> & {
@@ -90,8 +89,10 @@ const DefaultLayout = ({ project }: DefaultLayoutProps) => {
               </div>
             </Card>
             
-            {/* Task Queue Component */}
-            <TaskQueue projectId={project.id} />
+            <Card className="p-6">
+              <h3 className="text-lg font-medium mb-4">Task Overview</h3>
+              <p className="text-gray-500">No tasks available for this project.</p>
+            </Card>
           </div>
         </TabsContent>
 
