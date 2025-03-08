@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
@@ -14,7 +15,6 @@ import CredentialsTab from "../shared/CredentialsTab";
 import FilesTab from "../shared/FilesTab";
 import TeamTab from "../shared/TeamTab";
 import { NewTaskButton } from "./NewTaskButton";
-import { QueueTimeline } from "./QueueTimeline";
 
 interface MaintenanceLayoutProps {
   project: Tables<"projects"> & {
@@ -218,8 +218,6 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
                 </div>
               </div>
             </Card>
-
-            <QueueTimeline projectId={project.id} />
           </div>
         </TabsContent>
 
