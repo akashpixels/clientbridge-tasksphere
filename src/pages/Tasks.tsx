@@ -1,7 +1,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TaskTimeline } from "@/components/tasks/TaskTimeline";
-import { TaskQueue } from "@/components/tasks/TaskQueue";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -120,7 +119,6 @@ const Tasks = () => {
         
         <TabsContent value="timeline">
           <TaskTimeline projectId={projectId} />
-          {projectId && <TaskQueue projectId={projectId} />}
         </TabsContent>
         
         <TabsContent value="all">
