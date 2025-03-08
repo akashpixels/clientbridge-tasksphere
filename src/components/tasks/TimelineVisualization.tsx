@@ -79,7 +79,7 @@ export const TimelineVisualization = ({
       
       // For priority, add time to start
       if (priorityData.time_to_start) {
-        const timeToStartHours = parseTimeToStartToHours(priorityData.time_to_start);
+        const timeToStartHours = parseTimeToStartToHours(String(priorityData.time_to_start));
         startDate = addHours(startDate, timeToStartHours);
       }
       
@@ -96,7 +96,7 @@ export const TimelineVisualization = ({
       // Get base duration in hours
       let baseDurationHours = 0;
       if (taskTypeData.base_duration) {
-        baseDurationHours = parseBaseDurationToHours(taskTypeData.base_duration);
+        baseDurationHours = parseBaseDurationToHours(String(taskTypeData.base_duration));
       } else {
         // Default to 2 hours if no base duration
         baseDurationHours = 2;
