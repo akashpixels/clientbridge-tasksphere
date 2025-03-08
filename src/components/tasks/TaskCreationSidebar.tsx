@@ -14,9 +14,35 @@ export const TaskCreationSidebar = () => {
   const { toast } = useToast();
   const { id: projectId } = useParams<{ id: string; }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [queuePosition, setQueuePosition] = useState(0);
   const { closeRightSidebar } = useLayout();
   const [taskCreated, setTaskCreated] = useState(false);
   const [createdTaskData, setCreatedTaskData] = useState<any>(null);
+
+  const fetchQueuePosition = async () => {
+    if (!projectId) return;
+    try {
+      const {
+        count,
+        error
+      } = await supabase.from('tasks').select('*', {
+        count: 'exact',
+        head: true
+      }).eq('project_id', projectId).in('current_status_id', [1, 2, 3, 6, 7]); // Open, Pending, In Progress, Awaiting Input, In Queue
+
+      if (error) {
+        console.error("Error fetching queue position:", error);
+        return;
+      }
+      setQueuePosition(count || 0);
+    } catch (error) {
+      console.error("Error in fetchQueuePosition:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchQueuePosition();
+  }, []);
 
   const handleSubmit = async (formData: any) => {
     if (!projectId) return;
@@ -63,6 +89,9 @@ export const TaskCreationSidebar = () => {
       setTaskCreated(true);
       setCreatedTaskData(data);
       
+      // Refresh queue position to update the UI
+      fetchQueuePosition();
+      
     } catch (error: any) {
       console.error("Error creating task:", error);
       toast({
@@ -102,7 +131,9 @@ export const TaskCreationSidebar = () => {
         <h2 className="font-semibold text-[14px]">
           {taskCreated 
             ? "Task Created Successfully" 
-            : "New Task"}
+            : queuePosition > 0 
+              ? `# ${queuePosition} task${queuePosition > 1 ? 's' : ''} ahead of this` 
+              : 'First in queue'}
         </h2>
         <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
           <X size={18} />
@@ -119,6 +150,11 @@ export const TaskCreationSidebar = () => {
                   {createdTaskData?.task_code && (
                     <Badge variant="outline" className="font-mono text-xs">
                       {createdTaskData.task_code}
+                      {createdTaskData.queue_position && (
+                        <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
+                          #{createdTaskData.queue_position}
+                        </span>
+                      )}
                     </Badge>
                   )}
                   <p><span className="font-medium">Description:</span> {createdTaskData?.details}</p>
@@ -138,6 +174,7 @@ export const TaskCreationSidebar = () => {
           <TaskForm 
             onSubmit={handleSubmit} 
             isSubmitting={isSubmitting} 
+            queuePosition={queuePosition} 
           />
         )}
       </ScrollArea>

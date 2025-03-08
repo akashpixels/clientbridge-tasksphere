@@ -38,13 +38,13 @@ type TaskFormValues = z.infer<typeof taskFormSchema>;
 interface TaskFormProps {
   onSubmit: (data: TaskFormValues) => void;
   isSubmitting: boolean;
-  queuePosition?: number;
+  queuePosition: number;
 }
 
 export const TaskForm = ({
   onSubmit,
   isSubmitting,
-  queuePosition = 0
+  queuePosition
 }: TaskFormProps) => {
   const {
     id: projectId

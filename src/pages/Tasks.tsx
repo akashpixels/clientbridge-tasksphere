@@ -10,7 +10,7 @@ type QueuedTask = {
   id: string;
   task_code?: string | null;
   details: string;
-  position?: number; // Using position instead of queue_position
+  queue_position?: number | null;
   priority_level_id: number;
   project_id: string;
   priority?: {
@@ -32,25 +32,19 @@ const Tasks = () => {
           id, 
           task_code, 
           details, 
+          queue_position, 
           priority_level_id,
           project_id,
           priority:priority_levels(name, color)
         `)
         .eq('current_status_id', 7) // Queue status
-        .order('created_at', { ascending: true });
+        .order('queue_position', { ascending: true });
       
       if (error) {
         console.error("Error fetching queued tasks:", error);
-        return;
+      } else {
+        setQueuedTasks(data || []);
       }
-      
-      // Process data and add position based on array index
-      const processedData = data ? data.map((task, index) => ({
-        ...task,
-        position: index + 1  // Use array index + 1 as position
-      })) : [];
-      
-      setQueuedTasks(processedData);
     };
     
     fetchQueuedTasks();
@@ -165,7 +159,7 @@ const Tasks = () => {
                             </span>
                           </Badge>
                           <span className="absolute -top-2 -right-2 bg-slate-800 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                            {task.position}
+                            {task.queue_position}
                           </span>
                         </div>
                       ))}
