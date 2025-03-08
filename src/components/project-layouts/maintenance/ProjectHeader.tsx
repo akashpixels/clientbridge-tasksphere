@@ -3,6 +3,7 @@ import { Tables } from "@/integrations/supabase/types";
 import ProjectStats from "./ProjectStats";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subMonths } from "date-fns";
+import { TaskQueue } from "@/components/tasks/TaskQueue";
 
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
@@ -46,6 +47,9 @@ const ProjectHeader = ({
         </div>
       </div>
       <div className="flex items-center gap-4">
+        <div className="w-[400px]">
+          <TaskQueue projectId={project.id} />
+        </div>
         <ProjectStats project={project} selectedMonth={selectedMonth} />
         <div className="bg-[#fcfcfc]">
           <Select value={selectedMonth} onValueChange={onMonthChange}>

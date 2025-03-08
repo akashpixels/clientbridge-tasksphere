@@ -1,48 +1,64 @@
 
-import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { formatDuration } from "@/lib/date-utils";
 
 interface PriorityLevel {
   id: number;
   name: string;
-  color?: string;
-  time_to_start?: string;
+  color: string;
   multiplier?: number;
+  time_to_start?: string;
 }
 
 interface PriorityDialProps {
   priorityLevels: PriorityLevel[];
   value: number;
   onChange: (value: number) => void;
+  compact?: boolean;
 }
 
 export const PriorityDial = ({ priorityLevels, value, onChange }: PriorityDialProps) => {
-  const [selectedPriority, setSelectedPriority] = useState<number>(value);
-
-  const handlePriorityChange = (priorityId: number) => {
-    setSelectedPriority(priorityId);
-    onChange(priorityId);
+  // Sort priority levels by id to ensure correct order
+  const sortedLevels = [...priorityLevels].sort((a, b) => a.id - b.id);
+  
+  const getPriorityTooltip = (level: PriorityLevel) => {
+    if (!level) return "";
+    const timeToStart = level.time_to_start ? formatDuration(level.time_to_start) : "immediate";
+    const multiplier = level.multiplier ? `${level.multiplier}x duration` : "standard duration";
+    return `${timeToStart} delay, ${multiplier}`;
   };
 
   return (
-    <div className="flex items-center justify-center space-x-2">
-      {priorityLevels.map((level) => (
-        <button
-          key={level.id}
-          type="button"
-          onClick={() => handlePriorityChange(level.id)}
-          className={`p-2 rounded-full w-10 h-10 flex items-center justify-center transition-all ${
-            selectedPriority === level.id 
-              ? 'ring-2 ring-offset-2 scale-110' 
-              : 'opacity-70'
-          }`}
-          style={{
-            backgroundColor: level.color || '#6B7280',
-            color: '#ffffff'
-          }}
-          title={level.name}
-        >
-          {level.id}
-        </button>
+    <div className="flex flex-wrap gap-2">
+      {sortedLevels.map(level => (
+        <TooltipProvider key={level.id}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge
+                variant="outline"
+                className={`cursor-pointer px-3 py-1 hover:bg-muted transition-colors`}
+                style={{
+                  backgroundColor: value === level.id ? `${level.color}15` : '',
+                  borderColor: value === level.id ? level.color : '',
+                  color: value === level.id ? level.color : '#8E9196'
+                }}
+                onClick={() => onChange(level.id)}
+              >
+                <div className="flex items-center">
+                  <span 
+                    className="w-2 h-2 rounded-full mr-1.5 flex-shrink-0"
+                    style={{ backgroundColor: level.color || '#888888' }}
+                  />
+                  {level.name}
+                </div>
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{getPriorityTooltip(level)}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       ))}
     </div>
   );

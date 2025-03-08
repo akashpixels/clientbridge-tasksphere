@@ -10,6 +10,7 @@ type QueuedTask = {
   id: string;
   task_code?: string | null;
   details: string;
+  queue_position?: number | null;
   priority_level_id: number;
   project_id: string;
   priority?: {
@@ -30,19 +31,19 @@ const Tasks = () => {
         .select(`
           id, 
           task_code, 
-          details,  
+          details, 
+          queue_position, 
           priority_level_id,
           project_id,
           priority:priority_levels(name, color)
         `)
         .eq('current_status_id', 7) // Queue status
-        .order('created_at', { ascending: true });
+        .order('queue_position', { ascending: true });
       
       if (error) {
         console.error("Error fetching queued tasks:", error);
-        setQueuedTasks([]);
-      } else if (data) {
-        setQueuedTasks(data as QueuedTask[]);
+      } else {
+        setQueuedTasks(data || []);
       }
     };
     
@@ -140,7 +141,7 @@ const Tasks = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {tasks.map((task, index) => (
+                      {tasks.map((task) => (
                         <div 
                           key={task.id}
                           className="relative"
@@ -158,7 +159,7 @@ const Tasks = () => {
                             </span>
                           </Badge>
                           <span className="absolute -top-2 -right-2 bg-slate-800 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                            {index + 1}
+                            {task.queue_position}
                           </span>
                         </div>
                       ))}
