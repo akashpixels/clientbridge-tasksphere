@@ -30,6 +30,7 @@ interface TasksTabContentProps {
       last_name: string;
     } | null;
     task_code?: string;
+    queue_position?: number;
     start_time?: string | null;
     eta?: string | null;
   })[];
@@ -61,7 +62,7 @@ const TasksTabContent = ({
       try {
         const { data, error } = await supabase
           .from('tasks')
-          .select('id, details, task_code, current_status_id')
+          .select('id, details, task_code, queue_position, current_status_id')
           .limit(5);
           
         console.log("Direct tasks access test:", data?.length || 0);
@@ -125,7 +126,7 @@ const TasksTabContent = ({
           <div className="mt-4 p-3 bg-gray-50 rounded-md text-sm text-left">
             <p className="font-medium">Debugging information:</p>
             <p className="mt-1 text-xs">Project ID: {window.location.pathname.split('/').pop()}</p>
-            <p className="mt-1 text-xs">Status: Simplified task management active</p>
+            <p className="mt-1 text-xs">Status: Simplified timeline calculation active</p>
           </div>
         </div>
       )}
