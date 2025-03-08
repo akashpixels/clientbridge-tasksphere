@@ -7,8 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useParams } from "react-router-dom";
-import { AlertCircle, Clock, Infinity, Server } from "lucide-react";
-import { format } from "date-fns";
+import { AlertCircle, Server } from "lucide-react";
 
 type QueuedTask = {
   id: string;
@@ -22,39 +21,14 @@ type QueuedTask = {
   } | null;
 };
 
-type TimelineMetrics = {
-  project_id: string;
-  max_concurrent_tasks: number;
-  base_time: string;
-  gap_time: number;
-  active_task_count: number;
-};
-
 type GroupedTasks = Record<string, QueuedTask[]>;
 
 const Tasks = () => {
   const { id: projectId } = useParams<{ id: string }>();
   const [queuedTasks, setQueuedTasks] = useState<QueuedTask[]>([]);
-  const [timelineMetrics, setTimelineMetrics] = useState<TimelineMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    const fetchTimelineMetrics = async () => {
-      if (!projectId) return;
-      
-      const { data, error } = await supabase
-        .from('project_timeline')
-        .select('*')
-        .eq('project_id', projectId)
-        .single();
-      
-      if (error) {
-        console.error("Error fetching timeline metrics:", error);
-      } else {
-        setTimelineMetrics(data);
-      }
-    };
-    
     const fetchQueuedTasks = async () => {
       if (!projectId) return;
       
@@ -84,7 +58,6 @@ const Tasks = () => {
       }
     };
     
-    fetchTimelineMetrics();
     fetchQueuedTasks();
     
     // Real-time subscription for queue changes
@@ -97,7 +70,6 @@ const Tasks = () => {
         filter: `project_id=eq.${projectId}`
       }, () => {
         fetchQueuedTasks();
-        fetchTimelineMetrics();
       })
       .subscribe();
     
@@ -133,59 +105,9 @@ const Tasks = () => {
     return priorityColors[priorityName] || task.priority.color || '#9CA3AF';
   };
 
-  const formatBaseTime = (time: string | null) => {
-    if (!time) return 'Not available';
-    try {
-      return format(new Date(time), "h:mm a, MMM d");
-    } catch (e) {
-      return 'Invalid date';
-    }
-  };
-
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-6">Tasks</h1>
-      
-      {timelineMetrics && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
-              Project Timeline Metrics
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="flex flex-col gap-1">
-                <div className="text-sm font-medium text-gray-500">Active Tasks</div>
-                <div className="text-2xl font-bold">{timelineMetrics.active_task_count}</div>
-              </div>
-              
-              <div className="flex flex-col gap-1">
-                <div className="text-sm font-medium text-gray-500">Max Concurrent</div>
-                <div className="text-2xl font-bold flex items-center">
-                  {timelineMetrics.max_concurrent_tasks}
-                  <Infinity className="h-4 w-4 ml-1 text-gray-400" />
-                </div>
-              </div>
-              
-              <div className="flex flex-col gap-1">
-                <div className="text-sm font-medium text-gray-500">Base Time</div>
-                <div className="text-xl font-bold">{formatBaseTime(timelineMetrics.base_time)}</div>
-              </div>
-              
-              <div className="flex flex-col gap-1">
-                <div className="text-sm font-medium text-gray-500">Gap Time</div>
-                <div className="text-2xl font-bold">
-                  {timelineMetrics.gap_time > 0 
-                    ? `${Math.round(timelineMetrics.gap_time * 10) / 10} hours` 
-                    : '0 hours'}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
       
       <Tabs defaultValue="timeline" className="w-full">
         <TabsList>
