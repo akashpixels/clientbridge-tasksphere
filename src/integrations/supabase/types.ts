@@ -227,6 +227,13 @@ export type Database = {
             foreignKeyName: "files_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "project_timeline"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -274,6 +281,13 @@ export type Database = {
           submitted_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "inputs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_timeline"
+            referencedColumns: ["project_id"]
+          },
           {
             foreignKeyName: "inputs_project_id_fkey"
             columns: ["project_id"]
@@ -381,6 +395,13 @@ export type Database = {
             foreignKeyName: "project_assignees_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "project_timeline"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_assignees_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -431,6 +452,13 @@ export type Database = {
           username?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "project_credentials_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_timeline"
+            referencedColumns: ["project_id"]
+          },
           {
             foreignKeyName: "project_credentials_project_id_fkey"
             columns: ["project_id"]
@@ -515,6 +543,13 @@ export type Database = {
             foreignKeyName: "project_phases_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "project_timeline"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_phases_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -568,6 +603,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "project_subscriptions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_timeline"
+            referencedColumns: ["project_id"]
+          },
           {
             foreignKeyName: "project_subscriptions_project_id_fkey"
             columns: ["project_id"]
@@ -733,6 +775,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "subscription_usage_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_timeline"
+            referencedColumns: ["project_id"]
+          },
           {
             foreignKeyName: "subscription_usage_project_id_fkey"
             columns: ["project_id"]
@@ -1090,6 +1139,13 @@ export type Database = {
             foreignKeyName: "tasks_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "project_timeline"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -1189,6 +1245,16 @@ export type Database = {
       }
     }
     Views: {
+      project_timeline: {
+        Row: {
+          active_task_count: number | null
+          base_time: string | null
+          gap_time: number | null
+          max_concurrent_tasks: number | null
+          project_id: string | null
+        }
+        Relationships: []
+      }
       usage_view: {
         Row: {
           hours_allotted: number | null

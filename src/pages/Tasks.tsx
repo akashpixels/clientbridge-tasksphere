@@ -1,10 +1,14 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TaskTimeline } from "@/components/tasks/TaskTimeline";
+import { TaskQueue } from "@/components/tasks/TaskQueue";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useParams } from "react-router-dom";
+import { AlertCircle, Clock, Infinity, Server } from "lucide-react";
+import { format } from "date-fns";
 
 type QueuedTask = {
   id: string;
@@ -18,52 +22,89 @@ type QueuedTask = {
   } | null;
 };
 
+type TimelineMetrics = {
+  project_id: string;
+  max_concurrent_tasks: number;
+  base_time: string;
+  gap_time: number;
+  active_task_count: number;
+};
+
 type GroupedTasks = Record<string, QueuedTask[]>;
 
 const Tasks = () => {
+  const { id: projectId } = useParams<{ id: string }>();
   const [queuedTasks, setQueuedTasks] = useState<QueuedTask[]>([]);
+  const [timelineMetrics, setTimelineMetrics] = useState<TimelineMetrics | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    const fetchQueuedTasks = async () => {
+    const fetchTimelineMetrics = async () => {
+      if (!projectId) return;
+      
       const { data, error } = await supabase
-        .from('tasks')
-        .select(`
-          id, 
-          task_code, 
-          details, 
-          priority_level_id,
-          project_id,
-          priority:priority_levels(name, color)
-        `)
-        .eq('current_status_id', 7) // Queue status
-        .order('created_at', { ascending: true });
+        .from('project_timeline')
+        .select('*')
+        .eq('project_id', projectId)
+        .single();
       
       if (error) {
-        console.error("Error fetching queued tasks:", error);
+        console.error("Error fetching timeline metrics:", error);
       } else {
-        setQueuedTasks(data || []);
+        setTimelineMetrics(data);
       }
     };
     
+    const fetchQueuedTasks = async () => {
+      if (!projectId) return;
+      
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('tasks')
+          .select(`
+            id, 
+            task_code, 
+            details, 
+            priority_level_id,
+            project_id,
+            priority:priority_levels(name, color)
+          `)
+          .eq('current_status_id', 7) // Queue status
+          .eq('project_id', projectId)
+          .order('created_at', { ascending: true });
+        
+        if (error) {
+          console.error("Error fetching queued tasks:", error);
+        } else {
+          setQueuedTasks(data || []);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchTimelineMetrics();
     fetchQueuedTasks();
     
     // Real-time subscription for queue changes
     const subscription = supabase
-      .channel('tasks_queue_channel')
+      .channel('project_timeline_changes')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'tasks',
-        filter: 'current_status_id=eq.7'
+        filter: `project_id=eq.${projectId}`
       }, () => {
         fetchQueuedTasks();
+        fetchTimelineMetrics();
       })
       .subscribe();
     
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, []);
+  }, [projectId]);
   
   // Group tasks by project
   const groupedTasks: GroupedTasks = queuedTasks.reduce((acc: GroupedTasks, task) => {
@@ -92,9 +133,60 @@ const Tasks = () => {
     return priorityColors[priorityName] || task.priority.color || '#9CA3AF';
   };
 
+  const formatBaseTime = (time: string | null) => {
+    if (!time) return 'Not available';
+    try {
+      return format(new Date(time), "h:mm a, MMM d");
+    } catch (e) {
+      return 'Invalid date';
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-6">Tasks</h1>
+      
+      {timelineMetrics && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Clock className="h-5 w-5 text-primary" />
+              Project Timeline Metrics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="flex flex-col gap-1">
+                <div className="text-sm font-medium text-gray-500">Active Tasks</div>
+                <div className="text-2xl font-bold">{timelineMetrics.active_task_count}</div>
+              </div>
+              
+              <div className="flex flex-col gap-1">
+                <div className="text-sm font-medium text-gray-500">Max Concurrent</div>
+                <div className="text-2xl font-bold flex items-center">
+                  {timelineMetrics.max_concurrent_tasks}
+                  <Infinity className="h-4 w-4 ml-1 text-gray-400" />
+                </div>
+              </div>
+              
+              <div className="flex flex-col gap-1">
+                <div className="text-sm font-medium text-gray-500">Base Time</div>
+                <div className="text-xl font-bold">{formatBaseTime(timelineMetrics.base_time)}</div>
+              </div>
+              
+              <div className="flex flex-col gap-1">
+                <div className="text-sm font-medium text-gray-500">Gap Time</div>
+                <div className="text-2xl font-bold">
+                  {timelineMetrics.gap_time > 0 
+                    ? `${Math.round(timelineMetrics.gap_time * 10) / 10} hours` 
+                    : '0 hours'}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       <Tabs defaultValue="timeline" className="w-full">
         <TabsList>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
@@ -105,7 +197,8 @@ const Tasks = () => {
         </TabsList>
         
         <TabsContent value="timeline">
-          <TaskTimeline />
+          <TaskTimeline projectId={projectId} />
+          {projectId && <TaskQueue projectId={projectId} />}
         </TabsContent>
         
         <TabsContent value="all">
@@ -131,7 +224,14 @@ const Tasks = () => {
         
         <TabsContent value="queued">
           <div className="grid gap-4">
-            {Object.entries(groupedTasks).length > 0 ? (
+            {isLoading ? (
+              <Card className="shadow-sm">
+                <CardContent className="p-6 text-center">
+                  <Server className="h-12 w-12 mx-auto text-gray-300 mb-2 animate-pulse" />
+                  <p>Loading task queue...</p>
+                </CardContent>
+              </Card>
+            ) : Object.entries(groupedTasks).length > 0 ? (
               Object.entries(groupedTasks).map(([projectId, tasks]) => (
                 <Card key={projectId} className="shadow-sm">
                   <CardHeader className="pb-2">
@@ -166,7 +266,12 @@ const Tasks = () => {
                 </Card>
               ))
             ) : (
-              <p>No tasks in queue.</p>
+              <Card className="shadow-sm">
+                <CardContent className="p-6 text-center">
+                  <AlertCircle className="h-12 w-12 mx-auto text-amber-300 mb-2" />
+                  <p>No tasks in queue.</p>
+                </CardContent>
+              </Card>
             )}
           </div>
         </TabsContent>
