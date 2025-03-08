@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TaskTimeline } from "@/components/tasks/TaskTimeline";
 import { useEffect, useState } from "react";
@@ -9,7 +10,6 @@ type QueuedTask = {
   id: string;
   task_code?: string | null;
   details: string;
-  queue_position?: number | null;
   priority_level_id: number;
   project_id: string;
   priority?: {
@@ -30,19 +30,19 @@ const Tasks = () => {
         .select(`
           id, 
           task_code, 
-          details, 
-          queue_position, 
+          details,  
           priority_level_id,
           project_id,
           priority:priority_levels(name, color)
         `)
         .eq('current_status_id', 7) // Queue status
-        .order('queue_position', { ascending: true });
+        .order('created_at', { ascending: true });
       
       if (error) {
         console.error("Error fetching queued tasks:", error);
-      } else {
-        setQueuedTasks(data || []);
+        setQueuedTasks([]);
+      } else if (data) {
+        setQueuedTasks(data as QueuedTask[]);
       }
     };
     
@@ -140,7 +140,7 @@ const Tasks = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {tasks.map((task) => (
+                      {tasks.map((task, index) => (
                         <div 
                           key={task.id}
                           className="relative"
@@ -158,7 +158,7 @@ const Tasks = () => {
                             </span>
                           </Badge>
                           <span className="absolute -top-2 -right-2 bg-slate-800 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                            {task.queue_position}
+                            {index + 1}
                           </span>
                         </div>
                       ))}
