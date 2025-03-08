@@ -16,7 +16,6 @@ interface Task {
   id: string;
   task_code: string;
   details: string;
-  queue_position: number | null;
   priority_level_id: number;
   current_status_id: number;
   priority: {
@@ -48,7 +47,7 @@ export const TaskQueue = ({
       // First get all queued tasks for this project
       const { data: queuedTasks, error: fetchError } = await supabase
         .from('tasks')
-        .select('id, priority_level_id, queue_position')
+        .select('id, priority_level_id')
         .eq('project_id', projectId)
         .eq('current_status_id', 7) // Queued status
         .order('priority_level_id', { ascending: true }) // Lower number = higher priority
@@ -64,11 +63,11 @@ export const TaskQueue = ({
         return;
       }
       
-      // Assign new queue positions
+      // Update tasks in order of priority
       const updatePromises = queuedTasks.map((task, index) => {
         return supabase
           .from('tasks')
-          .update({ queue_position: index + 1 })
+          .update({ created_at: new Date(Date.now() + index * 1000).toISOString() })
           .eq('id', task.id);
       });
       
@@ -138,7 +137,6 @@ export const TaskQueue = ({
           id, 
           task_code, 
           details, 
-          queue_position, 
           priority_level_id,
           current_status_id,
           start_time,
@@ -149,9 +147,9 @@ export const TaskQueue = ({
       .order('current_status_id', {
         ascending: true
       }) // Active tasks first
-      .order('queue_position', {
+      .order('created_at', {
         ascending: true
-      }); // Then by queue position
+      }); // Then by created_at
 
       if (error) {
         throw error;
@@ -197,15 +195,6 @@ export const TaskQueue = ({
   const hasQueueIssues = () => {
     if (queuedTasks.length === 0) return false;
     
-    // Check for duplicate or missing queue positions
-    const positions = queuedTasks.map(task => task.queue_position).filter(Boolean) as number[];
-    const uniquePositions = new Set(positions);
-    
-    // Check if any position is null or <= 0
-    const hasInvalidPosition = queuedTasks.some(task => 
-      task.queue_position === null || task.queue_position <= 0
-    );
-    
     // Check for priority inversions
     let lastPriority = 0;
     let hasPriorityInversion = false;
@@ -221,7 +210,7 @@ export const TaskQueue = ({
       }
     });
     
-    return hasInvalidPosition || positions.length !== uniquePositions.size || hasPriorityInversion;
+    return hasPriorityInversion;
   };
 
   // Function to split tasks into rows based on max_concurrent_tasks
@@ -300,10 +289,11 @@ export const TaskQueue = ({
             <div className="space-y-2">
               {taskRows.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex flex-wrap gap-1">
-                  {row.map(task => {
+                  {row.map((task, index) => {
                     const isActive = [1, 2, 3].includes(task.current_status_id);
                     const colorToUse = isActive ? getStatusColor(task) : getPriorityColor(task);
                     const startTime = formatDateTime(task.start_time);
+                    const queuePosition = isActive ? null : index + 1;
                     
                     return (
                       <Tooltip key={task.id}>
@@ -321,9 +311,9 @@ export const TaskQueue = ({
                                 backgroundColor: colorToUse
                               }} />
                               {task.task_code}
-                              {task.queue_position !== null && task.current_status_id === 7 && (
+                              {!isActive && queuePosition !== null && (
                                 <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-sm">
-                                  #{task.queue_position}
+                                  #{queuePosition}
                                 </span>
                               )}
                               {isActive && (
@@ -348,7 +338,7 @@ export const TaskQueue = ({
                           <p className="text-gray-500 mt-1">
                             {isActive ? task.status?.name : (
                               <>
-                                Queued (#{task.queue_position}) - 
+                                Queued (#{queuePosition}) - 
                                 {task.priority?.name || `Priority ${task.priority_level_id}`}
                               </>
                             )}
