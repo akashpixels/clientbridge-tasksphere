@@ -789,6 +789,13 @@ export type Database = {
             foreignKeyName: "subtasks_parent_task_id_fkey"
             columns: ["parent_task_id"]
             isOneToOne: false
+            referencedRelation: "task_timelines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
             referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
@@ -824,6 +831,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "task_comment_views_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "task_timelines"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "task_comment_views_task_id_fkey"
             columns: ["task_id"]
@@ -886,6 +900,13 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "task_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "task_timelines"
             referencedColumns: ["id"]
           },
           {
@@ -976,6 +997,7 @@ export type Database = {
           created_at: string
           created_by: string
           current_status_id: number
+          dependent_task_id: string | null
           details: string
           eta: string | null
           hours_needed: number | null
@@ -1002,6 +1024,7 @@ export type Database = {
           created_at?: string
           created_by: string
           current_status_id?: number
+          dependent_task_id?: string | null
           details: string
           eta?: string | null
           hours_needed?: number | null
@@ -1028,6 +1051,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           current_status_id?: number
+          dependent_task_id?: string | null
           details?: string
           eta?: string | null
           hours_needed?: number | null
@@ -1073,6 +1097,20 @@ export type Database = {
             columns: ["current_status_id"]
             isOneToOne: false
             referencedRelation: "task_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_dependent_task_id_fkey"
+            columns: ["dependent_task_id"]
+            isOneToOne: false
+            referencedRelation: "task_timelines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_dependent_task_id_fkey"
+            columns: ["dependent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
           {
@@ -1192,6 +1230,112 @@ export type Database = {
       }
     }
     Views: {
+      task_timelines: {
+        Row: {
+          actual_hours_spent: number | null
+          actual_start_time: string | null
+          assigned_user_id: string | null
+          calculated_eta: string | null
+          calculated_start_time: string | null
+          channel_id: number | null
+          channel_load: number | null
+          complexity_level_id: number | null
+          created_at: string | null
+          created_by: string | null
+          current_status_id: number | null
+          dependent_task_id: string | null
+          details: string | null
+          eta: string | null
+          hours_needed: number | null
+          hours_spent: number | null
+          id: string | null
+          images: Json | null
+          last_status_id: number | null
+          position_in_channel: number | null
+          priority_level_id: number | null
+          project_id: string | null
+          reference_links: Json | null
+          start_time: string | null
+          target_device: Database["public"]["Enums"]["device_type"] | null
+          task_completed_at: string | null
+          task_type_id: number | null
+          timeline_status: string | null
+          total_tasks_in_project: number | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_complexity_level_id_fkey"
+            columns: ["complexity_level_id"]
+            isOneToOne: false
+            referencedRelation: "complexity_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_current_status_id_fkey"
+            columns: ["current_status_id"]
+            isOneToOne: false
+            referencedRelation: "task_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_dependent_task_id_fkey"
+            columns: ["dependent_task_id"]
+            isOneToOne: false
+            referencedRelation: "task_timelines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_dependent_task_id_fkey"
+            columns: ["dependent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_last_status_id_fkey"
+            columns: ["last_status_id"]
+            isOneToOne: false
+            referencedRelation: "task_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_priority_level_id_fkey"
+            columns: ["priority_level_id"]
+            isOneToOne: false
+            referencedRelation: "priority_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_task_type_id_fkey"
+            columns: ["task_type_id"]
+            isOneToOne: false
+            referencedRelation: "task_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usage_view: {
         Row: {
           hours_allotted: number | null
@@ -1209,13 +1353,6 @@ export type Database = {
           p_priority_level_id: number
         }
         Returns: number
-      }
-      calculate_eta: {
-        Args: {
-          start_time: string
-          hours_needed: number
-        }
-        Returns: string
       }
       calculate_hours_spent: {
         Args: {

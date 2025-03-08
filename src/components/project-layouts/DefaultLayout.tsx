@@ -6,7 +6,6 @@ import CredentialsTab from "./shared/CredentialsTab";
 import TeamTab from "./shared/TeamTab";
 import { NewTaskButton } from "./maintenance/NewTaskButton";
 import { TaskQueue } from "@/components/tasks/TaskQueue";
-import { TaskQueueManager } from "@/components/tasks/TaskQueueManager";
 
 interface DefaultLayoutProps {
   project: Tables<"projects"> & {
@@ -90,9 +89,6 @@ const DefaultLayout = ({ project }: DefaultLayoutProps) => {
                 </div>
               </div>
             </Card>
-            
-            {/* Task Queue Manager Component */}
-            <TaskQueueManager projectId={project.id} />
             
             {/* Task Queue Component */}
             <TaskQueue projectId={project.id} />
