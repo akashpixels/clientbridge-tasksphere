@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Clock, Calendar, ArrowRight, AlertCircle, Hash, Flag } from "lucide-react";
+import { Clock, Calendar, ArrowRight, AlertCircle, Flag } from "lucide-react";
 import { format, parseISO, isValid, addHours } from "date-fns";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,6 @@ interface Task {
   eta: string | null;
   current_status_id: number;
   priority_level_id: number;
-  queue_position: number | null;
   priority: {
     name: string;
     color: string;
@@ -72,56 +71,6 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
     }
   };
 
-  // Function to fix queue positions
-  const fixQueuePositions = async () => {
-    try {
-      // First get all queued tasks for this project
-      const { data: queuedTasks, error: fetchError } = await supabase
-        .from('tasks')
-        .select('id, priority_level_id, queue_position')
-        .eq('project_id', projectId)
-        .eq('current_status_id', 7) // Queued status
-        .order('priority_level_id', { ascending: true }) // Lower number = higher priority
-        .order('created_at', { ascending: true }); // First come, first served within same priority
-      
-      if (fetchError) throw fetchError;
-      
-      if (!queuedTasks || queuedTasks.length === 0) {
-        toast({
-          title: "No queue updates needed",
-          description: "There are no tasks in the queue to reorder.",
-        });
-        return;
-      }
-      
-      // Assign new queue positions
-      const updatePromises = queuedTasks.map((task, index) => {
-        return supabase
-          .from('tasks')
-          .update({ queue_position: index + 1 })
-          .eq('id', task.id);
-      });
-      
-      // Wait for all updates to complete
-      await Promise.all(updatePromises);
-      
-      toast({
-        title: "Queue positions fixed",
-        description: "Task queue order has been updated based on priority",
-      });
-      
-      // Refresh task data
-      fetchTasks();
-    } catch (err: any) {
-      console.error("Error fixing queue positions:", err);
-      toast({
-        title: "Error",
-        description: "Failed to fix queue positions: " + err.message,
-        variant: "destructive",
-      });
-    }
-  };
-
   const fetchTasks = async () => {
     setIsLoading(true);
     try {
@@ -136,7 +85,6 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
           eta,
           current_status_id,
           priority_level_id,
-          queue_position,
           priority:priority_levels(name, color),
           status:task_statuses!tasks_current_status_id_fkey(name, color_hex)
         `)
@@ -236,22 +184,6 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
                         task.current_status_id === 7)
   );
 
-  // Check for queue issues - now using our improved detection logic
-  const hasQueueIssues = tasks.some(task => 
-    task.current_status_id === 7 && (
-      !task.queue_position || 
-      task.queue_position <= 0 ||
-      // Check if any task with higher priority (lower priority_level_id) 
-      // has a higher queue position (which is wrong)
-      tasks.some(otherTask => 
-        otherTask.current_status_id === 7 &&
-        otherTask.id !== task.id &&
-        otherTask.priority_level_id < task.priority_level_id &&
-        (otherTask.queue_position || 0) > (task.queue_position || 0)
-      )
-    )
-  );
-
   if (isLoading) {
     return (
       <Card>
@@ -311,14 +243,6 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
               Update Start Times
             </button>
           )}
-          {hasQueueIssues && (
-            <button 
-              onClick={fixQueuePositions}
-              className="px-2 py-1 text-xs bg-amber-100 text-amber-700 rounded hover:bg-amber-200"
-            >
-              Fix Queue Positions
-            </button>
-          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -356,14 +280,6 @@ export function QueueTimeline({ projectId }: QueueTimelineProps) {
                         >
                           {task.status?.name || 'Unknown'}
                         </Badge>
-                        
-                        {/* Queue Position Badge */}
-                        {task.queue_position && (
-                          <div className="flex items-center text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                            <Hash className="h-3 w-3 mr-1" />
-                            <span>Queue: {task.queue_position}</span>
-                          </div>
-                        )}
                         
                         {/* Priority Level Badge */}
                         <div 

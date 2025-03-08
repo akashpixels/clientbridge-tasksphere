@@ -1,384 +1,266 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
-import { AlertTriangle } from "lucide-react";
+import { formatDuration } from "@/lib/date-utils";
+import { addDays, addWeeks, format, formatDistance, parseISO } from "date-fns";
+import { Clock, AlertTriangle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
 
 interface TimelineVisualizationProps {
-  taskTypeId?: number | null;
-  priorityLevelId?: number | null;
-  complexityLevelId?: number | null;
-  projectId?: string;
+  taskTypeId: number | null;
+  priorityLevelId: number | null;
+  complexityLevelId: number | null;
+  projectId: string | undefined;
   compact?: boolean;
-  queuePosition?: number | null;
-}
-
-interface TimelineEstimate {
-  currentTime: string;
-  startTime: string | null;
-  eta: string | null;
-  queuePosition: number | null;
-  taskInfo: {
-    hoursNeeded: number | null;
-    timeToStart: number | null;
-    isOverdue: boolean;
-  };
+  queuePosition?: number;
 }
 
 export const TimelineVisualization = ({
   taskTypeId,
   priorityLevelId,
-  complexityLevelId = 3,
+  complexityLevelId,
   projectId,
   compact = false,
-  queuePosition = null
+  queuePosition
 }: TimelineVisualizationProps) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [taskType, setTaskType] = useState<any>(null);
-  const [priorityLevel, setPriorityLevel] = useState<any>(null);
-  const [complexityLevel, setComplexityLevel] = useState<any>(null);
-  const [maxConcurrentTasks, setMaxConcurrentTasks] = useState(1);
-  const [timelineEstimate, setTimelineEstimate] = useState<TimelineEstimate | null>(null);
+  const [priority, setPriority] = useState<any>(null);
+  const [complexity, setComplexity] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [estimatedStartDate, setEstimatedStartDate] = useState<Date | null>(null);
+  const [estimatedCompletionDate, setEstimatedCompletionDate] = useState<Date | null>(null);
 
-  // Fetch task type data
-  useEffect(() => {
-    const fetchTaskType = async () => {
-      if (!taskTypeId) return;
-      const { data, error } = await supabase
+  const calculateDates = async () => {
+    if (!taskTypeId || !priorityLevelId || !complexityLevelId || !projectId) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Get current date/time as starting point
+      const now = new Date();
+      
+      // Fetch task type info (for base duration)
+      const { data: taskTypeData, error: taskTypeError } = await supabase
         .from('task_types')
-        .select('*')
+        .select('name, base_duration')
         .eq('id', taskTypeId)
         .single();
-        
-      if (error) {
-        console.error("Error fetching task type:", error);
-        return;
-      }
-      setTaskType(data);
-    };
-    
-    if (taskTypeId) {
-      fetchTaskType();
-    } else {
-      setTaskType(null);
-    }
-  }, [taskTypeId]);
-
-  // Fetch priority level data
-  useEffect(() => {
-    const fetchPriorityLevel = async () => {
-      if (!priorityLevelId) return;
-      const { data, error } = await supabase
+      
+      if (taskTypeError) throw taskTypeError;
+      setTaskType(taskTypeData);
+      
+      // Fetch priority info (for time to start and multiplier)
+      const { data: priorityData, error: priorityError } = await supabase
         .from('priority_levels')
-        .select('*')
+        .select('name, time_to_start, multiplier, color')
         .eq('id', priorityLevelId)
         .single();
-        
-      if (error) {
-        console.error("Error fetching priority level:", error);
-        return;
-      }
-      setPriorityLevel(data);
-    };
-    
-    if (priorityLevelId) {
-      fetchPriorityLevel();
-    } else {
-      setPriorityLevel(null);
-    }
-  }, [priorityLevelId]);
-
-  // Fetch complexity level data
-  useEffect(() => {
-    const fetchComplexityLevel = async () => {
-      if (!complexityLevelId) return;
-      const { data, error } = await supabase
+      
+      if (priorityError) throw priorityError;
+      setPriority(priorityData);
+      
+      // Fetch complexity info (for multiplier)
+      const { data: complexityData, error: complexityError } = await supabase
         .from('complexity_levels')
-        .select('*')
+        .select('name, multiplier')
         .eq('id', complexityLevelId)
         .single();
-        
-      if (error) {
-        console.error("Error fetching complexity level:", error);
-        return;
+      
+      if (complexityError) throw complexityError;
+      setComplexity(complexityData);
+      
+      // Estimate start date based on priority
+      let startDate = new Date(now);
+      
+      // For priority, add time to start
+      if (priorityData.time_to_start) {
+        const timeToStartHours = parseTimeToStartToHours(priorityData.time_to_start);
+        startDate = addHours(startDate, timeToStartHours);
       }
-      setComplexityLevel(data);
-    };
-    
-    if (complexityLevelId) {
-      fetchComplexityLevel();
-    } else {
-      setComplexityLevel(null);
+      
+      // Adjust for weekends
+      while (startDate.getDay() === 0 || startDate.getDay() === 6) {
+        startDate = addDays(startDate, 1);
+      }
+      
+      setEstimatedStartDate(startDate);
+      
+      // Calculate completion date based on base duration and multipliers
+      let completionDate = new Date(startDate);
+      
+      // Get base duration in hours
+      let baseDurationHours = 0;
+      if (taskTypeData.base_duration) {
+        baseDurationHours = parseBaseDurationToHours(taskTypeData.base_duration);
+      } else {
+        // Default to 2 hours if no base duration
+        baseDurationHours = 2;
+      }
+      
+      // Apply multipliers
+      const priorityMultiplier = priorityData.multiplier || 1;
+      const complexityMultiplier = complexityData.multiplier || 1;
+      
+      const totalDurationHours = baseDurationHours * priorityMultiplier * complexityMultiplier;
+      
+      // Add the calculated hours to the start date
+      completionDate = addHours(completionDate, totalDurationHours);
+      
+      // Adjust for weekends
+      while (completionDate.getDay() === 0 || completionDate.getDay() === 6) {
+        completionDate = addDays(completionDate, 1);
+      }
+      
+      setEstimatedCompletionDate(completionDate);
+      setLoading(false);
+    } catch (err: any) {
+      console.error("Error calculating timeline:", err);
+      setError(err.message);
+      setLoading(false);
     }
-  }, [complexityLevelId]);
+  };
 
-  // Fetch project concurrency data
-  useEffect(() => {
-    const fetchProjectConcurrency = async () => {
-      if (!projectId) return;
-      try {
-        const { data, error } = await supabase
-          .from('projects')
-          .select('max_concurrent_tasks')
-          .eq('id', projectId)
-          .single();
-          
-        if (error) throw error;
-        if (data && data.max_concurrent_tasks) {
-          setMaxConcurrentTasks(data.max_concurrent_tasks);
-        }
-      } catch (err: any) {
-        console.error("Error fetching project concurrency:", err);
-      }
-    };
-    
-    if (projectId) {
-      fetchProjectConcurrency();
+  // Parse interval string to hours
+  const parseTimeToStartToHours = (timeToStart: string): number => {
+    // Format is expected to be "X hours" or "X days"
+    if (timeToStart.includes('hours')) {
+      return parseInt(timeToStart);
+    } else if (timeToStart.includes('days')) {
+      return parseInt(timeToStart) * 24;
+    } else if (timeToStart.includes('weeks')) {
+      return parseInt(timeToStart) * 24 * 7;
     }
-  }, [projectId]);
+    return 0;
+  };
+  
+  // Parse interval to hours
+  const parseBaseDurationToHours = (baseDuration: string): number => {
+    // Format is expected to be "X hours" or "X days"
+    if (baseDuration.includes('hours')) {
+      return parseInt(baseDuration);
+    } else if (baseDuration.includes('days')) {
+      return parseInt(baseDuration) * 24;
+    } else if (baseDuration.includes('weeks')) {
+      return parseInt(baseDuration) * 24 * 7;
+    }
+    return 0;
+  };
+  
+  // Helper function to add hours to a date
+  const addHours = (date: Date, hours: number): Date => {
+    return new Date(date.getTime() + hours * 60 * 60 * 1000);
+  };
 
-  // Calculate timeline estimate
   useEffect(() => {
-    const fetchQueueCount = async () => {
-      if (!projectId) return 0;
-      const { count, error } = await supabase
-        .from('tasks')
-        .select('*', { count: 'exact', head: true })
-        .eq('project_id', projectId)
-        .in('current_status_id', [1, 2, 3]); // Open, Pending, In Progress
-        
-      if (error) {
-        console.error("Error fetching active tasks count:", error);
-        return 0;
-      }
-      return count || 0;
-    };
+    calculateDates();
+  }, [taskTypeId, priorityLevelId, complexityLevelId, projectId]);
 
-    const calculateTimelineEstimate = async () => {
-      try {
-        setIsLoading(true);
-        const now = new Date();
-        let startTime: Date | null = null;
-        let eta: Date | null = null;
-        let hoursNeeded: number | null = null;
-        let timeToStart: number | null = null;
-        let isOverdue = false;
-        
-        // Get active tasks count
-        const activeCount = await fetchQueueCount();
-        
-        if (taskType && priorityLevel && complexityLevel) {
-          // Start with current time
-          startTime = new Date();
-          
-          // Extract time to start from priority level
-          if (priorityLevel.time_to_start) {
-            const timeToStartMatch = priorityLevel.time_to_start.match(/(\d+):(\d+):(\d+)/);
-            if (timeToStartMatch) {
-              const hours = parseInt(timeToStartMatch[1]);
-              const minutes = parseInt(timeToStartMatch[2]);
-              timeToStart = hours + minutes / 60;
-              
-              // Apply priority delay
-              if (activeCount === 0) {
-                // No active tasks, just add the time_to_start
-                startTime = addHours(startTime, hours);
-                startTime = addMinutes(startTime, minutes);
-              } else {
-                // There are active tasks, add a standard delay
-                startTime = addHours(startTime, Math.max(1, hours));
-              }
-            }
-          }
-          
-          // Apply queue position delay if needed
-          if (queuePosition !== null && queuePosition > maxConcurrentTasks) {
-            const queueDelay = (queuePosition - maxConcurrentTasks) * 30; // 30 min per position
-            startTime = addMinutes(startTime, queueDelay);
-          }
-          
-          // Adjust for working hours (10am - 6pm)
-          const currentHour = startTime.getHours();
-          if (currentHour < 10) {
-            // Before working hours, move to 10am
-            startTime.setHours(10, 0, 0, 0);
-          } else if (currentHour >= 18) {
-            // After working hours, move to next day 10am
-            startTime = addDays(startTime, 1);
-            startTime.setHours(10, 0, 0, 0);
-          }
-          
-          // Calculate hours needed
-          hoursNeeded = 0;
-          
-          // Add base duration if available
-          if (taskType.base_duration) {
-            const baseDurationMatch = taskType.base_duration.match(/(\d+):(\d+):(\d+)/);
-            if (baseDurationMatch) {
-              const hours = parseInt(baseDurationMatch[1]);
-              const minutes = parseInt(baseDurationMatch[2]);
-              const baseDuration = hours + minutes / 60;
-              
-              // Apply complexity multiplier
-              if (complexityLevel.multiplier) {
-                hoursNeeded = baseDuration * complexityLevel.multiplier;
-              } else {
-                hoursNeeded = baseDuration;
-              }
-            }
-          }
-          
-          // Calculate ETA based on start time and hours needed
-          if (startTime && hoursNeeded) {
-            eta = new Date(startTime);
-            eta = addHours(eta, hoursNeeded);
-            
-            // Adjust ETA for working hours
-            const etaHour = eta.getHours();
-            const workingHoursInDay = 8; // 10am to 6pm
-            
-            if (etaHour >= 18) {
-              const hoursOver = etaHour - 18;
-              const daysToAdd = Math.floor(hoursOver / workingHoursInDay) + 1;
-              const remainingHours = hoursOver % workingHoursInDay;
-              
-              eta = addDays(eta, daysToAdd);
-              eta.setHours(10 + remainingHours, eta.getMinutes(), 0, 0);
-            }
-            
-            // Check if task might be overdue (for high priority tasks with long ETAs)
-            isOverdue = priorityLevel.id >= 4 && differenceInHours(eta, now) > 48;
-          }
-        }
-        
-        setTimelineEstimate({
-          currentTime: format(now, 'h:mm a'),
-          startTime: startTime ? format(startTime, 'h:mm a, MMM d') : null,
-          eta: eta ? format(eta, 'h:mm a, MMM d') : null,
-          queuePosition: queuePosition,
-          taskInfo: {
-            hoursNeeded: hoursNeeded ? Math.round(hoursNeeded * 10) / 10 : null,
-            timeToStart: timeToStart,
-            isOverdue
-          }
-        });
-        
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error calculating timeline:", error);
-        const now = new Date();
-        
-        setTimelineEstimate({
-          currentTime: format(now, 'h:mm a'),
-          startTime: null,
-          eta: null,
-          queuePosition: queuePosition,
-          taskInfo: {
-            hoursNeeded: null,
-            timeToStart: null,
-            isOverdue: false
-          }
-        });
-        
-        setIsLoading(false);
-      }
-    };
-    
-    calculateTimelineEstimate();
-  }, [taskType, priorityLevel, complexityLevel, queuePosition, maxConcurrentTasks, projectId]);
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-10 w-full" />
+      <div className="w-full bg-gray-50 rounded-lg p-4">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-3/4" />
+        </div>
       </div>
     );
   }
 
-  const getTimeBetweenNodes = (nodeType: 'start' | 'eta') => {
-    if (nodeType === 'start') {
-      if (!timelineEstimate?.taskInfo.timeToStart) return "";
-      return `${formatHourDifference(timelineEstimate.taskInfo.timeToStart)}`;
-    } else {
-      if (!timelineEstimate?.taskInfo.hoursNeeded) return "";
-      return formatHourDifference(timelineEstimate.taskInfo.hoursNeeded);
-    }
-  };
-
-  const formatTimeWithLineBreak = (timeString: string | null): React.ReactNode => {
-    if (!timeString) return "";
-    const parts = timeString.split(', ');
-    if (parts.length !== 2) return timeString;
+  if (error) {
     return (
-      <>
-        {parts[0]}<br />{parts[1]}
-      </>
+      <div className="w-full bg-red-50 rounded-lg p-4 flex items-start gap-2">
+        <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
+        <div>
+          <p className="text-sm text-red-700">Error calculating timeline</p>
+          <p className="text-xs text-red-500">{error}</p>
+        </div>
+      </div>
     );
-  };
+  }
+
+  if (!taskTypeId || !priorityLevelId || !complexityLevelId) {
+    return (
+      <div className="w-full bg-gray-50 rounded-lg p-4">
+        <p className="text-sm text-gray-500">
+          Select task properties to see estimated timeline
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="sticky top-0 bg-background z-10">
-      <div className="pt-7 pb-0">
-        <div className="relative">
-          <div className="absolute top-[-8px] left-[15%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
-            {getTimeBetweenNodes('start')}
-          </div>
-          
-          <div className="absolute top-[-8px] left-[60%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
-            {getTimeBetweenNodes('eta')}
-          </div>
-          
-          <div className="flex justify-between items-center mb-2 pt-1 pb-1 relative min-h-[32px]">
-            <div className="absolute top-[16px] left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
-            
-            <div className="flex flex-col items-start z-10 pl-0">
-              <div className="relative h-[20px] flex items-center">
-                <div className="w-[1px] h-[13px] bg-gray-300 absolute left-0 top-[-8px]"></div>
+    <TooltipProvider>
+      <div className={`w-full ${compact ? 'bg-gray-50' : 'bg-white border'} rounded-lg p-4`}>
+        <div className="flex items-center mb-3">
+          <Clock className="h-4 w-4 text-gray-500 mr-2" />
+          <h3 className="text-sm font-medium">Estimated Timeline</h3>
+        </div>
+        
+        <div className="space-y-3">
+          <div className="flex items-baseline justify-between">
+            <div>
+              <div className="text-xs text-gray-500">Start</div>
+              <div className="text-sm font-medium">
+                {estimatedStartDate ? format(estimatedStartDate, "MMM d, h:mm a") : "Unknown"}
               </div>
             </div>
             
-            <div className="absolute left-[35%] -translate-x-1/2 z-10 flex flex-col items-center">
-              <div className="h-[22px] w-[40px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600">
-                Start
-              </div>
-              <div className="text-[9px] mt-0.5 text-gray-500 text-center min-h-[24px]">
-                {formatTimeWithLineBreak(formatTimelineTime(timelineEstimate?.startTime))}
+            <div className="text-right">
+              <div className="text-xs text-gray-500">Complete</div>
+              <div className="text-sm font-medium">
+                {estimatedCompletionDate ? format(estimatedCompletionDate, "MMM d, h:mm a") : "Unknown"}
               </div>
             </div>
+          </div>
+          
+          <div className="relative pt-2">
+            <div className="w-full h-2 bg-gray-200 rounded overflow-hidden">
+              {priority && (
+                <div 
+                  className="h-full"
+                  style={{ 
+                    width: '100%', 
+                    backgroundColor: priority.color || '#6366f1'
+                  }}
+                ></div>
+              )}
+            </div>
             
-            <div className="flex flex-col items-end z-10 pr-0">
-              <div className="relative h-[20px] flex items-center">
-                <div className="h-[22px] w-[35px] rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-medium text-gray-600 absolute right-0">
-                  ETA
-                </div>
-              </div>
-              <div className="text-[9px] mt-0.5 text-gray-500 text-right min-h-[24px]">
-                {formatTimeWithLineBreak(formatTimelineTime(timelineEstimate?.eta))}
-              </div>
+            <div className="flex justify-between mt-1 text-xs text-gray-500">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>Now</div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Current date and time</p>
+                </TooltipContent>
+              </Tooltip>
+              
+              {estimatedCompletionDate && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      {formatDistance(
+                        new Date(), 
+                        estimatedCompletionDate, 
+                        { addSuffix: true }
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Estimated completion time</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
           </div>
         </div>
-
-        {timelineEstimate?.taskInfo.isOverdue && (
-          <div className="flex items-start text-yellow-600 text-xs p-2 bg-yellow-50 rounded-md border border-yellow-200 mt-1">
-            <AlertTriangle size={14} className="mt-0.5 mr-1 flex-shrink-0" />
-            <span>
-              This task may take longer than expected. Consider adjusting priority or complexity.
-            </span>
-          </div>
-        )}
-          
-        {timelineEstimate?.queuePosition !== null && timelineEstimate.queuePosition > maxConcurrentTasks && (
-          <div className="flex items-center text-blue-600 text-xs p-2 bg-blue-50 rounded-md border border-blue-200 mt-2">
-            <span>
-              Queue position #{timelineEstimate.queuePosition} (adds {(timelineEstimate.queuePosition - maxConcurrentTasks) * 30} min delay)
-            </span>
-          </div>
-        )}
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
