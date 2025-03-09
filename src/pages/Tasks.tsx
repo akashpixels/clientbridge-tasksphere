@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -72,7 +73,7 @@ const Tasks = () => {
     fetchQueuedTasks();
     
     const subscription = supabase
-      .channel('project_timeline_changes')
+      .channel('queued_tasks_changes')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
@@ -12,7 +13,6 @@ interface StartEtaPredictorProps {
   projectId?: string;
   compact?: boolean;
   activeTaskCount?: number | null;
-  queuePosition?: number | null;
 }
 
 interface TimelineEstimate {
@@ -32,8 +32,7 @@ export const StartEtaPredictor = ({
   complexityLevelId = 3,
   projectId,
   compact = false,
-  activeTaskCount = null,
-  queuePosition = null
+  activeTaskCount = null
 }: StartEtaPredictorProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [taskType, setTaskType] = useState<any>(null);
@@ -170,9 +169,9 @@ export const StartEtaPredictor = ({
             startTime = addMinutes(startTime, queueDelay);
           }
           
-          if (queuePosition !== null && queuePosition > 0) {
-            startTime = addMinutes(startTime, queuePosition * 20);
-          }
+          // Calculate queue position based on index in queue
+          // This position is now calculated directly from the order in the queue
+          // shown in the Tasks component, using array index + 1
           
           if (taskType.base_duration) {
             const baseDurationMatch = taskType.base_duration.match(/(\d+):(\d+):(\d+)/);
@@ -241,7 +240,7 @@ export const StartEtaPredictor = ({
     };
     
     calculateTimelineEstimate();
-  }, [taskType, priorityLevel, complexityLevel, activeTaskCount, maxConcurrentTasks, projectId, queuePosition]);
+  }, [taskType, priorityLevel, complexityLevel, activeTaskCount, maxConcurrentTasks, projectId]);
 
   if (isLoading) {
     return (
