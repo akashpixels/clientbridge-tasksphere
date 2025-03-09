@@ -14,7 +14,7 @@ const LeftSidebar = ({ isOpen, onToggle }: LeftSidebarProps) => {
   return (
     <aside
       className={cn(
-        'fixed top-0 left-0 h-screen bg-background border-r border-border/40',
+        'fixed top-16 left-0 h-[calc(100vh-4rem)] bg-background border-r border-border/40',
         isOpen ? 'w-64' : 'w-20',
         'transition-all duration-300 ease-in-out'
       )}

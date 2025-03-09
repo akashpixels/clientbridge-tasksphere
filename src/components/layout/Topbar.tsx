@@ -1,15 +1,10 @@
 
-import { Bell, Search, User } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 
-interface TopbarProps {
-  showSearch?: boolean;
-}
-
-const Topbar = ({ showSearch = true }: TopbarProps) => {
+const Topbar = () => {
   const location = useLocation();
   
   // Generate breadcrumbs based on current path
@@ -27,21 +22,10 @@ const Topbar = ({ showSearch = true }: TopbarProps) => {
   };
 
   return (
-    <div className="h-16 border-b border-border/40 flex items-center justify-between px-6 bg-background fixed w-full z-10 shadow-sm">
+    <div className="h-16 border-b border-border/40 flex items-center justify-between px-6 bg-background fixed w-full z-10">
       <div className="text-lg font-medium">{generateBreadcrumbs()}</div>
       
       <div className="flex items-center gap-4">
-        {showSearch && (
-          <div className="hidden md:flex relative w-64">
-            <Input 
-              type="text" 
-              placeholder="Search..." 
-              className="pl-9 h-9"
-            />
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          </div>
-        )}
-        
         <Button 
           variant="ghost" 
           size="icon" 
