@@ -1,12 +1,12 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TaskTimeline } from "@/components/tasks/TaskTimeline";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useParams } from "react-router-dom";
 import { AlertCircle, Server } from "lucide-react";
+import { TimelineVisualization } from "@/components/tasks/TimelineVisualization";
 
 type QueuedTask = {
   id: string;
@@ -26,6 +26,7 @@ const Tasks = () => {
   const { id: projectId } = useParams<{ id: string }>();
   const [queuedTasks, setQueuedTasks] = useState<QueuedTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTaskCount, setActiveTaskCount] = useState(0);
   
   useEffect(() => {
     const fetchQueuedTasks = async () => {
@@ -51,6 +52,19 @@ const Tasks = () => {
           console.error("Error fetching queued tasks:", error);
         } else {
           setQueuedTasks(data || []);
+        }
+        
+        // Fetch active task count
+        const { data: activeData, error: activeError } = await supabase
+          .from('tasks')
+          .select('id')
+          .eq('project_id', projectId)
+          .in('current_status_id', [2, 3, 4, 5]) // Active statuses
+          
+        if (activeError) {
+          console.error("Error fetching active tasks:", activeError);
+        } else {
+          setActiveTaskCount(activeData?.length || 0);
         }
       } finally {
         setIsLoading(false);
@@ -118,7 +132,19 @@ const Tasks = () => {
         </TabsList>
         
         <TabsContent value="timeline">
-          <TaskTimeline projectId={projectId} />
+          <div className="p-4 bg-white rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-4">Task Timeline</h2>
+            {projectId && (
+              <TimelineVisualization 
+                projectId={projectId}
+                taskTypeId={null}
+                priorityLevelId={null}
+                complexityLevelId={3}
+                compact={false}
+                activeTaskCount={activeTaskCount}
+              />
+            )}
+          </div>
         </TabsContent>
         
         <TabsContent value="all">
