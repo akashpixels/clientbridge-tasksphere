@@ -14,7 +14,7 @@ const Layout = () => {
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
       <Topbar />
-      <div className="flex pt-16"> {/* Add top padding to account for fixed topbar */}
+      <div className="flex"> {/* Removed top padding as it's handled in MainContentArea */}
         <LeftSidebar 
           isOpen={isLeftSidebarOpen} 
           onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
