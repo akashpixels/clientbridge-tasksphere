@@ -5,7 +5,7 @@ import { AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
 
-interface TimelineVisualizationProps {
+interface StartEtaPredictorProps {
   taskTypeId?: number | null;
   priorityLevelId?: number | null;
   complexityLevelId?: number | null;
@@ -26,7 +26,7 @@ interface TimelineEstimate {
   };
 }
 
-export const TimelineVisualization = ({
+export const StartEtaPredictor = ({
   taskTypeId,
   priorityLevelId,
   complexityLevelId = 3,
@@ -34,7 +34,7 @@ export const TimelineVisualization = ({
   compact = false,
   activeTaskCount = null,
   queuePosition = null
-}: TimelineVisualizationProps) => {
+}: StartEtaPredictorProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [taskType, setTaskType] = useState<any>(null);
   const [priorityLevel, setPriorityLevel] = useState<any>(null);

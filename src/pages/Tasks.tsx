@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useParams } from "react-router-dom";
 import { AlertCircle, Server } from "lucide-react";
-import { TimelineVisualization } from "@/components/tasks/TimelineVisualization";
+import { StartEtaPredictor } from "@/components/tasks/StartEtaPredictor";
 
 type QueuedTask = {
   id: string;
@@ -54,7 +53,6 @@ const Tasks = () => {
           setQueuedTasks(data || []);
         }
         
-        // Fetch active task count
         const { data: activeData, error: activeError } = await supabase
           .from('tasks')
           .select('id')
@@ -73,7 +71,6 @@ const Tasks = () => {
     
     fetchQueuedTasks();
     
-    // Real-time subscription for queue changes
     const subscription = supabase
       .channel('project_timeline_changes')
       .on('postgres_changes', {
@@ -91,7 +88,6 @@ const Tasks = () => {
     };
   }, [projectId]);
   
-  // Group tasks by project
   const groupedTasks: GroupedTasks = queuedTasks.reduce((acc: GroupedTasks, task) => {
     const projectId = task.project_id;
     if (!acc[projectId]) {
@@ -101,9 +97,8 @@ const Tasks = () => {
     return acc;
   }, {});
   
-  // Helper function to get priority color
   const getPriorityColor = (task: QueuedTask) => {
-    if (!task.priority) return '#9CA3AF'; // Default gray
+    if (!task.priority) return '#9CA3AF';
     
     const priorityColors: Record<string, string> = {
       'Very Low': '#6EE7B7',
@@ -135,7 +130,7 @@ const Tasks = () => {
           <div className="p-4 bg-white rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Task Timeline</h2>
             {projectId && (
-              <TimelineVisualization 
+              <StartEtaPredictor 
                 projectId={projectId}
                 taskTypeId={null}
                 priorityLevelId={null}
@@ -149,21 +144,18 @@ const Tasks = () => {
         
         <TabsContent value="all">
           <div className="grid gap-4">
-            {/* Task list will go here */}
             <p>No tasks found.</p>
           </div>
         </TabsContent>
         
         <TabsContent value="assigned">
           <div className="grid gap-4">
-            {/* Assigned tasks will go here */}
             <p>No assigned tasks found.</p>
           </div>
         </TabsContent>
         
         <TabsContent value="completed">
           <div className="grid gap-4">
-            {/* Completed tasks will go here */}
             <p>No completed tasks found.</p>
           </div>
         </TabsContent>

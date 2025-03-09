@@ -11,14 +11,14 @@ interface PriorityLevel {
   time_to_start?: string;
 }
 
-interface PriorityDialProps {
+interface PrioritySelectorProps {
   priorityLevels: PriorityLevel[];
   value: number;
   onChange: (value: number) => void;
   compact?: boolean;
 }
 
-export const PriorityDial = ({ priorityLevels, value, onChange }: PriorityDialProps) => {
+export const PrioritySelector = ({ priorityLevels, value, onChange }: PrioritySelectorProps) => {
   // Sort priority levels by id to ensure correct order
   const sortedLevels = [...priorityLevels].sort((a, b) => a.id - b.id);
   
