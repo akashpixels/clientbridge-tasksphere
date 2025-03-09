@@ -38,14 +38,18 @@ type TaskFormValues = z.infer<typeof taskFormSchema>;
 interface TaskFormProps {
   onSubmit: (data: TaskFormValues) => void;
   isSubmitting: boolean;
-  queuePosition: number;
+  activeTaskCount: number;
 }
 
 export const TaskForm = ({
   onSubmit,
   isSubmitting,
-  queuePosition
-}: TaskFormProps) => {
+  activeTaskCount
+}: {
+  onSubmit: (data: TaskFormValues) => void;
+  isSubmitting: boolean;
+  activeTaskCount: number;
+}) => {
   const {
     id: projectId
   } = useParams<{
@@ -244,7 +248,7 @@ export const TaskForm = ({
   
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        <TimelineVisualization taskTypeId={timelineParams.taskTypeId} priorityLevelId={timelineParams.priorityLevelId} complexityLevelId={timelineParams.complexityLevelId} projectId={projectId} compact={true} queuePosition={queuePosition} />
+        <TimelineVisualization taskTypeId={timelineParams.taskTypeId} priorityLevelId={timelineParams.priorityLevelId} complexityLevelId={timelineParams.complexityLevelId} projectId={projectId} compact={true} activeTaskCount={activeTaskCount} />
 
         <div className="space-y-5 py-0">
           <FormField control={form.control} name="details" render={({

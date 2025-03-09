@@ -14,12 +14,12 @@ export const TaskCreationSidebar = () => {
   const { toast } = useToast();
   const { id: projectId } = useParams<{ id: string; }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [queuePosition, setQueuePosition] = useState(0);
+  const [activeTaskCount, setActiveTaskCount] = useState(0);
   const { closeRightSidebar } = useLayout();
   const [taskCreated, setTaskCreated] = useState(false);
   const [createdTaskData, setCreatedTaskData] = useState<any>(null);
 
-  const fetchQueuePosition = async () => {
+  const fetchActiveTaskCount = async () => {
     if (!projectId) return;
     try {
       const {
@@ -28,20 +28,20 @@ export const TaskCreationSidebar = () => {
       } = await supabase.from('tasks').select('*', {
         count: 'exact',
         head: true
-      }).eq('project_id', projectId).in('current_status_id', [1, 2, 3, 6, 7]); // Open, Pending, In Progress, Awaiting Input, In Queue
+      }).eq('project_id', projectId).in('current_status_id', [1, 2, 3, 6]); // Open, Pending, In Progress, Awaiting Input
 
       if (error) {
-        console.error("Error fetching queue position:", error);
+        console.error("Error fetching active task count:", error);
         return;
       }
-      setQueuePosition(count || 0);
+      setActiveTaskCount(count || 0);
     } catch (error) {
-      console.error("Error in fetchQueuePosition:", error);
+      console.error("Error in fetchActiveTaskCount:", error);
     }
   };
 
   useEffect(() => {
-    fetchQueuePosition();
+    fetchActiveTaskCount();
   }, []);
 
   const handleSubmit = async (formData: any) => {
@@ -82,15 +82,15 @@ export const TaskCreationSidebar = () => {
       
       toast({
         title: "Task created successfully",
-        description: "Your task has been added to the queue."
+        description: "Your task has been added to the project."
       });
       
       // Set task created state and store the created task data
       setTaskCreated(true);
       setCreatedTaskData(data);
       
-      // Refresh queue position to update the UI
-      fetchQueuePosition();
+      // Refresh active task count
+      fetchActiveTaskCount();
       
     } catch (error: any) {
       console.error("Error creating task:", error);
@@ -109,7 +109,7 @@ export const TaskCreationSidebar = () => {
     setCreatedTaskData(null);
   };
 
-  // Determine if the task is queued and get the priority level name
+  // Helper function to get priority name
   const getPriorityName = async (priorityId: number) => {
     try {
       const { data, error } = await supabase
@@ -131,9 +131,9 @@ export const TaskCreationSidebar = () => {
         <h2 className="font-semibold text-[14px]">
           {taskCreated 
             ? "Task Created Successfully" 
-            : queuePosition > 0 
-              ? `# ${queuePosition} task${queuePosition > 1 ? 's' : ''} ahead of this` 
-              : 'First in queue'}
+            : activeTaskCount > 0 
+              ? `${activeTaskCount} active task${activeTaskCount > 1 ? 's' : ''}` 
+              : 'No active tasks'}
         </h2>
         <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
           <X size={18} />
@@ -143,23 +143,18 @@ export const TaskCreationSidebar = () => {
         {taskCreated ? (
           <div className="space-y-6 pt-2">
             <div className="bg-green-50 border border-green-200 rounded-md p-4">
-              <p className="text-green-800 text-sm mb-2">Your task has been successfully created and added to the queue.</p>
+              <p className="text-green-800 text-sm mb-2">Your task has been successfully created and added to the project.</p>
               <div className="text-sm space-y-2 mt-4">
                 <h3 className="font-medium">Task Details:</h3>
                 <div className="flex gap-2 items-center">
                   {createdTaskData?.task_code && (
                     <Badge variant="outline" className="font-mono text-xs">
                       {createdTaskData.task_code}
-                      {createdTaskData.queue_position && (
-                        <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
-                          #{createdTaskData.queue_position}
-                        </span>
-                      )}
                     </Badge>
                   )}
                   <p><span className="font-medium">Description:</span> {createdTaskData?.details}</p>
                 </div>
-                <p><span className="font-medium">Status:</span> {createdTaskData?.current_status_id === 7 ? 'Queued' : 'Open'}</p>
+                <p><span className="font-medium">Status:</span> {createdTaskData?.current_status_id === 1 ? 'Open' : 'Pending'}</p>
                 <p><span className="font-medium">Priority:</span> {createdTaskData?.priority_level_id}</p>
               </div>
             </div>
@@ -174,7 +169,7 @@ export const TaskCreationSidebar = () => {
           <TaskForm 
             onSubmit={handleSubmit} 
             isSubmitting={isSubmitting} 
-            queuePosition={queuePosition} 
+            activeTaskCount={activeTaskCount} 
           />
         )}
       </ScrollArea>

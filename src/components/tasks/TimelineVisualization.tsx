@@ -12,14 +12,13 @@ interface TimelineVisualizationProps {
   complexityLevelId?: number | null;
   projectId?: string;
   compact?: boolean;
-  queuePosition?: number | null;
+  activeTaskCount?: number | null;
 }
 
 interface TimelineEstimate {
   currentTime: string;
   startTime: string | null;
   eta: string | null;
-  queuePosition: number | null;
   taskInfo: {
     hoursNeeded: number | null;
     timeToStart: number | null;
@@ -33,7 +32,7 @@ export const TimelineVisualization = ({
   complexityLevelId = 3,
   projectId,
   compact = false,
-  queuePosition = null
+  activeTaskCount = null
 }: TimelineVisualizationProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [taskType, setTaskType] = useState<any>(null);
@@ -139,23 +138,8 @@ export const TimelineVisualization = ({
     }
   }, [projectId]);
 
-  // Calculate timeline estimate
+  // Calculate timeline estimate without server functions
   useEffect(() => {
-    const fetchQueueCount = async () => {
-      if (!projectId) return 0;
-      const { count, error } = await supabase
-        .from('tasks')
-        .select('*', { count: 'exact', head: true })
-        .eq('project_id', projectId)
-        .in('current_status_id', [1, 2, 3]); // Open, Pending, In Progress
-        
-      if (error) {
-        console.error("Error fetching active tasks count:", error);
-        return 0;
-      }
-      return count || 0;
-    };
-
     const calculateTimelineEstimate = async () => {
       try {
         setIsLoading(true);
@@ -165,9 +149,6 @@ export const TimelineVisualization = ({
         let hoursNeeded: number | null = null;
         let timeToStart: number | null = null;
         let isOverdue = false;
-        
-        // Get active tasks count
-        const activeCount = await fetchQueueCount();
         
         if (taskType && priorityLevel && complexityLevel) {
           // Start with current time
@@ -182,7 +163,7 @@ export const TimelineVisualization = ({
               timeToStart = hours + minutes / 60;
               
               // Apply priority delay
-              if (activeCount === 0) {
+              if (activeTaskCount === 0) {
                 // No active tasks, just add the time_to_start
                 startTime = addHours(startTime, hours);
                 startTime = addMinutes(startTime, minutes);
@@ -193,9 +174,9 @@ export const TimelineVisualization = ({
             }
           }
           
-          // Apply queue position delay if needed
-          if (queuePosition !== null && queuePosition > maxConcurrentTasks) {
-            const queueDelay = (queuePosition - maxConcurrentTasks) * 30; // 30 min per position
+          // Apply task count delay if needed
+          if (activeTaskCount !== null && activeTaskCount > maxConcurrentTasks) {
+            const queueDelay = (activeTaskCount - maxConcurrentTasks) * 30; // 30 min per position
             startTime = addMinutes(startTime, queueDelay);
           }
           
@@ -257,7 +238,6 @@ export const TimelineVisualization = ({
           currentTime: format(now, 'h:mm a'),
           startTime: startTime ? format(startTime, 'h:mm a, MMM d') : null,
           eta: eta ? format(eta, 'h:mm a, MMM d') : null,
-          queuePosition: queuePosition,
           taskInfo: {
             hoursNeeded: hoursNeeded ? Math.round(hoursNeeded * 10) / 10 : null,
             timeToStart: timeToStart,
@@ -274,7 +254,6 @@ export const TimelineVisualization = ({
           currentTime: format(now, 'h:mm a'),
           startTime: null,
           eta: null,
-          queuePosition: queuePosition,
           taskInfo: {
             hoursNeeded: null,
             timeToStart: null,
@@ -287,7 +266,7 @@ export const TimelineVisualization = ({
     };
     
     calculateTimelineEstimate();
-  }, [taskType, priorityLevel, complexityLevel, queuePosition, maxConcurrentTasks, projectId]);
+  }, [taskType, priorityLevel, complexityLevel, activeTaskCount, maxConcurrentTasks, projectId]);
 
   if (isLoading) {
     return (
@@ -371,10 +350,10 @@ export const TimelineVisualization = ({
           </div>
         )}
           
-        {timelineEstimate?.queuePosition !== null && timelineEstimate.queuePosition > maxConcurrentTasks && (
+        {activeTaskCount !== null && activeTaskCount > maxConcurrentTasks && (
           <div className="flex items-center text-blue-600 text-xs p-2 bg-blue-50 rounded-md border border-blue-200 mt-2">
             <span>
-              Queue position #{timelineEstimate.queuePosition} (adds {(timelineEstimate.queuePosition - maxConcurrentTasks) * 30} min delay)
+              Active tasks: {activeTaskCount} (adds {(activeTaskCount - maxConcurrentTasks) * 30} min delay)
             </span>
           </div>
         )}

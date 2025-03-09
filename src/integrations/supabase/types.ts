@@ -1266,13 +1266,6 @@ export type Database = {
       }
     }
     Functions: {
-      calculate_eta: {
-        Args: {
-          start_time: string
-          hours_needed: number
-        }
-        Returns: string
-      }
       calculate_hours_spent: {
         Args: {
           actual_start: string
@@ -1284,13 +1277,6 @@ export type Database = {
       calculate_monthly_subscription_usage: {
         Args: Record<PropertyKey, never>
         Returns: undefined
-      }
-      calculate_start_time: {
-        Args: {
-          created_at: string
-          priority_id: number
-        }
-        Returns: string
       }
     }
     Enums: {
