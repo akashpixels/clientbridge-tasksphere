@@ -13,7 +13,7 @@ const MainContentArea = ({ isLeftSidebarOpen }: MainContentAreaProps) => {
   return (
     <main 
       className={cn(
-        'flex-1 transition-all duration-300 ease-in-out pt-[46px]',
+        'flex-1 transition-all duration-300 ease-in-out',
         isLeftSidebarOpen ? 'ml-64' : 'ml-20',
         rightSidebarContent ? 'mr-[300px]' : ''
       )}
