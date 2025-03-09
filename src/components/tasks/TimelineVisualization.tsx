@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
@@ -13,6 +12,7 @@ interface TimelineVisualizationProps {
   projectId?: string;
   compact?: boolean;
   activeTaskCount?: number | null;
+  queuePosition?: number | null;
 }
 
 interface TimelineEstimate {
@@ -32,7 +32,8 @@ export const TimelineVisualization = ({
   complexityLevelId = 3,
   projectId,
   compact = false,
-  activeTaskCount = null
+  activeTaskCount = null,
+  queuePosition = null
 }: TimelineVisualizationProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [taskType, setTaskType] = useState<any>(null);
@@ -41,7 +42,6 @@ export const TimelineVisualization = ({
   const [maxConcurrentTasks, setMaxConcurrentTasks] = useState(1);
   const [timelineEstimate, setTimelineEstimate] = useState<TimelineEstimate | null>(null);
 
-  // Fetch task type data
   useEffect(() => {
     const fetchTaskType = async () => {
       if (!taskTypeId) return;
@@ -65,7 +65,6 @@ export const TimelineVisualization = ({
     }
   }, [taskTypeId]);
 
-  // Fetch priority level data
   useEffect(() => {
     const fetchPriorityLevel = async () => {
       if (!priorityLevelId) return;
@@ -89,7 +88,6 @@ export const TimelineVisualization = ({
     }
   }, [priorityLevelId]);
 
-  // Fetch complexity level data
   useEffect(() => {
     const fetchComplexityLevel = async () => {
       if (!complexityLevelId) return;
@@ -113,7 +111,6 @@ export const TimelineVisualization = ({
     }
   }, [complexityLevelId]);
 
-  // Fetch project concurrency data
   useEffect(() => {
     const fetchProjectConcurrency = async () => {
       if (!projectId) return;
@@ -138,7 +135,6 @@ export const TimelineVisualization = ({
     }
   }, [projectId]);
 
-  // Calculate timeline estimate without server functions
   useEffect(() => {
     const calculateTimelineEstimate = async () => {
       try {
@@ -151,10 +147,8 @@ export const TimelineVisualization = ({
         let isOverdue = false;
         
         if (taskType && priorityLevel && complexityLevel) {
-          // Start with current time
           startTime = new Date();
           
-          // Extract time to start from priority level
           if (priorityLevel.time_to_start) {
             const timeToStartMatch = priorityLevel.time_to_start.match(/(\d+):(\d+):(\d+)/);
             if (timeToStartMatch) {
@@ -162,39 +156,24 @@ export const TimelineVisualization = ({
               const minutes = parseInt(timeToStartMatch[2]);
               timeToStart = hours + minutes / 60;
               
-              // Apply priority delay
               if (activeTaskCount === 0) {
-                // No active tasks, just add the time_to_start
                 startTime = addHours(startTime, hours);
                 startTime = addMinutes(startTime, minutes);
               } else {
-                // There are active tasks, add a standard delay
                 startTime = addHours(startTime, Math.max(1, hours));
               }
             }
           }
           
-          // Apply task count delay if needed
           if (activeTaskCount !== null && activeTaskCount > maxConcurrentTasks) {
-            const queueDelay = (activeTaskCount - maxConcurrentTasks) * 30; // 30 min per position
+            const queueDelay = (activeTaskCount - maxConcurrentTasks) * 30;
             startTime = addMinutes(startTime, queueDelay);
           }
           
-          // Adjust for working hours (10am - 6pm)
-          const currentHour = startTime.getHours();
-          if (currentHour < 10) {
-            // Before working hours, move to 10am
-            startTime.setHours(10, 0, 0, 0);
-          } else if (currentHour >= 18) {
-            // After working hours, move to next day 10am
-            startTime = addDays(startTime, 1);
-            startTime.setHours(10, 0, 0, 0);
+          if (queuePosition !== null && queuePosition > 0) {
+            startTime = addMinutes(startTime, queuePosition * 20);
           }
           
-          // Calculate hours needed
-          hoursNeeded = 0;
-          
-          // Add base duration if available
           if (taskType.base_duration) {
             const baseDurationMatch = taskType.base_duration.match(/(\d+):(\d+):(\d+)/);
             if (baseDurationMatch) {
@@ -202,7 +181,6 @@ export const TimelineVisualization = ({
               const minutes = parseInt(baseDurationMatch[2]);
               const baseDuration = hours + minutes / 60;
               
-              // Apply complexity multiplier
               if (complexityLevel.multiplier) {
                 hoursNeeded = baseDuration * complexityLevel.multiplier;
               } else {
@@ -211,14 +189,12 @@ export const TimelineVisualization = ({
             }
           }
           
-          // Calculate ETA based on start time and hours needed
           if (startTime && hoursNeeded) {
             eta = new Date(startTime);
             eta = addHours(eta, hoursNeeded);
             
-            // Adjust ETA for working hours
             const etaHour = eta.getHours();
-            const workingHoursInDay = 8; // 10am to 6pm
+            const workingHoursInDay = 8;
             
             if (etaHour >= 18) {
               const hoursOver = etaHour - 18;
@@ -229,7 +205,6 @@ export const TimelineVisualization = ({
               eta.setHours(10 + remainingHours, eta.getMinutes(), 0, 0);
             }
             
-            // Check if task might be overdue (for high priority tasks with long ETAs)
             isOverdue = priorityLevel.id >= 4 && differenceInHours(eta, now) > 48;
           }
         }
@@ -266,7 +241,7 @@ export const TimelineVisualization = ({
     };
     
     calculateTimelineEstimate();
-  }, [taskType, priorityLevel, complexityLevel, activeTaskCount, maxConcurrentTasks, projectId]);
+  }, [taskType, priorityLevel, complexityLevel, activeTaskCount, maxConcurrentTasks, projectId, queuePosition]);
 
   if (isLoading) {
     return (
