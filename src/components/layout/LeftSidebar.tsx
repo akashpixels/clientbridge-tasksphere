@@ -14,17 +14,19 @@ const LeftSidebar = ({ isOpen, onToggle }: LeftSidebarProps) => {
   return (
     <aside
       className={cn(
-        'h-screen bg-background border-r border-border/40',
+        'fixed top-0 left-0 h-screen bg-background border-r border-border/40',
         isOpen ? 'w-64' : 'w-20',
         'transition-all duration-300 ease-in-out'
       )}
     >
       <button
         onClick={onToggle}
-        className="absolute top-6 z-10 bg-background border border-border/40 rounded-full p-1.5 hover:bg-gray-100"
-        style={{ right: isOpen ? '-12px' : '-12px', transform: isOpen ? 'none' : 'rotate(180deg)' }}
+        className="absolute -right-3 top-6 bg-background border border-border/40 rounded-full p-1.5 hover:bg-gray-100"
       >
-        <ChevronLeft className="h-4 w-4 text-gray-600" />
+        <ChevronLeft className={cn(
+          "h-4 w-4 text-gray-600 transition-transform",
+          !isOpen && "rotate-180"
+        )} />
       </button>
       <div className="h-full flex flex-col px-4 py-6">
         <SidebarHeader isOpen={isOpen} />
