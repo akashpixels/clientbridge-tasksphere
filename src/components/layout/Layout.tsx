@@ -12,18 +12,18 @@ const Layout = () => {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8]">
-      <Topbar />
-      <div className="flex pt-16"> {/* Add top padding to account for fixed topbar */}
-        <LeftSidebar 
-          isOpen={isLeftSidebarOpen} 
-          onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
-        />
-        
-        <MainContentArea isLeftSidebarOpen={isLeftSidebarOpen} />
-
-        <RightSidebar />
+    <div className="min-h-screen bg-[#f8f8f8] flex">
+      <LeftSidebar 
+        isOpen={isLeftSidebarOpen} 
+        onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
+      />
+      
+      <div className="flex-1 flex flex-col">
+        <Topbar />
+        <MainContentArea isLeftSidebarOpen={false} />
       </div>
+
+      <RightSidebar />
     </div>
   );
 };
