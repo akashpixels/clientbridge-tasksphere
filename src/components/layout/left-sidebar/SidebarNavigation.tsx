@@ -1,6 +1,6 @@
 
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Briefcase, CheckSquare, Users, FileText } from 'lucide-react';
+import { Home, Briefcase, Users, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -16,7 +16,6 @@ interface SidebarNavigationProps {
 const navItems: NavItem[] = [
   { label: 'Dashboard', icon: <Home size={20} />, href: '/' },
   { label: 'Projects', icon: <Briefcase size={20} />, href: '/projects' },
-  { label: 'Tasks', icon: <CheckSquare size={20} />, href: '/tasks' },
   { label: 'Team', icon: <Users size={20} />, href: '/team' },
   { label: 'Clients', icon: <FileText size={20} />, href: '/clients' },
 ];

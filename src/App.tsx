@@ -8,7 +8,6 @@ import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
-import Tasks from "./pages/Tasks";
 import Team from "./pages/Team";
 import Clients from "./pages/Clients";
 import Auth from "./pages/Auth";
@@ -38,7 +37,6 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/projects/:id" element={<ProjectDetails />} />
-                  <Route path="/tasks" element={<Tasks />} />
                   <Route path="/team" element={<Team />} />
                   <Route path="/clients" element={<Clients />} />
                   <Route path="*" element={<NotFound />} />
