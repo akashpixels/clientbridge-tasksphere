@@ -122,7 +122,7 @@ export const TaskCreationSidebar = () => {
     }
   };
   return <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex justify-between items-center px-4 border-b bg-[#fcfcfc] sticky top-0 z-10 py-[5px]">
+      <div className="flex justify-between items-center px-4 border-b sticky top-0 z-10 py-[5px]">
         <h2 className="font-semibold text-[14px]">
           {taskCreated ? "Task Created Successfully" : activeTaskCount > 0 ? `${activeTaskCount} active task${activeTaskCount > 1 ? 's' : ''}` : 'No active tasks'}
         </h2>
