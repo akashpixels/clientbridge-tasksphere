@@ -34,8 +34,8 @@ const SidebarNavigation = ({ isOpen }: SidebarNavigationProps) => {
             onClick={() => navigate(item.href)}
             className={cn(
               'w-full flex items-center gap-3 p-3 rounded-[6px] transition-all',
-              'text-gray-700 hover:text-gray-900 hover:bg-gray-100',
-              isActive && 'bg-gray-100 text-gray-900'
+              'text-gray-700 hover:text-gray-900 hover:bg-muted',
+              isActive && 'bg-muted text-gray-900'
             )}
           >
             <div className="min-w-[20px]">
