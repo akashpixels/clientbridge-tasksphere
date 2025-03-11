@@ -247,7 +247,7 @@ export const TaskForm = ({
   const errors = form.formState.errors;
   
   return <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6 relative">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6 px-4 relative">
         <StartEtaPredictor 
           taskTypeId={timelineParams.taskTypeId} 
           priorityLevelId={timelineParams.priorityLevelId} 
