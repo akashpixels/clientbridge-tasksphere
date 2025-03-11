@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -121,7 +122,7 @@ export const TaskCreationSidebar = () => {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex justify-between items-center px-4 border-b sticky top-0 z-10 py-[5px]">
+      <div className="flex justify-between items-center px-4 border-b sticky top-0 z-10 py-[5px] bg-background">
         <h2 className="font-semibold text-[14px]">
           {taskCreated 
             ? "Task Created Successfully" 
@@ -134,32 +135,35 @@ export const TaskCreationSidebar = () => {
           <X size={18} />
         </Button>
       </div>
-      <ScrollArea className="flex-1 px-4 py-2 overflow-y-auto">
+      
+      <div className="flex-1 overflow-hidden relative">
         {taskCreated ? (
-          <div className="space-y-6 pt-2 pb-20">
-            <div className="bg-green-50 border border-green-200 rounded-md p-4">
-              <p className="text-green-800 text-sm mb-2">Your task has been successfully created and added to the project.</p>
-              <div className="text-sm space-y-2 mt-4">
-                <h3 className="font-medium">Task Details:</h3>
-                <div className="flex gap-2 items-center">
-                  {createdTaskData?.task_code && (
-                    <Badge variant="outline" className="font-mono text-xs">
-                      {createdTaskData.task_code}
-                    </Badge>
-                  )}
-                  <p><span className="font-medium">Description:</span> {createdTaskData?.details}</p>
+          <ScrollArea className="h-full px-4 py-2">
+            <div className="space-y-6 pt-2 pb-20">
+              <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                <p className="text-green-800 text-sm mb-2">Your task has been successfully created and added to the project.</p>
+                <div className="text-sm space-y-2 mt-4">
+                  <h3 className="font-medium">Task Details:</h3>
+                  <div className="flex gap-2 items-center">
+                    {createdTaskData?.task_code && (
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {createdTaskData.task_code}
+                      </Badge>
+                    )}
+                    <p><span className="font-medium">Description:</span> {createdTaskData?.details}</p>
+                  </div>
+                  <p><span className="font-medium">Status:</span> {createdTaskData?.current_status_id === 1 ? 'Open' : 'Pending'}</p>
+                  <p><span className="font-medium">Priority:</span> {createdTaskData?.priority_level_id}</p>
                 </div>
-                <p><span className="font-medium">Status:</span> {createdTaskData?.current_status_id === 1 ? 'Open' : 'Pending'}</p>
-                <p><span className="font-medium">Priority:</span> {createdTaskData?.priority_level_id}</p>
+              </div>
+              
+              <div className="sticky bottom-0 py-4 mt-6 bg-background">
+                <Button onClick={handleAddAnother} className="w-full">
+                  Add Another Task
+                </Button>
               </div>
             </div>
-            
-            <div className="flex justify-center pt-4">
-              <Button onClick={handleAddAnother} className="w-full">
-                Add Another Task
-              </Button>
-            </div>
-          </div>
+          </ScrollArea>
         ) : (
           <TaskForm 
             onSubmit={handleSubmit} 
@@ -167,7 +171,7 @@ export const TaskCreationSidebar = () => {
             activeTaskCount={activeTaskCount} 
           />
         )}
-      </ScrollArea>
+      </div>
     </div>
   );
 };

@@ -247,7 +247,7 @@ export const TaskForm = ({
   const errors = form.formState.errors;
   
   return <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6 relative">
         <StartEtaPredictor 
           taskTypeId={timelineParams.taskTypeId} 
           priorityLevelId={timelineParams.priorityLevelId} 
@@ -257,7 +257,7 @@ export const TaskForm = ({
           activeTaskCount={activeTaskCount} 
         />
 
-        <div className="space-y-5 py-0 pb-20">
+        <div className="space-y-5 py-0 pb-24">
           <FormField control={form.control} name="details" render={({
           field
         }) => <FormItem>
@@ -429,7 +429,7 @@ export const TaskForm = ({
           </div>
         </div>
 
-        <div className="px-4 py-3 border-t sticky bottom-0 bg-background z-10 mt-4 -mx-4">
+        <div className="fixed-bottom-button px-4 py-3 border-t bg-background z-10 mt-4 -mx-4 sticky bottom-0 left-0 right-0">
           <Button 
             type="submit" 
             disabled={isSubmitting || !isFormValid} 
