@@ -34,7 +34,7 @@ export const ProjectTableRow = ({ project }: ProjectTableRowProps) => {
 
   return (
     <TableRow 
-      className="cursor-pointer hover:bg-[#e8e3d9] transition-colors border-b border-gray-200"
+      className="cursor-pointer hover:bg-muted transition-colors border-b border-gray-200"
       onClick={() => navigate(`/projects/${project.id}`)}
     >
       <TableCell className="pl-4">
