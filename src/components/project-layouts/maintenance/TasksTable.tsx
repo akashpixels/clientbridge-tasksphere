@@ -215,7 +215,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
         {tasks.map((task) => (
           <TableRow 
             key={task.id}
-            className="cursor-pointer hover:bg-muted"
+            className="cursor-pointer hover:bg-muted/50"
             onClick={() => {
               onCommentClick(task.id);
               setRightSidebarContent(<TaskCommentThread taskId={task.id} />);
