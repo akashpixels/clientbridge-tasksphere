@@ -260,7 +260,7 @@ export const TaskForm = ({
               <FormMessage />
             </FormItem>} />
 
-          <div className="grid grid-cols-2 gap-4  bg-[#fcfcfc]">
+          <div className="grid grid-cols-2 gap-4 ">
             <FormField control={form.control} name="task_type_id" render={({
             field
           }) => <FormItem>
@@ -422,7 +422,7 @@ export const TaskForm = ({
           </div>
         </div>
 
-        <div className="px-4 py-3 border-t sticky bottom-0 bg-white z-10 mt-4 -mx-4">
+        <div className="px-4 py-3 border-t sticky bottom-0  z-10 mt-4 -mx-4">
           <Button 
             type="submit" 
             disabled={isSubmitting || !isFormValid} 
