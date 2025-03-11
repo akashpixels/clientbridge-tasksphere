@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -27,10 +28,10 @@ export const ProjectFilters = ({
         className="max-w-xs"
       />
       <Select value={statusFilter} onValueChange={setStatusFilter}>
-        <SelectTrigger className="w-[180px] bg-white">
+        <SelectTrigger className="w-[180px] bg-card">
           <SelectValue placeholder="Filter by status" />
         </SelectTrigger>
-        <SelectContent className="bg-white">
+        <SelectContent className="bg-card">
           <SelectItem value="all">All Statuses</SelectItem>
           <SelectItem value="Open">Open</SelectItem>
           <SelectItem value="In Progress">In Progress</SelectItem>
@@ -42,10 +43,10 @@ export const ProjectFilters = ({
         </SelectContent>
       </Select>
       <Select value={subscriptionFilter} onValueChange={setSubscriptionFilter}>
-        <SelectTrigger className="w-[180px] bg-white">
+        <SelectTrigger className="w-[180px] bg-card">
           <SelectValue placeholder="Filter by subscription" />
         </SelectTrigger>
-        <SelectContent className="bg-white">
+        <SelectContent className="bg-card">
           <SelectItem value="all">All Projects</SelectItem>
           <SelectItem value="active">Active</SelectItem>
           <SelectItem value="inactive">Inactive</SelectItem>

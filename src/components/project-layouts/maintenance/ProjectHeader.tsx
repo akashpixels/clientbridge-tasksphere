@@ -47,7 +47,7 @@ const ProjectHeader = ({
       </div>
       <div className="flex items-center gap-4">
         <ProjectStats project={project} selectedMonth={selectedMonth} />
-        <div className="bg-[#fcfcfc]">
+        <div className="bg-card">
           <Select value={selectedMonth} onValueChange={onMonthChange}>
             <SelectTrigger className="w-[108px] h-[108px] flex flex-col items-center justify-between p-4 rounded-[4px] border border-gray-200 focus:ring-0 focus:border-gray-200 bg-transparent">
               <SelectValue placeholder="Select month">
@@ -61,7 +61,7 @@ const ProjectHeader = ({
                   </div>}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent className="bg-[#fcfcfc]">
+            <SelectContent className="bg-card">
               {monthOptions.map(month => <SelectItem key={month.value} value={month.value}>
                   {month.label}
                 </SelectItem>)}
