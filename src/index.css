@@ -7,7 +7,8 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
+    /* Convert #f9f9fa to HSL: hue 240, saturation 4.3%, lightness 98.2% */
+    --background: 240 4.3% 98.2%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
@@ -34,11 +35,11 @@
   }
 
   body {
-    @apply bg-[#f9f9fa] text-foreground antialiased;
+    @apply bg-background text-foreground antialiased;
   }
 
   .glass-card {
-    @apply bg-[#fcfcfc] border border-[#e5e7eb];
+    @apply bg-card border border-[#e5e7eb];
   }
 
   .hover-card {

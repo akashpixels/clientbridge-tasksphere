@@ -21,7 +21,7 @@ const LeftSidebar = ({ isOpen, onToggle }: LeftSidebarProps) => {
     >
       <button
         onClick={onToggle}
-        className="absolute -right-3 top-6 bg-background border border-border/40 rounded-full p-1.5 hover:bg-gray-100"
+        className="absolute -right-3 top-6 bg-background border border-border/40 rounded-full p-1.5 hover:bg-secondary"
       >
         <ChevronLeft className={cn(
           "h-4 w-4 text-gray-600 transition-transform",

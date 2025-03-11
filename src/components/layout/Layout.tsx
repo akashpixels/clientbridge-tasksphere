@@ -12,7 +12,7 @@ const Layout = () => {
   } = useLayout();
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   
-  return <div className="min-h-screen bg-[#f9f9fa]">
+  return <div className="min-h-screen bg-background">
       <div className="flex">
         <LeftSidebar isOpen={isLeftSidebarOpen} onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} />
         
