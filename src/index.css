@@ -10,7 +10,7 @@
     /* Updated background to #f3f1ee: HSL 36, 17%, 94% */
     --background: 36 17% 94%;
     --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
+    --card: 30,14.3%,97.3%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
