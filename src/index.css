@@ -7,8 +7,8 @@
 
 @layer base {
   :root {
-    /* Convert #f9f9fa to HSL: hue 240, saturation 4.3%, lightness 98.2% */
-    --background: 240 4.3% 98.2%;
+    /* Updated HSL value for #F9F9FA: hue 240, saturation 9%, lightness 98% */
+    --background: 240 9% 98%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
