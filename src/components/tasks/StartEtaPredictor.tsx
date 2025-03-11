@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
+import { format, addHours, addDays, addMinutes } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
 

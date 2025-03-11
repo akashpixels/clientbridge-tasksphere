@@ -30,7 +30,6 @@ interface TasksTabContentProps {
       last_name: string;
     } | null;
     task_code?: string;
-    queue_position?: number;
     start_time?: string | null;
     eta?: string | null;
   })[];
@@ -62,7 +61,7 @@ const TasksTabContent = ({
       try {
         const { data, error } = await supabase
           .from('tasks')
-          .select('id, details, task_code, queue_position, current_status_id')
+          .select('id, details, task_code, current_status_id')
           .limit(5);
           
         console.log("Direct tasks access test:", data?.length || 0);
