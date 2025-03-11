@@ -273,7 +273,7 @@ export const StartEtaPredictor = ({
           </div>
           
           <div className="flex justify-between items-center mb-2 pt-1 pb-1 relative min-h-[32px]">
-            <div className="absolute top-[16px] left-0 right-0 h-[1px] bg-gray-300 z-0"></div>
+            <div className="absolute top-[16px] left-0 right-0 h-[1px] z-0"></div>
             
             <div className="flex flex-col items-start z-10 pl-0">
               <div className="relative h-[20px] flex items-center">
