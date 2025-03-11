@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addHours, addDays, addMinutes, differenceInHours } from "date-fns";
-import { AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
 
@@ -22,7 +20,6 @@ interface TimelineEstimate {
   taskInfo: {
     hoursNeeded: number | null;
     timeToStart: number | null;
-    isOverdue: boolean;
   };
 }
 
@@ -143,7 +140,6 @@ export const StartEtaPredictor = ({
         let eta: Date | null = null;
         let hoursNeeded: number | null = null;
         let timeToStart: number | null = null;
-        let isOverdue = false;
         
         if (taskType && priorityLevel && complexityLevel) {
           startTime = new Date();
@@ -168,10 +164,6 @@ export const StartEtaPredictor = ({
             const queueDelay = (activeTaskCount - maxConcurrentTasks) * 30;
             startTime = addMinutes(startTime, queueDelay);
           }
-          
-          // Calculate queue position based on index in queue
-          // This position is now calculated directly from the order in the queue
-          // shown in the Tasks component, using array index + 1
           
           if (taskType.base_duration) {
             const baseDurationMatch = taskType.base_duration.match(/(\d+):(\d+):(\d+)/);
@@ -203,8 +195,6 @@ export const StartEtaPredictor = ({
               eta = addDays(eta, daysToAdd);
               eta.setHours(10 + remainingHours, eta.getMinutes(), 0, 0);
             }
-            
-            isOverdue = priorityLevel.id >= 4 && differenceInHours(eta, now) > 48;
           }
         }
         
@@ -214,8 +204,7 @@ export const StartEtaPredictor = ({
           eta: eta ? format(eta, 'h:mm a, MMM d') : null,
           taskInfo: {
             hoursNeeded: hoursNeeded ? Math.round(hoursNeeded * 10) / 10 : null,
-            timeToStart: timeToStart,
-            isOverdue
+            timeToStart: timeToStart
           }
         });
         
@@ -230,8 +219,7 @@ export const StartEtaPredictor = ({
           eta: null,
           taskInfo: {
             hoursNeeded: null,
-            timeToStart: null,
-            isOverdue: false
+            timeToStart: null
           }
         });
         
@@ -314,15 +302,6 @@ export const StartEtaPredictor = ({
             </div>
           </div>
         </div>
-
-        {timelineEstimate?.taskInfo.isOverdue && (
-          <div className="flex items-start text-yellow-600 text-xs p-2 bg-yellow-50 rounded-md border border-yellow-200 mt-1">
-            <AlertTriangle size={14} className="mt-0.5 mr-1 flex-shrink-0" />
-            <span>
-              This task may take longer than expected. Consider adjusting priority or complexity.
-            </span>
-          </div>
-        )}
           
         {activeTaskCount !== null && activeTaskCount > maxConcurrentTasks && (
           <div className="flex items-center text-blue-600 text-xs p-2 bg-blue-50 rounded-md border border-blue-200 mt-2">
