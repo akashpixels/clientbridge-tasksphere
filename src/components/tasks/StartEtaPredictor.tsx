@@ -302,14 +302,6 @@ export const StartEtaPredictor = ({
             </div>
           </div>
         </div>
-          
-        {activeTaskCount !== null && activeTaskCount > maxConcurrentTasks && (
-          <div className="flex items-center text-blue-600 text-xs p-2 bg-blue-50 rounded-md border border-blue-200 mt-2">
-            <span>
-              Active tasks: {activeTaskCount} (adds {(activeTaskCount - maxConcurrentTasks) * 30} min delay)
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );
