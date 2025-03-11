@@ -56,7 +56,7 @@ const ProjectStats = ({ project, selectedMonth }: ProjectStatsProps) => {
       
      {/* Hours Progress Card */}
       <div 
-        className="relative w-[160px] h-[108px] border border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 overflow-hidden text-gray-900"
+        className="relative w-[160px] h-[108px] border border-border rounded-lg flex flex-col justify-center items-center gap-2 overflow-hidden text-gray-900"
         style={{
           background: `linear-gradient(to right, hsl(var(--card)) ${hoursPercentage}%, transparent ${hoursPercentage}%)`,
           transition: "background 0.5s ease"
@@ -73,7 +73,7 @@ const ProjectStats = ({ project, selectedMonth }: ProjectStatsProps) => {
       </div>
 
       {/* Subscription Status Card */}
-      <div className="relative w-[108px] h-[108px] border border-gray-200 rounded-lg flex flex-col items-center justify-center bg-card gap-2">
+      <div className="relative w-[108px] h-[108px] border border-border rounded-lg flex flex-col items-center justify-center bg-card gap-2">
         
         {/* Status Dot with Tooltip (Top-Right) */}
         <div

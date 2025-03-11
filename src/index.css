@@ -24,7 +24,8 @@
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border:240 5.9% 90%;
+    /* Updated border color to a soft tan that complements the background */
+    --border: 33 15% 88%;
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
     --radius: 0.375rem;
@@ -39,7 +40,7 @@
   }
 
   .glass-card {
-    @apply bg-card border border-[#e5e7eb];
+    @apply bg-card border border-border;
   }
 
   .hover-card {
