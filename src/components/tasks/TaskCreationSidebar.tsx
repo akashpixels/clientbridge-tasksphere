@@ -8,22 +8,16 @@ import { TaskForm } from "./TaskForm";
 import { useLayout } from "@/context/layout";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+
 export const TaskCreationSidebar = () => {
-  const {
-    toast
-  } = useToast();
-  const {
-    id: projectId
-  } = useParams<{
-    id: string;
-  }>();
+  const { toast } = useToast();
+  const { id: projectId } = useParams<{ id: string; }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTaskCount, setActiveTaskCount] = useState(0);
-  const {
-    closeRightSidebar
-  } = useLayout();
+  const { closeRightSidebar } = useLayout();
   const [taskCreated, setTaskCreated] = useState(false);
   const [createdTaskData, setCreatedTaskData] = useState<any>(null);
+
   const fetchActiveTaskCount = async () => {
     if (!projectId) return;
     try {
@@ -44,9 +38,11 @@ export const TaskCreationSidebar = () => {
       console.error("Error in fetchActiveTaskCount:", error);
     }
   };
+
   useEffect(() => {
     fetchActiveTaskCount();
   }, []);
+
   const handleSubmit = async (formData: any) => {
     if (!projectId) return;
     console.log("Submitting form data:", formData);
@@ -102,6 +98,7 @@ export const TaskCreationSidebar = () => {
       setIsSubmitting(false);
     }
   };
+
   const handleAddAnother = () => {
     setTaskCreated(false);
     setCreatedTaskData(null);
@@ -121,25 +118,35 @@ export const TaskCreationSidebar = () => {
       return 'Unknown';
     }
   };
-  return <div className="flex flex-col h-full overflow-hidden">
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
       <div className="flex justify-between items-center px-4 border-b sticky top-0 z-10 py-[5px]">
         <h2 className="font-semibold text-[14px]">
-          {taskCreated ? "Task Created Successfully" : activeTaskCount > 0 ? `${activeTaskCount} active task${activeTaskCount > 1 ? 's' : ''}` : 'No active tasks'}
+          {taskCreated 
+            ? "Task Created Successfully" 
+            : activeTaskCount > 0 
+              ? `${activeTaskCount} active task${activeTaskCount > 1 ? 's' : ''}` 
+              : 'No active tasks'
+          }
         </h2>
         <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
           <X size={18} />
         </Button>
       </div>
       <ScrollArea className="flex-1 px-4 py-2 overflow-y-auto">
-        {taskCreated ? <div className="space-y-6 pt-2">
+        {taskCreated ? (
+          <div className="space-y-6 pt-2 pb-20">
             <div className="bg-green-50 border border-green-200 rounded-md p-4">
               <p className="text-green-800 text-sm mb-2">Your task has been successfully created and added to the project.</p>
               <div className="text-sm space-y-2 mt-4">
                 <h3 className="font-medium">Task Details:</h3>
                 <div className="flex gap-2 items-center">
-                  {createdTaskData?.task_code && <Badge variant="outline" className="font-mono text-xs">
+                  {createdTaskData?.task_code && (
+                    <Badge variant="outline" className="font-mono text-xs">
                       {createdTaskData.task_code}
-                    </Badge>}
+                    </Badge>
+                  )}
                   <p><span className="font-medium">Description:</span> {createdTaskData?.details}</p>
                 </div>
                 <p><span className="font-medium">Status:</span> {createdTaskData?.current_status_id === 1 ? 'Open' : 'Pending'}</p>
@@ -152,7 +159,15 @@ export const TaskCreationSidebar = () => {
                 Add Another Task
               </Button>
             </div>
-          </div> : <TaskForm onSubmit={handleSubmit} isSubmitting={isSubmitting} activeTaskCount={activeTaskCount} />}
+          </div>
+        ) : (
+          <TaskForm 
+            onSubmit={handleSubmit} 
+            isSubmitting={isSubmitting} 
+            activeTaskCount={activeTaskCount} 
+          />
+        )}
       </ScrollArea>
-    </div>;
+    </div>
+  );
 };

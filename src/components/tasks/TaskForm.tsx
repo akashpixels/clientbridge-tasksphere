@@ -248,9 +248,16 @@ export const TaskForm = ({
   
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        <StartEtaPredictor taskTypeId={timelineParams.taskTypeId} priorityLevelId={timelineParams.priorityLevelId} complexityLevelId={timelineParams.complexityLevelId} projectId={projectId} compact={true} activeTaskCount={activeTaskCount} />
+        <StartEtaPredictor 
+          taskTypeId={timelineParams.taskTypeId} 
+          priorityLevelId={timelineParams.priorityLevelId} 
+          complexityLevelId={timelineParams.complexityLevelId} 
+          projectId={projectId} 
+          compact={true} 
+          activeTaskCount={activeTaskCount} 
+        />
 
-        <div className="space-y-5 py-0">
+        <div className="space-y-5 py-0 pb-20">
           <FormField control={form.control} name="details" render={({
           field
         }) => <FormItem>
@@ -422,7 +429,7 @@ export const TaskForm = ({
           </div>
         </div>
 
-        <div className="px-4 py-3 border-t sticky bottom-0  z-10 mt-4 -mx-4">
+        <div className="px-4 py-3 border-t sticky bottom-0 bg-background z-10 mt-4 -mx-4">
           <Button 
             type="submit" 
             disabled={isSubmitting || !isFormValid} 
