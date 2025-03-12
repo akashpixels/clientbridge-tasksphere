@@ -1,3 +1,4 @@
+
 import { format, formatDistanceToNow, parseISO, isValid } from "date-fns";
 
 export function formatDate(date: string | Date): string {
@@ -45,6 +46,17 @@ export function formatTimelineTime(date: string | Date | null): string {
   try {
     const parsedDate = typeof date === "string" ? parseISO(date) : date;
     return format(parsedDate, "haaa, MMM d").toLowerCase();
+  } catch (e) {
+    return typeof date === "string" ? date : "";
+  }
+}
+
+// Format base time for timeline display
+export function formatBaseTime(date: string | Date | null): string {
+  if (!date) return "";
+  try {
+    const parsedDate = typeof date === "string" ? parseISO(date) : date;
+    return format(parsedDate, "HH:mm MMM d");
   } catch (e) {
     return typeof date === "string" ? date : "";
   }
