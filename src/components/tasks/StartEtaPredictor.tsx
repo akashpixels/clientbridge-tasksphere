@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatTimelineTime, formatHourDifference, formatBaseTime } from "@/lib/date-utils";
+import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
 import { supabase } from "@/integrations/supabase/client";
 
 interface StartEtaPredictorProps {
@@ -238,7 +237,7 @@ export const StartEtaPredictor = ({
                 Start
               </div>
               <div className="text-[9px] mt-0.5 text-gray-500 text-center min-h-[24px]">
-                {formatTimeWithLineBreak(formatBaseTime(timelineEstimate?.startTime))}
+                {formatTimeWithLineBreak(formatTimelineTime(timelineEstimate?.startTime))}
               </div>
             </div>
             
@@ -249,7 +248,7 @@ export const StartEtaPredictor = ({
                 </div>
               </div>
               <div className="text-[9px] mt-0.5 text-gray-500 text-right min-h-[24px]">
-                {formatTimeWithLineBreak(formatBaseTime(timelineEstimate?.eta))}
+                {formatTimeWithLineBreak(formatTimelineTime(timelineEstimate?.eta))}
               </div>
             </div>
           </div>
