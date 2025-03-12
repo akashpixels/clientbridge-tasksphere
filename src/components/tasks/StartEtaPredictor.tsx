@@ -50,7 +50,7 @@ export const StartEtaPredictor = ({
       try {
         setIsLoading(true);
         
-        // First, get project timeline info
+        // Use project_timeline view directly for accurate data
         const { data: projectTimeline, error: timelineError } = await supabase
           .from('project_timeline')
           .select('*')
@@ -89,6 +89,17 @@ export const StartEtaPredictor = ({
           return;
         }
         
+        // Use priority level to adjust start time if needed
+        const { data: priorityData, error: priorityError } = await supabase
+          .from('priority_levels')
+          .select('multiplier, time_to_start')
+          .eq('id', priorityLevelId || 2)
+          .maybeSingle();
+          
+        if (priorityError) {
+          console.error('Error fetching priority level:', priorityError);
+        }
+        
         // Calculate hours needed for task - simplified calculation
         const baseDurationHours = taskTypeData?.base_duration ? 
           parseInterval(taskTypeData.base_duration as string) : 2;
@@ -99,7 +110,7 @@ export const StartEtaPredictor = ({
         const hoursNeeded = baseDurationHours * complexityMultiplier;
         
         // Calculate when task can start based on project timeline
-        const baseTime = projectTimeline ? new Date(projectTimeline.base_time as string) : new Date();
+        const baseTime = projectTimeline?.base_time ? new Date(projectTimeline.base_time) : new Date();
         const gapHours = projectTimeline?.gap_time || 0;
         const activeCount = projectTimeline?.active_task_count || 0;
         const maxConcurrent = projectTimeline?.max_concurrent_tasks || 1;
@@ -107,9 +118,12 @@ export const StartEtaPredictor = ({
         // If project is at capacity, add delay based on earliest ETA
         const mustWait = activeCount >= maxConcurrent;
         
+        // Use priority to potentially adjust wait time
+        const isPriorityCritical = priorityLevelId === 1;
+        
         // Calculate the final start time and ETA
         const startTime = new Date(baseTime);
-        if (mustWait && gapHours > 0) {
+        if (mustWait && !isPriorityCritical && gapHours > 0) {
           startTime.setHours(startTime.getHours() + gapHours);
         }
         
@@ -137,7 +151,7 @@ export const StartEtaPredictor = ({
     };
     
     fetchTimelineData();
-  }, [projectId, taskTypeId, complexityLevelId]);
+  }, [projectId, taskTypeId, complexityLevelId, priorityLevelId]);
 
   // Helper function to parse PostgreSQL interval to hours
   const parseInterval = (interval: string): number => {

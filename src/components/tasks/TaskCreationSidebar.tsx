@@ -22,19 +22,19 @@ export const TaskCreationSidebar = () => {
   const fetchActiveTaskCount = async () => {
     if (!projectId) return;
     try {
-      const {
-        count,
-        error
-      } = await supabase.from('tasks').select('*', {
-        count: 'exact',
-        head: true
-      }).eq('project_id', projectId).in('current_status_id', [1, 2, 3, 6]); // Open, Pending, In Progress, Awaiting Input
+      // Use project_timeline view to get pre-calculated active task count
+      const { data, error } = await supabase
+        .from('project_timeline')
+        .select('active_task_count')
+        .eq('project_id', projectId)
+        .maybeSingle();
 
       if (error) {
-        console.error("Error fetching active task count:", error);
+        console.error("Error fetching project timeline:", error);
         return;
       }
-      setActiveTaskCount(count || 0);
+      
+      setActiveTaskCount(data?.active_task_count || 0);
     } catch (error) {
       console.error("Error in fetchActiveTaskCount:", error);
     }
@@ -42,7 +42,7 @@ export const TaskCreationSidebar = () => {
 
   useEffect(() => {
     fetchActiveTaskCount();
-  }, []);
+  }, [projectId]);
 
   const handleSubmit = async (formData: any) => {
     if (!projectId) return;
