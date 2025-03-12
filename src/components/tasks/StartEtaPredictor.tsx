@@ -1,7 +1,5 @@
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { format, addHours, addDays, addMinutes } from "date-fns";
+import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
 
@@ -32,204 +30,17 @@ export const StartEtaPredictor = ({
   compact = false,
   activeTaskCount = null
 }: StartEtaPredictorProps) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [taskType, setTaskType] = useState<any>(null);
-  const [priorityLevel, setPriorityLevel] = useState<any>(null);
-  const [complexityLevel, setComplexityLevel] = useState<any>(null);
-  const [maxConcurrentTasks, setMaxConcurrentTasks] = useState(1);
-  const [timelineEstimate, setTimelineEstimate] = useState<TimelineEstimate | null>(null);
-
-  useEffect(() => {
-    const fetchTaskType = async () => {
-      if (!taskTypeId) return;
-      const { data, error } = await supabase
-        .from('task_types')
-        .select('*')
-        .eq('id', taskTypeId)
-        .single();
-        
-      if (error) {
-        console.error("Error fetching task type:", error);
-        return;
-      }
-      setTaskType(data);
-    };
-    
-    if (taskTypeId) {
-      fetchTaskType();
-    } else {
-      setTaskType(null);
+  // Use static sample data instead of calculations
+  const [isLoading] = useState(false);
+  const [timelineEstimate] = useState<TimelineEstimate>({
+    currentTime: "9:30 am",
+    startTime: "11:45 am, Aug 15",
+    eta: "2:30 pm, Aug 15",
+    taskInfo: {
+      hoursNeeded: 2.5,
+      timeToStart: 2
     }
-  }, [taskTypeId]);
-
-  useEffect(() => {
-    const fetchPriorityLevel = async () => {
-      if (!priorityLevelId) return;
-      const { data, error } = await supabase
-        .from('priority_levels')
-        .select('*')
-        .eq('id', priorityLevelId)
-        .single();
-        
-      if (error) {
-        console.error("Error fetching priority level:", error);
-        return;
-      }
-      setPriorityLevel(data);
-    };
-    
-    if (priorityLevelId) {
-      fetchPriorityLevel();
-    } else {
-      setPriorityLevel(null);
-    }
-  }, [priorityLevelId]);
-
-  useEffect(() => {
-    const fetchComplexityLevel = async () => {
-      if (!complexityLevelId) return;
-      const { data, error } = await supabase
-        .from('complexity_levels')
-        .select('*')
-        .eq('id', complexityLevelId)
-        .single();
-        
-      if (error) {
-        console.error("Error fetching complexity level:", error);
-        return;
-      }
-      setComplexityLevel(data);
-    };
-    
-    if (complexityLevelId) {
-      fetchComplexityLevel();
-    } else {
-      setComplexityLevel(null);
-    }
-  }, [complexityLevelId]);
-
-  useEffect(() => {
-    const fetchProjectConcurrency = async () => {
-      if (!projectId) return;
-      try {
-        const { data, error } = await supabase
-          .from('projects')
-          .select('max_concurrent_tasks')
-          .eq('id', projectId)
-          .single();
-          
-        if (error) throw error;
-        if (data && data.max_concurrent_tasks) {
-          setMaxConcurrentTasks(data.max_concurrent_tasks);
-        }
-      } catch (err: any) {
-        console.error("Error fetching project concurrency:", err);
-      }
-    };
-    
-    if (projectId) {
-      fetchProjectConcurrency();
-    }
-  }, [projectId]);
-
-  useEffect(() => {
-    const calculateTimelineEstimate = async () => {
-      try {
-        setIsLoading(true);
-        const now = new Date();
-        let startTime: Date | null = null;
-        let eta: Date | null = null;
-        let hoursNeeded: number | null = null;
-        let timeToStart: number | null = null;
-        
-        if (taskType && priorityLevel && complexityLevel) {
-          startTime = new Date();
-          
-          if (priorityLevel.time_to_start) {
-            const timeToStartMatch = priorityLevel.time_to_start.match(/(\d+):(\d+):(\d+)/);
-            if (timeToStartMatch) {
-              const hours = parseInt(timeToStartMatch[1]);
-              const minutes = parseInt(timeToStartMatch[2]);
-              timeToStart = hours + minutes / 60;
-              
-              if (activeTaskCount === 0) {
-                startTime = addHours(startTime, hours);
-                startTime = addMinutes(startTime, minutes);
-              } else {
-                startTime = addHours(startTime, Math.max(1, hours));
-              }
-            }
-          }
-          
-          if (activeTaskCount !== null && activeTaskCount > maxConcurrentTasks) {
-            const queueDelay = (activeTaskCount - maxConcurrentTasks) * 30;
-            startTime = addMinutes(startTime, queueDelay);
-          }
-          
-          if (taskType.base_duration) {
-            const baseDurationMatch = taskType.base_duration.match(/(\d+):(\d+):(\d+)/);
-            if (baseDurationMatch) {
-              const hours = parseInt(baseDurationMatch[1]);
-              const minutes = parseInt(baseDurationMatch[2]);
-              const baseDuration = hours + minutes / 60;
-              
-              if (complexityLevel.multiplier) {
-                hoursNeeded = baseDuration * complexityLevel.multiplier;
-              } else {
-                hoursNeeded = baseDuration;
-              }
-            }
-          }
-          
-          if (startTime && hoursNeeded) {
-            eta = new Date(startTime);
-            eta = addHours(eta, hoursNeeded);
-            
-            const etaHour = eta.getHours();
-            const workingHoursInDay = 8;
-            
-            if (etaHour >= 18) {
-              const hoursOver = etaHour - 18;
-              const daysToAdd = Math.floor(hoursOver / workingHoursInDay) + 1;
-              const remainingHours = hoursOver % workingHoursInDay;
-              
-              eta = addDays(eta, daysToAdd);
-              eta.setHours(10 + remainingHours, eta.getMinutes(), 0, 0);
-            }
-          }
-        }
-        
-        setTimelineEstimate({
-          currentTime: format(now, 'h:mm a'),
-          startTime: startTime ? format(startTime, 'h:mm a, MMM d') : null,
-          eta: eta ? format(eta, 'h:mm a, MMM d') : null,
-          taskInfo: {
-            hoursNeeded: hoursNeeded ? Math.round(hoursNeeded * 10) / 10 : null,
-            timeToStart: timeToStart
-          }
-        });
-        
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error calculating timeline:", error);
-        const now = new Date();
-        
-        setTimelineEstimate({
-          currentTime: format(now, 'h:mm a'),
-          startTime: null,
-          eta: null,
-          taskInfo: {
-            hoursNeeded: null,
-            timeToStart: null
-          }
-        });
-        
-        setIsLoading(false);
-      }
-    };
-    
-    calculateTimelineEstimate();
-  }, [taskType, priorityLevel, complexityLevel, activeTaskCount, maxConcurrentTasks, projectId]);
+  });
 
   if (isLoading) {
     return (
