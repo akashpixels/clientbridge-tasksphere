@@ -30,6 +30,7 @@ interface TasksTabContentProps {
       last_name: string;
     } | null;
     task_code?: string;
+    awaiting_input?: boolean;
     start_time?: string | null;
     eta?: string | null;
   })[];

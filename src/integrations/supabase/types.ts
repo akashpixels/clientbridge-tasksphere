@@ -962,6 +962,7 @@ export type Database = {
           is_active: boolean
           is_default: boolean
           name: string
+          type: Database["public"]["Enums"]["task_status_type"] | null
           updated_at: string
         }
         Insert: {
@@ -972,6 +973,7 @@ export type Database = {
           is_active?: boolean
           is_default?: boolean
           name: string
+          type?: Database["public"]["Enums"]["task_status_type"] | null
           updated_at?: string
         }
         Update: {
@@ -982,6 +984,7 @@ export type Database = {
           is_active?: boolean
           is_default?: boolean
           name?: string
+          type?: Database["public"]["Enums"]["task_status_type"] | null
           updated_at?: string
         }
         Relationships: []
@@ -1021,6 +1024,7 @@ export type Database = {
           actual_hours_spent: number | null
           actual_start_time: string | null
           assigned_user_id: string | null
+          awaiting_input: boolean | null
           complexity_level_id: number | null
           created_at: string
           created_by: string
@@ -1046,6 +1050,7 @@ export type Database = {
           actual_hours_spent?: number | null
           actual_start_time?: string | null
           assigned_user_id?: string | null
+          awaiting_input?: boolean | null
           complexity_level_id?: number | null
           created_at?: string
           created_by: string
@@ -1071,6 +1076,7 @@ export type Database = {
           actual_hours_spent?: number | null
           actual_start_time?: string | null
           assigned_user_id?: string | null
+          awaiting_input?: boolean | null
           complexity_level_id?: number | null
           created_at?: string
           created_by?: string
@@ -1293,6 +1299,7 @@ export type Database = {
         | "SEO"
         | "Marketing"
         | "General"
+      task_status_type: "Scheduled" | "Active" | "Completion" | "Special Cases"
     }
     CompositeTypes: {
       [_ in never]: never

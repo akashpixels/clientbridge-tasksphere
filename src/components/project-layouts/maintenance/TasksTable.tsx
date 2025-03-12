@@ -1,4 +1,3 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -44,6 +43,8 @@ interface TasksTableProps {
     } | null;
     task_code?: string;
     queue_position?: number;
+    start_time?: string | null;
+    eta?: string | null;
   })[];
   sortConfig: {
     key: string;
@@ -65,7 +66,11 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
     return format(new Date(date), "MMM d, h:mm a");
   };
 
-  const getStatusColor = (status: { name: string | null, color_hex: string | null }) => {
+  const getStatusColor = (status: { name: string | null, color_hex: string | null }, awaiting_input?: boolean) => {
+    if (awaiting_input) {
+      return { bg: '#FEF9C3', text: '#854D0E' }; // Yellow background for awaiting input
+    }
+
     if (!status?.color_hex) {
       return { bg: '#F3F4F6', text: '#374151' };
     }
@@ -240,11 +245,11 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
                 <span 
                   className="px-2 py-1 text-xs rounded-full font-semibold"
                   style={{
-                    backgroundColor: getStatusColor(task.status || { name: null, color_hex: null }).bg,
-                    color: getStatusColor(task.status || { name: null, color_hex: null }).text
+                    backgroundColor: getStatusColor(task.status || { name: null, color_hex: null }, task.awaiting_input).bg,
+                    color: getStatusColor(task.status || { name: null, color_hex: null }, task.awaiting_input).text
                   }}
                 >
-                  {task.status?.name === 'Open' ? 'Starts at' : task.status?.name}
+                  {task.awaiting_input ? 'Awaiting Input' : task.status?.name}
                 </span>
                 {task.task_completed_at && task.actual_hours_spent && (
                   <span className="text-xs text-gray-500 pl-2">
