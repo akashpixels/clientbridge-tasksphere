@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
@@ -106,10 +105,10 @@ export const StartEtaPredictor = ({
         
         // Calculate hours needed for task
         const timeToStartHours = priorityData?.time_to_start ? 
-          parseInterval(priorityData.time_to_start) : 0;
+          parseInterval(priorityData.time_to_start as string) : 0;
           
         const baseDurationHours = taskTypeData?.base_duration ? 
-          parseInterval(taskTypeData.base_duration) : 2;
+          parseInterval(taskTypeData.base_duration as string) : 2;
           
         const priorityMultiplier = priorityData?.multiplier || 1;
         const complexityMultiplier = complexityData?.multiplier || 1;
@@ -118,7 +117,7 @@ export const StartEtaPredictor = ({
         const hoursNeeded = (baseDurationHours * priorityMultiplier * complexityMultiplier);
         
         // Calculate when task can start based on project timeline
-        const baseTime = projectTimeline ? new Date(projectTimeline.base_time) : new Date();
+        const baseTime = projectTimeline ? new Date(projectTimeline.base_time as string) : new Date();
         const gapHours = projectTimeline?.gap_time || 0;
         const activeCount = projectTimeline?.active_task_count || 0;
         const maxConcurrent = projectTimeline?.max_concurrent_tasks || 1;

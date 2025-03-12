@@ -324,7 +324,7 @@ export const TaskForm = ({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'Desktop' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('Desktop')}>
+                          <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'desktop' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('desktop')}>
                             <Monitor size={24} />
                           </div>
                         </TooltipTrigger>
@@ -337,7 +337,7 @@ export const TaskForm = ({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'Mobile' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('Mobile')}>
+                          <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'mobile' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('mobile')}>
                             <Smartphone size={24} />
                           </div>
                         </TooltipTrigger>
@@ -350,7 +350,7 @@ export const TaskForm = ({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'Both' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('Both')}>
+                          <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'both' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('both')}>
                             <MonitorSmartphone size={24} />
                           </div>
                         </TooltipTrigger>
@@ -451,3 +451,4 @@ export const TaskForm = ({
       </form>
     </Form>;
 };
+
