@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
@@ -18,7 +19,6 @@ interface TimelineEstimate {
   eta: string | null;
   taskInfo: {
     hoursNeeded: number | null;
-    timeToStart: number | null;
   };
 }
 
@@ -36,13 +36,12 @@ export const StartEtaPredictor = ({
     startTime: null,
     eta: null,
     taskInfo: {
-      hoursNeeded: null,
-      timeToStart: null
+      hoursNeeded: null
     }
   });
 
   useEffect(() => {
-    if (!projectId || !taskTypeId || !priorityLevelId) {
+    if (!projectId || !taskTypeId) {
       setIsLoading(false);
       return;
     }
@@ -60,19 +59,6 @@ export const StartEtaPredictor = ({
           
         if (timelineError) {
           console.error('Error fetching project timeline:', timelineError);
-          setIsLoading(false);
-          return;
-        }
-        
-        // Get time to start from priority level
-        const { data: priorityData, error: priorityError } = await supabase
-          .from('priority_levels')
-          .select('time_to_start, multiplier')
-          .eq('id', priorityLevelId)
-          .maybeSingle();
-          
-        if (priorityError) {
-          console.error('Error fetching priority level:', priorityError);
           setIsLoading(false);
           return;
         }
@@ -103,18 +89,14 @@ export const StartEtaPredictor = ({
           return;
         }
         
-        // Calculate hours needed for task
-        const timeToStartHours = priorityData?.time_to_start ? 
-          parseInterval(priorityData.time_to_start as string) : 0;
-          
+        // Calculate hours needed for task - simplified calculation
         const baseDurationHours = taskTypeData?.base_duration ? 
           parseInterval(taskTypeData.base_duration as string) : 2;
           
-        const priorityMultiplier = priorityData?.multiplier || 1;
         const complexityMultiplier = complexityData?.multiplier || 1;
         
-        // Calculate total hours needed for task
-        const hoursNeeded = (baseDurationHours * priorityMultiplier * complexityMultiplier);
+        // Calculate total hours needed for task using simplified formula
+        const hoursNeeded = baseDurationHours * complexityMultiplier;
         
         // Calculate when task can start based on project timeline
         const baseTime = projectTimeline ? new Date(projectTimeline.base_time as string) : new Date();
@@ -124,12 +106,11 @@ export const StartEtaPredictor = ({
         
         // If project is at capacity, add delay based on earliest ETA
         const mustWait = activeCount >= maxConcurrent;
-        const timeToStart = mustWait ? gapHours + timeToStartHours : timeToStartHours;
-                
+        
         // Calculate the final start time and ETA
         const startTime = new Date(baseTime);
-        if (timeToStart > 0) {
-          startTime.setHours(startTime.getHours() + timeToStart);
+        if (mustWait && gapHours > 0) {
+          startTime.setHours(startTime.getHours() + gapHours);
         }
         
         const etaTime = new Date(startTime);
@@ -144,8 +125,7 @@ export const StartEtaPredictor = ({
           startTime: startTime.toISOString(),
           eta: etaTime.toISOString(),
           taskInfo: {
-            hoursNeeded,
-            timeToStart
+            hoursNeeded
           }
         });
         
@@ -157,7 +137,7 @@ export const StartEtaPredictor = ({
     };
     
     fetchTimelineData();
-  }, [projectId, taskTypeId, priorityLevelId, complexityLevelId]);
+  }, [projectId, taskTypeId, complexityLevelId]);
 
   // Helper function to parse PostgreSQL interval to hours
   const parseInterval = (interval: string): number => {
@@ -190,14 +170,9 @@ export const StartEtaPredictor = ({
     );
   }
 
-  const getTimeBetweenNodes = (nodeType: 'start' | 'eta') => {
-    if (nodeType === 'start') {
-      if (!timelineEstimate?.taskInfo.timeToStart) return "";
-      return `${formatHourDifference(timelineEstimate.taskInfo.timeToStart)}`;
-    } else {
-      if (!timelineEstimate?.taskInfo.hoursNeeded) return "";
-      return formatHourDifference(timelineEstimate.taskInfo.hoursNeeded);
-    }
+  const getTimeBetweenNodes = () => {
+    if (!timelineEstimate?.taskInfo.hoursNeeded) return "";
+    return formatHourDifference(timelineEstimate.taskInfo.hoursNeeded);
   };
 
   const formatTimeWithLineBreak = (timeString: string | null): React.ReactNode => {
@@ -215,12 +190,8 @@ export const StartEtaPredictor = ({
     <div className="sticky top-0 bg-background z-10">
       <div className="pt-7 pb-0">
         <div className="relative">
-          <div className="absolute top-[-8px] left-[15%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
-            {getTimeBetweenNodes('start')}
-          </div>
-          
           <div className="absolute top-[-8px] left-[60%] -translate-x-1/2 text-[9px] text-gray-400 font-medium">
-            {getTimeBetweenNodes('eta')}
+            {getTimeBetweenNodes()}
           </div>
           
           <div className="flex justify-between items-center mb-2 pt-1 pb-1 relative min-h-[32px]">
