@@ -43,6 +43,7 @@ interface TasksTableProps {
     } | null;
     task_code?: string;
     queue_position?: number;
+    awaiting_input?: boolean;
     start_time?: string | null;
     eta?: string | null;
   })[];
@@ -53,9 +54,17 @@ interface TasksTableProps {
   onSort: (key: string) => void;
   onImageClick: (image: string, images: string[]) => void;
   onCommentClick: (taskId: string) => void;
+  selectedTaskId?: string;
 }
 
-const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }: TasksTableProps) => {
+const TasksTable = ({ 
+  tasks, 
+  sortConfig, 
+  onSort, 
+  onImageClick, 
+  onCommentClick,
+  selectedTaskId 
+}: TasksTableProps) => {
   const { setRightSidebarContent } = useLayout();
 
   const formatETA = (date: string) => {
@@ -68,7 +77,7 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
 
   const getStatusColor = (status: { name: string | null, color_hex: string | null }, awaiting_input?: boolean) => {
     if (awaiting_input) {
-      return { bg: '#FEF9C3', text: '#854D0E' }; // Yellow background for awaiting input
+      return { bg: '#FEF9C3', text: '#854D0E' };
     }
 
     if (!status?.color_hex) {
@@ -221,10 +230,15 @@ const TasksTable = ({ tasks, sortConfig, onSort, onImageClick, onCommentClick }:
         {tasks.map((task) => (
           <TableRow 
             key={task.id}
-            className="cursor-pointer hover:bg-muted/30"
+            className={`cursor-pointer ${selectedTaskId === task.id ? 'bg-muted/30' : 'hover:bg-muted/30'}`}
             onClick={() => {
               onCommentClick(task.id);
-              setRightSidebarContent(<TaskCommentThread taskId={task.id} />);
+              setRightSidebarContent(
+                <TaskCommentThread 
+                  taskId={task.id} 
+                  taskCode={task.task_code || 'No Code'} 
+                />
+              );
             }}
           >
             <TableCell>

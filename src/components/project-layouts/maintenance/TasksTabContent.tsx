@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from "@/components/ui/card";
 import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
@@ -51,6 +51,7 @@ const TasksTabContent = ({
   onImageClick,
   onCommentClick,
 }: TasksTabContentProps) => {
+  const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
   
   // Add diagnostic output
   useEffect(() => {
@@ -99,6 +100,12 @@ const TasksTabContent = ({
     };
   }, []);
 
+  // Handle task selection
+  const handleTaskClick = (taskId: string) => {
+    setSelectedTaskId(taskId);
+    onCommentClick(taskId);
+  };
+
   return (
     <Card className="p-0">
       {isLoadingTasks ? (
@@ -113,7 +120,8 @@ const TasksTabContent = ({
             sortConfig={sortConfig}
             onSort={onSort}
             onImageClick={onImageClick}
-            onCommentClick={onCommentClick}
+            onCommentClick={handleTaskClick}
+            selectedTaskId={selectedTaskId}
           />
         </div>
       ) : (

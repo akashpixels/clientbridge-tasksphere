@@ -2,16 +2,20 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import CommentList from "./CommentList";
 import AttachmentHandler from "./AttachmentHandler";
 import CommentSender from "./CommentSender";
 import CommentInputRequest from "./CommentInputRequest";
 import PreviewDialog from "./PreviewDialog";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { useLayout } from "@/context/layout";
 
 interface TaskCommentThreadProps {
   taskId: string;
+  taskCode?: string;
 }
 
 interface Comment {
@@ -27,13 +31,14 @@ interface Comment {
   parent_id?: string;
 }
 
-const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
+const TaskCommentThread = ({ taskId, taskCode = "Task" }: TaskCommentThreadProps) => {
   const [newComment, setNewComment] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [respondingToComment, setRespondingToComment] = useState<string | null>(null);
   const [isRequestingInput, setIsRequestingInput] = useState(false);
   const queryClient = useQueryClient();
+  const { closeRightSidebar } = useLayout();
 
   const { data: comments, isLoading } = useQuery({
     queryKey: ['taskComments', taskId],
@@ -117,11 +122,19 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   };
 
   if (isLoading) {
-    return <Loader2 className="w-6 h-6 animate-spin text-gray-500" />;
+    return <Loader2 className="w-6 h-6 animate-spin text-gray-500 m-auto p-6" />;
   }
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 bg-white border-b">
+        <div className="font-semibold">{taskCode}</div>
+        <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+
       <div className="flex-1 overflow-y-auto">
         <CommentList 
           comments={comments} 
