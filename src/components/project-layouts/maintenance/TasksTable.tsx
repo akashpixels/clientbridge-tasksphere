@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -285,9 +286,9 @@ const TasksTable = ({
             </TableCell>
             <TableCell>
               <div className="flex gap-1">
-                {task.target_device === 'Desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
-                {task.target_device === 'Mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
-                {task.target_device === 'Both' && (
+                {task.target_device === 'desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
+                {task.target_device === 'mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
+                {task.target_device === 'both' && (
                   <>
                     <Monitor className="w-4 h-4 text-gray-500" />
                     <Smartphone className="w-4 h-4 text-gray-500" />

@@ -24,7 +24,7 @@ const taskFormSchema = z.object({
   }),
   priority_level_id: z.coerce.number().default(3),
   complexity_level_id: z.coerce.number().default(3),
-  target_device: z.enum(["Desktop", "Mobile", "Both"]).default("Both"),
+  target_device: z.enum(["desktop", "mobile", "both"]).default("both"),
   reference_links: z.array(z.string().url({
     message: "Must be a valid URL"
   })).default([]),
@@ -73,7 +73,7 @@ export const TaskForm = ({
       details: "",
       complexity_level_id: 3,
       priority_level_id: 3,
-      target_device: "Both",
+      target_device: "both",
       reference_links: [],
       image_urls: []
     },
