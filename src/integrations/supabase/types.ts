@@ -565,7 +565,7 @@ export type Database = {
       project_subscriptions: {
         Row: {
           auto_renew: boolean
-          billing_cycle: Database["public"]["Enums"]["billing_cycle_enum"]
+          billing_cycle: Database["public"]["Enums"]["billing_cycle"]
           created_at: string
           hours_allotted: number
           id: string
@@ -578,7 +578,7 @@ export type Database = {
         }
         Insert: {
           auto_renew?: boolean
-          billing_cycle?: Database["public"]["Enums"]["billing_cycle_enum"]
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
           created_at?: string
           hours_allotted?: number
           id?: string
@@ -591,7 +591,7 @@ export type Database = {
         }
         Update: {
           auto_renew?: boolean
-          billing_cycle?: Database["public"]["Enums"]["billing_cycle_enum"]
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
           created_at?: string
           hours_allotted?: number
           id?: string
@@ -959,7 +959,6 @@ export type Database = {
           created_at: string
           description: string | null
           id: number
-          is_active: boolean
           is_default: boolean
           name: string
           type: Database["public"]["Enums"]["task_status_type"] | null
@@ -970,7 +969,6 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: number
-          is_active?: boolean
           is_default?: boolean
           name: string
           type?: Database["public"]["Enums"]["task_status_type"] | null
@@ -981,7 +979,6 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: number
-          is_active?: boolean
           is_default?: boolean
           name?: string
           type?: Database["public"]["Enums"]["task_status_type"] | null
@@ -1287,19 +1284,19 @@ export type Database = {
     }
     Enums: {
       attachment_type: "image" | "document" | "other"
-      billing_cycle_enum: "monthly" | "quarterly" | "yearly" | "half yearly"
-      device_type: "Mobile" | "Desktop" | "Both"
-      gender_enum: "Male" | "Female" | "Other"
+      billing_cycle: "monthly" | "quarterly" | "yearly" | "half yearly"
+      device_type: "mobile" | "desktop" | "both"
+      gender_enum: "male" | "female" | "other"
       input_status: "requested" | "submitted" | "approved" | "re-requested"
       payment_status: "paid" | "pending" | "overdue" | "cancelled"
       subscription_status: "active" | "inactive"
       task_categories:
-        | "Design"
-        | "Development"
-        | "SEO"
-        | "Marketing"
-        | "General"
-      task_status_type: "Scheduled" | "Active" | "Completion" | "Special Cases"
+        | "design"
+        | "development"
+        | "seo"
+        | "marketing"
+        | "general"
+      task_status_type: "scheduled" | "active" | "completion" | "specialcase"
     }
     CompositeTypes: {
       [_ in never]: never

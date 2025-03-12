@@ -1,7 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StartEtaPredictorProps {
   taskTypeId?: number | null;
@@ -24,23 +25,162 @@ interface TimelineEstimate {
 
 export const StartEtaPredictor = ({
   taskTypeId,
-  priorityLevelId,
+  priorityLevelId = 2,
   complexityLevelId = 3,
   projectId,
   compact = false,
   activeTaskCount = null
 }: StartEtaPredictorProps) => {
-  // Use static sample data instead of calculations
-  const [isLoading] = useState(false);
-  const [timelineEstimate] = useState<TimelineEstimate>({
-    currentTime: "9:30 am",
-    startTime: "11:45 am, Aug 15",
-    eta: "2:30 pm, Aug 15",
+  const [isLoading, setIsLoading] = useState(true);
+  const [timelineEstimate, setTimelineEstimate] = useState<TimelineEstimate>({
+    currentTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    startTime: null,
+    eta: null,
     taskInfo: {
-      hoursNeeded: 2.5,
-      timeToStart: 2
+      hoursNeeded: null,
+      timeToStart: null
     }
   });
+
+  useEffect(() => {
+    if (!projectId || !taskTypeId || !priorityLevelId) {
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchTimelineData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // First, get project timeline info
+        const { data: projectTimeline, error: timelineError } = await supabase
+          .from('project_timeline')
+          .select('*')
+          .eq('project_id', projectId)
+          .maybeSingle();
+          
+        if (timelineError) {
+          console.error('Error fetching project timeline:', timelineError);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Get time to start from priority level
+        const { data: priorityData, error: priorityError } = await supabase
+          .from('priority_levels')
+          .select('time_to_start, multiplier')
+          .eq('id', priorityLevelId)
+          .maybeSingle();
+          
+        if (priorityError) {
+          console.error('Error fetching priority level:', priorityError);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Get task duration base from task type
+        const { data: taskTypeData, error: taskTypeError } = await supabase
+          .from('task_types')
+          .select('base_duration')
+          .eq('id', taskTypeId)
+          .maybeSingle();
+          
+        if (taskTypeError) {
+          console.error('Error fetching task type:', taskTypeError);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Get complexity multiplier
+        const { data: complexityData, error: complexityError } = await supabase
+          .from('complexity_levels')
+          .select('multiplier')
+          .eq('id', complexityLevelId || 3)
+          .maybeSingle();
+          
+        if (complexityError) {
+          console.error('Error fetching complexity level:', complexityError);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Calculate hours needed for task
+        const timeToStartHours = priorityData?.time_to_start ? 
+          parseInterval(priorityData.time_to_start) : 0;
+          
+        const baseDurationHours = taskTypeData?.base_duration ? 
+          parseInterval(taskTypeData.base_duration) : 2;
+          
+        const priorityMultiplier = priorityData?.multiplier || 1;
+        const complexityMultiplier = complexityData?.multiplier || 1;
+        
+        // Calculate total hours needed for task
+        const hoursNeeded = (baseDurationHours * priorityMultiplier * complexityMultiplier);
+        
+        // Calculate when task can start based on project timeline
+        const baseTime = projectTimeline ? new Date(projectTimeline.base_time) : new Date();
+        const gapHours = projectTimeline?.gap_time || 0;
+        const activeCount = projectTimeline?.active_task_count || 0;
+        const maxConcurrent = projectTimeline?.max_concurrent_tasks || 1;
+        
+        // If project is at capacity, add delay based on earliest ETA
+        const mustWait = activeCount >= maxConcurrent;
+        const timeToStart = mustWait ? gapHours + timeToStartHours : timeToStartHours;
+                
+        // Calculate the final start time and ETA
+        const startTime = new Date(baseTime);
+        if (timeToStart > 0) {
+          startTime.setHours(startTime.getHours() + timeToStart);
+        }
+        
+        const etaTime = new Date(startTime);
+        etaTime.setHours(etaTime.getHours() + hoursNeeded);
+        
+        // Format the timestamps as locale string
+        const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        // Update the timeline estimate state
+        setTimelineEstimate({
+          currentTime,
+          startTime: startTime.toISOString(),
+          eta: etaTime.toISOString(),
+          taskInfo: {
+            hoursNeeded,
+            timeToStart
+          }
+        });
+        
+      } catch (err) {
+        console.error('Error calculating timeline:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchTimelineData();
+  }, [projectId, taskTypeId, priorityLevelId, complexityLevelId]);
+
+  // Helper function to parse PostgreSQL interval to hours
+  const parseInterval = (interval: string): number => {
+    // Handle simple interval like '2 hours'
+    const hoursMatch = interval.match(/(\d+)\s+hours?/i);
+    if (hoursMatch) return parseInt(hoursMatch[1], 10);
+    
+    // Handle complex intervals like '01:30:00' (hh:mm:ss)
+    const timeMatch = interval.match(/(\d+):(\d+):(\d+)/);
+    if (timeMatch) {
+      const hours = parseInt(timeMatch[1], 10);
+      const minutes = parseInt(timeMatch[2], 10);
+      return hours + (minutes / 60);
+    }
+    
+    // Handle days
+    const daysMatch = interval.match(/(\d+)\s+days?/i);
+    if (daysMatch) return parseInt(daysMatch[1], 10) * 24;
+    
+    // Return default if format not recognized
+    return 0;
+  };
 
   if (isLoading) {
     return (
