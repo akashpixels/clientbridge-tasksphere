@@ -14,13 +14,13 @@ const SidebarHeader = ({ isOpen }: SidebarHeaderProps) => {
   useEffect(() => {
     const fetchAgencyDetails = async () => {
       const { data: logoData } = await supabase
-        .from('agency_details')
+        .from('agency_settings')
         .select('value')
         .eq('key', 'logo_url')
         .single();
 
       const { data: nameData } = await supabase
-        .from('agency_details')
+        .from('agency_settings')
         .select('value')
         .eq('key', 'agency_shortname')
         .single();
