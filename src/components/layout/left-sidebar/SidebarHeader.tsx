@@ -13,23 +13,32 @@ const SidebarHeader = ({ isOpen }: SidebarHeaderProps) => {
 
   useEffect(() => {
     const fetchAgencyDetails = async () => {
-      const { data: logoData } = await supabase
-        .from('agency_settings')
-        .select('value')
-        .eq('key', 'logo_url')
-        .single();
+      try {
+        // Use the new table name "agency_settings" instead of "agency_details"
+        const { data: logoData, error: logoError } = await supabase
+          .from('agency_settings')
+          .select('value')
+          .eq('key', 'logo_url')
+          .single();
 
-      const { data: nameData } = await supabase
-        .from('agency_settings')
-        .select('value')
-        .eq('key', 'agency_shortname')
-        .single();
+        const { data: nameData, error: nameError } = await supabase
+          .from('agency_settings')
+          .select('value')
+          .eq('key', 'agency_shortname')
+          .single();
 
-      if (logoData?.value) {
-        setAgencyLogo(logoData.value.toString());
-      }
-      if (nameData?.value) {
-        setAgencyName(nameData.value.toString());
+        if (logoData?.value) {
+          setAgencyLogo(logoData.value.toString());
+        }
+        if (nameData?.value) {
+          setAgencyName(nameData.value.toString());
+        }
+        
+        // Log any errors for debugging
+        if (logoError) console.error('Error fetching logo:', logoError);
+        if (nameError) console.error('Error fetching agency name:', nameError);
+      } catch (error) {
+        console.error('Error fetching agency settings:', error);
       }
     };
 

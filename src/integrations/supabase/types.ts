@@ -56,7 +56,7 @@ export type Database = {
           },
         ]
       }
-      agency_details: {
+      agency_settings: {
         Row: {
           created_at: string
           id: number
