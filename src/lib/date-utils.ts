@@ -1,4 +1,6 @@
+
 import { format, formatDistanceToNow, parseISO, isValid } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 
 export function formatDate(date: string | Date): string {
   const parsedDate = typeof date === "string" ? parseISO(date) : date;
@@ -103,4 +105,45 @@ export function isValidDate(dateString: string | null): boolean {
   } catch (e) {
     return false;
   }
+}
+
+/**
+ * Calculate working hours between two timestamps using the database function
+ * This utilizes agency settings for working days, hours, and holidays
+ */
+export async function calculateWorkingHours(startTime: Date | string, endTime: Date | string): Promise<number> {
+  try {
+    // Convert inputs to ISO strings if they are Date objects
+    const start = typeof startTime === 'string' ? startTime : startTime.toISOString();
+    const end = typeof endTime === 'string' ? endTime : endTime.toISOString();
+    
+    // Call the database function
+    const { data, error } = await supabase.rpc('calculate_working_hours', {
+      start_time: start,
+      end_time: end
+    });
+    
+    if (error) {
+      console.error('Error calculating working hours:', error);
+      return 0;
+    }
+    
+    // Return the calculated hours, or 0 if null
+    return data || 0;
+  } catch (e) {
+    console.error('Exception calculating working hours:', e);
+    return 0;
+  }
+}
+
+/**
+ * Format working hours as a string (e.g., "8.5 working hours")
+ */
+export function formatWorkingHours(hours: number): string {
+  if (hours === null || isNaN(hours)) return "0 working hours";
+  
+  // Round to one decimal place if not a whole number
+  const formattedHours = Number.isInteger(hours) ? hours : Math.round(hours * 10) / 10;
+  
+  return `${formattedHours} working hour${formattedHours !== 1 ? 's' : ''}`;
 }
