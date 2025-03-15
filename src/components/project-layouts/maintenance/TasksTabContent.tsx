@@ -52,6 +52,76 @@ const TasksTabContent = ({
   onCommentClick,
 }: TasksTabContentProps) => {
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
+  const [enhancedTasks, setEnhancedTasks] = useState(tasks);
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  
+  // Fetch additional timeline data for tasks
+  useEffect(() => {
+    if (!tasks || tasks.length === 0) {
+      setEnhancedTasks([]);
+      return;
+    }
+    
+    const fetchTimelineData = async () => {
+      setIsEnhancing(true);
+      
+      try {
+        // Get task ids
+        const taskIds = tasks.map(task => task.id);
+        
+        // Get timeline data for these tasks
+        const { data: timelineData, error } = await supabase
+          .from('task_timeline')
+          .select('task_id, start_time, eta')
+          .in('task_id', taskIds);
+          
+        if (error) {
+          console.error('Error fetching task timeline data:', error);
+          setEnhancedTasks(tasks);
+          return;
+        }
+        
+        if (!timelineData || timelineData.length === 0) {
+          console.log('No timeline data found for tasks');
+          setEnhancedTasks(tasks);
+          return;
+        }
+        
+        // Create a map of task_id -> timeline data
+        const timelineMap = new Map();
+        timelineData.forEach(item => {
+          timelineMap.set(item.task_id, {
+            start_time: item.start_time,
+            eta: item.eta
+          });
+        });
+        
+        // Enhance the tasks with the timeline data
+        const newTasks = tasks.map(task => {
+          const timelineInfo = timelineMap.get(task.id);
+          
+          if (timelineInfo) {
+            return {
+              ...task,
+              start_time: timelineInfo.start_time,
+              eta: timelineInfo.eta
+            };
+          }
+          
+          return task;
+        });
+        
+        setEnhancedTasks(newTasks);
+      } catch (e) {
+        console.error('Error enhancing tasks with timeline data:', e);
+        setEnhancedTasks(tasks);
+      } finally {
+        setIsEnhancing(false);
+      }
+    };
+    
+    fetchTimelineData();
+  }, [tasks]);
   
   // Add diagnostic output
   useEffect(() => {
@@ -106,17 +176,19 @@ const TasksTabContent = ({
     onCommentClick(taskId);
   };
 
+  const isLoading = isLoadingTasks || isEnhancing;
+
   return (
     <Card className="p-0">
-      {isLoadingTasks ? (
+      {isLoading ? (
         <div className="flex items-center justify-center p-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
           <p>Loading tasks...</p>
         </div>
-      ) : tasks && tasks.length > 0 ? (
+      ) : enhancedTasks && enhancedTasks.length > 0 ? (
         <div className="overflow-x-auto">
           <TasksTable 
-            tasks={tasks}
+            tasks={enhancedTasks}
             sortConfig={sortConfig}
             onSort={onSort}
             onImageClick={onImageClick}
@@ -134,7 +206,7 @@ const TasksTabContent = ({
           <div className="mt-4 p-3 bg-gray-50 rounded-md text-sm text-left">
             <p className="font-medium">Debugging information:</p>
             <p className="mt-1 text-xs">Project ID: {window.location.pathname.split('/').pop()}</p>
-            <p className="mt-1 text-xs">Status: Simplified timeline calculation active</p>
+            <p className="mt-1 text-xs">Status: Task timeline view active</p>
           </div>
         </div>
       )}

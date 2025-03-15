@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
+import { formatTimelineTime, formatHourDifference, calculateWorkingHours, formatWorkingHours } from "@/lib/date-utils";
 import { supabase } from "@/integrations/supabase/client";
 
 interface StartEtaPredictorProps {
@@ -19,6 +19,7 @@ interface TimelineEstimate {
   eta: string | null;
   taskInfo: {
     hoursNeeded: number | null;
+    workingHours: number | null;
   };
 }
 
@@ -36,7 +37,8 @@ export const StartEtaPredictor = ({
     startTime: null,
     eta: null,
     taskInfo: {
-      hoursNeeded: null
+      hoursNeeded: null,
+      workingHours: null
     }
   });
 
@@ -50,33 +52,7 @@ export const StartEtaPredictor = ({
       try {
         setIsLoading(true);
         
-        // Use project_timeline view directly for accurate data
-        const { data: projectTimeline, error: timelineError } = await supabase
-          .from('project_timeline')
-          .select('*')
-          .eq('project_id', projectId)
-          .maybeSingle();
-          
-        if (timelineError) {
-          console.error('Error fetching project timeline:', timelineError);
-          setIsLoading(false);
-          return;
-        }
-        
-        // Get task duration base from task type
-        const { data: taskTypeData, error: taskTypeError } = await supabase
-          .from('task_types')
-          .select('base_duration')
-          .eq('id', taskTypeId)
-          .maybeSingle();
-          
-        if (taskTypeError) {
-          console.error('Error fetching task type:', taskTypeError);
-          setIsLoading(false);
-          return;
-        }
-        
-        // Get complexity multiplier
+        // Get complexity multiplier from complexity level
         const { data: complexityData, error: complexityError } = await supabase
           .from('complexity_levels')
           .select('multiplier')
@@ -89,60 +65,119 @@ export const StartEtaPredictor = ({
           return;
         }
         
-        // Use priority level to adjust start time if needed
-        const { data: priorityData, error: priorityError } = await supabase
-          .from('priority_levels')
-          .select('multiplier, time_to_start')
-          .eq('id', priorityLevelId || 2)
+        // Get base duration from task type
+        const { data: taskTypeData, error: taskTypeError } = await supabase
+          .from('task_types')
+          .select('base_duration')
+          .eq('id', taskTypeId)
           .maybeSingle();
           
-        if (priorityError) {
-          console.error('Error fetching priority level:', priorityError);
+        if (taskTypeError) {
+          console.error('Error fetching task type:', taskTypeError);
+          setIsLoading(false);
+          return;
         }
         
-        // Calculate hours needed for task - simplified calculation
+        // Calculate hours needed for the task (simplified)
         const baseDurationHours = taskTypeData?.base_duration ? 
           parseInterval(taskTypeData.base_duration as string) : 2;
-          
         const complexityMultiplier = complexityData?.multiplier || 1;
-        
-        // Calculate total hours needed for task using simplified formula
         const hoursNeeded = baseDurationHours * complexityMultiplier;
         
-        // Calculate when task can start based on project timeline
-        const baseTime = projectTimeline?.base_time ? new Date(projectTimeline.base_time) : new Date();
-        const gapHours = projectTimeline?.gap_time || 0;
-        const activeCount = projectTimeline?.active_task_count || 0;
-        const maxConcurrent = projectTimeline?.max_concurrent_tasks || 1;
-        
-        // If project is at capacity, add delay based on earliest ETA
-        const mustWait = activeCount >= maxConcurrent;
-        
-        // Use priority to potentially adjust wait time
-        const isPriorityCritical = priorityLevelId === 1;
-        
-        // Calculate the final start time and ETA
-        const startTime = new Date(baseTime);
-        if (mustWait && !isPriorityCritical && gapHours > 0) {
+        // Use the task_timeline view to get start and eta values
+        const { data: timelineData, error: timelineError } = await supabase
+          .from('task_timeline')
+          .select('*')
+          .eq('project_id', projectId)
+          .eq('priority_level_id', priorityLevelId)
+          .maybeSingle();
+          
+        if (timelineError) {
+          console.error('Error fetching timeline data:', timelineError);
+          
+          // Fallback to just using the project_timeline base
+          const { data: projectTimeline, error: projectTimelineError } = await supabase
+            .from('project_timeline')
+            .select('base_time, gap_time')
+            .eq('project_id', projectId)
+            .maybeSingle();
+            
+          if (projectTimelineError) {
+            console.error('Error fetching project timeline:', projectTimelineError);
+            setIsLoading(false);
+            return;
+          }
+          
+          // Calculate a simplistic start and eta
+          const baseTime = projectTimeline?.base_time ? new Date(projectTimeline.base_time) : new Date();
+          const gapHours = projectTimeline?.gap_time || 0;
+          
+          // Simple calculation (not using working hours)
+          const startTime = new Date(baseTime);
           startTime.setHours(startTime.getHours() + gapHours);
+          
+          const etaTime = new Date(startTime);
+          etaTime.setHours(etaTime.getHours() + hoursNeeded);
+          
+          // Calculate approximate working hours between timestamps
+          let workingHours = 0;
+          if (startTime && etaTime) {
+            workingHours = await calculateWorkingHours(startTime.toISOString(), etaTime.toISOString());
+          }
+          
+          setTimelineEstimate({
+            currentTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            startTime: startTime.toISOString(),
+            eta: etaTime.toISOString(),
+            taskInfo: {
+              hoursNeeded: hoursNeeded,
+              workingHours: workingHours
+            }
+          });
+          
+          setIsLoading(false);
+          return;
         }
         
-        const etaTime = new Date(startTime);
-        etaTime.setHours(etaTime.getHours() + hoursNeeded);
-        
-        // Format the timestamps as locale string
-        const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        // Update the timeline estimate state
-        setTimelineEstimate({
-          currentTime,
-          startTime: startTime.toISOString(),
-          eta: etaTime.toISOString(),
-          taskInfo: {
-            hoursNeeded
+        // If we have timeline data from our view
+        if (timelineData) {
+          const startTime = timelineData.start_time;
+          const eta = timelineData.eta;
+          
+          // Calculate working hours between start and eta
+          let workingHours = 0;
+          if (startTime && eta) {
+            workingHours = await calculateWorkingHours(startTime, eta);
           }
-        });
-        
+          
+          setTimelineEstimate({
+            currentTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            startTime: startTime,
+            eta: eta,
+            taskInfo: {
+              hoursNeeded: hoursNeeded,
+              workingHours: workingHours
+            }
+          });
+        } else {
+          // No timeline data - use default calculation
+          const baseTime = new Date();
+          const startTime = new Date(baseTime);
+          startTime.setHours(startTime.getHours() + 1); // Default gap
+          
+          const etaTime = new Date(startTime);
+          etaTime.setHours(etaTime.getHours() + hoursNeeded);
+          
+          setTimelineEstimate({
+            currentTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            startTime: startTime.toISOString(),
+            eta: etaTime.toISOString(),
+            taskInfo: {
+              hoursNeeded: hoursNeeded,
+              workingHours: null
+            }
+          });
+        }
       } catch (err) {
         console.error('Error calculating timeline:', err);
       } finally {
@@ -185,6 +220,12 @@ export const StartEtaPredictor = ({
   }
 
   const getTimeBetweenNodes = () => {
+    // Return working hours if available, otherwise fallback to regular hours
+    if (timelineEstimate?.taskInfo.workingHours) {
+      return formatWorkingHours(timelineEstimate.taskInfo.workingHours);
+    }
+    
+    // Fallback to regular hours display
     if (!timelineEstimate?.taskInfo.hoursNeeded) return "";
     return formatHourDifference(timelineEstimate.taskInfo.hoursNeeded);
   };
