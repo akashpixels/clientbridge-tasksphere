@@ -9,6 +9,7 @@ import { TaskForm } from "./TaskForm";
 import { useLayout } from "@/context/layout";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { StartEtaPredictor } from "./StartEtaPredictor";
 
 export const TaskCreationSidebar = () => {
   const { toast } = useToast();
@@ -105,21 +106,6 @@ export const TaskCreationSidebar = () => {
     setCreatedTaskData(null);
   };
 
-  // Helper function to get priority name
-  const getPriorityName = async (priorityId: number) => {
-    try {
-      const {
-        data,
-        error
-      } = await supabase.from('priority_levels').select('name').eq('id', priorityId).single();
-      if (error) throw error;
-      return data?.name || 'Unknown';
-    } catch (error) {
-      console.error('Error fetching priority name:', error);
-      return 'Unknown';
-    }
-  };
-
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex justify-between items-center px-4 border-b sticky top-0 z-10 py-[5px] bg-background">
@@ -155,6 +141,15 @@ export const TaskCreationSidebar = () => {
                   <p><span className="font-medium">Status:</span> {createdTaskData?.current_status_id === 1 ? 'Open' : 'Pending'}</p>
                   <p><span className="font-medium">Priority:</span> {createdTaskData?.priority_level_id}</p>
                 </div>
+              </div>
+              
+              {/* Add the ETA predictor showing when this task will be worked on */}
+              <div className="mt-6 border p-4 rounded-md">
+                <h3 className="text-sm font-medium mb-2">Task Timeline</h3>
+                <StartEtaPredictor 
+                  taskId={createdTaskData?.id}
+                  projectId={projectId}
+                />
               </div>
               
               <div className="sticky bottom-0 py-4 mt-6 bg-background">
