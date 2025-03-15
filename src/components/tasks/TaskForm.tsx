@@ -229,7 +229,7 @@ export const TaskForm = ({
 
   const getPriorityTooltip = (level: any) => {
     if (!level) return "";
-    const timeToStart = level.time_to_start ? formatDuration(level.time_to_start) : "immediate";
+    const timeToStart = level.time_to_start !== undefined ? formatDuration(level.time_to_start) : "immediate";
     const multiplier = level.multiplier ? `${level.multiplier}x duration` : "standard duration";
     return `${timeToStart} delay, ${multiplier}`;
   };
