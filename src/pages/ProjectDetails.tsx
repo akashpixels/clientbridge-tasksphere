@@ -65,24 +65,10 @@ const ProjectDetails = () => {
 
       console.log('Usage data for selected month:', usageData);
       
-      // Get timeline data for this project
-      const { data: timelineData, error: timelineError } = await supabase
-        .from('project_timeline')
-        .select('*')
-        .eq('project_id', id)
-        .maybeSingle();
-        
-      if (timelineError) {
-        console.error('Error fetching project timeline:', timelineError);
-      }
-      
-      console.log('Project timeline data:', timelineData);
-      
       // Construct the enhanced project object
       const projectData = data;
       const enhancedProject = {
         ...projectData,
-        timeline: timelineData || null,
         project_subscriptions: projectData.project_subscriptions?.map(subscription => ({
           ...subscription,
           // Use hours data from usage_view if available, fallback to subscription data

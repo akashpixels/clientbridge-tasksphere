@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -18,7 +19,6 @@ import {
 import { useLayout } from "@/context/layout";
 import { Badge } from "@/components/ui/badge";
 import TaskCommentThread from "./comments/TaskCommentThread";
-import { getTimeStatusInfo } from "@/lib/date-utils";
 
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
@@ -228,10 +228,7 @@ const TasksTable = ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {tasks.map((task) => {
-          const timeStatus = getTimeStatusInfo(task.start_time, task.eta);
-          
-          return (
+        {tasks.map((task) => (
           <TableRow 
             key={task.id}
             className={`cursor-pointer ${selectedTaskId === task.id ? 'bg-muted/30' : 'hover:bg-muted/30'}`}
@@ -275,8 +272,8 @@ const TasksTable = ({
                   </span>
                 )}
                 {task.status?.name === 'Open' && task.start_time && (
-                  <span className={`text-xs pl-2 ${timeStatus.statusClass}`}>
-                    {timeStatus.status}
+                  <span className="text-xs text-gray-500 pl-2">
+                    {format(new Date(task.start_time), "h:mmaaa d MMM")}
                   </span>
                 )}
               </div>
@@ -382,7 +379,7 @@ const TasksTable = ({
               </div>
             </TableCell>
           </TableRow>
-        )})}
+        ))}
       </TableBody>
     </Table>
   );

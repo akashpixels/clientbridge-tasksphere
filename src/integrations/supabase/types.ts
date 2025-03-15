@@ -344,7 +344,7 @@ export type Database = {
           is_active: boolean
           multiplier: number | null
           name: string
-          time_to_start: number | null
+          time_to_start: unknown | null
           updated_at: string
         }
         Insert: {
@@ -355,7 +355,7 @@ export type Database = {
           is_active?: boolean
           multiplier?: number | null
           name: string
-          time_to_start?: number | null
+          time_to_start?: unknown | null
           updated_at?: string
         }
         Update: {
@@ -366,7 +366,7 @@ export type Database = {
           is_active?: boolean
           multiplier?: number | null
           name?: string
-          time_to_start?: number | null
+          time_to_start?: unknown | null
           updated_at?: string
         }
         Relationships: []
@@ -838,13 +838,6 @@ export type Database = {
             foreignKeyName: "subtasks_parent_task_id_fkey"
             columns: ["parent_task_id"]
             isOneToOne: false
-            referencedRelation: "task_timeline"
-            referencedColumns: ["task_id"]
-          },
-          {
-            foreignKeyName: "subtasks_parent_task_id_fkey"
-            columns: ["parent_task_id"]
-            isOneToOne: false
             referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
@@ -880,13 +873,6 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "task_comment_views_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "task_timeline"
-            referencedColumns: ["task_id"]
-          },
           {
             foreignKeyName: "task_comment_views_task_id_fkey"
             columns: ["task_id"]
@@ -950,13 +936,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "task_comments"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "task_comments_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "task_timeline"
-            referencedColumns: ["task_id"]
           },
           {
             foreignKeyName: "task_comments_task_id_fkey"
@@ -1279,34 +1258,6 @@ export type Database = {
         }
         Relationships: []
       }
-      task_timeline: {
-        Row: {
-          base_time: string | null
-          eta: string | null
-          gap_time: number | null
-          hours_needed: number | null
-          project_id: string | null
-          start_time: string | null
-          task_id: string | null
-          time_to_start: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tasks_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "project_timeline"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "tasks_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       usage_view: {
         Row: {
           hours_allotted: number | null
@@ -1329,29 +1280,6 @@ export type Database = {
       calculate_monthly_subscription_usage: {
         Args: Record<PropertyKey, never>
         Returns: undefined
-      }
-      calculate_working_hours: {
-        Args: {
-          start_time: string
-          end_time: string
-        }
-        Returns: number
-      }
-      calculate_working_timestamp: {
-        Args: {
-          start_time: string
-          work_hours: number
-        }
-        Returns: string
-      }
-      find_next_working_day: {
-        Args: {
-          input_date: string
-          working_days: string[]
-          holidays: string[]
-          start_time: string
-        }
-        Returns: string
       }
     }
     Enums: {
