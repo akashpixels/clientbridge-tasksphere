@@ -1286,6 +1286,7 @@ export type Database = {
           gap_time: number | null
           hours_needed: number | null
           project_id: string | null
+          queue_position: number | null
           start_time: string | null
           task_id: string | null
           time_to_start: number | null

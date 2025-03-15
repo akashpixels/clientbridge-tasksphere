@@ -33,6 +33,7 @@ interface TasksTabContentProps {
     awaiting_input?: boolean;
     start_time?: string | null;
     eta?: string | null;
+    queue_position?: number;
   })[];
   sortConfig: {
     key: string;
