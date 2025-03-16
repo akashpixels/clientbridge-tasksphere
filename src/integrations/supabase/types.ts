@@ -1053,6 +1053,8 @@ export type Database = {
           hours_spent: number | null
           id: string
           images: Json | null
+          is_awaiting_input: boolean | null
+          is_onhold: boolean | null
           last_status_id: number | null
           priority_level_id: number
           project_id: string
@@ -1079,6 +1081,8 @@ export type Database = {
           hours_spent?: number | null
           id?: string
           images?: Json | null
+          is_awaiting_input?: boolean | null
+          is_onhold?: boolean | null
           last_status_id?: number | null
           priority_level_id?: number
           project_id: string
@@ -1105,6 +1109,8 @@ export type Database = {
           hours_spent?: number | null
           id?: string
           images?: Json | null
+          is_awaiting_input?: boolean | null
+          is_onhold?: boolean | null
           last_status_id?: number | null
           priority_level_id?: number
           project_id?: string

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card } from "@/components/ui/card";
 import TasksTable from "./TasksTable";
@@ -30,7 +29,7 @@ interface TasksTabContentProps {
       last_name: string;
     } | null;
     task_code?: string;
-    awaiting_input?: boolean;
+    is_awaiting_input?: boolean;
     start_time?: string | null;
     eta?: string | null;
     queue_position?: number;
@@ -54,12 +53,10 @@ const TasksTabContent = ({
 }: TasksTabContentProps) => {
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
   
-  // Add diagnostic output
   useEffect(() => {
     console.log("TasksTabContent rendered with tasks:", tasks?.length || 0);
     console.log("isLoadingTasks:", isLoadingTasks);
     
-    // Check if we can directly access the tasks table
     const checkTasksAccess = async () => {
       try {
         const { data, error } = await supabase
@@ -79,7 +76,6 @@ const TasksTabContent = ({
     checkTasksAccess();
   }, [tasks, isLoadingTasks]);
   
-  // Setup real-time subscription for comment changes
   useEffect(() => {
     const channel = supabase
       .channel('comments-changes')
@@ -101,7 +97,6 @@ const TasksTabContent = ({
     };
   }, []);
 
-  // Handle task selection
   const handleTaskClick = (taskId: string) => {
     setSelectedTaskId(taskId);
     onCommentClick(taskId);
