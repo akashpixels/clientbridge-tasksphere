@@ -857,6 +857,64 @@ export type Database = {
           },
         ]
       }
+      task_blocking_history: {
+        Row: {
+          blocking_type: string
+          created_at: string
+          created_by: string
+          ended_at: string | null
+          id: string
+          reason: string | null
+          started_at: string
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          blocking_type: string
+          created_at?: string
+          created_by: string
+          ended_at?: string | null
+          id?: string
+          reason?: string | null
+          started_at?: string
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          blocking_type?: string
+          created_at?: string
+          created_by?: string
+          ended_at?: string | null
+          id?: string
+          reason?: string | null
+          started_at?: string
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_blocking_history_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_blocking_history_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "task_timeline"
+            referencedColumns: ["task_id"]
+          },
+          {
+            foreignKeyName: "task_blocking_history_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_comment_views: {
         Row: {
           created_at: string
@@ -1336,6 +1394,12 @@ export type Database = {
       calculate_monthly_subscription_usage: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      calculate_total_blocking_time: {
+        Args: {
+          p_task_id: string
+        }
+        Returns: unknown
       }
       calculate_working_hours: {
         Args: {

@@ -44,6 +44,7 @@ interface TasksTableProps {
     task_code?: string;
     queue_position?: number;
     is_awaiting_input?: boolean;
+    is_onhold?: boolean;
     start_time?: string | null;
     eta?: string | null;
   })[];
@@ -75,7 +76,11 @@ const TasksTable = ({
     return format(new Date(date), "MMM d, h:mm a");
   };
 
-  const getStatusColor = (status: { name: string | null, color_hex: string | null }, is_awaiting_input?: boolean) => {
+  const getStatusColor = (status: { name: string | null, color_hex: string | null }, is_awaiting_input?: boolean, is_onhold?: boolean) => {
+    if (is_onhold) {
+      return { bg: '#FDE68A', text: '#92400E' };
+    }
+    
     if (is_awaiting_input) {
       return { bg: '#FEF9C3', text: '#854D0E' };
     }
@@ -259,11 +264,11 @@ const TasksTable = ({
                 <span 
                   className="px-2 py-1 text-xs rounded-full font-semibold"
                   style={{
-                    backgroundColor: getStatusColor(task.status || { name: null, color_hex: null }, task.is_awaiting_input).bg,
-                    color: getStatusColor(task.status || { name: null, color_hex: null }, task.is_awaiting_input).text
+                    backgroundColor: getStatusColor(task.status || { name: null, color_hex: null }, task.is_awaiting_input, task.is_onhold).bg,
+                    color: getStatusColor(task.status || { name: null, color_hex: null }, task.is_awaiting_input, task.is_onhold).text
                   }}
                 >
-                  {task.is_awaiting_input ? 'Awaiting Input' : task.status?.name}
+                  {task.is_onhold ? 'On Hold' : task.is_awaiting_input ? 'Awaiting Input' : task.status?.name}
                 </span>
                 {task.task_completed_at && task.actual_hours_spent && (
                   <span className="text-xs text-gray-500 pl-2">

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card } from "@/components/ui/card";
 import TasksTable from "./TasksTable";
@@ -30,6 +31,7 @@ interface TasksTabContentProps {
     } | null;
     task_code?: string;
     is_awaiting_input?: boolean;
+    is_onhold?: boolean;
     start_time?: string | null;
     eta?: string | null;
     queue_position?: number;
@@ -61,7 +63,7 @@ const TasksTabContent = ({
       try {
         const { data, error } = await supabase
           .from('tasks')
-          .select('id, details, task_code, current_status_id')
+          .select('id, details, task_code, current_status_id, is_onhold, is_awaiting_input')
           .limit(5);
           
         console.log("Direct tasks access test:", data?.length || 0);
@@ -78,16 +80,16 @@ const TasksTabContent = ({
   
   useEffect(() => {
     const channel = supabase
-      .channel('comments-changes')
+      .channel('task-status-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'task_comments'
+          table: 'task_blocking_history'
         },
         (payload) => {
-          console.log('Comment change received:', payload);
+          console.log('Task blocking status change received:', payload);
         }
       )
       .subscribe();
