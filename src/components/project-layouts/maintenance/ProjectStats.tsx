@@ -6,8 +6,8 @@ import { useState } from "react";
 interface ProjectStatsProps {
   project: Tables<"projects"> & {
     project_subscriptions?: {
-      hours_allotted: number;
-      hours_spent: number;
+      hours_allotted: unknown; // Can be INTERVAL or number
+      hours_spent: unknown; // Can be INTERVAL or number
       subscription_status: string;
       next_renewal_date: string;
     }[];
@@ -25,9 +25,30 @@ const ProjectStats = ({ project, selectedMonth }: ProjectStatsProps) => {
   const subscription = project.project_subscriptions?.[0];
   
   // Hours data comes directly from the subscription object
-  // which is pre-populated with data from usage_view for the selected month
-  const hoursAllotted = subscription?.hours_allotted || 0;
-  const hoursSpent = subscription?.hours_spent || 0;
+  // Handle both numeric values and interval objects
+  let hoursAllotted = 0;
+  let hoursSpent = 0;
+  
+  if (subscription) {
+    // Handle PostgreSQL INTERVAL type (from Supabase)
+    if (subscription.hours_allotted && typeof subscription.hours_allotted === 'object' && 'hours' in (subscription.hours_allotted as any)) {
+      const intervalObj = subscription.hours_allotted as any;
+      hoursAllotted = (intervalObj.hours || 0) + ((intervalObj.minutes || 0) / 60);
+    } 
+    // Handle numeric values
+    else if (typeof subscription.hours_allotted === 'number') {
+      hoursAllotted = subscription.hours_allotted;
+    }
+    
+    // Similar handling for hours_spent
+    if (subscription.hours_spent && typeof subscription.hours_spent === 'object' && 'hours' in (subscription.hours_spent as any)) {
+      const intervalObj = subscription.hours_spent as any;
+      hoursSpent = (intervalObj.hours || 0) + ((intervalObj.minutes || 0) / 60);
+    }
+    else if (typeof subscription.hours_spent === 'number') {
+      hoursSpent = subscription.hours_spent;
+    }
+  }
 
   console.log(`Hours for ${selectedMonth}: allotted=${hoursAllotted}, spent=${hoursSpent}`);
 

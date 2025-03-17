@@ -17,8 +17,8 @@ export function formatDistanceToNowShort(date: string | Date): string {
 }
 
 /**
- * Format a duration from either a number (minutes), string (HH:MM:SS), or
- * PostgreSQL interval string to a human-readable format.
+ * Format a duration from either a PostgreSQL interval, number (minutes), 
+ * or string (HH:MM:SS) to a human-readable format.
  */
 export function formatDuration(duration: string | number): string {
   // Handle numeric duration (in minutes)
@@ -42,8 +42,30 @@ export function formatDuration(duration: string | number): string {
     return result;
   }
   
+  // Check if it's a PostgreSQL interval object (from Supabase)
+  if (duration && typeof duration === 'object' && 'hours' in (duration as any)) {
+    const intervalObj = duration as any;
+    const hours = intervalObj.hours || 0;
+    const minutes = intervalObj.minutes || 0;
+    
+    if (hours === 0 && minutes === 0) {
+      return "immediate";
+    }
+    
+    let result = "";
+    if (hours > 0) {
+      result += `${hours} hour${hours !== 1 ? 's' : ''}`;
+    }
+    if (minutes > 0) {
+      if (result) result += " ";
+      result += `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    }
+    
+    return result;
+  }
+  
   // Handle PostgreSQL interval format: "HH:MM:SS" or "X days HH:MM:SS"
-  if (duration.includes(':') || duration.includes('day')) {
+  if (typeof duration === 'string' && (duration.includes(':') || duration.includes('day'))) {
     let days = 0;
     let hours = 0;
     let minutes = 0;
@@ -87,7 +109,7 @@ export function formatDuration(duration: string | number): string {
   }
   
   // Handle string format duration: "HH:MM:SS"
-  const match = duration.match(/(\d+):(\d+):(\d+)/);
+  const match = typeof duration === 'string' && duration.match(/(\d+):(\d+):(\d+)/);
   if (!match) return "unknown duration";
   
   const hours = parseInt(match[1]);
@@ -121,9 +143,27 @@ export function formatTimelineTime(date: string | Date | null): string {
   }
 }
 
-// Format hour differences for timeline display
-export function formatHourDifference(hours: number | null | string): string {
+/**
+ * Format hour differences for timeline display
+ * Handles PostgreSQL intervals and string representations
+ */
+export function formatHourDifference(hours: number | null | string | object): string {
   if (hours === null) return "";
+  
+  // If it's a PostgreSQL interval object from Supabase
+  if (typeof hours === 'object' && hours !== null && 'hours' in (hours as any)) {
+    const intervalObj = hours as any;
+    const hourValue = intervalObj.hours || 0;
+    const minuteValue = intervalObj.minutes || 0;
+    const formattedHours = hourValue + (minuteValue / 60);
+    
+    // Round to one decimal place if not a whole number
+    const displayValue = Number.isInteger(formattedHours) 
+      ? formattedHours 
+      : Math.round(formattedHours * 10) / 10;
+    
+    return `${displayValue} Hrs`;
+  }
   
   // If it's a PostgreSQL interval string, extract the hours
   if (typeof hours === 'string') {
@@ -132,11 +172,13 @@ export function formatHourDifference(hours: number | null | string): string {
     if (hourMatch) {
       const extractedHours = parseInt(hourMatch[1]);
       const extractedMinutes = parseInt(hourMatch[2]);
-      hours = extractedHours + (extractedMinutes / 60);
+      const hourValue = extractedHours + (extractedMinutes / 60);
+      const formattedHours = Number.isInteger(hourValue) ? hourValue : Math.round(hourValue * 10) / 10;
+      return `${formattedHours} Hrs`;
     } else {
       const simpleHourMatch = hours.match(/(\d+) hour/);
       if (simpleHourMatch) {
-        hours = parseInt(simpleHourMatch[1]);
+        return `${parseInt(simpleHourMatch[1])} Hrs`;
       } else {
         return hours; // Return the original string if we can't parse it
       }
