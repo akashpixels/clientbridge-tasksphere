@@ -150,23 +150,22 @@ const TasksTable = ({
     return priorityColors[priority.name] || priority.color || '#9CA3AF'; 
   };
 
-  const renderReferenceLinks = (links: Record<string, string> | null) => {
-    if (!links) return null;
+ const renderReferenceLinks = (links: Record<string, string> | null) => {
+  if (!links) return null;
+  
+  return Object.entries(links).map(([text, url], index) => (
     
-    return Object.entries(links).map(([text, url], index) => (
-      <a
-        key={index}
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-1 text-xs text-gray-800 hover:text-gray-600"
-      >
-        <Link2 className="w-3 h-3" />
-        {String(text)}
-      </a>
-    ));
-  };
-
+      key={index}
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-1 text-xs text-gray-800 hover:text-gray-600"
+    >
+      <Link2 className="w-3 h-3" />
+      {String(text)}
+    </a>
+  ));
+};
   return (
     <Table>
       <TableHeader>
@@ -356,11 +355,13 @@ const TasksTable = ({
               )}
             </TableCell>
             
-            <TableCell>
-              <div className="flex flex-col gap-1">
-                {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
-              </div>
-            </TableCell>
+           <TableCell>
+  <div className="flex flex-col gap-1">
+    {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
+  </div>
+</TableCell>
+
+   
 
             <TableCell>
               <div className="flex -space-x-2">
