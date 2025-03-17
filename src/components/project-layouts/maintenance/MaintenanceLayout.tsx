@@ -33,8 +33,8 @@ interface MaintenanceLayoutProps {
     project_subscriptions?: {
       id: string;
       subscription_status: string;
-      hours_allotted: any;
-      hours_spent: any;
+      hours_allotted: number;
+      hours_spent: number;
       next_renewal_date: string;
     }[];
   };
