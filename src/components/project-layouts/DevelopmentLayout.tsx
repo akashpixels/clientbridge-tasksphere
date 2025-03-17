@@ -3,7 +3,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import CredentialsTab from "./shared/CredentialsTab";
-import { intervalToHours } from "@/lib/date-utils";
 
 interface DevelopmentLayoutProps {
   project: Tables<"projects"> & {
@@ -20,8 +19,8 @@ interface DevelopmentLayoutProps {
       color_hex: string | null;
     } | null;
     project_subscriptions: {
-      hours_spent: number | unknown;
-      hours_allotted: number | unknown;
+      hours_spent: number | null;
+      hours_allotted: number;
     }[];
   };
 }
@@ -29,10 +28,6 @@ interface DevelopmentLayoutProps {
 const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
   // Get the latest subscription
   const currentSubscription = project.project_subscriptions?.[0];
-  
-  // Convert interval to hours if needed
-  const hoursSpent = currentSubscription ? intervalToHours(currentSubscription.hours_spent) : 0;
-  const hoursAllotted = currentSubscription ? intervalToHours(currentSubscription.hours_allotted) : 0;
   
   return (
     <div className="container mx-auto p-6">
@@ -91,7 +86,9 @@ const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
                 <div>
                   <h4 className="font-medium">Hours</h4>
                   <p className="text-gray-500 mt-1">
-                    {`${hoursSpent.toFixed(1)} / ${hoursAllotted} hours`}
+                    {currentSubscription ? 
+                      `${currentSubscription.hours_spent || 0} / ${currentSubscription.hours_allotted} hours` 
+                      : 'No subscription data'}
                   </p>
                 </div>
               </div>

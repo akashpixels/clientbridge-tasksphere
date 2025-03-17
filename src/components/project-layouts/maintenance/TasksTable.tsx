@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -47,7 +48,6 @@ interface TasksTableProps {
     is_onhold?: boolean;
     start_time?: string | null;
     eta?: string | null;
-    reference_links?: Record<string, string> | null;
   })[];
   sortConfig: {
     key: string;
@@ -77,15 +77,24 @@ const TasksTable = ({
     return format(new Date(date), "MMM d, h:mm a");
   };
 
+  /**
+   * Get the status color based on task status with priority:
+   * 1. is_awaiting_input (Highest priority)
+   * 2. is_onhold (Second priority)
+   * 3. Regular status colors from status configuration
+   */
   const getStatusColor = (status: { name: string | null, color_hex: string | null }, is_awaiting_input?: boolean, is_onhold?: boolean) => {
+    // First priority: Check if awaiting input
     if (is_awaiting_input) {
       return { bg: '#FEF9C3', text: '#854D0E' }; // Light yellow
     }
     
+    // Second priority: Check if on hold
     if (is_onhold) {
       return { bg: '#FDE68A', text: '#92400E' }; // Darker yellow
     }
 
+    // Default status color handling
     if (!status?.color_hex) {
       return { bg: '#F3F4F6', text: '#374151' }; // Default gray
     }
@@ -166,14 +175,6 @@ const TasksTable = ({
         {text}
       </a>
     ));
-  };
-
-  const getImagesArray = (images: unknown): string[] => {
-    if (!images) return [];
-    if (Array.isArray(images)) {
-      return images.filter((img): img is string => typeof img === 'string');
-    }
-    return [];
   };
 
   return (
@@ -367,24 +368,21 @@ const TasksTable = ({
             
             <TableCell>
               <div className="flex flex-col gap-1">
-                {task.reference_links && renderReferenceLinks(task.reference_links)}
+                {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
               </div>
             </TableCell>
 
             <TableCell>
               <div className="flex -space-x-2">
-                {task.images && (
-                  getImagesArray(task.images).map((image, index) => (
+                {task.images && Array.isArray(task.images) && task.images.length > 0 && (
+                  task.images.map((image, index) => (
                     <div
                       key={index}
                       className="w-8 h-8 relative cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onImageClick(image, getImagesArray(task.images));
-                      }}
+                      onClick={() => onImageClick(image as string, task.images as string[])}
                     >
                       <img 
-                        src={image}
+                        src={image as string}
                         alt={`Task image ${index + 1}`}
                         className="w-8 h-8 rounded-lg border-2 border-white object-cover"
                       />

@@ -32,20 +32,18 @@ serve(async (req) => {
     }
 
     // Call the SQL function to calculate and store monthly subscription usage
-    // This function is now updated to properly handle INTERVAL data types
     const { data, error } = await supabaseClient.rpc(
       "calculate_monthly_subscription_usage"
     );
 
     if (error) {
-      console.error("RPC error:", error);
       throw error;
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Monthly subscription usage calculation completed successfully",
+        message: "Monthly subscription usage calculation completed",
         data,
       }),
       {

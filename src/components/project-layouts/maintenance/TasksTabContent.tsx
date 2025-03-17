@@ -34,40 +34,36 @@ import { Loader2, AlertCircle } from "lucide-react";
  * $$ LANGUAGE plpgsql;
  */
 
-// Define the enhanced task type including reference_links with the correct type
-type EnhancedTask = Tables<"tasks"> & {
-  task_type: {
-    name: string;
-    category: string;
-  } | null;
-  status: {
-    name: string;
-    color_hex: string | null;
-  } | null;
-  priority: {
-    name: string;
-    color: string;
-  } | null;
-  complexity: {
-    name: string;
-    multiplier: number;
-  } | null;
-  assigned_user: {
-    first_name: string;
-    last_name: string;
-  } | null;
-  task_code?: string;
-  is_awaiting_input?: boolean;
-  is_onhold?: boolean;
-  start_time?: string | null;
-  eta?: string | null;
-  queue_position?: number;
-  reference_links?: Record<string, string> | null;
-};
-
 interface TasksTabContentProps {
   isLoadingTasks: boolean;
-  tasks: EnhancedTask[];
+  tasks: (Tables<"tasks"> & {
+    task_type: {
+      name: string;
+      category: string;
+    } | null;
+    status: {
+      name: string;
+      color_hex: string | null;
+    } | null;
+    priority: {
+      name: string;
+      color: string;
+    } | null;
+    complexity: {
+      name: string;
+      multiplier: number;
+    } | null;
+    assigned_user: {
+      first_name: string;
+      last_name: string;
+    } | null;
+    task_code?: string;
+    is_awaiting_input?: boolean;
+    is_onhold?: boolean;
+    start_time?: string | null;
+    eta?: string | null;
+    queue_position?: number;
+  })[];
   sortConfig: {
     key: string;
     direction: 'asc' | 'desc';
@@ -136,30 +132,6 @@ const TasksTabContent = ({
     onCommentClick(taskId);
   };
 
-  // Process tasks to ensure reference_links is properly typed
-  const processedTasks: EnhancedTask[] = tasks.map(task => {
-    // Ensure reference_links is a proper Record<string, string> or null
-    let safeReferenceLinks: Record<string, string> | null = null;
-    
-    if (task.reference_links) {
-      // Check if reference_links is an object
-      if (typeof task.reference_links === 'object' && task.reference_links !== null) {
-        safeReferenceLinks = {};
-        // Try to convert each key-value pair to strings
-        Object.entries(task.reference_links).forEach(([key, value]) => {
-          if (typeof value === 'string') {
-            safeReferenceLinks![key] = value;
-          }
-        });
-      }
-    }
-    
-    return {
-      ...task,
-      reference_links: safeReferenceLinks
-    };
-  });
-
   return (
     <Card className="p-0">
       {isLoadingTasks ? (
@@ -167,10 +139,10 @@ const TasksTabContent = ({
           <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
           <p>Loading tasks...</p>
         </div>
-      ) : processedTasks && processedTasks.length > 0 ? (
+      ) : tasks && tasks.length > 0 ? (
         <div className="overflow-x-auto">
           <TasksTable 
-            tasks={processedTasks}
+            tasks={tasks}
             sortConfig={sortConfig}
             onSort={onSort}
             onImageClick={onImageClick}

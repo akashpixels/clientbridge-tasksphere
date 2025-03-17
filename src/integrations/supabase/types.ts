@@ -231,13 +231,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "files_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
-          },
-          {
             foreignKeyName: "files_uploaded_by_fkey"
             columns: ["uploaded_by"]
             isOneToOne: false
@@ -287,13 +280,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inputs_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "inputs_requested_by_fkey"
@@ -399,13 +385,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "project_assignees_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
-          },
-          {
             foreignKeyName: "project_assignees_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -458,13 +437,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_credentials_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -547,13 +519,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "project_phases_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
-          },
-          {
             foreignKeyName: "project_phases_status_id_fkey"
             columns: ["status_id"]
             isOneToOne: false
@@ -567,7 +532,7 @@ export type Database = {
           auto_renew: boolean
           billing_cycle: Database["public"]["Enums"]["billing_cycle"]
           created_at: string
-          hours_allotted: unknown | null
+          hours_allotted: number
           id: string
           max_concurrent_tasks: number
           next_renewal_date: string
@@ -580,7 +545,7 @@ export type Database = {
           auto_renew?: boolean
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
           created_at?: string
-          hours_allotted?: unknown | null
+          hours_allotted?: number
           id?: string
           max_concurrent_tasks?: number
           next_renewal_date: string
@@ -593,7 +558,7 @@ export type Database = {
           auto_renew?: boolean
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
           created_at?: string
-          hours_allotted?: unknown | null
+          hours_allotted?: number
           id?: string
           max_concurrent_tasks?: number
           next_renewal_date?: string
@@ -609,13 +574,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_subscriptions_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -737,8 +695,8 @@ export type Database = {
       subscription_usage: {
         Row: {
           created_at: string
-          hours_allotted: unknown | null
-          hours_spent: unknown | null
+          hours_allotted: number
+          hours_spent: number
           id: string
           metadata: Json | null
           month_year: string
@@ -750,8 +708,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          hours_allotted?: unknown | null
-          hours_spent?: unknown | null
+          hours_allotted: number
+          hours_spent: number
           id?: string
           metadata?: Json | null
           month_year: string
@@ -763,8 +721,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          hours_allotted?: unknown | null
-          hours_spent?: unknown | null
+          hours_allotted?: number
+          hours_spent?: number
           id?: string
           metadata?: Json | null
           month_year?: string
@@ -781,13 +739,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscription_usage_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "subscription_usage_subscription_id_fkey"
@@ -1069,7 +1020,7 @@ export type Database = {
       }
       tasks: {
         Row: {
-          actual_hours_spent: unknown | null
+          actual_hours_spent: number | null
           actual_start_time: string | null
           assigned_user_id: string | null
           awaiting_input: boolean | null
@@ -1080,7 +1031,7 @@ export type Database = {
           details: string
           eta: string | null
           hours_needed: unknown | null
-          hours_spent: unknown | null
+          hours_spent: number | null
           id: string
           images: Json | null
           is_awaiting_input: boolean | null
@@ -1097,7 +1048,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          actual_hours_spent?: unknown | null
+          actual_hours_spent?: number | null
           actual_start_time?: string | null
           assigned_user_id?: string | null
           awaiting_input?: boolean | null
@@ -1108,7 +1059,7 @@ export type Database = {
           details: string
           eta?: string | null
           hours_needed?: unknown | null
-          hours_spent?: unknown | null
+          hours_spent?: number | null
           id?: string
           images?: Json | null
           is_awaiting_input?: boolean | null
@@ -1125,7 +1076,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          actual_hours_spent?: unknown | null
+          actual_hours_spent?: number | null
           actual_start_time?: string | null
           assigned_user_id?: string | null
           awaiting_input?: boolean | null
@@ -1136,7 +1087,7 @@ export type Database = {
           details?: string
           eta?: string | null
           hours_needed?: unknown | null
-          hours_spent?: unknown | null
+          hours_spent?: number | null
           id?: string
           images?: Json | null
           is_awaiting_input?: boolean | null
@@ -1201,13 +1152,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "tasks_task_type_id_fkey"
@@ -1307,8 +1251,8 @@ export type Database = {
     Views: {
       usage_view: {
         Row: {
-          hours_allotted: unknown | null
-          hours_spent: unknown | null
+          hours_allotted: number | null
+          hours_spent: number | null
           month_year: string | null
           project_id: string | null
         }
