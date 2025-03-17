@@ -251,7 +251,7 @@ const TasksTable = ({
               setRightSidebarContent(
                 <TaskCommentThread 
                   taskId={task.id} 
-                  taskCode={task.task_code ? String(task.task_code) : 'No Code'} 
+                  taskCode={typeof task.task_code === 'string' ? task.task_code : String(task.task_code || 'No Code')} 
                 />
               );
             }}
