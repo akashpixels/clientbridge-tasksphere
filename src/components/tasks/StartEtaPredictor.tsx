@@ -40,9 +40,9 @@ export const StartEtaPredictor = ({
         // If we have a specific taskId, fetch that task's timeline data
         if (taskId) {
           query = supabase
-            .from('task_timeline')
+            .from('tasks')
             .select('start_time, eta, hours_needed')
-            .eq('task_id', taskId)
+            .eq('id', taskId)
             .single();
         } 
         // If we don't have a taskId but have a projectId and priorityLevel, 
@@ -51,10 +51,19 @@ export const StartEtaPredictor = ({
           // For new tasks, we need to know queue position and use similar calculations
           // This is a simplified approach - in a real app, you might have this logic in a function
           const { data: projectData } = await supabase
-            .from('project_timeline')
-            .select('active_task_count, max_concurrent_tasks')
-            .eq('project_id', projectId)
+            .from('projects')
+            .select('max_concurrent_tasks')
+            .eq('id', projectId)
             .single();
+            
+          const { data: tasksData } = await supabase
+            .from('tasks')
+            .select('id')
+            .eq('project_id', projectId)
+            .in('current_status_id', [2, 3, 4, 5, 6, 7]) // Active task statuses
+            .is('task_completed_at', null);
+            
+          const activeTaskCount = tasksData?.length || 0;
             
           const { data: priorityData } = await supabase
             .from('priority_levels')
@@ -75,13 +84,12 @@ export const StartEtaPredictor = ({
             .single();
             
           // Handle the interval types from PostgreSQL
-          const baseHours = taskTypeData?.base_duration || '1 hour';
-          const hoursNeeded = baseHours;
+          const hoursNeeded = taskTypeData?.base_duration || '1 hour';
           
           // Calculate start time based on priority and project capacity
           let startTime = new Date();
           if (priorityLevelId !== 1 && 
-              (projectData?.active_task_count || 0) >= (projectData?.max_concurrent_tasks || 1)) {
+              activeTaskCount >= (projectData?.max_concurrent_tasks || 1)) {
             // Task will be queued - add delay based on priority
             // Convert PostgreSQL interval to JavaScript Date addition
             if (priorityData?.time_to_start) {
@@ -115,7 +123,7 @@ export const StartEtaPredictor = ({
           setTimelineData({
             startTime: startTime.toISOString(),
             eta: etaTime.toISOString(),
-            hoursNeeded: hoursNeeded
+            hoursNeeded: String(hoursNeeded) // Convert interval to string
           });
           setIsLoading(false);
           return;
@@ -146,7 +154,7 @@ export const StartEtaPredictor = ({
           setTimelineData({
             startTime: data.start_time,
             eta: data.eta,
-            hoursNeeded: data.hours_needed
+            hoursNeeded: String(data.hours_needed) // Convert interval to string
           });
         }
       } catch (error) {

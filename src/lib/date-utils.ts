@@ -127,7 +127,7 @@ export function formatHourDifference(hours: number | null | string): string {
   
   // If it's a PostgreSQL interval string, extract the hours
   if (typeof hours === 'string') {
-    // Try to extract hours from formats like "2:30:00" or "2 hours 30 mins"
+    // Try to extract hours from formats like "2:30:00" or "2 hours 30 mins" or PostgreSQL interval
     const hourMatch = hours.match(/(\d+):(\d+):(\d+)/);
     if (hourMatch) {
       const extractedHours = parseInt(hourMatch[1]);

@@ -23,19 +23,20 @@ export const TaskCreationSidebar = () => {
   const fetchActiveTaskCount = async () => {
     if (!projectId) return;
     try {
-      // Use project_timeline view to get pre-calculated active task count
+      // Count active tasks directly from the tasks table
       const { data, error } = await supabase
-        .from('project_timeline')
-        .select('active_task_count')
+        .from('tasks')
+        .select('id')
         .eq('project_id', projectId)
-        .maybeSingle();
+        .in('current_status_id', [2, 3, 4, 5, 6, 7]) // Active task statuses
+        .is('task_completed_at', null);
 
       if (error) {
-        console.error("Error fetching project timeline:", error);
+        console.error("Error fetching active tasks:", error);
         return;
       }
       
-      setActiveTaskCount(data?.active_task_count || 0);
+      setActiveTaskCount(data?.length || 0);
     } catch (error) {
       console.error("Error in fetchActiveTaskCount:", error);
     }
