@@ -4,3 +4,6 @@ verify_jwt = false
 
 [functions.calculate-monthly-usage]
 verify_jwt = false
+
+[functions.update-task-etas]
+verify_jwt = false

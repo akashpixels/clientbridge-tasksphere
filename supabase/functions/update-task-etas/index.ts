@@ -19,14 +19,21 @@ serve(async (req) => {
 
   // Initialize Supabase client with service role key for admin access
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  console.log("Processing request to update task status");
+  console.log("Processing request to update task ETAs");
 
   try {
-    // Call the database function to update tasks with missing start times
-    const { data, error } = await supabase.rpc("update_in_progress_tasks");
+    // Create a database function to recalculate ETAs
+    const { data: fnData, error: fnError } = await supabase.rpc("create_update_task_etas_function", {}, { count: "exact" });
+    
+    if (fnError) {
+      console.error("Error creating or checking update_task_etas function:", fnError.message);
+    }
+
+    // Call the database function to update tasks ETAs
+    const { data, error } = await supabase.rpc("update_task_etas");
 
     if (error) {
-      console.error("Error updating task status:", error.message);
+      console.error("Error updating task ETAs:", error.message);
       return new Response(
         JSON.stringify({
           success: false,
@@ -39,22 +46,11 @@ serve(async (req) => {
       );
     }
 
-    // Now also update ETAs based on the updated calculate_working_timestamp function
-    const { data: etaData, error: etaError } = await supabase.rpc("update_task_etas");
-    
-    if (etaError) {
-      console.error("Error updating task ETAs:", etaError.message);
-      // We'll continue even if this fails since the primary function worked
-    } else {
-      console.log("Task ETAs updated successfully");
-    }
-
-    console.log("Task status updated successfully:", data);
+    console.log("Task ETAs updated successfully:", data);
     return new Response(
       JSON.stringify({
         success: true,
         data,
-        etaUpdated: !etaError,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -63,7 +59,7 @@ serve(async (req) => {
     );
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
-    console.error("Exception while updating task status:", errorMessage);
+    console.error("Exception while updating task ETAs:", errorMessage);
     return new Response(
       JSON.stringify({
         success: false,

@@ -1269,13 +1269,21 @@ export type Database = {
         }
         Returns: unknown
       }
-      calculate_working_timestamp: {
-        Args: {
-          start_time: string
-          work_hours: number
-        }
-        Returns: string
-      }
+      calculate_working_timestamp:
+        | {
+            Args: {
+              start_time: string
+              work_hours: number
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              start_time: string
+              work_hours: unknown
+            }
+            Returns: string
+          }
       find_next_working_day: {
         Args: {
           input_date: string
