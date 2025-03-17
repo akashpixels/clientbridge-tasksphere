@@ -248,12 +248,13 @@ const TasksTable = ({
             className={`cursor-pointer ${selectedTaskId === task.id ? 'bg-muted/30' : 'hover:bg-muted/30'}`}
             onClick={() => {
               onCommentClick(task.id);
-              setRightSidebarContent(
-                <TaskCommentThread 
-                  taskId={task.id} 
-                  taskCode={typeof task.task_code === 'string' ? task.task_code : String(task.task_code || 'No Code')} 
-                />
-              );
+             setRightSidebarContent(
+  <TaskCommentThread 
+    taskId={task.id} 
+    taskCode={typeof task.task_code === 'string' ? task.task_code : String(task.task_code || 'No Code')} 
+  /> as React.ReactNode
+);
+
             }}
           >
             <TableCell>
