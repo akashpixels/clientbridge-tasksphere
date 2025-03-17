@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -47,6 +48,7 @@ interface TasksTableProps {
     is_onhold?: boolean;
     start_time?: string | null;
     eta?: string | null;
+    reference_links?: Record<string, string> | null;
   })[];
   sortConfig: {
     key: string;
@@ -366,7 +368,7 @@ const TasksTable = ({
             
             <TableCell>
               <div className="flex flex-col gap-1">
-                {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
+                {task.reference_links && renderReferenceLinks(task.reference_links)}
               </div>
             </TableCell>
 
