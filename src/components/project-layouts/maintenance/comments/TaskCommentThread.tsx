@@ -15,7 +15,7 @@ import { useLayout } from "@/context/layout";
 
 interface TaskCommentThreadProps {
   taskId: string;
-  taskCode: string; // No more undefined, this is now required and must be a string
+  taskCode?: string; // Make taskCode optional
 }
 
 interface Comment {
@@ -129,7 +129,7 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-white border-b">
-        <div className="font-semibold">{taskCode}</div>
+        <div className="font-semibold">{taskCode || 'Task Details'}</div>
         <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
           <X className="h-4 w-4" />
         </Button>

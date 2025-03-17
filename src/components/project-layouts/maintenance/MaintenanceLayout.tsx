@@ -182,6 +182,7 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
             onSort={handleSort}
             onImageClick={handleImageClick}
             onCommentClick={(taskId: string) => {
+              // No need to pass taskCode since it's now optional
               setRightSidebarContent(
                 <TaskCommentThread taskId={taskId} />
               );

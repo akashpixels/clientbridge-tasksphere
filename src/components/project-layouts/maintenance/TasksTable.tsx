@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -233,11 +234,10 @@ const TasksTable = ({
       </TableHeader>
       <TableBody>
         {tasks.map((task) => {
-          const taskCode = typeof task.task_code === 'string' 
-            ? task.task_code 
-            : task.task_code !== undefined 
-              ? String(task.task_code) 
-              : 'Task';
+          // We'll convert task_code to string safely
+          const taskCode = task.task_code !== undefined && task.task_code !== null 
+            ? String(task.task_code) 
+            : 'Task';
               
           return (
             <TableRow 
