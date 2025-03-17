@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
@@ -141,7 +140,18 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
     }
   };
 
-  const sortedTasks = tasks ? [...tasks].sort((a, b) => {
+  const processedTasks = tasks ? tasks.map(task => ({
+    ...task,
+    actual_hours_spent: typeof task.actual_hours_spent === 'object' && task.actual_hours_spent !== null
+      ? parseFloat(String(task.actual_hours_spent)) || 0
+      : (typeof task.actual_hours_spent === 'string'
+          ? parseFloat(task.actual_hours_spent) || 0
+          : (typeof task.actual_hours_spent === 'number' 
+              ? task.actual_hours_spent
+              : null))
+  })) : [];
+
+  const sortedTasks = processedTasks.sort((a, b) => {
     const aValue = a[sortConfig.key as keyof typeof a];
     const bValue = b[sortConfig.key as keyof typeof b];
     
@@ -150,7 +160,7 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
     
     const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
     return sortConfig.direction === 'asc' ? comparison : -comparison;
-  }) : [];
+  });
 
   return (
     <div className="container mx-auto">
@@ -248,3 +258,4 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
 };
 
 export default MaintenanceLayout;
+
