@@ -76,12 +76,6 @@ const TasksTable = ({
     return format(new Date(date), "MMM d, h:mm a");
   };
 
-  /**
-   * Get the status color based on task status with priority:
-   * 1. is_awaiting_input (Highest priority)
-   * 2. is_onhold (Second priority)
-   * 3. Regular status colors from status configuration
-   */
   const getStatusColor = (status: { name: string | null, color_hex: string | null }, is_awaiting_input?: boolean, is_onhold?: boolean) => {
     if (is_awaiting_input) {
       return { bg: '#FEF9C3', text: '#854D0E' }; // Light yellow
