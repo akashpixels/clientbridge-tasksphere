@@ -47,6 +47,8 @@ interface TasksTableProps {
     is_onhold?: boolean;
     start_time?: string | null;
     eta?: string | null;
+    actual_hours_spent?: number | null;
+    task_completed_at?: string | null;
   })[];
   sortConfig: {
     key: string;
