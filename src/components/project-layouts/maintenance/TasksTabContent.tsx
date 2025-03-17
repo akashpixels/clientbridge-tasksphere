@@ -63,6 +63,8 @@ interface TasksTabContentProps {
     start_time?: string | null;
     eta?: string | null;
     queue_position?: number;
+    actual_hours_spent?: number | null;
+    task_completed_at?: string | null;
   })[];
   sortConfig: {
     key: string;
@@ -132,6 +134,18 @@ const TasksTabContent = ({
     onCommentClick(taskId);
   };
 
+  // Process the tasks data to ensure actual_hours_spent is properly converted to a number
+  const processedTasks = tasks?.map(task => ({
+    ...task,
+    actual_hours_spent: typeof task.actual_hours_spent === 'object' && task.actual_hours_spent !== null
+      ? parseFloat(String(task.actual_hours_spent)) || 0
+      : (typeof task.actual_hours_spent === 'string'
+          ? parseFloat(task.actual_hours_spent) || 0
+          : (typeof task.actual_hours_spent === 'number' 
+              ? task.actual_hours_spent
+              : null))
+  })) || [];
+
   return (
     <Card className="p-0">
       {isLoadingTasks ? (
@@ -139,10 +153,10 @@ const TasksTabContent = ({
           <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
           <p>Loading tasks...</p>
         </div>
-      ) : tasks && tasks.length > 0 ? (
+      ) : processedTasks && processedTasks.length > 0 ? (
         <div className="overflow-x-auto">
           <TasksTable 
-            tasks={tasks}
+            tasks={processedTasks}
             sortConfig={sortConfig}
             onSort={onSort}
             onImageClick={onImageClick}
