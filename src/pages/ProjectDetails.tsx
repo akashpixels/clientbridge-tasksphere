@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,7 +64,7 @@ const ProjectDetails = () => {
         project_subscriptions: projectData.project_subscriptions?.map(subscription => ({
           ...subscription,
           // Use hours data from usage calculation if available, fallback to subscription data
-          hours_allotted: usageData?.hours_allotted ?? Number(subscription.hours_allotted) || 0,
+          hours_allotted: usageData?.hours_allotted ?? (Number(subscription.hours_allotted) || 0),
           hours_spent: usageData?.hours_spent ?? 0
         }))
       };
@@ -124,10 +123,10 @@ const ProjectDetails = () => {
     return <div className="container mx-auto p-6">Project not found</div>;
   }
 
-  console.log('Project layout:', project.layout);
+  console.log('Project layout:', project?.layout);
   
   // Get subscription data for the HoursUsageProgress component
-  const subscription = project.project_subscriptions?.[0];
+  const subscription = project?.project_subscriptions?.[0];
   const hoursAllotted = subscription?.hours_allotted || 0;
   const hoursSpent = subscription?.hours_spent || 0;
   
@@ -146,7 +145,7 @@ const ProjectDetails = () => {
   };
   
   // Render the appropriate layout based on the project's layout type
-  const layoutId = project.layout_id;
+  const layoutId = project?.layout_id;
   
   switch (layoutId) {
     case 1:

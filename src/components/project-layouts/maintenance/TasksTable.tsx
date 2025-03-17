@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -250,7 +251,7 @@ const TasksTable = ({
               setRightSidebarContent(
                 <TaskCommentThread 
                   taskId={task.id} 
-                  taskCode={task.task_code || 'No Code'} 
+                  taskCode={task.task_code ? String(task.task_code) : 'No Code'} 
                 />
               );
             }}
