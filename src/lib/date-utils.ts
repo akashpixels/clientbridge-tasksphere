@@ -155,8 +155,13 @@ export function formatHourDifference(hours: number | null | string | object): st
     const intervalObj = hours as any;
     const hourValue = intervalObj.hours || 0;
     const minuteValue = intervalObj.minutes || 0;
-    // Fix the arithmetic operation by ensuring we're working with numbers
-    const formattedHours = Number(hourValue) + (Number(minuteValue) / 60);
+    
+    // Ensure we're working with numbers for both parts of the calculation
+    const hourValueNum = Number(hourValue);
+    const minuteValueNum = Number(minuteValue);
+    
+    // Calculate formatted hours with proper numeric conversion
+    const formattedHours = hourValueNum + (minuteValueNum / 60);
     
     // Round to one decimal place if not a whole number
     const displayValue = Number.isInteger(formattedHours) 
@@ -188,8 +193,11 @@ export function formatHourDifference(hours: number | null | string | object): st
   
   if (isNaN(Number(hours))) return "";
   
+  // Convert to number to ensure it's treated as a numeric value
+  const hoursNum = Number(hours);
+  
   // Round to one decimal place if not a whole number
-  const formattedHours = Number.isInteger(hours) ? hours : Math.round(hours * 10) / 10;
+  const formattedHours = Number.isInteger(hoursNum) ? hoursNum : Math.round(hoursNum * 10) / 10;
   
   return `${formattedHours} Hrs`;
 }
