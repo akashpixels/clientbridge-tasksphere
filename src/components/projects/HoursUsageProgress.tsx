@@ -4,8 +4,8 @@ import { Progress } from "@/components/ui/progress";
 import { formatDuration } from "@/lib/date-utils";
 
 interface HoursUsageProgressProps {
-  hoursAllotted: number;  // Changed from string | number | object to number
-  hoursSpent: number;     // Changed from string | number | object to number
+  hoursAllotted: number;  // Represents allocated_duration
+  hoursSpent: number;     // Represents actual_duration
   selectedMonth: string;
 }
 

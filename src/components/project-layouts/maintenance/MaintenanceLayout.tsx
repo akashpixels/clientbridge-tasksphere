@@ -33,8 +33,8 @@ interface MaintenanceLayoutProps {
     project_subscriptions?: {
       id: string;
       subscription_status: string;
-      hours_allotted: number;
-      hours_spent: number;
+      allocated_duration: unknown;
+      actual_duration: unknown;
       next_renewal_date: string;
     }[];
   };
@@ -144,12 +144,12 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
   // Process interval values consistently
   const processedTasks = tasks ? tasks.map(task => ({
     ...task,
-    actual_hours_spent: typeof task.actual_hours_spent === 'object' && task.actual_hours_spent !== null
-      ? parseFloat(String(task.actual_hours_spent)) || 0
-      : (typeof task.actual_hours_spent === 'string'
-          ? parseFloat(task.actual_hours_spent) || 0
-          : (typeof task.actual_hours_spent === 'number' 
-              ? task.actual_hours_spent
+    actual_duration: typeof task.actual_duration === 'object' && task.actual_duration !== null
+      ? parseFloat(String(task.actual_duration)) || 0
+      : (typeof task.actual_duration === 'string'
+          ? parseFloat(task.actual_duration) || 0
+          : (typeof task.actual_duration === 'number' 
+              ? task.actual_duration
               : null))
   })) : [];
 
