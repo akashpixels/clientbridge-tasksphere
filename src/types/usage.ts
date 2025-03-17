@@ -1,5 +1,5 @@
 
 export interface MonthlyUsage {
-  hours_allotted: number;
-  hours_spent: number;
+  allocated_duration: number;
+  actual_duration: number;
 }

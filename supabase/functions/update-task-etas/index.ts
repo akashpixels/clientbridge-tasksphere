@@ -31,10 +31,10 @@ Deno.serve(async (req) => {
         task_type_id, 
         complexity_level_id,
         priority_level_id,
-        actual_start_time,
+        started_at,  // Updated from actual_start_time
         eta
       `)
-      .is('task_completed_at', null)  // Only for incomplete tasks
+      .is('completed_at', null)  // Updated from task_completed_at
       .not('is_onhold', 'eq', true)   // Not on hold
       .not('is_awaiting_input', 'eq', true)  // Not awaiting input
       .order('priority_level_id', { ascending: true }); // Process highest priority first
@@ -59,26 +59,26 @@ Deno.serve(async (req) => {
         
         const { data: taskType } = await supabaseClient
           .from('task_types')
-          .select('base_duration')
+          .select('default_duration') // Updated from base_duration
           .eq('id', task.task_type_id)
           .single();
         
         const { data: priorityLevel } = await supabaseClient
           .from('priority_levels')
-          .select('time_to_start')
+          .select('start_delay')      // Updated from time_to_start
           .eq('id', task.priority_level_id)
           .single();
         
         // If we have valid data, calculate new ETA
-        if (complexityLevel && taskType && taskType.base_duration) {
+        if (complexityLevel && taskType && taskType.default_duration) {
           const multiplier = complexityLevel.multiplier || 1;
           
           // Calculate new ETA using database function
           const { data: result } = await supabaseClient.rpc(
             'calculate_working_timestamp',
             {
-              start_time: task.actual_start_time || new Date().toISOString(),
-              work_hours: `${taskType.base_duration.hours * multiplier} hours`
+              start_time: task.started_at || new Date().toISOString(),
+              work_hours: `${taskType.default_duration.hours * multiplier} hours`
             }
           );
           

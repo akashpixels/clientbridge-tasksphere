@@ -8,7 +8,7 @@ interface PriorityLevel {
   name: string;
   color: string;
   multiplier?: number;
-  time_to_start?: string | number | object; // Updated to handle PostgreSQL interval objects
+  start_delay?: string | number | object; // Updated from time_to_start
 }
 
 interface PrioritySelectorProps {
@@ -24,7 +24,7 @@ export const PrioritySelector = ({ priorityLevels, value, onChange }: PrioritySe
   
   const getPriorityTooltip = (level: PriorityLevel) => {
     if (!level) return "";
-    const timeToStart = level.time_to_start !== undefined ? formatDuration(level.time_to_start) : "immediate";
+    const timeToStart = level.start_delay !== undefined ? formatDuration(level.start_delay) : "immediate";
     const multiplier = level.multiplier ? `${level.multiplier}x duration` : "standard duration";
     return `${timeToStart} delay, ${multiplier}`;
   };

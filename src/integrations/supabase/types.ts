@@ -330,7 +330,7 @@ export type Database = {
           is_active: boolean
           multiplier: number | null
           name: string
-          time_to_start: unknown | null
+          start_delay: unknown | null
           updated_at: string
         }
         Insert: {
@@ -341,7 +341,7 @@ export type Database = {
           is_active?: boolean
           multiplier?: number | null
           name: string
-          time_to_start?: unknown | null
+          start_delay?: unknown | null
           updated_at?: string
         }
         Update: {
@@ -352,7 +352,7 @@ export type Database = {
           is_active?: boolean
           multiplier?: number | null
           name?: string
-          time_to_start?: unknown | null
+          start_delay?: unknown | null
           updated_at?: string
         }
         Relationships: []
@@ -466,10 +466,10 @@ export type Database = {
       }
       project_phases: {
         Row: {
-          actual_time: unknown | null
+          actual_duration: unknown | null
           created_at: string
           description: string | null
-          estimated_time: unknown | null
+          estimated_duration: unknown | null
           id: number
           is_milestone: boolean | null
           name: string
@@ -481,10 +481,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          actual_time?: unknown | null
+          actual_duration?: unknown | null
           created_at?: string
           description?: string | null
-          estimated_time?: unknown | null
+          estimated_duration?: unknown | null
           id?: number
           is_milestone?: boolean | null
           name: string
@@ -496,10 +496,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          actual_time?: unknown | null
+          actual_duration?: unknown | null
           created_at?: string
           description?: string | null
-          estimated_time?: unknown | null
+          estimated_duration?: unknown | null
           id?: number
           is_milestone?: boolean | null
           name?: string
@@ -529,10 +529,10 @@ export type Database = {
       }
       project_subscriptions: {
         Row: {
+          allocated_duration: unknown | null
           auto_renew: boolean
           billing_cycle: Database["public"]["Enums"]["billing_cycle"]
           created_at: string
-          hours_allotted: unknown | null
           id: string
           max_concurrent_tasks: number
           next_renewal_date: string
@@ -542,10 +542,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          allocated_duration?: unknown | null
           auto_renew?: boolean
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
           created_at?: string
-          hours_allotted?: unknown | null
           id?: string
           max_concurrent_tasks?: number
           next_renewal_date: string
@@ -555,10 +555,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          allocated_duration?: unknown | null
           auto_renew?: boolean
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
           created_at?: string
-          hours_allotted?: unknown | null
           id?: string
           max_concurrent_tasks?: number
           next_renewal_date?: string
@@ -694,9 +694,9 @@ export type Database = {
       }
       subscription_usage: {
         Row: {
+          actual_duration: unknown | null
+          allocated_duration: unknown | null
           created_at: string
-          hours_allotted: unknown | null
-          hours_spent: unknown | null
           id: string
           metadata: Json | null
           month_year: string
@@ -707,9 +707,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          actual_duration?: unknown | null
+          allocated_duration?: unknown | null
           created_at?: string
-          hours_allotted?: unknown | null
-          hours_spent?: unknown | null
           id?: string
           metadata?: Json | null
           month_year: string
@@ -720,9 +720,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          actual_duration?: unknown | null
+          allocated_duration?: unknown | null
           created_at?: string
-          hours_allotted?: unknown | null
-          hours_spent?: unknown | null
           id?: string
           metadata?: Json | null
           month_year?: string
@@ -856,23 +856,23 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          last_viewed_at: string
           task_id: string | null
           user_id: string | null
+          viewed_at: string
         }
         Insert: {
           created_at?: string
           id?: number
-          last_viewed_at?: string
           task_id?: string | null
           user_id?: string | null
+          viewed_at?: string
         }
         Update: {
           created_at?: string
           id?: number
-          last_viewed_at?: string
           task_id?: string | null
           user_id?: string | null
+          viewed_at?: string
         }
         Relationships: [
           {
@@ -990,27 +990,27 @@ export type Database = {
       }
       task_types: {
         Row: {
-          base_duration: unknown | null
           category: Database["public"]["Enums"]["task_categories"]
           created_at: string
+          default_duration: unknown | null
           description: string | null
           id: number
           name: string
           updated_at: string
         }
         Insert: {
-          base_duration?: unknown | null
           category: Database["public"]["Enums"]["task_categories"]
           created_at?: string
+          default_duration?: unknown | null
           description?: string | null
           id?: number
           name: string
           updated_at?: string
         }
         Update: {
-          base_duration?: unknown | null
           category?: Database["public"]["Enums"]["task_categories"]
           created_at?: string
+          default_duration?: unknown | null
           description?: string | null
           id?: number
           name?: string
@@ -1020,18 +1020,17 @@ export type Database = {
       }
       tasks: {
         Row: {
-          actual_hours_spent: unknown | null
-          actual_start_time: string | null
+          actual_duration: unknown | null
           assigned_user_id: string | null
           awaiting_input: boolean | null
+          completed_at: string | null
           complexity_level_id: number | null
           created_at: string
           created_by: string
           current_status_id: number
           details: string
+          estimated_duration: unknown | null
           eta: string | null
-          hours_needed: unknown | null
-          hours_spent: unknown | null
           id: string
           images: Json | null
           is_awaiting_input: boolean | null
@@ -1041,25 +1040,24 @@ export type Database = {
           project_id: string
           reference_links: Json | null
           start_time: string | null
+          started_at: string | null
           target_device: Database["public"]["Enums"]["device_type"]
           task_code: string | null
-          task_completed_at: string | null
           task_type_id: number
           updated_at: string
         }
         Insert: {
-          actual_hours_spent?: unknown | null
-          actual_start_time?: string | null
+          actual_duration?: unknown | null
           assigned_user_id?: string | null
           awaiting_input?: boolean | null
+          completed_at?: string | null
           complexity_level_id?: number | null
           created_at?: string
           created_by: string
           current_status_id?: number
           details: string
+          estimated_duration?: unknown | null
           eta?: string | null
-          hours_needed?: unknown | null
-          hours_spent?: unknown | null
           id?: string
           images?: Json | null
           is_awaiting_input?: boolean | null
@@ -1069,25 +1067,24 @@ export type Database = {
           project_id: string
           reference_links?: Json | null
           start_time?: string | null
+          started_at?: string | null
           target_device?: Database["public"]["Enums"]["device_type"]
           task_code?: string | null
-          task_completed_at?: string | null
           task_type_id: number
           updated_at?: string
         }
         Update: {
-          actual_hours_spent?: unknown | null
-          actual_start_time?: string | null
+          actual_duration?: unknown | null
           assigned_user_id?: string | null
           awaiting_input?: boolean | null
+          completed_at?: string | null
           complexity_level_id?: number | null
           created_at?: string
           created_by?: string
           current_status_id?: number
           details?: string
+          estimated_duration?: unknown | null
           eta?: string | null
-          hours_needed?: unknown | null
-          hours_spent?: unknown | null
           id?: string
           images?: Json | null
           is_awaiting_input?: boolean | null
@@ -1097,9 +1094,9 @@ export type Database = {
           project_id?: string
           reference_links?: Json | null
           start_time?: string | null
+          started_at?: string | null
           target_device?: Database["public"]["Enums"]["device_type"]
           task_code?: string | null
-          task_completed_at?: string | null
           task_type_id?: number
           updated_at?: string
         }

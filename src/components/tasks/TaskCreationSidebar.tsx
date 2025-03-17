@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -16,8 +17,8 @@ interface TaskData {
   details: string;
   current_status_id: number;
   priority_level_id: number;
-  actual_hours_spent?: any;
-  actual_hours_spent_formatted?: string;
+  actual_duration?: any;
+  actual_duration_formatted?: string;
   [key: string]: any; // Allow other properties
 }
 
@@ -86,7 +87,7 @@ export const TaskCreationSidebar = () => {
         .select('id')
         .eq('project_id', projectId)
         .in('current_status_id', [2, 3, 4, 5, 6, 7]) // Active task statuses
-        .is('task_completed_at', null);
+        .is('completed_at', null); // Updated from task_completed_at to completed_at
 
       if (error) {
         console.error("Error fetching active tasks:", error);
@@ -144,9 +145,9 @@ export const TaskCreationSidebar = () => {
       // Process interval fields for display and add to task data
       const processedData: TaskData = { ...data };
       
-      if (processedData && processedData.actual_hours_spent) {
+      if (processedData && processedData.actual_duration) {
         // Add the formatted property to the data object
-        processedData.actual_hours_spent_formatted = formatIntervalForDisplay(processedData.actual_hours_spent);
+        processedData.actual_duration_formatted = formatIntervalForDisplay(processedData.actual_duration);
       }
 
       // Set task created state and store the created task data

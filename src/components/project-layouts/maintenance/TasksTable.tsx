@@ -48,8 +48,8 @@ interface TasksTableProps {
     is_onhold?: boolean;
     start_time?: string | null;
     eta?: string | null;
-    actual_hours_spent?: number | null;
-    task_completed_at?: string | null;
+    actual_duration?: number | null; // Updated from actual_hours_spent
+    completed_at?: string | null;    // Updated from task_completed_at
   })[];
   sortConfig: {
     key: string;
@@ -320,9 +320,9 @@ const TasksTable = ({
                 >
                   {task.is_awaiting_input ? 'Awaiting Input' : task.is_onhold ? 'On Hold' : task.status?.name}
                 </span>
-                {task.task_completed_at && task.actual_hours_spent !== undefined && task.actual_hours_spent !== null && (
+                {task.completed_at && task.actual_duration !== undefined && task.actual_duration !== null && (
                   <span className="text-xs text-gray-500 pl-2">
-                    {formatInterval(task.actual_hours_spent)}
+                    {formatInterval(task.actual_duration)}
                   </span>
                 )}
                 {task.status?.name === 'Open' && task.start_time && (

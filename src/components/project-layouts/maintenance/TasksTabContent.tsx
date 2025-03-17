@@ -63,8 +63,8 @@ interface TasksTabContentProps {
     start_time?: string | null;
     eta?: string | null;
     queue_position?: number;
-    actual_hours_spent?: number | null;
-    task_completed_at?: string | null;
+    actual_duration?: number | null;     // Updated from actual_hours_spent
+    completed_at?: string | null;        // Updated from task_completed_at
   })[];
   sortConfig: {
     key: string;
@@ -134,15 +134,15 @@ const TasksTabContent = ({
     onCommentClick(taskId);
   };
 
-  // Process the tasks data to ensure actual_hours_spent is properly converted to a number
+  // Process the tasks data to ensure actual_duration is properly converted to a number
   const processedTasks = tasks?.map(task => ({
     ...task,
-    actual_hours_spent: typeof task.actual_hours_spent === 'object' && task.actual_hours_spent !== null
-      ? parseFloat(String(task.actual_hours_spent)) || 0
-      : (typeof task.actual_hours_spent === 'string'
-          ? parseFloat(task.actual_hours_spent) || 0
-          : (typeof task.actual_hours_spent === 'number' 
-              ? task.actual_hours_spent
+    actual_duration: typeof task.actual_duration === 'object' && task.actual_duration !== null
+      ? parseFloat(String(task.actual_duration)) || 0
+      : (typeof task.actual_duration === 'string'
+          ? parseFloat(task.actual_duration) || 0
+          : (typeof task.actual_duration === 'number' 
+              ? task.actual_duration
               : null))
   })) || [];
 

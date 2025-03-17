@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +38,7 @@ const ProjectDetails = () => {
           project_subscriptions(
             id,
             subscription_status,
-            hours_allotted,
+            allocated_duration,
             next_renewal_date
           )
         `)
@@ -64,8 +65,8 @@ const ProjectDetails = () => {
         project_subscriptions: projectData.project_subscriptions?.map(subscription => ({
           ...subscription,
           // Use hours data from usage calculation if available, fallback to subscription data
-          hours_allotted: usageData?.hours_allotted ?? (Number(subscription.hours_allotted) || 0),
-          hours_spent: usageData?.hours_spent ?? 0
+          allocated_duration: usageData?.allocated_duration ?? (Number(subscription.allocated_duration) || 0),
+          actual_duration: usageData?.actual_duration ?? 0
         }))
       };
       
@@ -82,7 +83,7 @@ const ProjectDetails = () => {
       // Try to fetch from subscription_usage table first
       const { data: usageData, error: usageError } = await supabase
         .from('subscription_usage')
-        .select('hours_allotted, hours_spent')
+        .select('allocated_duration, actual_duration')
         .eq('project_id', projectId)
         .eq('month_year', monthYear)
         .maybeSingle();
@@ -94,20 +95,20 @@ const ProjectDetails = () => {
       if (usageData) {
         // Convert interval strings to numbers if needed
         return {
-          hours_allotted: typeof usageData.hours_allotted === 'number' 
-            ? usageData.hours_allotted 
-            : parseFloat(String(usageData.hours_allotted)) || 0,
-          hours_spent: typeof usageData.hours_spent === 'number' 
-            ? usageData.hours_spent 
-            : parseFloat(String(usageData.hours_spent)) || 0
+          allocated_duration: typeof usageData.allocated_duration === 'number' 
+            ? usageData.allocated_duration 
+            : parseFloat(String(usageData.allocated_duration)) || 0,
+          actual_duration: typeof usageData.actual_duration === 'number' 
+            ? usageData.actual_duration 
+            : parseFloat(String(usageData.actual_duration)) || 0
         };
       }
       
       // Fallback: Calculate total hours spent for the month from tasks
       // This is a simplified version and may need to be expanded based on your business logic
       return {
-        hours_allotted: 0, // Default value
-        hours_spent: 0     // Default value
+        allocated_duration: 0, // Default value
+        actual_duration: 0     // Default value
       };
     } catch (error) {
       console.error('Error in fetchMonthlyUsage:', error);
@@ -127,8 +128,8 @@ const ProjectDetails = () => {
   
   // Get subscription data for the HoursUsageProgress component
   const subscription = project?.project_subscriptions?.[0];
-  const hoursAllotted = subscription?.hours_allotted || 0;
-  const hoursSpent = subscription?.hours_spent || 0;
+  const hoursAllotted = subscription?.allocated_duration || 0;
+  const hoursSpent = subscription?.actual_duration || 0;
   
   // Prepare layout props with HoursUsageProgress component
   const layoutProps = {

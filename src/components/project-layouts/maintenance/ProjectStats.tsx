@@ -7,8 +7,8 @@ import { intervalToHours } from "@/lib/date-utils";
 interface ProjectStatsProps {
   project: Tables<"projects"> & {
     project_subscriptions?: {
-      hours_allotted: unknown; // Can be INTERVAL or number
-      hours_spent: unknown; // Can be INTERVAL or number
+      allocated_duration: unknown; // Updated from hours_allotted
+      actual_duration: unknown;    // This would replace hours_spent
       subscription_status: string;
       next_renewal_date: string;
     }[];
@@ -30,11 +30,11 @@ const ProjectStats = ({ project, selectedMonth }: ProjectStatsProps) => {
   let hoursSpent = 0;
   
   if (subscription) {
-    // Convert hours_allotted to numeric hours regardless of type
-    hoursAllotted = intervalToHours(subscription.hours_allotted);
+    // Convert allocated_duration to numeric hours regardless of type
+    hoursAllotted = intervalToHours(subscription.allocated_duration);
     
-    // Convert hours_spent to numeric hours regardless of type
-    hoursSpent = intervalToHours(subscription.hours_spent);
+    // Convert actual_duration to numeric hours regardless of type
+    hoursSpent = intervalToHours(subscription.actual_duration);
   }
 
   console.log(`Hours for ${selectedMonth}: allotted=${hoursAllotted}, spent=${hoursSpent}`);
