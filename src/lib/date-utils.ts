@@ -199,6 +199,11 @@ export const formatHourDifference = (start: Date | string | null, end: Date | st
 
 /**
  * Convert interval object to hours as number
+ * Enhanced to handle more formats:
+ * - Interval objects from PostgreSQL
+ * - Interval strings like "2 hours 30 minutes"
+ * - Numbers (assumed to be hours)
+ * - Strings that contain numbers (assumed to be hours)
  */
 export const intervalToHours = (interval: any): number => {
   if (!interval) return 0;
@@ -217,17 +222,26 @@ export const intervalToHours = (interval: any): number => {
   
   // If it's an interval string
   if (typeof interval === 'string') {
+    // Try to extract components from the PostgreSQL interval string
     const daysMatch = interval.match(/(\d+)\s+day/i);
     const hoursMatch = interval.match(/(\d+)\s+hour/i);
     const minutesMatch = interval.match(/(\d+)\s+min/i);
     const secondsMatch = interval.match(/(\d+)\s+sec/i);
     
-    const days = daysMatch ? parseInt(daysMatch[1]) : 0;
-    const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
-    const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
-    const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 0;
+    // If it matches the interval pattern
+    if (daysMatch || hoursMatch || minutesMatch || secondsMatch) {
+      const days = daysMatch ? parseInt(daysMatch[1]) : 0;
+      const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+      const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+      const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 0;
+      
+      return days * 24 + hours + minutes / 60 + seconds / 3600;
+    }
     
-    return days * 24 + hours + minutes / 60 + seconds / 3600;
+    // If it's just a number string, interpret as hours
+    if (interval.trim() && !isNaN(Number(interval))) {
+      return Number(interval);
+    }
   }
   
   // If it's a number, assume it's already in hours

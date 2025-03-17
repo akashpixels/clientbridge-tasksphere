@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { useState } from "react";
 import { HoursUsageProgress } from "@/components/projects/HoursUsageProgress";
 import { MonthlyUsage } from "@/types/usage";
+import { intervalToHours } from "@/lib/date-utils";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -65,7 +66,7 @@ const ProjectDetails = () => {
         project_subscriptions: projectData.project_subscriptions?.map(subscription => ({
           ...subscription,
           // Use hours data from usage calculation if available, fallback to subscription data
-          allocated_duration: usageData?.allocated_duration ?? (Number(subscription.allocated_duration) || 0),
+          allocated_duration: usageData?.allocated_duration ?? subscription.allocated_duration,
           actual_duration: usageData?.actual_duration ?? 0
         }))
       };
@@ -93,14 +94,10 @@ const ProjectDetails = () => {
       }
 
       if (usageData) {
-        // Convert interval strings to numbers if needed
+        // Convert interval objects to numbers using the helper function
         return {
-          allocated_duration: typeof usageData.allocated_duration === 'number' 
-            ? usageData.allocated_duration 
-            : parseFloat(String(usageData.allocated_duration)) || 0,
-          actual_duration: typeof usageData.actual_duration === 'number' 
-            ? usageData.actual_duration 
-            : parseFloat(String(usageData.actual_duration)) || 0
+          allocated_duration: intervalToHours(usageData.allocated_duration),
+          actual_duration: intervalToHours(usageData.actual_duration)
         };
       }
       
@@ -128,8 +125,8 @@ const ProjectDetails = () => {
   
   // Get subscription data for the HoursUsageProgress component
   const subscription = project?.project_subscriptions?.[0];
-  const hoursAllotted = subscription?.allocated_duration || 0;
-  const hoursSpent = subscription?.actual_duration || 0;
+  const hoursAllotted = intervalToHours(subscription?.allocated_duration) || 0;
+  const hoursSpent = intervalToHours(subscription?.actual_duration) || 0;
   
   // Prepare layout props with HoursUsageProgress component
   const layoutProps = {
