@@ -155,7 +155,8 @@ export function formatHourDifference(hours: number | null | string | object): st
     const intervalObj = hours as any;
     const hourValue = intervalObj.hours || 0;
     const minuteValue = intervalObj.minutes || 0;
-    const formattedHours = hourValue + (minuteValue / 60);
+    // Fix the arithmetic operation by ensuring we're working with numbers
+    const formattedHours = Number(hourValue) + (Number(minuteValue) / 60);
     
     // Round to one decimal place if not a whole number
     const displayValue = Number.isInteger(formattedHours) 

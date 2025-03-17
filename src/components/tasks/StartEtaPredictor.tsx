@@ -3,9 +3,23 @@ import { formatTimelineTime, formatHourDifference } from "@/lib/date-utils";
 
 interface StartEtaPredictorProps {
   compact?: boolean;
+  taskId?: string | number;
+  projectId?: string; 
+  taskTypeId?: number;
+  priorityLevelId?: number;
+  complexityLevelId?: number;
+  activeTaskCount?: number;
 }
 
-export const StartEtaPredictor = ({ compact = false }: StartEtaPredictorProps) => {
+export const StartEtaPredictor = ({ 
+  compact = false,
+  taskId,
+  projectId,
+  taskTypeId,
+  priorityLevelId,
+  complexityLevelId,
+  activeTaskCount
+}: StartEtaPredictorProps) => {
   // Static timeline data
   const timelineData = {
     startTime: "2025-03-17T12:00:00Z",
