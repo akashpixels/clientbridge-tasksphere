@@ -367,11 +367,11 @@ const TasksTable = ({
             <TableCell>
               <div className="flex -space-x-2">
                 {task.images && Array.isArray(task.images) && task.images.length > 0 && (
-                  task.images.map((image, index) => (
+                  (task.images as string[]).map((image, index) => (
                     <div
                       key={index}
                       className="w-8 h-8 relative cursor-pointer"
-                      onClick={() => onImageClick(image as string, task.images as string[])}
+                      onClick={() => onImageClick(image, task.images as string[])}
                     >
                       <img 
                         src={image as string}
