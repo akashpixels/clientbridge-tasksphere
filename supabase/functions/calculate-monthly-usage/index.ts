@@ -38,13 +38,14 @@ serve(async (req) => {
     );
 
     if (error) {
+      console.error("RPC error:", error);
       throw error;
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Monthly subscription usage calculation completed",
+        message: "Monthly subscription usage calculation completed successfully",
         data,
       }),
       {

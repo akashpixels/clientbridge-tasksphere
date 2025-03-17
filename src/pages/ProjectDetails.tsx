@@ -8,6 +8,7 @@ import DevelopmentLayout from "@/components/project-layouts/DevelopmentLayout";
 import DefaultLayout from "@/components/project-layouts/DefaultLayout";
 import { format } from "date-fns";
 import { useState } from "react";
+import { intervalToHours } from "@/lib/date-utils";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -71,9 +72,9 @@ const ProjectDetails = () => {
         ...projectData,
         project_subscriptions: projectData.project_subscriptions?.map(subscription => ({
           ...subscription,
-          // Use hours data from usage_view if available, fallback to subscription data
-          hours_allotted: usageData?.hours_allotted ?? subscription.hours_allotted,
-          hours_spent: usageData?.hours_spent ?? 0
+          // Convert hours data using our utility
+          hours_allotted: intervalToHours(usageData?.hours_allotted ?? subscription.hours_allotted),
+          hours_spent: intervalToHours(usageData?.hours_spent ?? 0)
         }))
       };
       

@@ -1,4 +1,3 @@
-
 /**
  * Formats a date into a human-readable string like "January 1, 2023"
  */
@@ -198,42 +197,67 @@ export const formatHourDifference = (start: Date | string | null, end: Date | st
 };
 
 /**
- * Convert interval object to hours as number
+ * Converts various interval representations to numeric hours.
+ * Handles PostgreSQL intervals, strings like "5 hours", and numeric values.
  */
-export const intervalToHours = (interval: any): number => {
-  if (!interval) return 0;
-  
-  // If it's a PostgreSQL interval object
-  if (typeof interval === 'object' && interval !== null) {
-    if ('hours' in interval || 'minutes' in interval || 'seconds' in interval || 'days' in interval) {
-      const days = interval.days || 0;
-      const hours = interval.hours || 0;
-      const minutes = interval.minutes || 0;
-      const seconds = interval.seconds || 0;
-      
-      return days * 24 + hours + minutes / 60 + seconds / 3600;
-    }
+export const intervalToHours = (interval: unknown): number => {
+  if (interval === null || interval === undefined) {
+    return 0;
   }
   
-  // If it's an interval string
-  if (typeof interval === 'string') {
-    const daysMatch = interval.match(/(\d+)\s+day/i);
-    const hoursMatch = interval.match(/(\d+)\s+hour/i);
-    const minutesMatch = interval.match(/(\d+)\s+min/i);
-    const secondsMatch = interval.match(/(\d+)\s+sec/i);
-    
-    const days = daysMatch ? parseInt(daysMatch[1]) : 0;
-    const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
-    const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
-    const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 0;
-    
-    return days * 24 + hours + minutes / 60 + seconds / 3600;
-  }
-  
-  // If it's a number, assume it's already in hours
+  // If already a number, return it
   if (typeof interval === 'number') {
     return interval;
   }
   
+  // Handle interval as string
+  if (typeof interval === 'string') {
+    // Simple case: "X hours" format
+    if (interval.includes('hours') || interval.includes('hour')) {
+      const match = interval.match(/(\d+(\.\d+)?)/);
+      if (match && match[1]) {
+        return parseFloat(match[1]);
+      }
+    }
+    
+    // Handle PostgreSQL interval format (like "5:30:00" for 5 hours 30 minutes)
+    if (interval.includes(':')) {
+      const parts = interval.split(':');
+      if (parts.length >= 2) {
+        const hours = parseInt(parts[0], 10);
+        const minutes = parseInt(parts[1], 10);
+        return hours + (minutes / 60);
+      }
+    }
+    
+    // Try direct conversion for simple numeric strings
+    const num = parseFloat(interval);
+    if (!isNaN(num)) {
+      return num;
+    }
+  }
+  
+  // Handle PostgreSQL interval object format
+  if (typeof interval === 'object' && interval !== null) {
+    const intervalObj = interval as any;
+    if (typeof intervalObj.hours === 'number') {
+      let totalHours = intervalObj.hours || 0;
+      if (typeof intervalObj.minutes === 'number') {
+        totalHours += intervalObj.minutes / 60;
+      }
+      if (typeof intervalObj.seconds === 'number') {
+        totalHours += intervalObj.seconds / 3600;
+      }
+      if (typeof intervalObj.days === 'number') {
+        totalHours += intervalObj.days * 24;
+      }
+      if (typeof intervalObj.months === 'number') {
+        totalHours += intervalObj.months * 30 * 24; // Approximation
+      }
+      return totalHours;
+    }
+  }
+  
+  console.warn('Unable to convert interval to hours:', interval);
   return 0;
 };
