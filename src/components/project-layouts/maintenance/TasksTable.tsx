@@ -1,4 +1,3 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -84,17 +83,14 @@ const TasksTable = ({
    * 3. Regular status colors from status configuration
    */
   const getStatusColor = (status: { name: string | null, color_hex: string | null }, is_awaiting_input?: boolean, is_onhold?: boolean) => {
-    // First priority: Check if awaiting input
     if (is_awaiting_input) {
       return { bg: '#FEF9C3', text: '#854D0E' }; // Light yellow
     }
     
-    // Second priority: Check if on hold
     if (is_onhold) {
       return { bg: '#FDE68A', text: '#92400E' }; // Darker yellow
     }
 
-    // Default status color handling
     if (!status?.color_hex) {
       return { bg: '#F3F4F6', text: '#374151' }; // Default gray
     }
@@ -175,6 +171,14 @@ const TasksTable = ({
         {text}
       </a>
     ));
+  };
+
+  const getImagesArray = (images: unknown): string[] => {
+    if (!images) return [];
+    if (Array.isArray(images)) {
+      return images.filter((img): img is string => typeof img === 'string');
+    }
+    return [];
   };
 
   return (
@@ -374,15 +378,18 @@ const TasksTable = ({
 
             <TableCell>
               <div className="flex -space-x-2">
-                {task.images && Array.isArray(task.images) && task.images.length > 0 && (
-                  task.images.map((image, index) => (
+                {task.images && (
+                  getImagesArray(task.images).map((image, index) => (
                     <div
                       key={index}
                       className="w-8 h-8 relative cursor-pointer"
-                      onClick={() => onImageClick(image as string, task.images as string[])}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onImageClick(image, getImagesArray(task.images));
+                      }}
                     >
                       <img 
-                        src={image as string}
+                        src={image}
                         alt={`Task image ${index + 1}`}
                         className="w-8 h-8 rounded-lg border-2 border-white object-cover"
                       />
