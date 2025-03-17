@@ -231,6 +231,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "usage_view"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "files_uploaded_by_fkey"
             columns: ["uploaded_by"]
             isOneToOne: false
@@ -280,6 +287,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inputs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "usage_view"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "inputs_requested_by_fkey"
@@ -385,6 +399,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "project_assignees_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "usage_view"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "project_assignees_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -438,6 +459,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "project_credentials_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "usage_view"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       project_layouts: {
@@ -474,7 +502,7 @@ export type Database = {
           is_milestone: boolean | null
           name: string
           phase_order: number
-          progress: number | null
+          progress: number
           project_id: string
           status_id: number | null
           tasks: Json | null
@@ -489,7 +517,7 @@ export type Database = {
           is_milestone?: boolean | null
           name: string
           phase_order: number
-          progress?: number | null
+          progress?: number
           project_id: string
           status_id?: number | null
           tasks?: Json | null
@@ -504,7 +532,7 @@ export type Database = {
           is_milestone?: boolean | null
           name?: string
           phase_order?: number
-          progress?: number | null
+          progress?: number
           project_id?: string
           status_id?: number | null
           tasks?: Json | null
@@ -517,6 +545,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_phases_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "usage_view"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "project_phases_status_id_fkey"
@@ -532,7 +567,7 @@ export type Database = {
           auto_renew: boolean
           billing_cycle: Database["public"]["Enums"]["billing_cycle"]
           created_at: string
-          hours_allotted: number
+          hours_allotted: unknown | null
           id: string
           max_concurrent_tasks: number
           next_renewal_date: string
@@ -545,7 +580,7 @@ export type Database = {
           auto_renew?: boolean
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
           created_at?: string
-          hours_allotted?: number
+          hours_allotted?: unknown | null
           id?: string
           max_concurrent_tasks?: number
           next_renewal_date: string
@@ -558,7 +593,7 @@ export type Database = {
           auto_renew?: boolean
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
           created_at?: string
-          hours_allotted?: number
+          hours_allotted?: unknown | null
           id?: string
           max_concurrent_tasks?: number
           next_renewal_date?: string
@@ -574,6 +609,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_subscriptions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "usage_view"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -614,7 +656,7 @@ export type Database = {
           name: string
           payment_status: Database["public"]["Enums"]["payment_status"]
           primary_color_hex: string | null
-          progress: number | null
+          progress: number
           secondary_color_hex: string | null
           status_id: number | null
           status_options: Json
@@ -636,7 +678,7 @@ export type Database = {
           name: string
           payment_status?: Database["public"]["Enums"]["payment_status"]
           primary_color_hex?: string | null
-          progress?: number | null
+          progress?: number
           secondary_color_hex?: string | null
           status_id?: number | null
           status_options?: Json
@@ -658,7 +700,7 @@ export type Database = {
           name?: string
           payment_status?: Database["public"]["Enums"]["payment_status"]
           primary_color_hex?: string | null
-          progress?: number | null
+          progress?: number
           secondary_color_hex?: string | null
           status_id?: number | null
           status_options?: Json
@@ -695,8 +737,8 @@ export type Database = {
       subscription_usage: {
         Row: {
           created_at: string
-          hours_allotted: number
-          hours_spent: number
+          hours_allotted: unknown | null
+          hours_spent: unknown | null
           id: string
           metadata: Json | null
           month_year: string
@@ -708,8 +750,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          hours_allotted: number
-          hours_spent: number
+          hours_allotted?: unknown | null
+          hours_spent?: unknown | null
           id?: string
           metadata?: Json | null
           month_year: string
@@ -721,8 +763,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          hours_allotted?: number
-          hours_spent?: number
+          hours_allotted?: unknown | null
+          hours_spent?: unknown | null
           id?: string
           metadata?: Json | null
           month_year?: string
@@ -739,6 +781,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_usage_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "usage_view"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "subscription_usage_subscription_id_fkey"
@@ -1020,7 +1069,7 @@ export type Database = {
       }
       tasks: {
         Row: {
-          actual_hours_spent: number | null
+          actual_hours_spent: unknown | null
           actual_start_time: string | null
           assigned_user_id: string | null
           awaiting_input: boolean | null
@@ -1031,7 +1080,7 @@ export type Database = {
           details: string
           eta: string | null
           hours_needed: unknown | null
-          hours_spent: number | null
+          hours_spent: unknown | null
           id: string
           images: Json | null
           is_awaiting_input: boolean | null
@@ -1048,7 +1097,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          actual_hours_spent?: number | null
+          actual_hours_spent?: unknown | null
           actual_start_time?: string | null
           assigned_user_id?: string | null
           awaiting_input?: boolean | null
@@ -1059,7 +1108,7 @@ export type Database = {
           details: string
           eta?: string | null
           hours_needed?: unknown | null
-          hours_spent?: number | null
+          hours_spent?: unknown | null
           id?: string
           images?: Json | null
           is_awaiting_input?: boolean | null
@@ -1076,7 +1125,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          actual_hours_spent?: number | null
+          actual_hours_spent?: unknown | null
           actual_start_time?: string | null
           assigned_user_id?: string | null
           awaiting_input?: boolean | null
@@ -1087,7 +1136,7 @@ export type Database = {
           details?: string
           eta?: string | null
           hours_needed?: unknown | null
-          hours_spent?: number | null
+          hours_spent?: unknown | null
           id?: string
           images?: Json | null
           is_awaiting_input?: boolean | null
@@ -1152,6 +1201,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "usage_view"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "tasks_task_type_id_fkey"
@@ -1251,8 +1307,8 @@ export type Database = {
     Views: {
       usage_view: {
         Row: {
-          hours_allotted: number | null
-          hours_spent: number | null
+          hours_allotted: unknown | null
+          hours_spent: unknown | null
           month_year: string | null
           project_id: string | null
         }
@@ -1283,7 +1339,7 @@ export type Database = {
           start_time: string
           end_time: string
         }
-        Returns: number
+        Returns: unknown
       }
       calculate_working_timestamp: {
         Args: {

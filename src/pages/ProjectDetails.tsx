@@ -8,6 +8,7 @@ import DevelopmentLayout from "@/components/project-layouts/DevelopmentLayout";
 import DefaultLayout from "@/components/project-layouts/DefaultLayout";
 import { format } from "date-fns";
 import { useState } from "react";
+import { HoursUsageProgress } from "@/components/projects/HoursUsageProgress";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -92,16 +93,31 @@ const ProjectDetails = () => {
 
   console.log('Project layout:', project.layout);
   
+  // Get subscription data for the HoursUsageProgress component
+  const subscription = project.project_subscriptions?.[0];
+  const hoursAllotted = subscription?.hours_allotted || 0;
+  const hoursSpent = subscription?.hours_spent || 0;
+  
+  // Prepare layout props with HoursUsageProgress component
+  const layoutProps = {
+    project,
+    selectedMonth,
+    onMonthChange: setSelectedMonth,
+    hoursUsageProgress: subscription ? (
+      <HoursUsageProgress 
+        hoursAllotted={hoursAllotted}
+        hoursSpent={hoursSpent}
+        selectedMonth={selectedMonth}
+      />
+    ) : null
+  };
+  
   // Render the appropriate layout based on the project's layout type
   const layoutId = project.layout_id;
   
   switch (layoutId) {
     case 1:
-      return <MaintenanceLayout 
-        project={project} 
-        selectedMonth={selectedMonth}
-        onMonthChange={setSelectedMonth}
-      />;
+      return <MaintenanceLayout {...layoutProps} />;
     case 2:
       return <BrandingLayout project={project} />;
     case 3:
