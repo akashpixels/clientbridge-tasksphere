@@ -694,7 +694,6 @@ export type Database = {
       }
       subscription_usage: {
         Row: {
-          actual_duration: unknown | null
           allocated_duration: unknown | null
           created_at: string
           id: string
@@ -705,9 +704,9 @@ export type Database = {
           status: string | null
           subscription_id: string
           updated_at: string
+          used_duration: unknown | null
         }
         Insert: {
-          actual_duration?: unknown | null
           allocated_duration?: unknown | null
           created_at?: string
           id?: string
@@ -718,9 +717,9 @@ export type Database = {
           status?: string | null
           subscription_id: string
           updated_at?: string
+          used_duration?: unknown | null
         }
         Update: {
-          actual_duration?: unknown | null
           allocated_duration?: unknown | null
           created_at?: string
           id?: string
@@ -731,6 +730,7 @@ export type Database = {
           status?: string | null
           subscription_id?: string
           updated_at?: string
+          used_duration?: unknown | null
         }
         Relationships: [
           {

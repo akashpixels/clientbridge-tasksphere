@@ -8,7 +8,7 @@ interface ProjectStatsProps {
   project: Tables<"projects"> & {
     project_subscriptions?: {
       allocated_duration: unknown; 
-      actual_duration: unknown;    
+      actual_duration: unknown;    // This is still named actual_duration in the frontend interface
       subscription_status: string;
       next_renewal_date: string;
     }[];
@@ -34,6 +34,7 @@ const ProjectStats = ({ project, selectedMonth }: ProjectStatsProps) => {
     hoursAllotted = intervalToHours(subscription.allocated_duration);
     
     // Convert actual_duration to numeric hours regardless of type
+    // Note: In the frontend, we still use actual_duration even though it's used_duration in the DB
     hoursSpent = intervalToHours(subscription.actual_duration);
   }
 

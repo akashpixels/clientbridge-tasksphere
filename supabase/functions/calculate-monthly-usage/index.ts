@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
             subscription_id: subscription.id,
             month_year: prevMonthFormat,
             hours_allotted: `${hoursAllotted} hours`,
-            hours_spent: `${totalHoursSpent} hours`,
+            hours_spent: `${totalHoursSpent} hours`, // Updated field name
             status: 'completed',
             notes: `Automatically calculated on ${currentDate.toISOString()}`,
             updated_at: new Date().toISOString()

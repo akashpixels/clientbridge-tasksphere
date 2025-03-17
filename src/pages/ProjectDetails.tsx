@@ -67,7 +67,7 @@ const ProjectDetails = () => {
           ...subscription,
           // Use hours data from usage calculation if available, fallback to subscription data
           allocated_duration: usageData?.allocated_duration ?? subscription.allocated_duration,
-          actual_duration: usageData?.actual_duration ?? 0
+          actual_duration: usageData?.used_duration ?? 0
         }))
       };
       
@@ -84,7 +84,7 @@ const ProjectDetails = () => {
       // Try to fetch from subscription_usage table first
       const { data: usageData, error: usageError } = await supabase
         .from('subscription_usage')
-        .select('allocated_duration, actual_duration')
+        .select('allocated_duration, used_duration')
         .eq('project_id', projectId)
         .eq('month_year', monthYear)
         .maybeSingle();
@@ -97,7 +97,7 @@ const ProjectDetails = () => {
         // Convert interval objects to numbers using the helper function
         return {
           allocated_duration: intervalToHours(usageData.allocated_duration),
-          actual_duration: intervalToHours(usageData.actual_duration)
+          used_duration: intervalToHours(usageData.used_duration)
         };
       }
       
@@ -105,7 +105,7 @@ const ProjectDetails = () => {
       // This is a simplified version and may need to be expanded based on your business logic
       return {
         allocated_duration: 0, // Default value
-        actual_duration: 0     // Default value
+        used_duration: 0     // Default value
       };
     } catch (error) {
       console.error('Error in fetchMonthlyUsage:', error);

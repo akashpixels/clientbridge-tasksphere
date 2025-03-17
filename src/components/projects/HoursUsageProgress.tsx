@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 
 interface HoursUsageProgressProps {
   hoursAllotted: number;  // Represents allocated_duration
-  hoursSpent: number;     // Represents actual_duration
+  hoursSpent: number;     // Represents used_duration (formerly actual_duration)
   selectedMonth: string;
 }
 
