@@ -1,3 +1,4 @@
+
 /**
  * Formats a date into a human-readable string like "January 1, 2023"
  */
@@ -194,4 +195,45 @@ export const formatHourDifference = (start: Date | string | null, end: Date | st
   
   if (hours === 0) return `${days} day${days !== 1 ? 's' : ''}`;
   return `${days} day${days !== 1 ? 's' : ''}, ${hours} hour${hours !== 1 ? 's' : ''}`;
+};
+
+/**
+ * Convert interval object to hours as number
+ */
+export const intervalToHours = (interval: any): number => {
+  if (!interval) return 0;
+  
+  // If it's a PostgreSQL interval object
+  if (typeof interval === 'object' && interval !== null) {
+    if ('hours' in interval || 'minutes' in interval || 'seconds' in interval || 'days' in interval) {
+      const days = interval.days || 0;
+      const hours = interval.hours || 0;
+      const minutes = interval.minutes || 0;
+      const seconds = interval.seconds || 0;
+      
+      return days * 24 + hours + minutes / 60 + seconds / 3600;
+    }
+  }
+  
+  // If it's an interval string
+  if (typeof interval === 'string') {
+    const daysMatch = interval.match(/(\d+)\s+day/i);
+    const hoursMatch = interval.match(/(\d+)\s+hour/i);
+    const minutesMatch = interval.match(/(\d+)\s+min/i);
+    const secondsMatch = interval.match(/(\d+)\s+sec/i);
+    
+    const days = daysMatch ? parseInt(daysMatch[1]) : 0;
+    const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+    const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+    const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 0;
+    
+    return days * 24 + hours + minutes / 60 + seconds / 3600;
+  }
+  
+  // If it's a number, assume it's already in hours
+  if (typeof interval === 'number') {
+    return interval;
+  }
+  
+  return 0;
 };

@@ -2,6 +2,7 @@
 import { Tables } from "@/integrations/supabase/types";
 import { differenceInDays } from "date-fns";
 import { useState } from "react";
+import { intervalToHours } from "@/lib/date-utils";
 
 interface ProjectStatsProps {
   project: Tables<"projects"> & {
@@ -24,30 +25,16 @@ const ProjectStats = ({ project, selectedMonth }: ProjectStatsProps) => {
 
   const subscription = project.project_subscriptions?.[0];
   
-  // Hours data comes directly from the subscription object
-  // Handle both numeric values and interval objects
+  // Convert hours data to numeric values regardless of input type
   let hoursAllotted = 0;
   let hoursSpent = 0;
   
   if (subscription) {
-    // Handle PostgreSQL INTERVAL type (from Supabase)
-    if (subscription.hours_allotted && typeof subscription.hours_allotted === 'object' && 'hours' in (subscription.hours_allotted as any)) {
-      const intervalObj = subscription.hours_allotted as any;
-      hoursAllotted = (intervalObj.hours || 0) + ((intervalObj.minutes || 0) / 60);
-    } 
-    // Handle numeric values
-    else if (typeof subscription.hours_allotted === 'number') {
-      hoursAllotted = subscription.hours_allotted;
-    }
+    // Convert hours_allotted to numeric hours regardless of type
+    hoursAllotted = intervalToHours(subscription.hours_allotted);
     
-    // Similar handling for hours_spent
-    if (subscription.hours_spent && typeof subscription.hours_spent === 'object' && 'hours' in (subscription.hours_spent as any)) {
-      const intervalObj = subscription.hours_spent as any;
-      hoursSpent = (intervalObj.hours || 0) + ((intervalObj.minutes || 0) / 60);
-    }
-    else if (typeof subscription.hours_spent === 'number') {
-      hoursSpent = subscription.hours_spent;
-    }
+    // Convert hours_spent to numeric hours regardless of type
+    hoursSpent = intervalToHours(subscription.hours_spent);
   }
 
   console.log(`Hours for ${selectedMonth}: allotted=${hoursAllotted}, spent=${hoursSpent}`);
