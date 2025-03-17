@@ -130,14 +130,17 @@ export const TaskCreationSidebar = () => {
         description: "Your task has been added to the project."
       });
 
-      // Process interval fields for display
-      if (data && data.actual_hours_spent) {
-        data.actual_hours_spent_formatted = formatIntervalForDisplay(data.actual_hours_spent);
+      // Process interval fields for display and add to task data
+      const processedData = { ...data };
+      
+      if (processedData && processedData.actual_hours_spent) {
+        // Add the formatted property to the data object
+        processedData.actual_hours_spent_formatted = formatIntervalForDisplay(processedData.actual_hours_spent);
       }
 
       // Set task created state and store the created task data
       setTaskCreated(true);
-      setCreatedTaskData(data);
+      setCreatedTaskData(processedData);
 
       // Refresh active task count
       fetchActiveTaskCount();
