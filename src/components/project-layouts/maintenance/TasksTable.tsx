@@ -242,7 +242,7 @@ const TasksTable = ({
                 <TaskCommentThread 
                   taskId={task.id} 
                   taskCode={typeof task.task_code === 'string' ? task.task_code : String(task.task_code || 'No Code')} 
-                /> as React.ReactNode
+                />
               );
             }}
           >
