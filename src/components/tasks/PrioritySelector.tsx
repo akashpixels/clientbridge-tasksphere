@@ -8,7 +8,7 @@ interface PriorityLevel {
   name: string;
   color: string;
   multiplier?: number;
-  time_to_start?: string | number;
+  time_to_start?: string | number | object; // Updated to handle PostgreSQL interval objects
 }
 
 interface PrioritySelectorProps {

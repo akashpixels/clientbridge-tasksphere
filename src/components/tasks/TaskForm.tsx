@@ -10,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { StartEtaPredictor } from "./StartEtaPredictor";
 import { Upload, X, Plus, Monitor, Smartphone, MonitorSmartphone, Loader2 } from "lucide-react";
 import { PrioritySelector } from "./PrioritySelector";
 import { formatDuration } from "@/lib/date-utils";
@@ -248,15 +247,6 @@ export const TaskForm = ({
   
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6 px-4 relative">
-        <StartEtaPredictor 
-          taskTypeId={timelineParams.taskTypeId} 
-          priorityLevelId={timelineParams.priorityLevelId} 
-          complexityLevelId={timelineParams.complexityLevelId} 
-          projectId={projectId} 
-          compact={true} 
-          activeTaskCount={activeTaskCount} 
-        />
-
         <div className="space-y-5 py-0 pb-24">
           <FormField control={form.control} name="details" render={({
           field
@@ -451,4 +441,3 @@ export const TaskForm = ({
       </form>
     </Form>;
 };
-

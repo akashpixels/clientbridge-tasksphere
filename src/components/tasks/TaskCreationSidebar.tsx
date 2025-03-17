@@ -9,7 +9,6 @@ import { TaskForm } from "./TaskForm";
 import { useLayout } from "@/context/layout";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { StartEtaPredictor } from "./StartEtaPredictor";
 
 export const TaskCreationSidebar = () => {
   const { toast } = useToast();
@@ -142,15 +141,6 @@ export const TaskCreationSidebar = () => {
                   <p><span className="font-medium">Status:</span> {createdTaskData?.current_status_id === 1 ? 'Open' : 'Pending'}</p>
                   <p><span className="font-medium">Priority:</span> {createdTaskData?.priority_level_id}</p>
                 </div>
-              </div>
-              
-              {/* Add the ETA predictor showing when this task will be worked on */}
-              <div className="mt-6 border p-4 rounded-md">
-                <h3 className="text-sm font-medium mb-2">Task Timeline</h3>
-                <StartEtaPredictor 
-                  taskId={createdTaskData?.id}
-                  projectId={projectId}
-                />
               </div>
               
               <div className="sticky bottom-0 py-4 mt-6 bg-background">
