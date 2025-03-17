@@ -10,6 +10,53 @@ import { useLayout } from "@/context/layout";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+// Helper function to format interval for display
+const formatIntervalForDisplay = (intervalValue: any): string => {
+  if (!intervalValue) return "0h";
+  
+  // Handle if intervalValue is already a number
+  if (typeof intervalValue === 'number') {
+    return intervalValue === 0 ? "0h" : `${intervalValue}h`;
+  }
+  
+  // Convert PostgreSQL interval string formats to hours
+  try {
+    if (typeof intervalValue === 'string') {
+      // Handle "HH:MM:SS" format
+      if (intervalValue.includes(':')) {
+        const parts = intervalValue.split(':');
+        const hours = parseInt(parts[0], 10);
+        const minutes = parseInt(parts[1], 10);
+        const minutesAsHours = minutes / 60;
+        return `${(hours + minutesAsHours).toFixed(1).replace(/\.0$/, '')}h`;
+      }
+      // Handle "X hours Y minutes" format
+      else if (intervalValue.includes('hours') || intervalValue.includes('hour')) {
+        const hoursMatch = intervalValue.match(/(\d+)\s+hours?/);
+        const minutesMatch = intervalValue.match(/(\d+)\s+minutes?/);
+        const hours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
+        const minutes = minutesMatch ? parseInt(minutesMatch[1], 10) : 0;
+        const minutesAsHours = minutes / 60;
+        return `${(hours + minutesAsHours).toFixed(1).replace(/\.0$/, '')}h`;
+      }
+      // Try to parse as a raw number
+      return `${parseFloat(intervalValue)}h`;
+    }
+    
+    // Handle interval object format from PostgreSQL
+    if (typeof intervalValue === 'object' && intervalValue !== null) {
+      // Convert interval object to string and extract hours
+      const stringValue = String(intervalValue);
+      return formatIntervalForDisplay(stringValue);
+    }
+    
+    return "0h";
+  } catch (e) {
+    console.error("Error formatting interval:", e, intervalValue);
+    return "0h";
+  }
+};
+
 export const TaskCreationSidebar = () => {
   const { toast } = useToast();
   const { id: projectId } = useParams<{ id: string; }>();
@@ -82,6 +129,11 @@ export const TaskCreationSidebar = () => {
         title: "Task created successfully",
         description: "Your task has been added to the project."
       });
+
+      // Process interval fields for display
+      if (data && data.actual_hours_spent) {
+        data.actual_hours_spent_formatted = formatIntervalForDisplay(data.actual_hours_spent);
+      }
 
       // Set task created state and store the created task data
       setTaskCreated(true);

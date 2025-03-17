@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -59,6 +60,53 @@ interface TasksTableProps {
   onCommentClick: (taskId: string) => void;
   selectedTaskId?: string;
 }
+
+// Helper function to format interval for display
+const formatInterval = (intervalValue: any): string => {
+  if (!intervalValue) return "0h";
+  
+  // Handle if intervalValue is already a number
+  if (typeof intervalValue === 'number') {
+    return intervalValue === 0 ? "0h" : `${intervalValue}h`;
+  }
+  
+  // Convert PostgreSQL interval string formats to hours
+  try {
+    if (typeof intervalValue === 'string') {
+      // Handle "HH:MM:SS" format
+      if (intervalValue.includes(':')) {
+        const parts = intervalValue.split(':');
+        const hours = parseInt(parts[0], 10);
+        const minutes = parseInt(parts[1], 10);
+        const minutesAsHours = minutes / 60;
+        return `${(hours + minutesAsHours).toFixed(1).replace(/\.0$/, '')}h`;
+      }
+      // Handle "X hours Y minutes" format
+      else if (intervalValue.includes('hours') || intervalValue.includes('hour')) {
+        const hoursMatch = intervalValue.match(/(\d+)\s+hours?/);
+        const minutesMatch = intervalValue.match(/(\d+)\s+minutes?/);
+        const hours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
+        const minutes = minutesMatch ? parseInt(minutesMatch[1], 10) : 0;
+        const minutesAsHours = minutes / 60;
+        return `${(hours + minutesAsHours).toFixed(1).replace(/\.0$/, '')}h`;
+      }
+      // Try to parse as a raw number
+      return `${parseFloat(intervalValue)}h`;
+    }
+    
+    // Handle interval object format from PostgreSQL
+    if (typeof intervalValue === 'object' && intervalValue !== null) {
+      // Convert interval object to string and extract hours
+      const stringValue = String(intervalValue);
+      return formatInterval(stringValue);
+    }
+    
+    return "0h";
+  } catch (e) {
+    console.error("Error formatting interval:", e, intervalValue);
+    return "0h";
+  }
+};
 
 const TasksTable = ({ 
   tasks, 
@@ -272,9 +320,9 @@ const TasksTable = ({
                 >
                   {task.is_awaiting_input ? 'Awaiting Input' : task.is_onhold ? 'On Hold' : task.status?.name}
                 </span>
-                {task.task_completed_at && task.actual_hours_spent && (
+                {task.task_completed_at && task.actual_hours_spent !== undefined && task.actual_hours_spent !== null && (
                   <span className="text-xs text-gray-500 pl-2">
-                    {task.actual_hours_spent} hrs
+                    {formatInterval(task.actual_hours_spent)}
                   </span>
                 )}
                 {task.status?.name === 'Open' && task.start_time && (

@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
@@ -140,6 +141,7 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
     }
   };
 
+  // Process interval values consistently
   const processedTasks = tasks ? tasks.map(task => ({
     ...task,
     actual_hours_spent: typeof task.actual_hours_spent === 'object' && task.actual_hours_spent !== null
@@ -258,4 +260,3 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
 };
 
 export default MaintenanceLayout;
-
