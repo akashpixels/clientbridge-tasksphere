@@ -15,7 +15,7 @@ import { useLayout } from "@/context/layout";
 
 interface TaskCommentThreadProps {
   taskId: string;
-  taskCode?: string; // Make taskCode optional
+  taskCode?: string;
 }
 
 interface Comment {
@@ -31,7 +31,7 @@ interface Comment {
   parent_id?: string;
 }
 
-const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
+const TaskCommentThread = ({ taskId, taskCode = "Task" }: TaskCommentThreadProps) => {
   const [newComment, setNewComment] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -129,7 +129,7 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-white border-b">
-        <div className="font-semibold">{taskCode || 'Task Details'}</div>
+        <div className="font-semibold">{taskCode}</div>
         <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
           <X className="h-4 w-4" />
         </Button>
