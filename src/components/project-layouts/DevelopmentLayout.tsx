@@ -19,8 +19,8 @@ interface DevelopmentLayoutProps {
       color_hex: string | null;
     } | null;
     project_subscriptions: {
-      hours_spent: number | null;
-      hours_allotted: number;
+      actual_duration: unknown | null;
+      allocated_duration: unknown;
     }[];
   };
 }
@@ -87,7 +87,7 @@ const DevelopmentLayout = ({ project }: DevelopmentLayoutProps) => {
                   <h4 className="font-medium">Hours</h4>
                   <p className="text-gray-500 mt-1">
                     {currentSubscription ? 
-                      `${currentSubscription.hours_spent || 0} / ${currentSubscription.hours_allotted} hours` 
+                      `${currentSubscription.actual_duration || 0} / ${currentSubscription.allocated_duration} hours` 
                       : 'No subscription data'}
                   </p>
                 </div>

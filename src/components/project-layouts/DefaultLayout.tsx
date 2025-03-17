@@ -20,6 +20,10 @@ interface DefaultLayoutProps {
       name: string;
       color_hex: string | null;
     } | null;
+    project_subscriptions?: {
+      actual_duration: unknown;
+      allocated_duration: unknown;
+    }[];
   };
 }
 

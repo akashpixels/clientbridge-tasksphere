@@ -7,8 +7,8 @@ import { intervalToHours } from "@/lib/date-utils";
 interface ProjectStatsProps {
   project: Tables<"projects"> & {
     project_subscriptions?: {
-      allocated_duration: unknown; // Updated from hours_allotted
-      actual_duration: unknown;    // This would replace hours_spent
+      allocated_duration: unknown; 
+      actual_duration: unknown;    
       subscription_status: string;
       next_renewal_date: string;
     }[];

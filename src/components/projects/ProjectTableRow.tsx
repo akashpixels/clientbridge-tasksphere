@@ -21,6 +21,8 @@ type Project = {
   } | null;
   project_subscriptions?: {
     subscription_status: string;
+    actual_duration?: unknown;
+    allocated_duration?: unknown;
   }[];
 };
 
