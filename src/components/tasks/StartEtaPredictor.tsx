@@ -27,8 +27,8 @@ export const StartEtaPredictor = ({
   const [timelineData, setTimelineData] = useState<{
     startTime: string | null;
     eta: string | null;
-    hoursNeeded: number | null;
-  }>({ startTime: null, eta: null, hoursNeeded: 0 });
+    hoursNeeded: string | null;
+  }>({ startTime: null, eta: null, hoursNeeded: null });
 
   useEffect(() => {
     const fetchTimelineData = async () => {
@@ -74,22 +74,43 @@ export const StartEtaPredictor = ({
             .eq('id', taskTypeId || 1)
             .single();
             
-          // Calculate hours needed based on task type and complexity
-          const baseHours = taskTypeData?.base_duration ? 
-            parseFloat(taskTypeData.base_duration.toString().replace(':00:00', '')) : 1;
-          const hoursNeeded = baseHours * (complexityData?.multiplier || 1);
+          // Handle the interval types from PostgreSQL
+          const baseHours = taskTypeData?.base_duration || '1 hour';
+          const hoursNeeded = baseHours;
           
           // Calculate start time based on priority and project capacity
           let startTime = new Date();
           if (priorityLevelId !== 1 && 
               (projectData?.active_task_count || 0) >= (projectData?.max_concurrent_tasks || 1)) {
             // Task will be queued - add delay based on priority
-            startTime.setMinutes(startTime.getMinutes() + (priorityData?.time_to_start || 0));
+            // Convert PostgreSQL interval to JavaScript Date addition
+            if (priorityData?.time_to_start) {
+              const timeToStart = priorityData.time_to_start;
+              
+              // Try to extract minutes from the interval
+              const minutesMatch = String(timeToStart).match(/(\d+) minutes?/);
+              const hoursMatch = String(timeToStart).match(/(\d+) hours?/);
+              
+              if (minutesMatch) {
+                startTime.setMinutes(startTime.getMinutes() + parseInt(minutesMatch[1]));
+              } else if (hoursMatch) {
+                startTime.setHours(startTime.getHours() + parseInt(hoursMatch[1]));
+              }
+            }
           }
           
           // Calculate ETA based on start time and hours needed
           let etaTime = new Date(startTime);
-          etaTime.setHours(etaTime.getHours() + hoursNeeded * (priorityData?.multiplier || 1));
+          
+          // Try to parse the hours from the interval
+          const hoursMatch = String(hoursNeeded).match(/(\d+)/);
+          if (hoursMatch) {
+            const hours = parseInt(hoursMatch[1]);
+            etaTime.setHours(etaTime.getHours() + hours * (priorityData?.multiplier || 1));
+          } else {
+            // Default fallback
+            etaTime.setHours(etaTime.getHours() + 2);
+          }
           
           setTimelineData({
             startTime: startTime.toISOString(),
@@ -107,7 +128,7 @@ export const StartEtaPredictor = ({
           setTimelineData({
             startTime: now.toISOString(),
             eta: etaTime.toISOString(),
-            hoursNeeded: 2
+            hoursNeeded: '2 hours'
           });
           setIsLoading(false);
           return;

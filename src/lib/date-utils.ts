@@ -16,11 +16,59 @@ export function formatDistanceToNowShort(date: string | Date): string {
   return formatDistanceToNow(parsedDate, { addSuffix: true });
 }
 
+/**
+ * Format a duration from either a number (minutes), string (HH:MM:SS), or
+ * PostgreSQL interval string to a human-readable format.
+ */
 export function formatDuration(duration: string | number): string {
   // Handle numeric duration (in minutes)
   if (typeof duration === 'number') {
     const hours = Math.floor(duration / 60);
     const minutes = Math.floor(duration % 60);
+    
+    if (hours === 0 && minutes === 0) {
+      return "immediate";
+    }
+    
+    let result = "";
+    if (hours > 0) {
+      result += `${hours} hour${hours !== 1 ? 's' : ''}`;
+    }
+    if (minutes > 0) {
+      if (result) result += " ";
+      result += `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    }
+    
+    return result;
+  }
+  
+  // Handle PostgreSQL interval format: "HH:MM:SS" or "X days HH:MM:SS"
+  if (duration.includes(':') || duration.includes('day')) {
+    let days = 0;
+    let hours = 0;
+    let minutes = 0;
+    
+    // Extract days if present
+    if (duration.includes('day')) {
+      const dayMatch = duration.match(/(\d+) day/);
+      if (dayMatch) {
+        days = parseInt(dayMatch[1]);
+      }
+    }
+    
+    // Extract time component
+    const timeMatch = duration.match(/(\d+):(\d+):(\d+)/);
+    if (timeMatch) {
+      hours = parseInt(timeMatch[1]) + (days * 24);
+      minutes = parseInt(timeMatch[2]);
+    } else {
+      // Try to handle other formats
+      const hoursMatch = duration.match(/(\d+) hour/);
+      const minutesMatch = duration.match(/(\d+) minute/);
+      
+      if (hoursMatch) hours = parseInt(hoursMatch[1]);
+      if (minutesMatch) minutes = parseInt(minutesMatch[1]);
+    }
     
     if (hours === 0 && minutes === 0) {
       return "immediate";
@@ -74,8 +122,28 @@ export function formatTimelineTime(date: string | Date | null): string {
 }
 
 // Format hour differences for timeline display
-export function formatHourDifference(hours: number | null): string {
-  if (hours === null || isNaN(Number(hours))) return "";
+export function formatHourDifference(hours: number | null | string): string {
+  if (hours === null) return "";
+  
+  // If it's a PostgreSQL interval string, extract the hours
+  if (typeof hours === 'string') {
+    // Try to extract hours from formats like "2:30:00" or "2 hours 30 mins"
+    const hourMatch = hours.match(/(\d+):(\d+):(\d+)/);
+    if (hourMatch) {
+      const extractedHours = parseInt(hourMatch[1]);
+      const extractedMinutes = parseInt(hourMatch[2]);
+      hours = extractedHours + (extractedMinutes / 60);
+    } else {
+      const simpleHourMatch = hours.match(/(\d+) hour/);
+      if (simpleHourMatch) {
+        hours = parseInt(simpleHourMatch[1]);
+      } else {
+        return hours; // Return the original string if we can't parse it
+      }
+    }
+  }
+  
+  if (isNaN(Number(hours))) return "";
   
   // Round to one decimal place if not a whole number
   const formattedHours = Number.isInteger(hours) ? hours : Math.round(hours * 10) / 10;
