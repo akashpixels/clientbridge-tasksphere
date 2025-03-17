@@ -1,4 +1,3 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -172,7 +171,7 @@ const TasksTable = ({
         className="flex items-center gap-1 text-xs text-gray-800 hover:text-gray-600"
       >
         <Link2 className="w-3 h-3" />
-        {text}
+        {String(text)}
       </a>
     ));
   };

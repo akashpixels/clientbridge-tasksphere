@@ -33,13 +33,14 @@ interface MaintenanceLayoutProps {
     project_subscriptions?: {
       id: string;
       subscription_status: string;
-      hours_allotted: number;
-      hours_spent: number;
+      hours_allotted: any;
+      hours_spent: any;
       next_renewal_date: string;
     }[];
   };
   selectedMonth: string;
   onMonthChange: (month: string) => void;
+  hoursUsageProgress?: React.ReactNode;
 }
 
 type SortConfig = {

@@ -231,13 +231,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "files_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
-          },
-          {
             foreignKeyName: "files_uploaded_by_fkey"
             columns: ["uploaded_by"]
             isOneToOne: false
@@ -287,13 +280,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inputs_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "inputs_requested_by_fkey"
@@ -399,13 +385,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "project_assignees_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
-          },
-          {
             foreignKeyName: "project_assignees_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -458,13 +437,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_credentials_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -547,13 +519,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "project_phases_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
-          },
-          {
             foreignKeyName: "project_phases_status_id_fkey"
             columns: ["status_id"]
             isOneToOne: false
@@ -609,13 +574,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_subscriptions_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -781,13 +739,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscription_usage_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "subscription_usage_subscription_id_fkey"
@@ -1203,13 +1154,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tasks_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "usage_view"
-            referencedColumns: ["project_id"]
-          },
-          {
             foreignKeyName: "tasks_task_type_id_fkey"
             columns: ["task_type_id"]
             isOneToOne: false
@@ -1305,25 +1249,9 @@ export type Database = {
       }
     }
     Views: {
-      usage_view: {
-        Row: {
-          hours_allotted: unknown | null
-          hours_spent: unknown | null
-          month_year: string | null
-          project_id: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
-      calculate_hours_spent: {
-        Args: {
-          actual_start: string
-          task_completed_at: string
-          priority_level_id: number
-        }
-        Returns: unknown
-      }
       calculate_monthly_subscription_usage: {
         Args: Record<PropertyKey, never>
         Returns: undefined
