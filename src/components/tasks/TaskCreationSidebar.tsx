@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +8,18 @@ import { TaskForm } from "./TaskForm";
 import { useLayout } from "@/context/layout";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+
+// Define a type for the task data that includes the formatted property
+interface TaskData {
+  id: string;
+  task_code?: string;
+  details: string;
+  current_status_id: number;
+  priority_level_id: number;
+  actual_hours_spent?: any;
+  actual_hours_spent_formatted?: string;
+  [key: string]: any; // Allow other properties
+}
 
 // Helper function to format interval for display
 const formatIntervalForDisplay = (intervalValue: any): string => {
@@ -64,7 +75,7 @@ export const TaskCreationSidebar = () => {
   const [activeTaskCount, setActiveTaskCount] = useState(0);
   const { closeRightSidebar } = useLayout();
   const [taskCreated, setTaskCreated] = useState(false);
-  const [createdTaskData, setCreatedTaskData] = useState<any>(null);
+  const [createdTaskData, setCreatedTaskData] = useState<TaskData | null>(null);
 
   const fetchActiveTaskCount = async () => {
     if (!projectId) return;
@@ -131,7 +142,7 @@ export const TaskCreationSidebar = () => {
       });
 
       // Process interval fields for display and add to task data
-      const processedData = { ...data };
+      const processedData: TaskData = { ...data };
       
       if (processedData && processedData.actual_hours_spent) {
         // Add the formatted property to the data object
