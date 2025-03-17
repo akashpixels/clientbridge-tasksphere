@@ -1,244 +1,197 @@
-
-import { format, formatDistanceToNow, parseISO, isValid } from "date-fns";
-
-export function formatDate(date: string | Date): string {
-  const parsedDate = typeof date === "string" ? parseISO(date) : date;
-  return format(parsedDate, "MMM d, yyyy");
-}
-
-export function formatDateTime(date: string | Date): string {
-  const parsedDate = typeof date === "string" ? parseISO(date) : date;
-  return format(parsedDate, "MMM d, yyyy h:mm a");
-}
-
-export function formatDistanceToNowShort(date: string | Date): string {
-  const parsedDate = typeof date === "string" ? parseISO(date) : date;
-  return formatDistanceToNow(parsedDate, { addSuffix: true });
-}
+/**
+ * Formats a date into a human-readable string like "January 1, 2023"
+ */
+export const formatDate = (date: Date | string): string => {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
 
 /**
- * Format a duration from different sources:
- * - PostgreSQL interval object ({hours, minutes, ...})
- * - PostgreSQL interval string ('HH:MM:SS' or 'X days HH:MM:SS')
- * - Number (minutes)
- * - String (readable format)
+ * Formats a date into a shorter human-readable string like "Jan 1, 2023"
  */
-export function formatDuration(duration: string | number | object | null): string {
-  if (duration === null || duration === undefined) {
-    return "immediate";
-  }
+export const formatShortDate = (date: Date | string): string => {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
+
+/**
+ * Formats a date into a string like "1/1/2023"
+ */
+export const formatShorterDate = (date: Date | string): string => {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  });
+};
+
+/**
+ * Formats a date into a string like "1/1/2023 12:00 AM"
+ */
+export const formatDateTime = (date: Date | string): string => {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+  });
+};
+
+/**
+ * Formats a duration (either a string, number of hours, or PostgreSQL interval object) into a human-readable format
+ */
+export const formatDuration = (duration: any): string => {
+  if (!duration) return "0 minutes";
   
-  // Handle numeric duration (in minutes)
-  if (typeof duration === 'number') {
-    const hours = Math.floor(duration / 60);
-    const minutes = Math.floor(duration % 60);
-    
-    if (hours === 0 && minutes === 0) {
-      return "immediate";
-    }
-    
-    let result = "";
-    if (hours > 0) {
-      result += `${hours} hour${hours !== 1 ? 's' : ''}`;
-    }
-    if (minutes > 0) {
-      if (result) result += " ";
-      result += `${minutes} minute${minutes !== 1 ? 's' : ''}`;
-    }
-    
-    return result;
-  }
-  
-  // Check if it's a PostgreSQL interval object (from Supabase)
-  if (duration && typeof duration === 'object' && 'hours' in (duration as any)) {
-    const intervalObj = duration as any;
-    const hours = intervalObj.hours || 0;
-    const minutes = intervalObj.minutes || 0;
-    const days = intervalObj.days || 0;
-    
-    if (days === 0 && hours === 0 && minutes === 0) {
-      return "immediate";
-    }
-    
-    let result = "";
-    if (days > 0) {
-      result += `${days} day${days !== 1 ? 's' : ''}`;
-    }
-    if (hours > 0) {
-      if (result) result += " ";
-      result += `${hours} hour${hours !== 1 ? 's' : ''}`;
-    }
-    if (minutes > 0) {
-      if (result) result += " ";
-      result += `${minutes} minute${minutes !== 1 ? 's' : ''}`;
-    }
-    
-    return result;
-  }
-  
-  // Handle PostgreSQL interval format: "HH:MM:SS" or "X days HH:MM:SS"
-  if (typeof duration === 'string') {
-    let days = 0;
-    let hours = 0;
-    let minutes = 0;
-    
-    // Extract days if present
-    if (duration.includes('day')) {
-      const dayMatch = duration.match(/(\d+) day/);
-      if (dayMatch) {
-        days = parseInt(dayMatch[1]);
-      }
-    }
-    
-    // Extract time component
-    const timeMatch = duration.match(/(\d+):(\d+):(\d+)/);
-    if (timeMatch) {
-      hours = parseInt(timeMatch[1]) + (days * 24);
-      minutes = parseInt(timeMatch[2]);
-    } else {
-      // Try to handle other formats
-      const hoursMatch = duration.match(/(\d+) hour/);
-      const minutesMatch = duration.match(/(\d+) minute/);
+  // If it's a PostgreSQL interval object (as returned from the database)
+  if (typeof duration === 'object' && duration !== null) {
+    if ('hours' in duration || 'minutes' in duration || 'seconds' in duration || 'days' in duration) {
+      const days = duration.days || 0;
+      const hours = duration.hours || 0;
+      const minutes = duration.minutes || 0;
       
-      if (hoursMatch) hours = parseInt(hoursMatch[1]);
-      if (minutesMatch) minutes = parseInt(minutesMatch[1]);
+      if (days > 0) {
+        return `${days} day${days > 1 ? 's' : ''}${hours > 0 ? `, ${hours} hour${hours > 1 ? 's' : ''}` : ''}`;
+      }
+      
+      if (hours > 0) {
+        return `${hours} hour${hours > 1 ? 's' : ''}${minutes > 0 ? `, ${minutes} minute${minutes > 1 ? 's' : ''}` : ''}`;
+      }
+      
+      if (minutes > 0) {
+        return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+      }
+      
+      return "less than a minute";
     }
-    
-    if (days === 0 && hours === 0 && minutes === 0) {
-      return "immediate";
-    }
-    
-    let result = "";
-    if (days > 0 && !timeMatch) {
-      result += `${days} day${days !== 1 ? 's' : ''}`;
-    }
-    if (hours > 0) {
-      if (result) result += " ";
-      result += `${hours} hour${hours !== 1 ? 's' : ''}`;
-    }
-    if (minutes > 0) {
-      if (result) result += " ";
-      result += `${minutes} minute${minutes !== 1 ? 's' : ''}`;
-    }
-    
-    return result || "immediate";
   }
   
-  return "unknown duration";
-}
-
-// Format timeline dates in the specific format we need
-export function formatTimelineTime(date: string | Date | null): string {
-  if (!date) return "";
-  try {
-    const parsedDate = typeof date === "string" ? parseISO(date) : date;
-    if (!isValid(parsedDate)) return "";
-    return format(parsedDate, "haaa, MMM d").toLowerCase();
-  } catch (e) {
-    return "";
+  // Handle PostgreSQL interval string format like "1 day 2 hours 30 minutes"
+  if (typeof duration === 'string') {
+    // Try to extract components from the PostgreSQL interval string
+    const daysMatch = duration.match(/(\d+)\s+day/i);
+    const hoursMatch = duration.match(/(\d+)\s+hour/i);
+    const minutesMatch = duration.match(/(\d+)\s+min/i);
+    const secondsMatch = duration.match(/(\d+)\s+sec/i);
+    
+    const days = daysMatch ? parseInt(daysMatch[1]) : 0;
+    const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+    const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+    const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 0;
+    
+    if (days > 0) {
+      return `${days} day${days > 1 ? 's' : ''}${hours > 0 ? `, ${hours} hour${hours > 1 ? 's' : ''}` : ''}`;
+    }
+    
+    if (hours > 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''}${minutes > 0 ? `, ${minutes} minute${minutes > 1 ? 's' : ''}` : ''}`;
+    }
+    
+    if (minutes > 0) {
+      return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    }
+    
+    if (seconds > 0) {
+      return `${seconds} second${seconds > 1 ? 's' : ''}`;
+    }
+    
+    // If none of the above patterns matched but it's a non-empty string
+    if (duration.trim()) {
+      return duration; // Return the original string
+    }
+    
+    return "less than a minute";
   }
-}
+  
+  // Treat as a number of hours if it's a number
+  if (typeof duration === 'number') {
+    if (duration < 1/60) return "less than a minute";
+    if (duration < 1) return `${Math.round(duration * 60)} minutes`;
+    if (duration === 1) return "1 hour";
+    if (duration < 24) return `${Math.floor(duration)} hours${duration % 1 > 0 ? `, ${Math.round((duration % 1) * 60)} minutes` : ''}`;
+    
+    const days = Math.floor(duration / 24);
+    const hours = Math.floor(duration % 24);
+    
+    if (hours === 0) return `${days} day${days > 1 ? 's' : ''}`;
+    return `${days} day${days > 1 ? 's' : ''}, ${hours} hour${hours > 1 ? 's' : ''}`;
+  }
+  
+  return "Unknown duration";
+};
 
 /**
- * Format hour differences for timeline display
- * Handles PostgreSQL intervals and string representations
+ * Formats the time since a given date, e.g., "2 hours ago"
  */
-export function formatHourDifference(hours: number | null | string | object): string {
-  if (hours === null || hours === undefined) return "";
-  
-  // If it's a PostgreSQL interval object from Supabase
-  if (typeof hours === 'object' && hours !== null && 'hours' in (hours as any)) {
-    const intervalObj = hours as any;
-    const hourValue = intervalObj.hours || 0;
-    const minuteValue = intervalObj.minutes || 0;
-    
-    // Ensure we're working with numbers for both parts of the calculation
-    const hourValueNum = Number(hourValue);
-    const minuteValueNum = Number(minuteValue);
-    
-    // Calculate formatted hours with proper numeric conversion
-    const formattedHours = hourValueNum + (minuteValueNum / 60);
-    
-    // Round to one decimal place if not a whole number
-    const displayValue = Number.isInteger(formattedHours) 
-      ? formattedHours 
-      : Math.round(formattedHours * 10) / 10;
-    
-    return `${displayValue} Hrs`;
-  }
-  
-  // If it's a PostgreSQL interval string, extract the hours
-  if (typeof hours === 'string') {
-    // Try to extract hours from formats like "2:30:00" or "2 hours 30 mins" or PostgreSQL interval
-    const hourMatch = hours.match(/(\d+):(\d+):(\d+)/);
-    if (hourMatch) {
-      const extractedHours = parseInt(hourMatch[1]);
-      const extractedMinutes = parseInt(hourMatch[2]);
-      const hourValue = extractedHours + (extractedMinutes / 60);
-      const formattedHours = Number.isInteger(hourValue) ? hourValue : Math.round(hourValue * 10) / 10;
-      return `${formattedHours} Hrs`;
-    } else {
-      const simpleHourMatch = hours.match(/(\d+) hour/);
-      if (simpleHourMatch) {
-        return `${parseInt(simpleHourMatch[1])} Hrs`;
-      } else {
-        return hours; // Return the original string if we can't parse it
-      }
-    }
-  }
-  
-  if (isNaN(Number(hours))) return "";
-  
-  // Convert to number to ensure it's treated as a numeric value
-  const hoursNum = Number(hours);
-  
-  // Round to one decimal place if not a whole number
-  const formattedHours = Number.isInteger(hoursNum) ? hoursNum : Math.round(hoursNum * 10) / 10;
-  
-  return `${formattedHours} Hrs`;
-}
+export const formatTimeAgo = (date: Date | string): string => {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
 
-// New function to get time status based on start and eta times
-export function getTimeStatusInfo(start: string | null, eta: string | null): {
-  status: string;
-  statusClass: string;
-} {
-  if (!start || !eta) return { status: 'Not scheduled', statusClass: 'text-gray-500' };
-  
-  try {
-    const startDate = parseISO(start);
-    const etaDate = parseISO(eta);
-    
-    if (!isValid(startDate) || !isValid(etaDate)) {
-      return { status: 'Invalid dates', statusClass: 'text-gray-500' };
-    }
-    
-    const now = new Date();
-    
-    // Task hasn't started yet
-    if (startDate > now) {
-      return { status: 'Upcoming', statusClass: 'text-blue-500' };
-    }
-    
-    // Task is in progress
-    if (now < etaDate) {
-      return { status: 'In Progress', statusClass: 'text-green-500' };
-    }
-    
-    // Task is overdue
-    return { status: 'Overdue', statusClass: 'text-amber-500' };
-  } catch (e) {
-    return { status: 'Error parsing dates', statusClass: 'text-red-500' };
+  if (diffInSeconds < 60) {
+    return 'just now';
   }
-}
 
-// Function to check if a date is valid
-export function isValidDate(dateString: string | null): boolean {
-  if (!dateString) return false;
-  try {
-    const date = parseISO(dateString);
-    return isValid(date);
-  } catch (e) {
-    return false;
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
   }
-}
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) {
+    return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+  }
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 7) {
+    return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+  }
+
+  return formatShortDate(d);
+};
+
+/**
+ * Formats the time difference between two dates in hours.
+ */
+export const formatHourDifference = (start: Date | string | null, end: Date | string | null): string => {
+  if (!start || !end) return "N/A";
+  
+  const startDate = typeof start === 'string' ? new Date(start) : start;
+  const endDate = typeof end === 'string' ? new Date(end) : end;
+  
+  const diffInMs = endDate.getTime() - startDate.getTime();
+  const diffInHours = diffInMs / (1000 * 60 * 60);
+  
+  if (diffInHours < 0) return "N/A"; // Invalid time difference
+  
+  if (diffInHours < 1) {
+    const diffInMinutes = Math.round(diffInHours * 60);
+    return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''}`;
+  }
+  
+  if (diffInHours < 24) {
+    const hours = Math.floor(diffInHours);
+    const minutes = Math.round((diffInHours - hours) * 60);
+    
+    if (minutes === 0) return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    return `${hours} hour${hours !== 1 ? 's' : ''}, ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+  }
+  
+  const days = Math.floor(diffInHours / 24);
+  const hours = Math.floor(diffInHours % 24);
+  
+  if (hours === 0) return `${days} day${days !== 1 ? 's' : ''}`;
+  return `${days} day${days !== 1 ? 's' : ''}, ${hours} hour${hours !== 1 ? 's' : ''}`;
+};
