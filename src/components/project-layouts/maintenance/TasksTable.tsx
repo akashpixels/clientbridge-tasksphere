@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -154,7 +155,7 @@ const renderReferenceLinks = (links: Record<string, string> | null) => {
   if (!links) return null;
   
   return Object.entries(links).map(([text, url], index) => (
-    
+    <a
       key={index}
       href={url}
       target="_blank"
@@ -166,6 +167,7 @@ const renderReferenceLinks = (links: Record<string, string> | null) => {
     </a>
   ));
 };
+
   return (
     <Table>
       <TableHeader>
