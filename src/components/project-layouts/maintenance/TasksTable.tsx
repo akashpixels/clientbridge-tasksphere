@@ -150,7 +150,7 @@ const TasksTable = ({
     return priorityColors[priority.name] || priority.color || '#9CA3AF'; 
   };
 
- const renderReferenceLinks = (links: Record<string, string> | null) => {
+const renderReferenceLinks = (links: Record<string, string> | null) => {
   if (!links) return null;
   
   return Object.entries(links).map(([text, url], index) => (
