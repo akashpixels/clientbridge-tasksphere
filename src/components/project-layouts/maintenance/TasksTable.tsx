@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -76,17 +77,26 @@ const TasksTable = ({
     return format(new Date(date), "MMM d, h:mm a");
   };
 
+  /**
+   * Get the status color based on task status with priority:
+   * 1. is_awaiting_input (Highest priority)
+   * 2. is_onhold (Second priority)
+   * 3. Regular status colors from status configuration
+   */
   const getStatusColor = (status: { name: string | null, color_hex: string | null }, is_awaiting_input?: boolean, is_onhold?: boolean) => {
-    if (is_onhold) {
-      return { bg: '#FDE68A', text: '#92400E' };
+    // First priority: Check if awaiting input
+    if (is_awaiting_input) {
+      return { bg: '#FEF9C3', text: '#854D0E' }; // Light yellow
     }
     
-    if (is_awaiting_input) {
-      return { bg: '#FEF9C3', text: '#854D0E' };
+    // Second priority: Check if on hold
+    if (is_onhold) {
+      return { bg: '#FDE68A', text: '#92400E' }; // Darker yellow
     }
 
+    // Default status color handling
     if (!status?.color_hex) {
-      return { bg: '#F3F4F6', text: '#374151' };
+      return { bg: '#F3F4F6', text: '#374151' }; // Default gray
     }
 
     const [bgColor, textColor] = status.color_hex.split(',').map(color => color.trim());
@@ -268,7 +278,7 @@ const TasksTable = ({
                     color: getStatusColor(task.status || { name: null, color_hex: null }, task.is_awaiting_input, task.is_onhold).text
                   }}
                 >
-                  {task.is_onhold ? 'On Hold' : task.is_awaiting_input ? 'Awaiting Input' : task.status?.name}
+                  {task.is_awaiting_input ? 'Awaiting Input' : task.is_onhold ? 'On Hold' : task.status?.name}
                 </span>
                 {task.task_completed_at && task.actual_hours_spent && (
                   <span className="text-xs text-gray-500 pl-2">
