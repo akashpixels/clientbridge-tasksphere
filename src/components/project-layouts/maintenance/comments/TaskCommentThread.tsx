@@ -15,7 +15,7 @@ import { useLayout } from "@/context/layout";
 
 interface TaskCommentThreadProps {
   taskId: string;
-  taskCode?: string;
+  taskCode: string; // No more undefined, this is now required and must be a string
 }
 
 interface Comment {
@@ -31,7 +31,7 @@ interface Comment {
   parent_id?: string;
 }
 
-const TaskCommentThread = ({ taskId, taskCode = "Task" }: TaskCommentThreadProps) => {
+const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
   const [newComment, setNewComment] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
