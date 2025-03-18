@@ -150,6 +150,13 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
           ? parseFloat(task.actual_duration) || 0
           : (typeof task.actual_duration === 'number' 
               ? task.actual_duration
+              : null)),
+    logged_duration: typeof task.logged_duration === 'object' && task.logged_duration !== null
+      ? parseFloat(String(task.logged_duration)) || 0
+      : (typeof task.logged_duration === 'string'
+          ? parseFloat(task.logged_duration) || 0
+          : (typeof task.logged_duration === 'number' 
+              ? task.logged_duration
               : null))
   })) : [];
 
