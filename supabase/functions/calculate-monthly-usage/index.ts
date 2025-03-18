@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
           continue; // Skip to next subscription
         }
         
-        // Calculate total hours spent - first try logged_duration, then fall back to actual_duration
+        // Calculate total hours spent - PRIORITIZE logged_duration over actual_duration
         let totalHoursSpent = 0;
         tasks?.forEach(task => {
           // First try to use logged_duration if available
