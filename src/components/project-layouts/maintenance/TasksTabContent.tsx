@@ -60,11 +60,12 @@ interface TasksTabContentProps {
     task_code?: string;
     is_awaiting_input?: boolean;
     is_onhold?: boolean;
-    start_time?: string | null;
-    eta?: string | null;
+    est_start?: string | null;
+    est_end?: string | null;
     queue_position?: number;
-    actual_duration?: number | null;     // Updated from actual_hours_spent
-    completed_at?: string | null;        // Updated from task_completed_at
+    actual_duration?: number | null;     
+    logged_duration?: number | null;     // Added new field
+    completed_at?: string | null;        
   })[];
   sortConfig: {
     key: string;
@@ -134,7 +135,7 @@ const TasksTabContent = ({
     onCommentClick(taskId);
   };
 
-  // Process the tasks data to ensure actual_duration is properly converted to a number
+  // Process the tasks data to ensure actual_duration and logged_duration are properly converted to numbers
   const processedTasks = tasks?.map(task => ({
     ...task,
     actual_duration: typeof task.actual_duration === 'object' && task.actual_duration !== null
@@ -143,6 +144,13 @@ const TasksTabContent = ({
           ? parseFloat(task.actual_duration) || 0
           : (typeof task.actual_duration === 'number' 
               ? task.actual_duration
+              : null)),
+    logged_duration: typeof task.logged_duration === 'object' && task.logged_duration !== null
+      ? parseFloat(String(task.logged_duration)) || 0
+      : (typeof task.logged_duration === 'string'
+          ? parseFloat(task.logged_duration) || 0
+          : (typeof task.logged_duration === 'number' 
+              ? task.logged_duration
               : null))
   })) || [];
 

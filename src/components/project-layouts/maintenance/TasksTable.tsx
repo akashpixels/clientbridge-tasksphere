@@ -46,10 +46,11 @@ interface TasksTableProps {
     queue_position?: number;
     is_awaiting_input?: boolean;
     is_onhold?: boolean;
-    start_time?: string | null;
-    eta?: string | null;
-    actual_duration?: number | null; // Updated from actual_hours_spent
-    completed_at?: string | null;    // Updated from task_completed_at
+    est_start?: string | null;
+    est_end?: string | null;
+    actual_duration?: number | null; // Used from actual_duration field
+    logged_duration?: number | null; // Added new field
+    completed_at?: string | null;    
   })[];
   sortConfig: {
     key: string;
@@ -263,17 +264,17 @@ const TasksTable = ({
           </TableHead>
           <TableHead 
             className="cursor-pointer"
-            onClick={() => onSort('start_time')}
+            onClick={() => onSort('est_start')}
           >
-            Start Time {sortConfig.key === 'start_time' && (
+            Start Time {sortConfig.key === 'est_start' && (
               sortConfig.direction === 'asc' ? <ArrowUp className="inline w-4 h-4" /> : <ArrowDown className="inline w-4 h-4" />
             )}
           </TableHead>
           <TableHead 
             className="cursor-pointer"
-            onClick={() => onSort('eta')}
+            onClick={() => onSort('est_end')}
           >
-            ETA {sortConfig.key === 'eta' && (
+            ETA {sortConfig.key === 'est_end' && (
               sortConfig.direction === 'asc' ? <ArrowUp className="inline w-4 h-4" /> : <ArrowDown className="inline w-4 h-4" />
             )}
           </TableHead>
@@ -320,14 +321,15 @@ const TasksTable = ({
                 >
                   {task.is_awaiting_input ? 'Awaiting Input' : task.is_onhold ? 'On Hold' : task.status?.name}
                 </span>
-                {task.completed_at && task.actual_duration !== undefined && task.actual_duration !== null && (
+                {task.completed_at && (
                   <span className="text-xs text-gray-500 pl-2">
-                    {formatInterval(task.actual_duration)}
+                    {task.logged_duration ? formatInterval(task.logged_duration) : 
+                     task.actual_duration ? formatInterval(task.actual_duration) : '0h'}
                   </span>
                 )}
-                {task.status?.name === 'Open' && task.start_time && (
+                {task.status?.name === 'Open' && task.est_start && (
                   <span className="text-xs text-gray-500 pl-2">
-                    {format(new Date(task.start_time), "h:mmaaa d MMM")}
+                    {format(new Date(task.est_start), "h:mmaaa d MMM")}
                   </span>
                 )}
               </div>
@@ -385,10 +387,10 @@ const TasksTable = ({
               </TooltipProvider>
             </TableCell>
             <TableCell className="text-left">
-              {task.start_time ? (
+              {task.est_start ? (
                 <div className="flex flex-col gap-1">
-                  <span className="text-xs text-gray-600">{format(new Date(task.start_time), "h:mm a")}</span>
-                  <span className="text-xs text-gray-700">{format(new Date(task.start_time), "MMM d")}</span>
+                  <span className="text-xs text-gray-600">{format(new Date(task.est_start), "h:mm a")}</span>
+                  <span className="text-xs text-gray-700">{format(new Date(task.est_start), "MMM d")}</span>
                 </div>
               ) : (
                 <span className="text-xs text-gray-700">Not set</span>
@@ -396,10 +398,10 @@ const TasksTable = ({
             </TableCell>
             
             <TableCell className="text-left">
-              {task.eta ? (
+              {task.est_end ? (
                 <div className="flex flex-col gap-1">
-                  <span className="text-xs text-gray-600">{format(new Date(task.eta), "h:mm a")}</span>
-                  <span className="text-xs text-gray-700">{format(new Date(task.eta), "MMM d")}</span>
+                  <span className="text-xs text-gray-600">{format(new Date(task.est_end), "h:mm a")}</span>
+                  <span className="text-xs text-gray-700">{format(new Date(task.est_end), "MMM d")}</span>
                 </div>
               ) : (
                 <span className="text-xs text-gray-700">Not set</span>

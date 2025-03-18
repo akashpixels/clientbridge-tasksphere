@@ -31,10 +31,10 @@ Deno.serve(async (req) => {
         task_type_id, 
         complexity_level_id,
         priority_level_id,
-        started_at,  // Updated from actual_start_time
-        eta
+        started_at,
+        est_end
       `)
-      .is('completed_at', null)  // Updated from task_completed_at
+      .is('completed_at', null)
       .not('is_onhold', 'eq', true)   // Not on hold
       .not('is_awaiting_input', 'eq', true)  // Not awaiting input
       .order('priority_level_id', { ascending: true }); // Process highest priority first
@@ -59,13 +59,13 @@ Deno.serve(async (req) => {
         
         const { data: taskType } = await supabaseClient
           .from('task_types')
-          .select('default_duration') // Updated from base_duration
+          .select('default_duration')
           .eq('id', task.task_type_id)
           .single();
         
         const { data: priorityLevel } = await supabaseClient
           .from('priority_levels')
-          .select('start_delay')      // Updated from time_to_start
+          .select('start_delay')
           .eq('id', task.priority_level_id)
           .single();
         
@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
           if (result) {
             updates.push({
               id: task.id,
-              eta: result
+              est_end: result
             });
             
             console.log(`Updated ETA for task ${task.id} to ${result}`);

@@ -400,7 +400,7 @@ export type Database = {
           encrypted: boolean
           id: number
           password: string | null
-          project_id: string | null
+          project_id: string
           type: string
           updated_at: string
           url: string
@@ -412,7 +412,7 @@ export type Database = {
           encrypted?: boolean
           id?: number
           password?: string | null
-          project_id?: string | null
+          project_id: string
           type: string
           updated_at?: string
           url: string
@@ -424,7 +424,7 @@ export type Database = {
           encrypted?: boolean
           id?: number
           password?: string | null
-          project_id?: string | null
+          project_id?: string
           type?: string
           updated_at?: string
           url?: string
@@ -529,7 +529,7 @@ export type Database = {
       }
       project_subscriptions: {
         Row: {
-          allocated_duration: unknown | null
+          allocated_duration: unknown
           auto_renew: boolean
           billing_cycle: Database["public"]["Enums"]["billing_cycle"]
           created_at: string
@@ -542,7 +542,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          allocated_duration?: unknown | null
+          allocated_duration: unknown
           auto_renew?: boolean
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
           created_at?: string
@@ -555,7 +555,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          allocated_duration?: unknown | null
+          allocated_duration?: unknown
           auto_renew?: boolean
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
           created_at?: string
@@ -1022,24 +1022,24 @@ export type Database = {
         Row: {
           actual_duration: unknown | null
           assigned_user_id: string | null
-          awaiting_input: boolean | null
           completed_at: string | null
           complexity_level_id: number | null
           created_at: string
           created_by: string
           current_status_id: number
           details: string
-          estimated_duration: unknown | null
-          eta: string | null
+          est_duration: unknown
+          est_end: string | null
+          est_start: string | null
           id: string
           images: Json | null
           is_awaiting_input: boolean | null
           is_onhold: boolean | null
           last_status_id: number | null
+          logged_duration: unknown | null
           priority_level_id: number
           project_id: string
           reference_links: Json | null
-          start_time: string | null
           started_at: string | null
           target_device: Database["public"]["Enums"]["device_type"]
           task_code: string | null
@@ -1049,24 +1049,24 @@ export type Database = {
         Insert: {
           actual_duration?: unknown | null
           assigned_user_id?: string | null
-          awaiting_input?: boolean | null
           completed_at?: string | null
           complexity_level_id?: number | null
           created_at?: string
           created_by: string
           current_status_id?: number
           details: string
-          estimated_duration?: unknown | null
-          eta?: string | null
+          est_duration: unknown
+          est_end?: string | null
+          est_start?: string | null
           id?: string
           images?: Json | null
           is_awaiting_input?: boolean | null
           is_onhold?: boolean | null
           last_status_id?: number | null
+          logged_duration?: unknown | null
           priority_level_id?: number
           project_id: string
           reference_links?: Json | null
-          start_time?: string | null
           started_at?: string | null
           target_device?: Database["public"]["Enums"]["device_type"]
           task_code?: string | null
@@ -1076,24 +1076,24 @@ export type Database = {
         Update: {
           actual_duration?: unknown | null
           assigned_user_id?: string | null
-          awaiting_input?: boolean | null
           completed_at?: string | null
           complexity_level_id?: number | null
           created_at?: string
           created_by?: string
           current_status_id?: number
           details?: string
-          estimated_duration?: unknown | null
-          eta?: string | null
+          est_duration?: unknown
+          est_end?: string | null
+          est_start?: string | null
           id?: string
           images?: Json | null
           is_awaiting_input?: boolean | null
           is_onhold?: boolean | null
           last_status_id?: number | null
+          logged_duration?: unknown | null
           priority_level_id?: number
           project_id?: string
           reference_links?: Json | null
-          start_time?: string | null
           started_at?: string | null
           target_device?: Database["public"]["Enums"]["device_type"]
           task_code?: string | null

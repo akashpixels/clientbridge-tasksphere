@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     // Get all active project subscriptions
     const { data: subscriptions, error: subscriptionError } = await supabaseClient
       .from('project_subscriptions')
-      .select('id, project_id, hours_allotted')
+      .select('id, project_id, allocated_duration')
       .eq('subscription_status', 'active');
     
     if (subscriptionError) {
@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
         // Calculate total hours spent in the previous month
         const { data: tasks, error: tasksError } = await supabaseClient
           .from('tasks')
-          .select('actual_hours_spent')
+          .select('logged_duration, actual_duration')
           .eq('project_id', subscription.project_id)
           .gte('created_at', firstDayPrevMonth.toISOString())
           .lt('created_at', firstDayCurrentMonth.toISOString());
@@ -63,13 +63,25 @@ Deno.serve(async (req) => {
           continue; // Skip to next subscription
         }
         
-        // Calculate total hours spent
+        // Calculate total hours spent - first try logged_duration, then fall back to actual_duration
         let totalHoursSpent = 0;
         tasks?.forEach(task => {
-          if (task.actual_hours_spent) {
+          // First try to use logged_duration if available
+          if (task.logged_duration) {
             // Convert PostgreSQL interval to hours
-            const hoursMatch = task.actual_hours_spent.match(/(\d+)\s+hour/i);
-            const minutesMatch = task.actual_hours_spent.match(/(\d+)\s+min/i);
+            const hoursMatch = String(task.logged_duration).match(/(\d+)\s+hour/i);
+            const minutesMatch = String(task.logged_duration).match(/(\d+)\s+min/i);
+            
+            const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+            const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+            
+            totalHoursSpent += hours + (minutes / 60);
+          } 
+          // Fall back to actual_duration if logged_duration is not available
+          else if (task.actual_duration) {
+            // Convert PostgreSQL interval to hours
+            const hoursMatch = String(task.actual_duration).match(/(\d+)\s+hour/i);
+            const minutesMatch = String(task.actual_duration).match(/(\d+)\s+min/i);
             
             const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
             const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
@@ -82,9 +94,9 @@ Deno.serve(async (req) => {
         
         // Convert hours allotted from interval to hours
         let hoursAllotted = 0;
-        if (subscription.hours_allotted) {
-          const hoursMatch = subscription.hours_allotted.match(/(\d+)\s+hour/i);
-          const minutesMatch = subscription.hours_allotted.match(/(\d+)\s+min/i);
+        if (subscription.allocated_duration) {
+          const hoursMatch = String(subscription.allocated_duration).match(/(\d+)\s+hour/i);
+          const minutesMatch = String(subscription.allocated_duration).match(/(\d+)\s+min/i);
           
           const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
           const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
@@ -99,8 +111,8 @@ Deno.serve(async (req) => {
             project_id: subscription.project_id,
             subscription_id: subscription.id,
             month_year: prevMonthFormat,
-            hours_allotted: `${hoursAllotted} hours`,
-            hours_spent: `${totalHoursSpent} hours`, // Updated field name
+            allocated_duration: `${hoursAllotted} hours`,
+            used_duration: `${totalHoursSpent} hours`, // Using used_duration instead of hours_spent
             status: 'completed',
             notes: `Automatically calculated on ${currentDate.toISOString()}`,
             updated_at: new Date().toISOString()
