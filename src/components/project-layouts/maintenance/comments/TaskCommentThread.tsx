@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +9,7 @@ import CommentSender from "./CommentSender";
 import CommentInputRequest from "./CommentInputRequest";
 import PreviewDialog from "./PreviewDialog";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useLayout } from "@/context/layout";
 
 interface TaskCommentThreadProps {
@@ -54,7 +53,6 @@ const TaskCommentThread = ({ taskId, taskCode = "Task" }: TaskCommentThreadProps
     },
   });
 
-  // Find if there's any pending input request
   const pendingInputRequest = comments?.find(comment => 
     comment.is_input_request && 
     !comments.some(c => c.is_input_response && c.parent_id === comment.id)
@@ -126,23 +124,25 @@ const TaskCommentThread = ({ taskId, taskCode = "Task" }: TaskCommentThreadProps
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-white border-b">
+      <div className="flex items-center justify-between p-4 bg-background border-b sticky top-0 z-10">
         <div className="font-semibold">{taskCode}</div>
         <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
           <X className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <CommentList 
-          comments={comments} 
-          onFileClick={handleFileClick}
-        />
-      </div>
+      <ScrollArea className="flex-1">
+        <div className="p-4">
+          <CommentList 
+            comments={comments} 
+            onFileClick={handleFileClick}
+          />
+        </div>
+      </ScrollArea>
 
-      <div className="border-t p-4 bg-white">
+      <div className="border-t p-4 bg-background sticky bottom-0 z-10">
         <CommentInputRequest
           isInputResponse={!!pendingInputRequest}
           isRequestingInput={isRequestingInput}
@@ -180,14 +180,6 @@ const TaskCommentThread = ({ taskId, taskCode = "Task" }: TaskCommentThreadProps
         onClose={() => setSelectedImage(null)}
         onDownload={handleDownload}
       />
-
-      <style>
-        {`
-          .max-w-4xl svg.lucide.lucide-x.h-4.w-4 {
-            display: none !important;
-          }
-        `}
-      </style>
     </div>
   );
 };

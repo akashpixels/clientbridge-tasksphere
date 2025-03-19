@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Upload, X, Plus, Monitor, Smartphone, MonitorSmartphone, Loader2 } from "lucide-react";
 import { PrioritySelector } from "./PrioritySelector";
 import { formatDuration } from "@/lib/date-utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const taskFormSchema = z.object({
   details: z.string().max(1000, {
@@ -245,22 +246,24 @@ export const TaskForm = ({
   const isFormValid = form.formState.isValid;
   const errors = form.formState.errors;
   
-  return <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6 px-4 relative">
-        <div className="space-y-5 py-0 pb-24">
-          <FormField control={form.control} name="details" render={({
-          field
-        }) => <FormItem>
+  return <div className="flex flex-col h-full">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="flex flex-col h-full">
+        <ScrollArea className="flex-1">
+          <div className="space-y-5 p-4">
+            <FormField control={form.control} name="details" render={({
+              field
+            }) => <FormItem>
               <FormControl>
                 <Textarea placeholder="Describe what needs to be done..." className="min-h-[100px] focus:outline-none" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>} />
 
-          <div className="grid grid-cols-2 gap-4 ">
-            <FormField control={form.control} name="task_type_id" render={({
-            field
-          }) => <FormItem>
+            <div className="grid grid-cols-2 gap-4 ">
+              <FormField control={form.control} name="task_type_id" render={({
+                field
+              }) => <FormItem>
                 <FormControl>
                   <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
                     <SelectTrigger className={`text-muted-foreground ${errors.task_type_id ? 'border-red-500' : ''}`}>
@@ -268,15 +271,15 @@ export const TaskForm = ({
                     </SelectTrigger>
                     <SelectContent className="bg-[#fcfcfc]">
                       {taskTypes.length > 0 && taskTypes.reduce((acc: any[], type: any) => {
-                    const categoryExists = acc.some(item => item.category === type.category);
-                    if (!categoryExists) {
-                      acc.push({
-                        category: type.category,
-                        items: taskTypes.filter(t => t.category === type.category)
-                      });
-                    }
-                    return acc;
-                  }, []).map((categoryGroup: any) => <div key={categoryGroup.category} className="mb-2">
+                        const categoryExists = acc.some(item => item.category === type.category);
+                        if (!categoryExists) {
+                          acc.push({
+                            category: type.category,
+                            items: taskTypes.filter(t => t.category === type.category)
+                          });
+                        }
+                        return acc;
+                      }, []).map((categoryGroup: any) => <div key={categoryGroup.category} className="mb-2">
                             <div className="px-2 py-1.5 text-xs font-semibold bg-muted">{categoryGroup.category}</div>
                             {categoryGroup.items.map((type: any) => <SelectItem key={type.id} value={type.id.toString()}>
                                 {type.name}
@@ -288,9 +291,9 @@ export const TaskForm = ({
                 <FormMessage />
               </FormItem>} />
             
-            <FormField control={form.control} name="complexity_level_id" render={({
-            field
-          }) => <FormItem>
+              <FormField control={form.control} name="complexity_level_id" render={({
+                field
+              }) => <FormItem>
                 <FormControl>
                   <Select onValueChange={value => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
                     <SelectTrigger className="text-muted-foreground">
@@ -305,121 +308,122 @@ export const TaskForm = ({
                 </FormControl>
                 <FormMessage />
               </FormItem>} />
-          </div>
-
-          <FormField control={form.control} name="target_device" render={({
-          field
-        }) => <FormItem>
-                  <div className="flex gap-5 mt-0 justify-center">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'desktop' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('desktop')}>
-                            <Monitor size={24} />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Desktop view only</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'mobile' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('mobile')}>
-                            <Smartphone size={24} />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Mobile view only</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'both' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('both')}>
-                            <MonitorSmartphone size={24} />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Responsive - works on all devices</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <FormMessage />
-                </FormItem>} />
-
-          <div className="mt-8 mb-8">
-            <FormField control={form.control} name="priority_level_id" render={({
-            field
-          }) => <FormItem className="mt-[30px] mb-[40px]">
-                  <FormLabel className="text-gray-500 text-xs mb-4">
-                    Priority Level
-                  </FormLabel>
-                  <div className="py-4 px-0 mt-2 border-t border-b border-gray-200">
-                    <FormControl>
-                      <div className="mt-1">
-                        <PrioritySelector priorityLevels={priorityLevels} value={field.value} onChange={field.onChange} />
-                      </div>
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>} />
-          </div>
-
-          <div>
-            <div className="flex gap-2 mb-2">
-              <Input type="url" value={newReferenceLink} onChange={e => setNewReferenceLink(e.target.value)} placeholder="Paste reference link URL" className="flex-1" />
-              <Button type="button" size="icon" variant="outline" onClick={addReferenceLink}>
-                <Plus size={16} />
-              </Button>
             </div>
-            {form.watch("reference_links").map((link, index) => <div key={index} className="flex items-center gap-2 mb-2">
-                <div className="flex-1 text-sm truncate">{link}</div>
-                <Button type="button" variant="ghost" size="sm" onClick={() => removeReferenceLink(index)}>
-                  <X size={14} />
+
+            <FormField control={form.control} name="target_device" render={({
+              field
+            }) => <FormItem>
+                <div className="flex gap-5 mt-0 justify-center">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'desktop' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('desktop')}>
+                          <Monitor size={24} />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Desktop view only</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'mobile' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('mobile')}>
+                          <Smartphone size={24} />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Mobile view only</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'both' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('both')}>
+                          <MonitorSmartphone size={24} />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Responsive - works on all devices</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <FormMessage />
+              </FormItem>} />
+
+            <div className="mt-8 mb-8">
+              <FormField control={form.control} name="priority_level_id" render={({
+                field
+              }) => <FormItem className="mt-[30px] mb-[40px]">
+                <FormLabel className="text-gray-500 text-xs mb-4">
+                  Priority Level
+                </FormLabel>
+                <div className="py-4 px-0 mt-2 border-t border-b border-gray-200">
+                  <FormControl>
+                    <div className="mt-1">
+                      <PrioritySelector priorityLevels={priorityLevels} value={field.value} onChange={field.onChange} />
+                    </div>
+                  </FormControl>
+                </div>
+                <FormMessage />
+              </FormItem>} />
+            </div>
+
+            <div>
+              <div className="flex gap-2 mb-2">
+                <Input type="url" value={newReferenceLink} onChange={e => setNewReferenceLink(e.target.value)} placeholder="Paste reference link URL" className="flex-1" />
+                <Button type="button" size="icon" variant="outline" onClick={addReferenceLink}>
+                  <Plus size={16} />
                 </Button>
-              </div>)}
-          </div>
-
-          <div>
-            <div className="flex gap-2 mb-2">
-              <div className="relative flex-1">
-                <Input type="text" value={newImageUrl} onChange={e => setNewImageUrl(e.target.value)} placeholder="Upload or paste image/URL" className="pr-10 w-full" onPaste={handleImagePaste} />
-                <input type="file" accept="image/*" multiple id="image-upload" className="hidden" onChange={handleImageUpload} />
-                <label htmlFor="image-upload" className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer">
-                  <Upload size={16} className="text-gray-500 hover:text-gray-700" />
-                </label>
               </div>
-              <Button type="button" size="icon" variant="outline" onClick={addImageUrl} disabled={!newImageUrl}>
-                <Plus size={16} />
-              </Button>
+              {form.watch("reference_links").map((link, index) => <div key={index} className="flex items-center gap-2 mb-2">
+                  <div className="flex-1 text-sm truncate">{link}</div>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => removeReferenceLink(index)}>
+                    <X size={14} />
+                  </Button>
+                </div>)}
             </div>
 
-            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-2">
-              {form.watch("image_urls").map((url, index) => <div key={`url-${index}`} className="relative group">
-                  <img src={url} alt="" className="w-[50px] h-[50px] object-cover rounded-md" onError={e => {
-                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/50?text=Error';
-              }} />
-                  <Button type="button" variant="destructive" size="sm" className="absolute -top-2 -right-2 h-5 w-5 p-0 rounded-full" onClick={() => removeImageUrl(index)}>
-                    <X size={12} />
-                  </Button>
-                </div>)}
-              {imageFiles.map((file, index) => <div key={`file-${index}`} className="relative group">
-                  <img src={URL.createObjectURL(file)} alt="" className="w-[50px] h-[50px] object-cover rounded-md" />
-                  <Button type="button" variant="destructive" size="sm" className="absolute -top-2 -right-2 h-5 w-5 p-0 rounded-full" onClick={() => removeImage(index)}>
-                    <X size={12} />
-                  </Button>
-                </div>)}
+            <div>
+              <div className="flex gap-2 mb-2">
+                <div className="relative flex-1">
+                  <Input type="text" value={newImageUrl} onChange={e => setNewImageUrl(e.target.value)} placeholder="Upload or paste image/URL" className="pr-10 w-full" onPaste={handleImagePaste} />
+                  <input type="file" accept="image/*" multiple id="image-upload" className="hidden" onChange={handleImageUpload} />
+                  <label htmlFor="image-upload" className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer">
+                    <Upload size={16} className="text-gray-500 hover:text-gray-700" />
+                  </label>
+                </div>
+                <Button type="button" size="icon" variant="outline" onClick={addImageUrl} disabled={!newImageUrl}>
+                  <Plus size={16} />
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-2">
+                {form.watch("image_urls").map((url, index) => <div key={`url-${index}`} className="relative group">
+                    <img src={url} alt="" className="w-[50px] h-[50px] object-cover rounded-md" onError={e => {
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/50?text=Error';
+                    }} />
+                    <Button type="button" variant="destructive" size="sm" className="absolute -top-2 -right-2 h-5 w-5 p-0 rounded-full" onClick={() => removeImageUrl(index)}>
+                      <X size={12} />
+                    </Button>
+                  </div>)}
+                {imageFiles.map((file, index) => <div key={`file-${index}`} className="relative group">
+                    <img src={URL.createObjectURL(file)} alt="" className="w-[50px] h-[50px] object-cover rounded-md" />
+                    <Button type="button" variant="destructive" size="sm" className="absolute -top-2 -right-2 h-5 w-5 p-0 rounded-full" onClick={() => removeImage(index)}>
+                      <X size={12} />
+                    </Button>
+                  </div>)}
+              </div>
             </div>
           </div>
-        </div>
+        </ScrollArea>
 
-        <div className="fixed-bottom-button px-4 py-3 border-t bg-background z-10 mt-4 -mx-4 sticky bottom-0 left-0 right-0">
+        <div className="border-t p-4 bg-background sticky bottom-0 z-10">
           <Button 
             type="submit" 
             disabled={isSubmitting || !isFormValid} 
@@ -439,5 +443,6 @@ export const TaskForm = ({
           )}
         </div>
       </form>
-    </Form>;
+    </Form>
+  </div>;
 };
