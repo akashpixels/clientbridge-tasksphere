@@ -89,7 +89,7 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
           *,
           task_type:task_types(name, category),
           status:task_statuses!tasks_current_status_id_fkey(name, color_hex),
-          priority:priority_levels(name, color),
+          priority:priority_levels(name, color_hex),
           complexity:complexity_levels(name, multiplier),
           assigned_user:user_profiles!tasks_assigned_user_id_fkey(first_name, last_name)
         `)

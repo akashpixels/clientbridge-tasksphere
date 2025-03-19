@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 
+// Update the type definition to match the actual structure from the database
 type ClientAdmin = {
   id: string;
   business_name: string;
@@ -11,7 +12,9 @@ type ClientAdmin = {
   description: string | null;
   created_at: string;
   updated_at: string;
-  deleted_at: string | null;
+  // Removed deleted_at as it no longer exists in the database
+  primary_color_hex: string | null;  // Renamed from primary_color
+  secondary_color_hex: string | null;  // Renamed from secondary_color
   user_profiles: {
     first_name: string;
     last_name: string;
@@ -33,7 +36,6 @@ const Clients = () => {
             username
           )
         `)
-        .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -41,32 +43,17 @@ const Clients = () => {
         throw error;
       }
       
-      return data;
+      return data as ClientAdmin[];
     },
   });
 
   const { data: archivedClients, isLoading: isLoadingArchived } = useQuery<ClientAdmin[]>({
     queryKey: ['archived-clients'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('client_admins')
-        .select(`
-          *,
-          user_profiles:user_profiles(
-            first_name,
-            last_name,
-            username
-          )
-        `)
-        .not('deleted_at', 'is', null)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching archived clients:', error);
-        throw error;
-      }
-      
-      return data;
+      // Since we've removed the deleted_at column, we need to adjust this query
+      // For this example, we're getting an empty array since we don't have a way to get archived clients anymore
+      // You might need to add a new way to track archived clients in the future
+      return [] as ClientAdmin[];
     },
   });
 

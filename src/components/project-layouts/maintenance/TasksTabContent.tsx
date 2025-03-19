@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card } from "@/components/ui/card";
 import TasksTable from "./TasksTable";
@@ -47,7 +46,7 @@ interface TasksTabContentProps {
     } | null;
     priority: {
       name: string;
-      color_hex: string; // Updated from color to color_hex
+      color_hex: string; // Updated from color to color_hex to match database change
     } | null;
     complexity: {
       name: string;

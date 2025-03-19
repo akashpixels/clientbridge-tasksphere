@@ -1,4 +1,3 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -32,7 +31,7 @@ interface TasksTableProps {
     } | null;
     priority: {
       name: string;
-      color: string;
+      color_hex: string;
     } | null;
     complexity: {
       name: string;
@@ -62,19 +61,15 @@ interface TasksTableProps {
   selectedTaskId?: string;
 }
 
-// Helper function to format interval for display
 const formatInterval = (intervalValue: any): string => {
   if (!intervalValue) return "0h";
   
-  // Handle if intervalValue is already a number
   if (typeof intervalValue === 'number') {
     return intervalValue === 0 ? "0h" : `${intervalValue}h`;
   }
   
-  // Convert PostgreSQL interval string formats to hours
   try {
     if (typeof intervalValue === 'string') {
-      // Handle "HH:MM:SS" format
       if (intervalValue.includes(':')) {
         const parts = intervalValue.split(':');
         const hours = parseInt(parts[0], 10);
@@ -82,7 +77,6 @@ const formatInterval = (intervalValue: any): string => {
         const minutesAsHours = minutes / 60;
         return `${(hours + minutesAsHours).toFixed(1).replace(/\.0$/, '')}h`;
       }
-      // Handle "X hours Y minutes" format
       else if (intervalValue.includes('hours') || intervalValue.includes('hour')) {
         const hoursMatch = intervalValue.match(/(\d+)\s+hours?/);
         const minutesMatch = intervalValue.match(/(\d+)\s+minutes?/);
@@ -91,13 +85,10 @@ const formatInterval = (intervalValue: any): string => {
         const minutesAsHours = minutes / 60;
         return `${(hours + minutesAsHours).toFixed(1).replace(/\.0$/, '')}h`;
       }
-      // Try to parse as a raw number
       return `${parseFloat(intervalValue)}h`;
     }
     
-    // Handle interval object format from PostgreSQL
     if (typeof intervalValue === 'object' && intervalValue !== null) {
-      // Convert interval object to string and extract hours
       const stringValue = String(intervalValue);
       return formatInterval(stringValue);
     }
@@ -186,7 +177,7 @@ const TasksTable = ({
     return complexityMap[complexity.name] || 1;
   };
 
-  const getPriorityColor = (priority: { name: string, color: string } | null) => {
+  const getPriorityColor = (priority: { name: string, color_hex: string } | null) => {
     if (!priority) return '#9CA3AF';
 
     const priorityColors: { [key: string]: string } = {
@@ -198,7 +189,7 @@ const TasksTable = ({
       'Critical': '#B91C1C'
     };
 
-    return priorityColors[priority.name] || priority.color || '#9CA3AF'; 
+    return priorityColors[priority.name] || priority.color_hex || '#9CA3AF'; 
   };
 
   const renderReferenceLinks = (links: Record<string, string> | null) => {

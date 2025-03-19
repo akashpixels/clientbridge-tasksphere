@@ -16,6 +16,43 @@ const ProjectDetails = () => {
   const { id } = useParams();
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
 
+  // Helper function to fetch monthly usage data
+  const fetchMonthlyUsage = async (projectId: string | undefined, monthYear: string): Promise<MonthlyUsage | null> => {
+    if (!projectId) return null;
+    
+    try {
+      // Try to fetch from subscription_usage table first - updated field name from month_year to billing_period
+      const { data: usageData, error: usageError } = await supabase
+        .from('subscription_usage')
+        .select('allocated_duration, used_duration')
+        .eq('project_id', projectId)
+        .eq('billing_period', monthYear) // Updated from month_year to billing_period
+        .maybeSingle();
+
+      if (usageError) {
+        console.error('Error fetching usage data:', usageError);
+      }
+
+      if (usageData) {
+        // Convert interval objects to numbers using the helper function
+        return {
+          allocated_duration: intervalToHours(usageData.allocated_duration),
+          used_duration: intervalToHours(usageData.used_duration)
+        };
+      }
+      
+      // Fallback: Calculate total hours spent for the month from tasks
+      // This is a simplified version and may need to be expanded based on your business logic
+      return {
+        allocated_duration: 0, // Default value
+        used_duration: 0     // Default value
+      };
+    } catch (error) {
+      console.error('Error in fetchMonthlyUsage:', error);
+      return null;
+    }
+  };
+
   const { data: project, isLoading } = useQuery({
     queryKey: ['project', id, selectedMonth],
     queryFn: async () => {
@@ -75,43 +112,6 @@ const ProjectDetails = () => {
       return enhancedProject;
     },
   });
-
-  // Helper function to fetch monthly usage data
-  const fetchMonthlyUsage = async (projectId: string | undefined, monthYear: string): Promise<MonthlyUsage | null> => {
-    if (!projectId) return null;
-    
-    try {
-      // Try to fetch from subscription_usage table first
-      const { data: usageData, error: usageError } = await supabase
-        .from('subscription_usage')
-        .select('allocated_duration, used_duration')
-        .eq('project_id', projectId)
-        .eq('month_year', monthYear)
-        .maybeSingle();
-
-      if (usageError) {
-        console.error('Error fetching usage data:', usageError);
-      }
-
-      if (usageData) {
-        // Convert interval objects to numbers using the helper function
-        return {
-          allocated_duration: intervalToHours(usageData.allocated_duration),
-          used_duration: intervalToHours(usageData.used_duration)
-        };
-      }
-      
-      // Fallback: Calculate total hours spent for the month from tasks
-      // This is a simplified version and may need to be expanded based on your business logic
-      return {
-        allocated_duration: 0, // Default value
-        used_duration: 0     // Default value
-      };
-    } catch (error) {
-      console.error('Error in fetchMonthlyUsage:', error);
-      return null;
-    }
-  };
 
   if (isLoading) {
     return <div className="container mx-auto p-6">Loading project details...</div>;
