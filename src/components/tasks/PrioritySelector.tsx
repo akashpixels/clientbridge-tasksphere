@@ -6,7 +6,7 @@ import { formatDuration } from "@/lib/date-utils";
 interface PriorityLevel {
   id: number;
   name: string;
-  color: string;
+  color_hex: string; // Updated from color to color_hex
   multiplier?: number;
   start_delay?: string | number | object; // Updated from time_to_start
 }
@@ -39,16 +39,16 @@ export const PrioritySelector = ({ priorityLevels, value, onChange }: PrioritySe
                 variant="outline"
                 className={`cursor-pointer px-3 py-1 hover:bg-muted transition-colors`}
                 style={{
-                  backgroundColor: value === level.id ? `${level.color}15` : '',
-                  borderColor: value === level.id ? level.color : '',
-                  color: value === level.id ? level.color : '#8E9196'
+                  backgroundColor: value === level.id ? `${level.color_hex}15` : '', // Updated from color to color_hex
+                  borderColor: value === level.id ? level.color_hex : '', // Updated from color to color_hex
+                  color: value === level.id ? level.color_hex : '#8E9196' // Updated from color to color_hex
                 }}
                 onClick={() => onChange(level.id)}
               >
                 <div className="flex items-center">
                   <span 
                     className="w-2 h-2 rounded-full mr-1.5 flex-shrink-0"
-                    style={{ backgroundColor: level.color || '#888888' }}
+                    style={{ backgroundColor: level.color_hex || '#888888' }} // Updated from color to color_hex
                   />
                   {level.name}
                 </div>
