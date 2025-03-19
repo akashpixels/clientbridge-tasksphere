@@ -84,7 +84,6 @@ export type Database = {
         Row: {
           business_name: string
           created_at: string
-          deleted_at: string | null
           description: string | null
           id: string
           logo_url: string | null
@@ -95,7 +94,6 @@ export type Database = {
         Insert: {
           business_name: string
           created_at?: string
-          deleted_at?: string | null
           description?: string | null
           id?: string
           logo_url?: string | null
@@ -106,7 +104,6 @@ export type Database = {
         Update: {
           business_name?: string
           created_at?: string
-          deleted_at?: string | null
           description?: string | null
           id?: string
           logo_url?: string | null
@@ -186,7 +183,7 @@ export type Database = {
           file_type_id: number | null
           file_url: string
           id: string
-          project_id: string | null
+          project_id: string
           size: number | null
           updated_at: string
           uploaded_by: string | null
@@ -198,7 +195,7 @@ export type Database = {
           file_type_id?: number | null
           file_url: string
           id?: string
-          project_id?: string | null
+          project_id: string
           size?: number | null
           updated_at?: string
           uploaded_by?: string | null
@@ -210,7 +207,7 @@ export type Database = {
           file_type_id?: number | null
           file_url?: string
           id?: string
-          project_id?: string | null
+          project_id?: string
           size?: number | null
           updated_at?: string
           uploaded_by?: string | null
@@ -323,7 +320,7 @@ export type Database = {
       }
       priority_levels: {
         Row: {
-          color: string | null
+          color_hex: string | null
           created_at: string
           description: string | null
           id: number
@@ -334,7 +331,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          color?: string | null
+          color_hex?: string | null
           created_at?: string
           description?: string | null
           id?: number
@@ -345,7 +342,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          color?: string | null
+          color_hex?: string | null
           created_at?: string
           description?: string | null
           id?: number
@@ -361,20 +358,20 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          project_id: string | null
-          user_id: string | null
+          project_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string
           id?: number
-          project_id?: string | null
-          user_id?: string | null
+          project_id: string
+          user_id: string
         }
         Update: {
           created_at?: string
           id?: number
-          project_id?: string | null
-          user_id?: string | null
+          project_id?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -397,8 +394,8 @@ export type Database = {
         Row: {
           created_at: string
           details: string | null
-          encrypted: boolean
           id: number
+          is_encrypted: boolean
           password: string | null
           project_id: string
           type: string
@@ -409,8 +406,8 @@ export type Database = {
         Insert: {
           created_at?: string
           details?: string | null
-          encrypted?: boolean
           id?: number
+          is_encrypted?: boolean
           password?: string | null
           project_id: string
           type: string
@@ -421,8 +418,8 @@ export type Database = {
         Update: {
           created_at?: string
           details?: string | null
-          encrypted?: boolean
           id?: number
+          is_encrypted?: boolean
           password?: string | null
           project_id?: string
           type?: string
@@ -469,7 +466,7 @@ export type Database = {
           actual_duration: unknown | null
           created_at: string
           description: string | null
-          estimated_duration: unknown | null
+          est_duration: unknown | null
           id: number
           is_milestone: boolean | null
           name: string
@@ -484,7 +481,7 @@ export type Database = {
           actual_duration?: unknown | null
           created_at?: string
           description?: string | null
-          estimated_duration?: unknown | null
+          est_duration?: unknown | null
           id?: number
           is_milestone?: boolean | null
           name: string
@@ -499,7 +496,7 @@ export type Database = {
           actual_duration?: unknown | null
           created_at?: string
           description?: string | null
-          estimated_duration?: unknown | null
+          est_duration?: unknown | null
           id?: number
           is_milestone?: boolean | null
           name?: string
@@ -608,6 +605,7 @@ export type Database = {
           details: string | null
           due_date: string | null
           id: string
+          is_using_phases: boolean
           layout_id: number | null
           logo_url: string | null
           max_concurrent_tasks: number
@@ -622,7 +620,6 @@ export type Database = {
           task_type_options: Json | null
           types: Json | null
           updated_at: string
-          uses_phases: boolean
         }
         Insert: {
           client_admin_id?: string | null
@@ -630,6 +627,7 @@ export type Database = {
           details?: string | null
           due_date?: string | null
           id?: string
+          is_using_phases?: boolean
           layout_id?: number | null
           logo_url?: string | null
           max_concurrent_tasks?: number
@@ -644,7 +642,6 @@ export type Database = {
           task_type_options?: Json | null
           types?: Json | null
           updated_at?: string
-          uses_phases?: boolean
         }
         Update: {
           client_admin_id?: string | null
@@ -652,6 +649,7 @@ export type Database = {
           details?: string | null
           due_date?: string | null
           id?: string
+          is_using_phases?: boolean
           layout_id?: number | null
           logo_url?: string | null
           max_concurrent_tasks?: number
@@ -666,7 +664,6 @@ export type Database = {
           task_type_options?: Json | null
           types?: Json | null
           updated_at?: string
-          uses_phases?: boolean
         }
         Relationships: [
           {
@@ -695,39 +692,39 @@ export type Database = {
       subscription_usage: {
         Row: {
           allocated_duration: unknown | null
+          billing_period: string
           created_at: string
           id: string
           metadata: Json | null
-          month_year: string
           notes: string | null
           project_id: string
-          status: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
           subscription_id: string
           updated_at: string
           used_duration: unknown | null
         }
         Insert: {
           allocated_duration?: unknown | null
+          billing_period: string
           created_at?: string
           id?: string
           metadata?: Json | null
-          month_year: string
           notes?: string | null
           project_id: string
-          status?: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
           subscription_id: string
           updated_at?: string
           used_duration?: unknown | null
         }
         Update: {
           allocated_duration?: unknown | null
+          billing_period?: string
           created_at?: string
           id?: string
           metadata?: Json | null
-          month_year?: string
           notes?: string | null
           project_id?: string
-          status?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
           subscription_id?: string
           updated_at?: string
           used_duration?: unknown | null
@@ -901,7 +898,7 @@ export type Database = {
           is_input_request: boolean | null
           is_input_response: boolean | null
           parent_id: string | null
-          task_id: string | null
+          task_id: string
           updated_at: string
           user_id: string | null
         }
@@ -914,7 +911,7 @@ export type Database = {
           is_input_request?: boolean | null
           is_input_response?: boolean | null
           parent_id?: string | null
-          task_id?: string | null
+          task_id: string
           updated_at?: string
           user_id?: string | null
         }
@@ -927,7 +924,7 @@ export type Database = {
           is_input_request?: boolean | null
           is_input_response?: boolean | null
           parent_id?: string | null
-          task_id?: string | null
+          task_id?: string
           updated_at?: string
           user_id?: string | null
         }
@@ -1028,7 +1025,7 @@ export type Database = {
           created_by: string
           current_status_id: number
           details: string
-          est_duration: unknown
+          est_duration: unknown | null
           est_end: string | null
           est_start: string | null
           id: string
@@ -1055,7 +1052,7 @@ export type Database = {
           created_by: string
           current_status_id?: number
           details: string
-          est_duration: unknown
+          est_duration?: unknown | null
           est_end?: string | null
           est_start?: string | null
           id?: string
@@ -1082,7 +1079,7 @@ export type Database = {
           created_by?: string
           current_status_id?: number
           details?: string
-          est_duration?: unknown
+          est_duration?: unknown | null
           est_end?: string | null
           est_start?: string | null
           id?: string

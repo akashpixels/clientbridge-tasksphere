@@ -110,9 +110,9 @@ Deno.serve(async (req) => {
           .upsert({
             project_id: subscription.project_id,
             subscription_id: subscription.id,
-            month_year: prevMonthFormat,
+            billing_period: prevMonthFormat,  // Updated from month_year to billing_period
             allocated_duration: `${hoursAllotted} hours`,
-            used_duration: `${totalHoursSpent} hours`, // Using used_duration instead of hours_spent
+            used_duration: `${totalHoursSpent} hours`, 
             status: 'completed',
             notes: `Automatically calculated on ${currentDate.toISOString()}`,
             updated_at: new Date().toISOString()

@@ -47,7 +47,7 @@ interface TasksTabContentProps {
     } | null;
     priority: {
       name: string;
-      color: string;
+      color_hex: string; // Updated from color to color_hex
     } | null;
     complexity: {
       name: string;
@@ -64,7 +64,7 @@ interface TasksTabContentProps {
     est_end?: string | null;
     queue_position?: number;
     actual_duration?: number | null;     
-    logged_duration?: number | null;     // Added new field
+    logged_duration?: number | null;
     completed_at?: string | null;        
   })[];
   sortConfig: {
