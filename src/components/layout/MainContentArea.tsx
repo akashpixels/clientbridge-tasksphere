@@ -13,12 +13,12 @@ const MainContentArea = ({ isLeftSidebarOpen }: MainContentAreaProps) => {
   return (
     <main 
       className={cn(
-        'flex-1 transition-all duration-300 ease-in-out bg-background',
+        'flex-1 transition-all duration-300 ease-in-out bg-background hide-scrollbar',
         isLeftSidebarOpen ? 'ml-64' : 'ml-20',
         rightSidebarContent ? 'mr-[300px]' : ''
       )}
     >
-      <div className="p-8">
+      <div className="p-8 overflow-auto hide-scrollbar">
         <Outlet />
       </div>
     </main>
