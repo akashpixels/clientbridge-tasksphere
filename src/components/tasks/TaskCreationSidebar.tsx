@@ -218,11 +218,13 @@ export const TaskCreationSidebar = () => {
             </div>
           </ScrollArea>
         ) : (
-          <TaskForm 
-            onSubmit={handleSubmit} 
-            isSubmitting={isSubmitting} 
-            activeTaskCount={activeTaskCount} 
-          />
+          <ScrollArea className="h-full">
+            <TaskForm 
+              onSubmit={handleSubmit} 
+              isSubmitting={isSubmitting} 
+              activeTaskCount={activeTaskCount} 
+            />
+          </ScrollArea>
         )}
       </div>
     </div>
