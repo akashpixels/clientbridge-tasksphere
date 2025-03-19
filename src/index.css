@@ -37,11 +37,6 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    scrollbar-width: none;
-  }
-
-  body::-webkit-scrollbar {
-    display: none;
   }
 
   .glass-card {
@@ -58,39 +53,5 @@
 
   .slide-in {
     @apply animate-slideIn;
-  }
-}
-
-/* Hide scrollbar while maintaining scroll functionality */
-@layer utilities {
-  .hide-scrollbar {
-    -ms-overflow-style: none !important;  /* IE and Edge */
-    scrollbar-width: none !important;  /* Firefox */
-    overflow-y: auto !important;
-    overflow-x: auto !important;
-  }
-  
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none !important;  /* Chrome, Safari, Opera */
-    width: 0 !important;
-    height: 0 !important;
-  }
-  
-  /* Ensure all potential scrollable elements don't show scrollbars */
-  .overflow-auto, .overflow-y-auto, .overflow-x-auto, 
-  .overflow-scroll, .overflow-y-scroll, .overflow-x-scroll {
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
-  }
-  
-  .overflow-auto::-webkit-scrollbar, 
-  .overflow-y-auto::-webkit-scrollbar, 
-  .overflow-x-auto::-webkit-scrollbar,
-  .overflow-scroll::-webkit-scrollbar, 
-  .overflow-y-scroll::-webkit-scrollbar, 
-  .overflow-x-scroll::-webkit-scrollbar {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
   }
 }

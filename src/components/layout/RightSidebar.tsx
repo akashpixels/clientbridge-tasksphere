@@ -7,7 +7,7 @@ const RightSidebar = () => {
   if (!rightSidebarContent) return null;
 
   return (
-    <aside className="fixed top-0 right-0 w-[300px] bg-background border-l border-border h-screen flex flex-col overflow-hidden hide-scrollbar">
+    <aside className="fixed top-0 right-0 w-[300px] bg-background border-l border-border h-screen flex flex-col overflow-hidden">
       {rightSidebarContent}
     </aside>
   );
