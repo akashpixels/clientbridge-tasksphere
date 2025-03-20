@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
 import PreviewDialog from "../maintenance/comments/PreviewDialog";
 import { 
@@ -199,54 +199,60 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-        <p>Loading files...</p>
-      </div>
+      <Card className="p-6">
+        <div className="flex items-center justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+          <p>Loading files...</p>
+        </div>
+      </Card>
     );
   }
   
   if (error) {
     console.error('Error in files query:', error);
     return (
-      <div className="text-center py-8">
-        <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-        <p className="text-lg font-semibold text-red-500">Error loading files</p>
-        <p className="text-sm text-gray-500 mt-2">{(error as Error).message}</p>
-        <p className="text-xs text-gray-400 mt-1">Project ID: {projectId}</p>
-        <button 
-          className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-sm mx-auto"
-          onClick={handleRefresh}
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Try again
-        </button>
-      </div>
+      <Card className="p-6">
+        <div className="text-center py-8">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+          <p className="text-lg font-semibold text-red-500">Error loading files</p>
+          <p className="text-sm text-gray-500 mt-2">{(error as Error).message}</p>
+          <p className="text-xs text-gray-400 mt-1">Project ID: {projectId}</p>
+          <button 
+            className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-sm mx-auto"
+            onClick={handleRefresh}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Try again
+          </button>
+        </div>
+      </Card>
     );
   }
 
   if (!projectFiles || projectFiles.length === 0) {
     return (
-      <div className="text-center py-8">
-        <AlertCircle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
-        <p className="text-lg font-semibold">No files found for this project.</p>
-        <p className="text-sm text-gray-500 mt-2">
-          This could be due to permission settings or because no files exist for this project.
-        </p>
-        <div className="mt-4 p-3 bg-gray-50 rounded-md text-sm text-left max-w-md mx-auto">
-          <p className="font-medium">Debugging information:</p>
-          <p className="mt-1 text-xs">Project ID: {projectId}</p>
-          <p className="mt-1 text-xs">RLS Status: Temporarily disabled</p>
+      <Card className="p-6">
+        <div className="text-center py-8">
+          <AlertCircle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
+          <p className="text-lg font-semibold">No files found for this project.</p>
+          <p className="text-sm text-gray-500 mt-2">
+            This could be due to permission settings or because no files exist for this project.
+          </p>
+          <div className="mt-4 p-3 bg-gray-50 rounded-md text-sm text-left max-w-md mx-auto">
+            <p className="font-medium">Debugging information:</p>
+            <p className="mt-1 text-xs">Project ID: {projectId}</p>
+            <p className="mt-1 text-xs">RLS Status: Temporarily disabled</p>
+          </div>
+          <button 
+            className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-sm mx-auto"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
         </div>
-        <button 
-          className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-sm mx-auto"
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </div>
+      </Card>
     );
   }
 
@@ -266,10 +272,11 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
   };
 
   return (
-    <div>
+    <Card className="p-6">
       <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-medium">Project Files</h3>
         <button 
-          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center text-sm ml-auto"
+          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center text-sm"
           onClick={handleRefresh}
           disabled={isRefreshing}
         >
@@ -300,7 +307,7 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
         onClose={() => setSelectedFile(null)}
         onDownload={handleDownload}
       />
-    </div>
+    </Card>
   );
 };
 
