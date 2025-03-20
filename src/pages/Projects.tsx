@@ -10,6 +10,7 @@ type Project = {
   name: string;
   logo_url: string;
   due_date: string | null;
+  layout_type: string; // Updated from layout_id
   client_admin: {
     id: string;
     business_name: string;
@@ -42,6 +43,7 @@ const Projects = () => {
     queryKey: ['projects'],
     queryFn: async () => {
       console.log('Fetching projects...');
+      // Updated query to use layout_type instead of layout:project_layouts
       const { data, error } = await supabase
         .from('projects')
         .select(`

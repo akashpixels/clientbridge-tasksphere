@@ -21,12 +21,12 @@ const ProjectDetails = () => {
     if (!projectId) return null;
     
     try {
-      // Try to fetch from subscription_usage table first - updated field name from month_year to billing_period
+      // Try to fetch from subscription_usage table first
       const { data: usageData, error: usageError } = await supabase
         .from('subscription_usage')
         .select('allocated_duration, used_duration')
         .eq('project_id', projectId)
-        .eq('billing_period', monthYear) // Updated from month_year to billing_period
+        .eq('billing_period', monthYear)
         .maybeSingle();
 
       if (usageError) {
@@ -58,7 +58,7 @@ const ProjectDetails = () => {
     queryFn: async () => {
       console.log('Fetching project details for ID:', id, 'for month:', selectedMonth);
       
-      // Fetch base project data with relationships
+      // Fetch base project data with relationships - updated to use layout_type instead of layout_id
       const { data, error } = await supabase
         .from('projects')
         .select(`
@@ -72,7 +72,6 @@ const ProjectDetails = () => {
             )
           ),
           status:task_statuses(name, color_hex),
-          layout:project_layouts(id, name),
           project_subscriptions(
             id,
             subscription_status,
@@ -121,7 +120,7 @@ const ProjectDetails = () => {
     return <div className="container mx-auto p-6">Project not found</div>;
   }
 
-  console.log('Project layout:', project?.layout);
+  console.log('Project layout type:', project?.layout_type);
   
   // Get subscription data for the HoursUsageProgress component
   const subscription = project?.project_subscriptions?.[0];
@@ -143,14 +142,14 @@ const ProjectDetails = () => {
   };
   
   // Render the appropriate layout based on the project's layout type
-  const layoutId = project?.layout_id;
+  const layoutType = project?.layout_type;
   
-  switch (layoutId) {
-    case 1:
+  switch (layoutType) {
+    case 'RETAINER':
       return <MaintenanceLayout {...layoutProps} />;
-    case 2:
+    case 'REGULAR':
       return <BrandingLayout project={project} />;
-    case 3:
+    case 'FUSION':
       return <DevelopmentLayout project={project} />;
     default:
       return <DefaultLayout project={project} />;

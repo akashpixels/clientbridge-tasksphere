@@ -437,30 +437,6 @@ export type Database = {
           },
         ]
       }
-      project_layouts: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: number
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: number
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: number
-          name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       project_phases: {
         Row: {
           actual_duration: unknown | null
@@ -606,7 +582,7 @@ export type Database = {
           due_date: string | null
           id: string
           is_using_phases: boolean
-          layout_id: number | null
+          layout_type: Database["public"]["Enums"]["layout_type"] | null
           logo_url: string | null
           max_concurrent_tasks: number
           name: string
@@ -618,7 +594,7 @@ export type Database = {
           status_options: Json
           task_fields: Json
           task_type_options: Json | null
-          types: Json | null
+          types: number | null
           updated_at: string
         }
         Insert: {
@@ -628,7 +604,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           is_using_phases?: boolean
-          layout_id?: number | null
+          layout_type?: Database["public"]["Enums"]["layout_type"] | null
           logo_url?: string | null
           max_concurrent_tasks?: number
           name: string
@@ -640,7 +616,7 @@ export type Database = {
           status_options?: Json
           task_fields?: Json
           task_type_options?: Json | null
-          types?: Json | null
+          types?: number | null
           updated_at?: string
         }
         Update: {
@@ -650,7 +626,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           is_using_phases?: boolean
-          layout_id?: number | null
+          layout_type?: Database["public"]["Enums"]["layout_type"] | null
           logo_url?: string | null
           max_concurrent_tasks?: number
           name?: string
@@ -662,7 +638,7 @@ export type Database = {
           status_options?: Json
           task_fields?: Json
           task_type_options?: Json | null
-          types?: Json | null
+          types?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -674,17 +650,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "projects_layout_id_fkey"
-            columns: ["layout_id"]
-            isOneToOne: false
-            referencedRelation: "project_layouts"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "projects_status_id_fkey"
             columns: ["status_id"]
             isOneToOne: false
             referencedRelation: "task_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_types_fkey"
+            columns: ["types"]
+            isOneToOne: false
+            referencedRelation: "project_types"
             referencedColumns: ["id"]
           },
         ]
@@ -742,58 +718,6 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "project_subscriptions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      subtasks: {
-        Row: {
-          assigned_to: string | null
-          completed_at: string | null
-          created_at: string
-          id: string
-          name: string
-          parent_task_id: string | null
-          status_id: number | null
-        }
-        Insert: {
-          assigned_to?: string | null
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          name: string
-          parent_task_id?: string | null
-          status_id?: number | null
-        }
-        Update: {
-          assigned_to?: string | null
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          name?: string
-          parent_task_id?: string | null
-          status_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "subtasks_assigned_to_fkey"
-            columns: ["assigned_to"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subtasks_parent_task_id_fkey"
-            columns: ["parent_task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subtasks_status_id_fkey"
-            columns: ["status_id"]
-            isOneToOne: false
-            referencedRelation: "task_statuses"
             referencedColumns: ["id"]
           },
         ]
@@ -1286,6 +1210,7 @@ export type Database = {
       device_type: "mobile" | "desktop" | "both"
       gender_enum: "male" | "female" | "other"
       input_status: "requested" | "submitted" | "approved" | "re-requested"
+      layout_type: "RETAINER" | "REGULAR" | "FUSION"
       payment_status: "paid" | "pending" | "overdue" | "cancelled"
       subscription_status: "active" | "inactive"
       task_categories:
