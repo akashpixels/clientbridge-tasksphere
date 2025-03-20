@@ -76,7 +76,7 @@ const TeamTab = ({
   }
   return <Card className="p-6">
       
-      <div className="rounded-md border">
+   
         <Table>
           <TableHeader>
             <TableRow>
@@ -107,7 +107,7 @@ const TeamTab = ({
               </TableRow>}
           </TableBody>
         </Table>
-      </div>
+     
     </Card>;
 };
 export default TeamTab;
