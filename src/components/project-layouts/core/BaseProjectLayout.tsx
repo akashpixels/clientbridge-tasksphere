@@ -22,8 +22,8 @@ export interface BaseProjectData {
     project_subscriptions?: {
       id?: string;
       subscription_status?: string;
-      allocated_duration?: unknown;
-      actual_duration?: unknown;
+      allocated_duration: unknown;
+      actual_duration: unknown;
       next_renewal_date?: string;
     }[];
   };
