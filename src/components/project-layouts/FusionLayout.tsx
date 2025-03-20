@@ -3,8 +3,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import CredentialsTab from "./shared/CredentialsTab";
+import TeamTab from "./shared/TeamTab";
 
-interface BrandingLayoutProps {
+interface FusionLayoutProps {
   project: Tables<"projects"> & {
     client_admin: {
       id: string;
@@ -18,14 +19,17 @@ interface BrandingLayoutProps {
       name: string;
       color_hex: string | null;
     } | null;
-    project_subscriptions?: {
-      actual_duration: unknown;
+    project_subscriptions: {
+      actual_duration: unknown | null;
       allocated_duration: unknown;
     }[];
   };
 }
 
-const BrandingLayout = ({ project }: BrandingLayoutProps) => {
+const FusionLayout = ({ project }: FusionLayoutProps) => {
+  // Get the latest subscription
+  const currentSubscription = project.project_subscriptions?.[0];
+  
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
@@ -51,42 +55,22 @@ const BrandingLayout = ({ project }: BrandingLayoutProps) => {
       <Tabs defaultValue="overview" className="w-full">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="brand-assets">Brand Assets</TabsTrigger>
-          <TabsTrigger value="guidelines">Guidelines</TabsTrigger>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="api-docs">API Docs</TabsTrigger>
+          <TabsTrigger value="deployments">Deployments</TabsTrigger>
           <TabsTrigger value="team">Team</TabsTrigger>
           <TabsTrigger value="credentials">Credentials</TabsTrigger>
-          <TabsTrigger value="files">Files</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
           <Card className="p-6">
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-medium">Brand Overview</h3>
+                <h3 className="text-lg font-medium">Development Overview</h3>
                 <p className="text-gray-500 mt-1">{project.details || 'No details provided'}</p>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-medium">Brand Colors</h4>
-                  <div className="flex gap-2 mt-1">
-                    {project.primary_color_hex && (
-                      <div 
-                        className="w-8 h-8 rounded"
-                        style={{ backgroundColor: project.primary_color_hex }}
-                        title="Primary Color"
-                      />
-                    )}
-                    {project.secondary_color_hex && (
-                      <div 
-                        className="w-8 h-8 rounded"
-                        style={{ backgroundColor: project.secondary_color_hex }}
-                        title="Secondary Color"
-                      />
-                    )}
-                  </div>
-                </div>
-                
                 <div>
                   <h4 className="font-medium">Status</h4>
                   <span 
@@ -99,41 +83,48 @@ const BrandingLayout = ({ project }: BrandingLayoutProps) => {
                     {project.status?.name || 'Unknown'}
                   </span>
                 </div>
+                
+                <div>
+                  <h4 className="font-medium">Hours</h4>
+                  <p className="text-gray-500 mt-1">
+                    {currentSubscription ? 
+                      `${currentSubscription.actual_duration || 0} / ${currentSubscription.allocated_duration} hours` 
+                      : 'No subscription data'}
+                  </p>
+                </div>
               </div>
             </div>
           </Card>
         </TabsContent>
 
-        <TabsContent value="brand-assets">
+        <TabsContent value="tasks">
           <Card className="p-6">
-            <p>Brand assets content coming soon...</p>
+            <p>Tasks content coming soon...</p>
           </Card>
         </TabsContent>
 
-        <TabsContent value="guidelines">
+        <TabsContent value="api-docs">
           <Card className="p-6">
-            <p>Brand guidelines content coming soon...</p>
+            <p>API documentation coming soon...</p>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="deployments">
+          <Card className="p-6">
+            <p>Deployment history coming soon...</p>
           </Card>
         </TabsContent>
 
         <TabsContent value="team">
-          <Card className="p-6">
-            <p>Team content coming soon...</p>
-          </Card>
+          <TeamTab projectId={project.id} />
         </TabsContent>
 
         <TabsContent value="credentials">
           <CredentialsTab projectId={project.id} />
-        </TabsContent>
-
-        <TabsContent value="files">
-          <Card className="p-6">
-            <p>Files content coming soon...</p>
-          </Card>
         </TabsContent>
       </Tabs>
     </div>
   );
 };
 
-export default BrandingLayout;
+export default FusionLayout;

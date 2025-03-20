@@ -1,11 +1,9 @@
-
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import RetainerLayout from "@/components/project-layouts/RetainerLayout";
-import BrandingLayout from "@/components/project-layouts/BrandingLayout";
-import DevelopmentLayout from "@/components/project-layouts/DevelopmentLayout";
-import DefaultLayout from "@/components/project-layouts/DefaultLayout";
+import RegularLayout from "@/components/project-layouts/RegularLayout";
+import FusionLayout from "@/components/project-layouts/FusionLayout";
 import { format } from "date-fns";
 import { useState } from "react";
 import { HoursUsageProgress } from "@/components/projects/HoursUsageProgress";
@@ -148,12 +146,14 @@ const ProjectDetails = () => {
     case 'RETAINER':
       return <RetainerLayout {...layoutProps} />;
     case 'REGULAR':
-      return <BrandingLayout project={project} />;
+      return <RegularLayout project={project} />;
     case 'FUSION':
-      return <DevelopmentLayout project={project} />;
+      return <FusionLayout project={project} />;
     default:
-      return <DefaultLayout project={project} />;
+      // If no layout type matches, default to RetainerLayout
+      return <RetainerLayout {...layoutProps} />;
   }
 };
 
 export default ProjectDetails;
+
