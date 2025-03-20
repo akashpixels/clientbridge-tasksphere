@@ -1,87 +1,38 @@
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { Tables } from "@/integrations/supabase/types";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect } from "react";
-import ProjectHeader from "./maintenance/ProjectHeader";
-import TasksTabContent from "./maintenance/TasksTabContent";
-import ImageViewerDialog from "./maintenance/ImageViewerDialog";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useLayout } from "@/context/layout";
+import BaseProjectLayout, { BaseProjectData, TabDefinition } from "./BaseProjectLayout";
+import ProjectHeader from "./shared/ProjectHeader";
+import ProjectStats from "./maintenance/ProjectStats";
+import TasksTabContent from "./maintenance/TasksTabContent";
 import TaskCommentThread from "./maintenance/comments/TaskCommentThread";
+import TeamTab from "./shared/TeamTab";
 import CredentialsTab from "./shared/CredentialsTab";
 import FilesTab from "./shared/FilesTab";
-import TeamTab from "./shared/TeamTab";
 import { NewTaskButton } from "./maintenance/NewTaskButton";
+import ImageViewerDialog from "./maintenance/ImageViewerDialog";
 
-interface RetainerLayoutProps {
-  project: Tables<"projects"> & {
-    client_admin: {
-      id: string;
-      business_name: string;
-      user_profiles: {
-        first_name: string;
-        last_name: string;
-      } | null;
-    } | null;
-    status: {
-      name: string;
-      color_hex: string | null;
-    } | null;
-    project_subscriptions?: {
-      id: string;
-      subscription_status: string;
-      allocated_duration: unknown;
-      actual_duration: unknown;
-      next_renewal_date: string;
-    }[];
-  };
-  selectedMonth: string;
-  onMonthChange: (month: string) => void;
-  hoursUsageProgress?: React.ReactNode;
-}
-
-type SortConfig = {
-  key: string;
-  direction: 'asc' | 'desc';
-};
-
-const RetainerLayout = ({ project, selectedMonth, onMonthChange }: RetainerLayoutProps) => {
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'created_at', direction: 'desc' });
+const RetainerLayout = (props: BaseProjectData) => {
+  const { project, selectedMonth, onMonthChange, hoursUsageProgress } = props;
+  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' as 'asc' | 'desc' });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
-  const { setRightSidebarContent, closeRightSidebar, setCurrentTab } = useLayout();
+  const { setRightSidebarContent, setCurrentTab } = useLayout();
 
-  useEffect(() => {
-    console.log("RetainerLayout - Project ID:", project.id);
-    
-    const checkProjectData = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('projects')
-          .select('id, name')
-          .eq('id', project.id)
-          .single();
-          
-        console.log("Direct project access test:", data);
-        console.log("Direct project access error:", error);
-      } catch (e) {
-        console.error("Error checking project data:", e);
-      }
-    };
-    
-    checkProjectData();
-  }, [project.id]);
+  // Skip if no selectedMonth or no project.id
+  const shouldFetchTasks = !!selectedMonth && !!project?.id;
 
-  const { data: tasks, isLoading: isLoadingTasks, error: tasksError } = useQuery({
+  const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['tasks', project.id, selectedMonth],
     queryFn: async () => {
       console.log('Fetching tasks for project:', project.id);
-      const startDate = startOfMonth(new Date(selectedMonth));
-      const endDate = endOfMonth(new Date(selectedMonth));
+      const startDate = startOfMonth(new Date(selectedMonth || ''));
+      const endDate = endOfMonth(new Date(selectedMonth || ''));
       
       const { data, error } = await supabase
         .from('tasks')
@@ -106,13 +57,8 @@ const RetainerLayout = ({ project, selectedMonth, onMonthChange }: RetainerLayou
       console.log('Fetched tasks:', data);
       return data;
     },
+    enabled: shouldFetchTasks,
   });
-
-  useEffect(() => {
-    if (tasksError) {
-      console.error("Task query error:", tasksError);
-    }
-  }, [tasksError]);
 
   const handleSort = (key: string) => {
     setSortConfig(current => ({
@@ -141,7 +87,7 @@ const RetainerLayout = ({ project, selectedMonth, onMonthChange }: RetainerLayou
     }
   };
 
-  // Process interval values consistently
+  // Process tasks data for display
   const processedTasks = tasks ? tasks.map(task => ({
     ...task,
     actual_duration: typeof task.actual_duration === 'object' && task.actual_duration !== null
@@ -171,29 +117,26 @@ const RetainerLayout = ({ project, selectedMonth, onMonthChange }: RetainerLayou
     return sortConfig.direction === 'asc' ? comparison : -comparison;
   });
 
-  return (
-    <div className="container mx-auto">
-      <div className="mb-6">
-        <ProjectHeader 
-          project={project} 
-          selectedMonth={selectedMonth}
-          onMonthChange={onMonthChange}
-        />
-      </div>
+  // Define the header content with project stats
+  const headerContent = (
+    <ProjectHeader
+      project={project}
+      selectedMonth={selectedMonth}
+      onMonthChange={onMonthChange}
+      statsComponent={<ProjectStats project={project} selectedMonth={selectedMonth || ''} />}
+    />
+  );
 
-      <Tabs defaultValue="tasks" className="w-full" onValueChange={(value) => setCurrentTab(value)}>
-        <div className="flex justify-between items-center mb-4">
-          <TabsList>
-            <TabsTrigger value="tasks">Tasks</TabsTrigger>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
-            <TabsTrigger value="credentials">Credentials</TabsTrigger>
-            <TabsTrigger value="files">Files</TabsTrigger>
-          </TabsList>
-          <NewTaskButton />
-        </div>
-
-        <TabsContent value="tasks">
+  // Define the tabs for this layout
+  const tabs: TabDefinition[] = [
+    {
+      id: "tasks",
+      label: "Tasks",
+      content: (
+        <>
+          <div className="flex justify-end mb-4">
+            <NewTaskButton />
+          </div>
           <TasksTabContent
             isLoadingTasks={isLoadingTasks}
             tasks={sortedTasks}
@@ -206,54 +149,71 @@ const RetainerLayout = ({ project, selectedMonth, onMonthChange }: RetainerLayou
               );
             }}
           />
-        </TabsContent>
-
-        <TabsContent value="overview">
-          <div className="space-y-6">
-            <Card className="p-6">
-              <div className="space-y-4">
+        </>
+      ),
+      default: true
+    },
+    {
+      id: "overview",
+      label: "Overview",
+      content: (
+        <div className="space-y-6">
+          <Card className="p-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-medium">Project Details</h3>
+                <p className="text-gray-500 mt-1">{project.details || 'No details provided'}</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-lg font-medium">Project Details</h3>
-                  <p className="text-gray-500 mt-1">{project.details || 'No details provided'}</p>
+                  <h4 className="font-medium">Status</h4>
+                  <span 
+                    className="inline-block px-2 py-1 rounded-full text-xs mt-1"
+                    style={{
+                      backgroundColor: `${project.status?.color_hex}15`,
+                      color: project.status?.color_hex
+                    }}
+                  >
+                    {project.status?.name || 'Unknown'}
+                  </span>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-medium">Status</h4>
-                    <span 
-                      className="inline-block px-2 py-1 rounded-full text-xs mt-1"
-                      style={{
-                        backgroundColor: `${project.status?.color_hex}15`,
-                        color: project.status?.color_hex
-                      }}
-                    >
-                      {project.status?.name || 'Unknown'}
-                    </span>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium">Progress</h4>
-                    <p className="text-gray-500 mt-1">{project.progress || 0}%</p>
-                  </div>
+                <div>
+                  <h4 className="font-medium">Progress</h4>
+                  <p className="text-gray-500 mt-1">{project.progress || 0}%</p>
                 </div>
               </div>
-            </Card>
-          </div>
-        </TabsContent>
+            </div>
+          </Card>
+        </div>
+      )
+    },
+    {
+      id: "team",
+      label: "Team",
+      content: <TeamTab projectId={project.id} />
+    },
+    {
+      id: "credentials",
+      label: "Credentials",
+      content: <CredentialsTab projectId={project.id} />
+    },
+    {
+      id: "files",
+      label: "Files",
+      content: <FilesTab projectId={project.id} />
+    }
+  ];
 
-        <TabsContent value="team">
-          <TeamTab projectId={project.id} />
-        </TabsContent>
-
-        <TabsContent value="credentials">
-          <CredentialsTab projectId={project.id} />
-        </TabsContent>
-
-        <TabsContent value="files">
-          <FilesTab projectId={project.id} />
-        </TabsContent>
-      </Tabs>
-
+  return (
+    <>
+      <BaseProjectLayout 
+        {...props} 
+        tabs={tabs} 
+        headerContent={headerContent} 
+      />
+      
       <ImageViewerDialog
         selectedImage={selectedImage}
         selectedTaskImages={selectedTaskImages}
@@ -262,7 +222,7 @@ const RetainerLayout = ({ project, selectedMonth, onMonthChange }: RetainerLayou
         onPrevious={handlePreviousImage}
         onNext={handleNextImage}
       />
-    </div>
+    </>
   );
 };
 
