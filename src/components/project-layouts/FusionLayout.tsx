@@ -1,6 +1,6 @@
 
 import { Card } from "@/components/ui/card";
-import BaseProjectLayout, { BaseProjectData, TabDefinition } from "./BaseProjectLayout";
+import BaseProjectLayout, { BaseProjectData, TabDefinition } from "./core/BaseProjectLayout";
 import TeamTab from "./shared/TeamTab";
 import CredentialsTab from "./shared/CredentialsTab";
 
