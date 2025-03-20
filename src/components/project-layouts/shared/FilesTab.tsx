@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -274,9 +275,8 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
   return (
     <Card className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium">Project Files</h3>
         <button 
-          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center text-sm"
+          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center text-sm ml-auto"
           onClick={handleRefresh}
           disabled={isRefreshing}
         >
