@@ -6,7 +6,7 @@ import RightSidebar from './RightSidebar';
 import MainContentArea from './MainContentArea';
 
 const Layout = () => {
-  const { setRightSidebarContent } = useLayout();
+  const { setRightSidebarContent, closeRightSidebar } = useLayout();
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   
   return (
