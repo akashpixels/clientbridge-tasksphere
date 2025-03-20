@@ -11,16 +11,28 @@ interface MainContentAreaProps {
 }
 
 const MainContentArea = ({ isLeftSidebarOpen }: MainContentAreaProps) => {
-  const { rightSidebarContent, closeRightSidebar } = useLayout();
+  const { rightSidebarContent, closeRightSidebar, currentTab, setCurrentTab } = useLayout();
   const isMobile = useIsMobile();
   const location = useLocation();
   
   // Add effect to close right sidebar on route change
   useEffect(() => {
+    console.log('MainContentArea: Route changed to', location.pathname);
     closeRightSidebar();
   }, [location.pathname, closeRightSidebar]);
   
-  console.log('MainContentArea: Rendering', { isLeftSidebarOpen, hasRightSidebar: !!rightSidebarContent, isMobile, path: location.pathname });
+  // Add effect to log tab changes
+  useEffect(() => {
+    console.log('MainContentArea: Current tab is', currentTab);
+  }, [currentTab]);
+  
+  console.log('MainContentArea: Rendering', { 
+    isLeftSidebarOpen, 
+    hasRightSidebar: !!rightSidebarContent, 
+    isMobile, 
+    path: location.pathname,
+    currentTab
+  });
   
   return (
     <main 

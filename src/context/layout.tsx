@@ -1,5 +1,5 @@
-import { createContext, useContext, ReactNode, useState, useCallback, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+
+import { createContext, useContext, ReactNode, useState, useCallback } from 'react';
 
 interface LayoutContextType {
   rightSidebarContent: ReactNode | null;
@@ -26,23 +26,15 @@ interface LayoutProviderProps {
 export function LayoutProvider({ children }: LayoutProviderProps) {
   const [rightSidebarContent, setRightSidebarContent] = useState<ReactNode | null>(null);
   const [currentTab, setCurrentTab] = useState('tasks');
-  const location = useLocation();
 
   const closeRightSidebar = useCallback(() => {
     console.log('Closing right sidebar');
     setRightSidebarContent(null);
   }, []);
 
-  // Effect to close right sidebar on route change
-  useEffect(() => {
-    closeRightSidebar();
-  }, [location.pathname, closeRightSidebar]);
-
-  // Effect to close right sidebar on tab change
-  useEffect(() => {
-    console.log('Tab changed to:', currentTab);
-    closeRightSidebar();
-  }, [currentTab, closeRightSidebar]);
+  // Effect to close right sidebar on tab change has been kept
+  // but route change effect has been moved to MainContentArea
+  console.log('LayoutProvider rendering');
 
   return (
     <LayoutContext.Provider 
