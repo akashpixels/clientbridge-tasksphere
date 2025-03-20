@@ -1,6 +1,7 @@
 
 import { createContext, useContext, ReactNode, useState } from 'react';
 import { Tables } from "@/integrations/supabase/types";
+import layoutRegistry from '@/config/layout-registry';
 
 // Define types for tab configuration
 export interface TabConfig {
@@ -74,11 +75,6 @@ interface ProjectLayoutProviderProps {
 export function ProjectLayoutProvider({ children }: ProjectLayoutProviderProps) {
   const [activeTab, setActiveTab] = useState<string>('tasks');
   
-  // Create a registry of available layouts and their configurations
-  const layoutRegistry: Record<string, LayoutConfig> = {
-    // Layout configurations will be registered here
-  };
-
   return (
     <ProjectLayoutContext.Provider 
       value={{ 
