@@ -13,6 +13,8 @@ const MainContentArea = ({ isLeftSidebarOpen }: MainContentAreaProps) => {
   const { rightSidebarContent } = useLayout();
   const isMobile = useIsMobile();
   
+  console.log('MainContentArea: Rendering', { isLeftSidebarOpen, hasRightSidebar: !!rightSidebarContent, isMobile });
+  
   return (
     <main 
       className={cn(

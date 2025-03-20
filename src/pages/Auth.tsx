@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,19 +12,35 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if already logged in
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        console.log('Auth: User already logged in, redirecting to home');
+        navigate('/');
+      }
+    };
+    
+    checkSession();
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Auth: Attempting login with email', email);
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
       if (error) {
+        console.error('Auth: Login error', error);
         if (error.message.includes('Invalid login credentials')) {
           toast({
             title: "Invalid credentials",
@@ -31,15 +48,22 @@ const Auth = () => {
             variant: "destructive",
           });
         } else {
-          throw error;
+          toast({
+            title: "Error",
+            description: error.message,
+            variant: "destructive",
+          });
         }
       } else {
-        navigate('/');
+        console.log('Auth: Login successful', data);
+        const from = location.state?.from?.pathname || "/";
+        navigate(from);
       }
     } catch (error: any) {
+      console.error('Auth: Unexpected error during login', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
