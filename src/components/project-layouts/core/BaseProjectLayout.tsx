@@ -1,8 +1,9 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tables } from "@/integrations/supabase/types";
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
 import { useLayout } from "@/context/layout";
+import { TabActionButton } from "../shared/TabActionButton";
 
 export interface BaseProjectData {
   project: Tables<"projects"> & {
@@ -64,13 +65,16 @@ const BaseProjectLayout = ({
         className="w-full"
         onValueChange={(value) => setCurrentTab(value)}
       >
-        <TabsList>
-          {tabs.map(tab => (
-            <TabsTrigger key={tab.id} value={tab.id}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="flex justify-between items-center mb-4">
+          <TabsList>
+            {tabs.map(tab => (
+              <TabsTrigger key={tab.id} value={tab.id}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <TabActionButton />
+        </div>
 
         {tabs.map(tab => (
           <TabsContent key={tab.id} value={tab.id}>

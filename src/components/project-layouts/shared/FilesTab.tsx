@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -136,13 +135,11 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Direct database check - this will help us diagnose if there's a permission issue
   useEffect(() => {
     const checkDirectAccess = async () => {
       console.log("Directly checking files for project:", projectId);
       
       try {
-        // Direct query to check if we can access the files table
         const { data, error } = await supabase
           .from('files')
           .select('*')
@@ -151,7 +148,6 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
         console.log("Direct access test - all files:", data?.length || 0, data);
         console.log("Direct access error:", error);
         
-        // Try directly with the projectId
         const { data: projectData, error: projectError } = await supabase
           .from('files')
           .select('*')
@@ -183,7 +179,6 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
         return [];
       }
       
-      // Get files for the project
       const { data, error } = await supabase
         .from('files')
         .select('*')
@@ -198,9 +193,8 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
       console.log(`Found ${data?.length || 0} files for project ${projectId}:`, data);
       return data || [];
     },
-    // Add refetch on window focus and stale time for better user experience
     refetchOnWindowFocus: true,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
   if (isLoading) {
@@ -262,15 +256,16 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     );
   }
 
-  // Group files by date for display
   const groupedFiles: Record<string, typeof projectFiles> = {};
-  projectFiles.forEach(file => {
-    const date = format(new Date(file.created_at), 'MMMM d, yyyy');
-    if (!groupedFiles[date]) {
-      groupedFiles[date] = [];
-    }
-    groupedFiles[date].push(file);
-  });
+  if (projectFiles) {
+    projectFiles.forEach(file => {
+      const date = format(new Date(file.created_at), 'MMMM d, yyyy');
+      if (!groupedFiles[date]) {
+        groupedFiles[date] = [];
+      }
+      groupedFiles[date].push(file);
+    });
+  }
 
   const handleDownload = (url: string) => {
     window.open(url, '_blank');

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +6,6 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useLayout } from "@/context/layout";
 import TasksTabContent from "../maintenance/TasksTabContent";
 import TaskCommentThread from "../maintenance/comments/TaskCommentThread";
-import { NewTaskButton } from "../maintenance/NewTaskButton";
 import ImageViewerDialog from "../maintenance/ImageViewerDialog";
 
 interface TasksTabProps {
@@ -113,9 +111,6 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
 
   return (
     <>
-      <div className="flex justify-end mb-4">
-        <NewTaskButton />
-      </div>
       <TasksTabContent
         isLoadingTasks={isLoadingTasks}
         tasks={sortedTasks}

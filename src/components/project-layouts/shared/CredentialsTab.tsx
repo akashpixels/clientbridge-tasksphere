@@ -1,12 +1,10 @@
-
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Globe, User, Copy, Shield } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
-import AddCredentialDialog from "./AddCredentialDialog";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface CredentialsTabProps {
   projectId: string;
@@ -114,8 +112,6 @@ const CredentialCard = ({ credential }: { credential: Tables<"project_credential
 };
 
 const CredentialsTab = ({ projectId }: CredentialsTabProps) => {
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-
   // Check if user is admin
   const { data: userProfile, isLoading: isLoadingProfile, error: profileError } = useQuery({
     queryKey: ['userProfile'],
@@ -174,14 +170,7 @@ const CredentialsTab = ({ projectId }: CredentialsTabProps) => {
         <div>Loading credentials...</div>
       ) : credentials && credentials.length > 0 ? (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium">Project Credentials</h3>
-            {isAdmin && (
-              <Button size="sm" onClick={() => setIsAddDialogOpen(true)}>
-                Add Credentials
-              </Button>
-            )}
-          </div>
+          <h3 className="text-lg font-medium">Project Credentials</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {credentials.map((cred) => (
               <CredentialCard key={cred.id} credential={cred} />
@@ -191,19 +180,8 @@ const CredentialsTab = ({ projectId }: CredentialsTabProps) => {
       ) : (
         <div className="text-center py-8">
           <p className="text-gray-500">No credentials found for this project.</p>
-          {isAdmin && (
-            <Button className="mt-4" onClick={() => setIsAddDialogOpen(true)}>
-              Add First Credentials
-            </Button>
-          )}
         </div>
       )}
-
-      <AddCredentialDialog
-        projectId={projectId}
-        open={isAddDialogOpen}
-        onClose={() => setIsAddDialogOpen(false)}
-      />
     </Card>
   );
 };
