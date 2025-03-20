@@ -1,172 +1,117 @@
 
-import { ReactNode } from "react";
-import { BaseProjectData } from "@/components/project-layouts/core/BaseProjectLayout";
-import CredentialsTab from "@/components/project-layouts/shared/CredentialsTab";
-import ProjectHeader from "@/components/project-layouts/shared/ProjectHeader";
+import { LayoutConfig } from "@/context/project-layout";
 import TeamTab from "@/components/project-layouts/shared/TeamTab";
+import CredentialsTab from "@/components/project-layouts/shared/CredentialsTab";
 import FilesTab from "@/components/project-layouts/shared/FilesTab";
 import OverviewTab from "@/components/project-layouts/tabs/OverviewTab";
+import ProjectHeader from "@/components/project-layouts/shared/ProjectHeader";
 import TasksTab from "@/components/project-layouts/tabs/TasksTab";
 
-export type LayoutType = "RETAINER" | "REGULAR" | "FUSION" | "MAINTENANCE";
-
-export interface TabDefinition {
-  id: string;
-  label: string;
-  content: ReactNode;
-  default?: boolean;
-}
-
-export interface LayoutConfig {
-  header: (props: BaseProjectData) => ReactNode;
-  getTabs: (props: BaseProjectData) => TabDefinition[];
-}
-
-// Layout registry containing all available layout configurations
-const layoutRegistry: Record<LayoutType, LayoutConfig> = {
+// Define the layout registry with all available layouts
+const layoutRegistry: Record<string, LayoutConfig> = {
   RETAINER: {
-    header: (props: BaseProjectData) => (
-      <ProjectHeader 
-        project={props.project}
-        hoursUsageProgress={props.hoursUsageProgress}
-        selectedMonth={props.selectedMonth}
-        onMonthChange={props.onMonthChange}
-      />
-    ),
-    getTabs: (props: BaseProjectData) => [
+    id: "RETAINER",
+    headerComponent: ProjectHeader,
+    tabs: [
       {
         id: "tasks",
         label: "Tasks",
-        content: <TasksTab projectId={props.project.id} />,
+        component: TasksTab,
         default: true
       },
       {
         id: "overview",
         label: "Overview",
-        content: <OverviewTab project={props.project} />
+        component: OverviewTab
       },
       {
         id: "team",
         label: "Team",
-        content: <TeamTab projectId={props.project.id} />
+        component: TeamTab
       },
       {
         id: "credentials",
         label: "Credentials",
-        content: <CredentialsTab projectId={props.project.id} />
+        component: CredentialsTab
       },
       {
         id: "files",
         label: "Files",
-        content: <FilesTab projectId={props.project.id} />
+        component: FilesTab
       }
     ]
   },
   REGULAR: {
-    header: (props: BaseProjectData) => (
-      <ProjectHeader 
-        project={props.project}
-      />
-    ),
-    getTabs: (props: BaseProjectData) => [
+    id: "REGULAR",
+    headerComponent: ProjectHeader,
+    tabs: [
       {
         id: "overview",
         label: "Overview",
-        content: <OverviewTab project={props.project} />,
+        component: OverviewTab,
         default: true
       },
       {
-        id: "tasks",
-        label: "Tasks",
-        content: <TasksTab projectId={props.project.id} />
+        id: "brand-assets",
+        label: "Brand Assets",
+        component: () => <div>Brand assets content coming soon...</div>
+      },
+      {
+        id: "guidelines",
+        label: "Guidelines",
+        component: () => <div>Brand guidelines content coming soon...</div>
       },
       {
         id: "team",
         label: "Team",
-        content: <TeamTab projectId={props.project.id} />
+        component: TeamTab
       },
       {
         id: "credentials",
         label: "Credentials",
-        content: <CredentialsTab projectId={props.project.id} />
+        component: CredentialsTab
       },
       {
         id: "files",
         label: "Files",
-        content: <FilesTab projectId={props.project.id} />
+        component: FilesTab
       }
     ]
   },
   FUSION: {
-    header: (props: BaseProjectData) => (
-      <ProjectHeader 
-        project={props.project}
-      />
-    ),
-    getTabs: (props: BaseProjectData) => [
-      {
-        id: "tasks",
-        label: "Tasks",
-        content: <TasksTab projectId={props.project.id} />,
-        default: true
-      },
+    id: "FUSION",
+    headerComponent: ProjectHeader,
+    tabs: [
       {
         id: "overview",
         label: "Overview",
-        content: <OverviewTab project={props.project} />
+        component: OverviewTab,
+        default: true
+      },
+      {
+        id: "tasks",
+        label: "Tasks",
+        component: TasksTab
+      },
+      {
+        id: "api-docs",
+        label: "API Docs",
+        component: () => <div>API documentation coming soon...</div>
+      },
+      {
+        id: "deployments",
+        label: "Deployments",
+        component: () => <div>Deployment history coming soon...</div>
       },
       {
         id: "team",
         label: "Team",
-        content: <TeamTab projectId={props.project.id} />
+        component: TeamTab
       },
       {
         id: "credentials",
         label: "Credentials",
-        content: <CredentialsTab projectId={props.project.id} />
-      },
-      {
-        id: "files",
-        label: "Files",
-        content: <FilesTab projectId={props.project.id} />
-      }
-    ]
-  },
-  MAINTENANCE: {
-    header: (props: BaseProjectData) => (
-      <ProjectHeader 
-        project={props.project}
-        hoursUsageProgress={props.hoursUsageProgress}
-        selectedMonth={props.selectedMonth}
-        onMonthChange={props.onMonthChange}
-      />
-    ),
-    getTabs: (props: BaseProjectData) => [
-      {
-        id: "tasks",
-        label: "Tasks",
-        content: <TasksTab projectId={props.project.id} />,
-        default: true
-      },
-      {
-        id: "overview",
-        label: "Overview",
-        content: <OverviewTab project={props.project} />
-      },
-      {
-        id: "team",
-        label: "Team",
-        content: <TeamTab projectId={props.project.id} />
-      },
-      {
-        id: "credentials",
-        label: "Credentials",
-        content: <CredentialsTab projectId={props.project.id} />
-      },
-      {
-        id: "files",
-        label: "Files",
-        content: <FilesTab projectId={props.project.id} />
+        component: CredentialsTab
       }
     ]
   }
