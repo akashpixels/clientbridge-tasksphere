@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom';
 
 const Layout = () => {
   const { setRightSidebarContent } = useLayout();
-  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false); // Changed default to false
   const location = useLocation();
   
   useEffect(() => {
