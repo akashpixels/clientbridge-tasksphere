@@ -1,19 +1,26 @@
 
 import { cn } from '@/lib/utils';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useLayout } from '@/context/layout';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useEffect } from 'react';
 
 interface MainContentAreaProps {
   isLeftSidebarOpen: boolean;
 }
 
 const MainContentArea = ({ isLeftSidebarOpen }: MainContentAreaProps) => {
-  const { rightSidebarContent } = useLayout();
+  const { rightSidebarContent, closeRightSidebar } = useLayout();
   const isMobile = useIsMobile();
+  const location = useLocation();
   
-  console.log('MainContentArea: Rendering', { isLeftSidebarOpen, hasRightSidebar: !!rightSidebarContent, isMobile });
+  // Add effect to close right sidebar on route change
+  useEffect(() => {
+    closeRightSidebar();
+  }, [location.pathname, closeRightSidebar]);
+  
+  console.log('MainContentArea: Rendering', { isLeftSidebarOpen, hasRightSidebar: !!rightSidebarContent, isMobile, path: location.pathname });
   
   return (
     <main 
