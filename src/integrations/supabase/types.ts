@@ -618,7 +618,7 @@ export type Database = {
           status_options: Json
           task_fields: Json
           task_type_options: Json | null
-          types: number | null
+          types: Json | null
           updated_at: string
         }
         Insert: {
@@ -640,7 +640,7 @@ export type Database = {
           status_options?: Json
           task_fields?: Json
           task_type_options?: Json | null
-          types?: number | null
+          types?: Json | null
           updated_at?: string
         }
         Update: {
@@ -662,7 +662,7 @@ export type Database = {
           status_options?: Json
           task_fields?: Json
           task_type_options?: Json | null
-          types?: number | null
+          types?: Json | null
           updated_at?: string
         }
         Relationships: [
@@ -685,13 +685,6 @@ export type Database = {
             columns: ["status_id"]
             isOneToOne: false
             referencedRelation: "task_statuses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "projects_types_fkey"
-            columns: ["types"]
-            isOneToOne: false
-            referencedRelation: "project_types"
             referencedColumns: ["id"]
           },
         ]
@@ -749,6 +742,58 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "project_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subtasks: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          name: string
+          parent_task_id: string | null
+          status_id: number | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          parent_task_id?: string | null
+          status_id?: number | null
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          parent_task_id?: string | null
+          status_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subtasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subtasks_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "task_statuses"
             referencedColumns: ["id"]
           },
         ]
