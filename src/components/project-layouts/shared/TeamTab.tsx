@@ -74,7 +74,7 @@ const TeamTab = ({
   if (isLoading) {
     return <Card className="p-6">Loading team members...</Card>;
   }
-  return <Card className="p-6">
+  return <Card className="p-0">
       
    
         <Table>
