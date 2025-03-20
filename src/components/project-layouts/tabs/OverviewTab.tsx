@@ -39,8 +39,7 @@ const OverviewTab = ({ projectId }: OverviewTabProps) => {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-medium">Project Details</h3>
-        <p className="text-gray-500 mt-1">{project.details || 'No details provided'}</p>
+        <p className="text-gray-500">{project.details || 'No details provided'}</p>
       </div>
       
       <div className="grid grid-cols-2 gap-4">
