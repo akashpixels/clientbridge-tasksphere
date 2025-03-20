@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import BaseProjectLayout, { BaseProjectData, TabDefinition } from "./core/BaseProjectLayout";
 import TeamTab from "./shared/TeamTab";
 import CredentialsTab from "./shared/CredentialsTab";
-import FilesTab from "./shared/FilesTab";
 
 const FusionLayout = (props: BaseProjectData) => {
   const { project } = props;
@@ -18,32 +17,34 @@ const FusionLayout = (props: BaseProjectData) => {
       label: "Overview",
       content: (
         <Card className="p-6">
-          <div>
-            <h3 className="text-lg font-medium">Development Overview</h3>
-            <p className="text-gray-500 mt-1">{project.details || 'No details provided'}</p>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="space-y-4">
             <div>
-              <h4 className="font-medium">Status</h4>
-              <span 
-                className="inline-block px-2 py-1 rounded-full text-xs mt-1"
-                style={{
-                  backgroundColor: `${project.status?.color_hex}15`,
-                  color: project.status?.color_hex
-                }}
-              >
-                {project.status?.name || 'Unknown'}
-              </span>
+              <h3 className="text-lg font-medium">Development Overview</h3>
+              <p className="text-gray-500 mt-1">{project.details || 'No details provided'}</p>
             </div>
             
-            <div>
-              <h4 className="font-medium">Hours</h4>
-              <p className="text-gray-500 mt-1">
-                {currentSubscription ? 
-                  `${currentSubscription.actual_duration || 0} / ${currentSubscription.allocated_duration} hours` 
-                  : 'No subscription data'}
-              </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-medium">Status</h4>
+                <span 
+                  className="inline-block px-2 py-1 rounded-full text-xs mt-1"
+                  style={{
+                    backgroundColor: `${project.status?.color_hex}15`,
+                    color: project.status?.color_hex
+                  }}
+                >
+                  {project.status?.name || 'Unknown'}
+                </span>
+              </div>
+              
+              <div>
+                <h4 className="font-medium">Hours</h4>
+                <p className="text-gray-500 mt-1">
+                  {currentSubscription ? 
+                    `${currentSubscription.actual_duration || 0} / ${currentSubscription.allocated_duration} hours` 
+                    : 'No subscription data'}
+                </p>
+              </div>
             </div>
           </div>
         </Card>
@@ -53,17 +54,29 @@ const FusionLayout = (props: BaseProjectData) => {
     {
       id: "tasks",
       label: "Tasks",
-      content: <Card className="p-6">Tasks content coming soon...</Card>
+      content: (
+        <Card className="p-6">
+          <p>Tasks content coming soon...</p>
+        </Card>
+      )
     },
     {
       id: "api-docs",
       label: "API Docs",
-      content: <Card className="p-6">API documentation coming soon...</Card>
+      content: (
+        <Card className="p-6">
+          <p>API documentation coming soon...</p>
+        </Card>
+      )
     },
     {
       id: "deployments",
       label: "Deployments",
-      content: <Card className="p-6">Deployment history coming soon...</Card>
+      content: (
+        <Card className="p-6">
+          <p>Deployment history coming soon...</p>
+        </Card>
+      )
     },
     {
       id: "team",
@@ -74,11 +87,6 @@ const FusionLayout = (props: BaseProjectData) => {
       id: "credentials",
       label: "Credentials",
       content: <CredentialsTab projectId={project.id} />
-    },
-    {
-      id: "files",
-      label: "Files",
-      content: <FilesTab projectId={project.id} />
     }
   ];
 

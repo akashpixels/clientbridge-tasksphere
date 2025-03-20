@@ -161,14 +161,16 @@ const TasksTabContent = ({
           <p>Loading tasks...</p>
         </div>
       ) : processedTasks && processedTasks.length > 0 ? (
-        <TasksTable 
-          tasks={processedTasks}
-          sortConfig={sortConfig}
-          onSort={onSort}
-          onImageClick={onImageClick}
-          onCommentClick={handleTaskClick}
-          selectedTaskId={selectedTaskId}
-        />
+        <div className="overflow-x-auto">
+          <TasksTable 
+            tasks={processedTasks}
+            sortConfig={sortConfig}
+            onSort={onSort}
+            onImageClick={onImageClick}
+            onCommentClick={handleTaskClick}
+            selectedTaskId={selectedTaskId}
+          />
+        </div>
       ) : (
         <div className="p-6 text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
