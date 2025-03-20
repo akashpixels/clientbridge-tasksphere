@@ -1,11 +1,10 @@
-
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useLayout } from "@/context/layout";
-import BaseProjectLayout, { BaseProjectData, TabDefinition } from "./BaseProjectLayout";
+import BaseProjectLayout, { BaseProjectData, TabDefinition } from "./core/BaseProjectLayout";
 import ProjectHeader from "./shared/ProjectHeader";
 import ProjectStats from "./maintenance/ProjectStats";
 import TasksTabContent from "./maintenance/TasksTabContent";
@@ -13,7 +12,6 @@ import TaskCommentThread from "./maintenance/comments/TaskCommentThread";
 import TeamTab from "./shared/TeamTab";
 import CredentialsTab from "./shared/CredentialsTab";
 import FilesTab from "./shared/FilesTab";
-import { NewTaskButton } from "./maintenance/NewTaskButton";
 import ImageViewerDialog from "./maintenance/ImageViewerDialog";
 
 const RetainerLayout = (props: BaseProjectData) => {
@@ -24,7 +22,6 @@ const RetainerLayout = (props: BaseProjectData) => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const { setRightSidebarContent, setCurrentTab } = useLayout();
 
-  // Skip if no selectedMonth or no project.id
   const shouldFetchTasks = !!selectedMonth && !!project?.id;
 
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
@@ -87,7 +84,6 @@ const RetainerLayout = (props: BaseProjectData) => {
     }
   };
 
-  // Process tasks data for display
   const processedTasks = tasks ? tasks.map(task => ({
     ...task,
     actual_duration: typeof task.actual_duration === 'object' && task.actual_duration !== null
@@ -117,7 +113,6 @@ const RetainerLayout = (props: BaseProjectData) => {
     return sortConfig.direction === 'asc' ? comparison : -comparison;
   });
 
-  // Define the header content with project stats
   const headerContent = (
     <ProjectHeader
       project={project}
@@ -127,16 +122,12 @@ const RetainerLayout = (props: BaseProjectData) => {
     />
   );
 
-  // Define the tabs for this layout
   const tabs: TabDefinition[] = [
     {
       id: "tasks",
       label: "Tasks",
       content: (
         <>
-          <div className="flex justify-end mb-4">
-            <NewTaskButton />
-          </div>
           <TasksTabContent
             isLoadingTasks={isLoadingTasks}
             tasks={sortedTasks}

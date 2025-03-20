@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
@@ -14,7 +13,6 @@ import TaskCommentThread from "./comments/TaskCommentThread";
 import CredentialsTab from "../shared/CredentialsTab";
 import FilesTab from "../shared/FilesTab";
 import TeamTab from "../shared/TeamTab";
-import { NewTaskButton } from "./NewTaskButton";
 
 interface MaintenanceLayoutProps {
   project: Tables<"projects"> & {
@@ -141,7 +139,6 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
     }
   };
 
-  // Process interval values consistently
   const processedTasks = tasks ? tasks.map(task => ({
     ...task,
     actual_duration: typeof task.actual_duration === 'object' && task.actual_duration !== null
@@ -190,7 +187,6 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
             <TabsTrigger value="credentials">Credentials</TabsTrigger>
             <TabsTrigger value="files">Files</TabsTrigger>
           </TabsList>
-          <NewTaskButton />
         </div>
 
         <TabsContent value="tasks">
