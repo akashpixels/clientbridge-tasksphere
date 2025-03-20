@@ -9,8 +9,8 @@ interface ProjectStatsProps {
     project_subscriptions?: {
       allocated_duration: unknown; 
       actual_duration: unknown;    // This is still named actual_duration in the frontend interface
-      subscription_status: string;
-      next_renewal_date: string;
+      subscription_status?: string;
+      next_renewal_date?: string;
     }[];
   };
   selectedMonth: string;
