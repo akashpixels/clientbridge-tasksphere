@@ -1,6 +1,6 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
 import { Eye, EyeOff, Globe, User, Copy, Shield } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 import { useState } from "react";
@@ -18,7 +18,7 @@ const CredentialCard = ({ credential }: { credential: Tables<"project_credential
   };
 
   return (
-    <Card className="relative flex flex-col h-[320px] hover:shadow-md transition-shadow duration-200 overflow-hidden group">
+    <div className="relative flex flex-col h-[320px] border rounded-lg hover:shadow-md transition-shadow duration-200 overflow-hidden group bg-card">
       <div className="absolute top-2 right-2">
         <span className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full flex items-center gap-1">
           <Shield className="h-3 w-3" />
@@ -107,7 +107,7 @@ const CredentialCard = ({ credential }: { credential: Tables<"project_credential
           )}
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 
@@ -164,25 +164,24 @@ const CredentialsTab = ({ projectId }: CredentialsTabProps) => {
 
   const isLoading = isLoadingProfile || isLoadingCredentials;
 
+  if (isLoading) {
+    return <div>Loading credentials...</div>;
+  }
+
+  if (!credentials || credentials.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No credentials found for this project.</p>
+      </div>
+    );
+  }
+
   return (
-    <Card className="p-6">
-      {isLoading ? (
-        <div>Loading credentials...</div>
-      ) : credentials && credentials.length > 0 ? (
-        <div className="space-y-6">
-          <h3 className="text-lg font-medium">Project Credentials</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {credentials.map((cred) => (
-              <CredentialCard key={cred.id} credential={cred} />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="text-center py-8">
-          <p className="text-gray-500">No credentials found for this project.</p>
-        </div>
-      )}
-    </Card>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {credentials.map((cred) => (
+        <CredentialCard key={cred.id} credential={cred} />
+      ))}
+    </div>
   );
 };
 

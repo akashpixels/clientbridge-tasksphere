@@ -1,7 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -89,51 +88,48 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
   });
 
   if (isLoading) {
-    return <Card className="p-6">Loading team members...</Card>;
+    return <div>Loading team members...</div>;
   }
 
   return (
-    <Card className="p-6">
-      <h3 className="text-lg font-medium mb-4">Project Team</h3>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Username</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Job Role</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {teamMembers && teamMembers.length > 0 ? (
-              teamMembers.map(member => (
-                <TableRow key={member.id}>
-                  <TableCell>
-                    {member.first_name} {member.last_name}
-                  </TableCell>
-                  <TableCell>{member.username}</TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700">
-                      {member.user_role?.name?.replace('_', ' ')}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {member.job_role?.name || 'Not assigned'}
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  No team members assigned to this project
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Username</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Job Role</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {teamMembers && teamMembers.length > 0 ? (
+            teamMembers.map(member => (
+              <TableRow key={member.id}>
+                <TableCell>
+                  {member.first_name} {member.last_name}
+                </TableCell>
+                <TableCell>{member.username}</TableCell>
+                <TableCell>
+                  <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700">
+                    {member.user_role?.name?.replace('_', ' ')}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  {member.job_role?.name || 'Not assigned'}
                 </TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </Card>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center text-muted-foreground">
+                No team members assigned to this project
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 
