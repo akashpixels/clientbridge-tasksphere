@@ -74,7 +74,7 @@ const TeamTab = ({
   if (isLoading) {
     return <Card className="p-6">Loading team members...</Card>;
   }
-  return <Card className="p-6">
+  return 
       
       <div className="rounded-md border">
         <Table>
@@ -107,7 +107,6 @@ const TeamTab = ({
               </TableRow>}
           </TableBody>
         </Table>
-      </div>
-    </Card>;
+      </div>;
 };
 export default TeamTab;
