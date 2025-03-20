@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useProjectData } from "@/hooks/useProjectData";
@@ -12,6 +11,7 @@ import CredentialsTab from "@/components/project-layouts/shared/CredentialsTab";
 import FilesTab from "@/components/project-layouts/shared/FilesTab";
 import ProjectStats from "@/components/project-layouts/maintenance/ProjectStats";
 import layoutRegistry from "@/config/layout-registry";
+import { Card } from "@/components/ui/card";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
