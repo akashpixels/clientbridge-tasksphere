@@ -2,9 +2,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tables } from "@/integrations/supabase/types";
 import { ReactNode } from "react";
-import TeamTab from "./shared/TeamTab";
-import CredentialsTab from "./shared/CredentialsTab";
-import FilesTab from "./shared/FilesTab";
 import { useLayout } from "@/context/layout";
 
 export interface BaseProjectData {

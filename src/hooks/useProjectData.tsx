@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { format, subMonths } from "date-fns";
+import { format } from "date-fns";
 import { intervalToHours } from "@/lib/date-utils";
 import { MonthlyUsage } from "@/types/usage";
 
