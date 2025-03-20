@@ -165,12 +165,12 @@ const CredentialsTab = ({ projectId }: CredentialsTabProps) => {
   const isLoading = isLoadingProfile || isLoadingCredentials;
 
   return (
-    <Card className="p-6">
+    <Card className="p-0">
       {isLoading ? (
         <div>Loading credentials...</div>
       ) : credentials && credentials.length > 0 ? (
         <div className="space-y-6">
-          <h3 className="text-lg font-medium">Project Credentials</h3>
+         
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {credentials.map((cred) => (
               <CredentialCard key={cred.id} credential={cred} />
