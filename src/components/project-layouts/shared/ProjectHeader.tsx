@@ -1,27 +1,32 @@
 
 import { Tables } from "@/integrations/supabase/types";
-import { format, subMonths } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format, subMonths } from "date-fns";
+import { ReactNode } from "react";
 
 interface ProjectHeaderProps {
   project: Tables<"projects"> & {
-    client_admin: {
+    client_admin?: {
       id: string;
       business_name: string;
-      user_profiles: {
+      user_profiles?: {
         first_name: string;
         last_name: string;
       } | null;
     } | null;
+    status?: {
+      name: string;
+      color_hex: string | null;
+    } | null;
   };
   selectedMonth?: string;
   onMonthChange?: (month: string) => void;
-  statsComponent?: React.ReactNode;
+  statsComponent?: ReactNode;
 }
 
 const ProjectHeader = ({
   project,
-  selectedMonth,
+  selectedMonth = format(new Date(), 'yyyy-MM'),
   onMonthChange,
   statsComponent
 }: ProjectHeaderProps) => {
@@ -39,13 +44,7 @@ const ProjectHeader = ({
   return (
     <div className="flex items-center justify-between w-full gap-4">
       <div className="flex items-center gap-4">
-        {project.logo_url && (
-          <img 
-            src={project.logo_url} 
-            alt={`${project.name} logo`} 
-            className="w-16 h-16 object-contain rounded-lg" 
-          />
-        )}
+        {project.logo_url && <img src={project.logo_url} alt={`${project.name} logo`} className="w-16 h-16 object-contain rounded-lg" />}
         <div>
           <h1 className="font-semibold text-lg">{project.name}</h1>
           <p className="text-gray-500">
@@ -55,10 +54,10 @@ const ProjectHeader = ({
           </p>
         </div>
       </div>
-      
-      {(selectedMonth && onMonthChange) && (
-        <div className="flex items-center gap-4">
-          {statsComponent}
+      <div className="flex items-center gap-4">
+        {statsComponent}
+        
+        {onMonthChange && (
           <div className="bg-card">
             <Select value={selectedMonth} onValueChange={onMonthChange}>
               <SelectTrigger className="w-[108px] h-[108px] flex flex-col items-center justify-between p-4 rounded-[4px] border border-gray-200 focus:ring-0 focus:border-gray-200 bg-transparent">
@@ -84,8 +83,8 @@ const ProjectHeader = ({
               </SelectContent>
             </Select>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
