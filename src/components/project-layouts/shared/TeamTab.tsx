@@ -94,7 +94,6 @@ const TeamTab = ({ projectId }: TeamTabProps) => {
 
   return (
     <Card className="p-6">
-      <h3 className="text-lg font-medium mb-4">Project Team</h3>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
