@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -304,40 +305,46 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     );
   }
 
-  const filesByType: Record<string, any[]> = {
-    "Project Files": [],
-    "Deliverables": [],
-    "Inputs": [],
-    "Credentials": [],
-    "Others": []
-  };
+  // Use useMemo to stabilize the filesByType object so it doesn't change on every render
+  const filesByType = useMemo(() => {
+    const result: Record<string, any[]> = {
+      "Project Files": [],
+      "Deliverables": [],
+      "Inputs": [],
+      "Credentials": [],
+      "Others": []
+    };
 
-  if (projectFiles) {
-    projectFiles.forEach(file => {
-      switch(file.file_type_id) {
-        case 1:
-          filesByType["Project Files"].push(file);
-          break;
-        case 2:
-          filesByType["Deliverables"].push(file);
-          break;
-        case 3:
-          filesByType["Inputs"].push(file);
-          break;
-        case 4:
-          filesByType["Credentials"].push(file);
-          break;
-        default:
-          filesByType["Others"].push(file);
-          break;
-      }
-    });
-  }
+    if (projectFiles) {
+      projectFiles.forEach(file => {
+        switch(file.file_type_id) {
+          case 1:
+            result["Project Files"].push(file);
+            break;
+          case 2:
+            result["Deliverables"].push(file);
+            break;
+          case 3:
+            result["Inputs"].push(file);
+            break;
+          case 4:
+            result["Credentials"].push(file);
+            break;
+          default:
+            result["Others"].push(file);
+            break;
+        }
+      });
+    }
+    
+    return result;
+  }, [projectFiles]);
 
   const handleDownload = (url: string) => {
     window.open(url, '_blank');
   };
 
+  // Move this useEffect after filesByType is defined
   useEffect(() => {
     if (!activeFolder && projectFiles && projectFiles.length > 0) {
       const firstNonEmptyFolder = Object.entries(filesByType)
