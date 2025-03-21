@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -305,7 +304,6 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     );
   }
 
-  // Use useMemo to stabilize the filesByType object so it doesn't change on every render
   const filesByType = useMemo(() => {
     const result: Record<string, any[]> = {
       "Project Files": [],
@@ -315,27 +313,25 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
       "Others": []
     };
 
-    if (projectFiles) {
-      projectFiles.forEach(file => {
-        switch(file.file_type_id) {
-          case 1:
-            result["Project Files"].push(file);
-            break;
-          case 2:
-            result["Deliverables"].push(file);
-            break;
-          case 3:
-            result["Inputs"].push(file);
-            break;
-          case 4:
-            result["Credentials"].push(file);
-            break;
-          default:
-            result["Others"].push(file);
-            break;
-        }
-      });
-    }
+    projectFiles.forEach(file => {
+      switch(file.file_type_id) {
+        case 1:
+          result["Project Files"].push(file);
+          break;
+        case 2:
+          result["Deliverables"].push(file);
+          break;
+        case 3:
+          result["Inputs"].push(file);
+          break;
+        case 4:
+          result["Credentials"].push(file);
+          break;
+        default:
+          result["Others"].push(file);
+          break;
+      }
+    });
     
     return result;
   }, [projectFiles]);
@@ -344,7 +340,6 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     window.open(url, '_blank');
   };
 
-  // Move this useEffect after filesByType is defined
   useEffect(() => {
     if (!activeFolder && projectFiles && projectFiles.length > 0) {
       const firstNonEmptyFolder = Object.entries(filesByType)
