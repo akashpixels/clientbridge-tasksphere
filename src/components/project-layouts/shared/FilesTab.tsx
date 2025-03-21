@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { format } from "date-fns";
 import PreviewDialog from "../maintenance/comments/PreviewDialog";
 import { 
   File, 
@@ -16,7 +15,8 @@ import {
   FileChartLine,
   Loader2,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Folder
 } from "lucide-react";
 
 interface FileCardProps {
@@ -92,7 +92,6 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
     const target = e.currentTarget;
     target.style.display = 'none';
     
-    // Add a fallback icon when image fails to load
     const container = target.parentElement;
     if (container) {
       const icon = document.createElement('div');
@@ -123,6 +122,43 @@ const FileCard = ({ file, onFileClick }: FileCardProps) => {
           {file.file_name}
         </p>
       </div>
+    </div>
+  );
+};
+
+interface FolderSectionProps {
+  title: string;
+  files: any[];
+  onFileClick: (url: string) => void;
+}
+
+const FolderSection = ({ title, files, onFileClick }: FolderSectionProps) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  if (files.length === 0) return null;
+
+  return (
+    <div className="mb-6">
+      <div 
+        className="flex items-center gap-2 mb-3 cursor-pointer" 
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <Folder className="h-5 w-5 text-amber-500" />
+        <h3 className="text-lg font-medium">{title}</h3>
+        <span className="text-sm text-gray-500">({files.length})</span>
+      </div>
+      
+      {isExpanded && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+          {files.map((file) => (
+            <FileCard 
+              key={file.id} 
+              file={file} 
+              onFileClick={onFileClick} 
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -256,14 +292,33 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     );
   }
 
-  const groupedFiles: Record<string, typeof projectFiles> = {};
+  const filesByType: Record<string, any[]> = {
+    "Project Files": [],
+    "Deliverables": [],
+    "Inputs": [],
+    "Credentials": [],
+    "Others": []
+  };
+
   if (projectFiles) {
     projectFiles.forEach(file => {
-      const date = format(new Date(file.created_at), 'MMMM d, yyyy');
-      if (!groupedFiles[date]) {
-        groupedFiles[date] = [];
+      switch(file.file_type_id) {
+        case 1:
+          filesByType["Project Files"].push(file);
+          break;
+        case 2:
+          filesByType["Deliverables"].push(file);
+          break;
+        case 3:
+          filesByType["Inputs"].push(file);
+          break;
+        case 4:
+          filesByType["Credentials"].push(file);
+          break;
+        default:
+          filesByType["Others"].push(file);
+          break;
       }
-      groupedFiles[date].push(file);
     });
   }
 
@@ -273,8 +328,7 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
 
   return (
     <Card className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium">Project Files</h3>
+      <div className="flex justify-end mb-4">
         <button 
           className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center text-sm"
           onClick={handleRefresh}
@@ -285,20 +339,14 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
         </button>
       </div>
       
-      <div className="space-y-8">
-        {Object.entries(groupedFiles).map(([date, dateFiles]) => (
-          <div key={date}>
-            <h3 className="text-lg font-medium mb-4">{date}</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-              {dateFiles.map((file) => (
-                <FileCard 
-                  key={file.id} 
-                  file={file} 
-                  onFileClick={setSelectedFile} 
-                />
-              ))}
-            </div>
-          </div>
+      <div className="space-y-4">
+        {Object.entries(filesByType).map(([folderName, files]) => (
+          <FolderSection 
+            key={folderName} 
+            title={folderName} 
+            files={files} 
+            onFileClick={setSelectedFile} 
+          />
         ))}
       </div>
 

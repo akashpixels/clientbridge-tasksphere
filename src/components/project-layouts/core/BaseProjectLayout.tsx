@@ -42,14 +42,12 @@ export interface TabDefinition {
 interface BaseProjectLayoutProps extends BaseProjectData {
   tabs: TabDefinition[];
   headerContent?: ReactNode;
-  rightSidebar?: ReactNode;
 }
 
 const BaseProjectLayout = ({ 
   project, 
   tabs,
-  headerContent,
-  rightSidebar
+  headerContent
 }: BaseProjectLayoutProps) => {
   const { setCurrentTab } = useLayout();
   const defaultTab = tabs.find(tab => tab.default)?.id || tabs[0]?.id;
