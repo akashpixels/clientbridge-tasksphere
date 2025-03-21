@@ -16,7 +16,9 @@ import {
   Loader2,
   AlertCircle,
   RefreshCw,
-  Folder
+  Folder,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 
 interface FileCardProps {
@@ -130,26 +132,31 @@ interface FolderSectionProps {
   title: string;
   files: any[];
   onFileClick: (url: string) => void;
+  isActive: boolean;
+  onToggle: () => void;
 }
 
-const FolderSection = ({ title, files, onFileClick }: FolderSectionProps) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-
+const FolderSection = ({ title, files, onFileClick, isActive, onToggle }: FolderSectionProps) => {
   if (files.length === 0) return null;
 
   return (
     <div className="mb-6">
       <div 
-        className="flex items-center gap-2 mb-3 cursor-pointer" 
-        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex items-center gap-2 mb-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors" 
+        onClick={onToggle}
       >
         <Folder className="h-5 w-5 text-amber-500" />
-        <h3 className="text-lg font-medium">{title}</h3>
-        <span className="text-sm text-gray-500">({files.length})</span>
+        <h3 className="text-lg font-medium flex-1">{title}</h3>
+        <span className="text-sm text-gray-500 mr-2">({files.length})</span>
+        {isActive ? (
+          <ChevronDown className="h-4 w-4 text-gray-500" />
+        ) : (
+          <ChevronRight className="h-4 w-4 text-gray-500" />
+        )}
       </div>
       
-      {isExpanded && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+      {isActive && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 animate-accordion-down">
           {files.map((file) => (
             <FileCard 
               key={file.id} 
@@ -170,6 +177,7 @@ interface FilesTabProps {
 const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeFolder, setActiveFolder] = useState<string | null>(null);
 
   useEffect(() => {
     const checkDirectAccess = async () => {
@@ -203,6 +211,10 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
   const handleRefresh = () => {
     setIsRefreshing(true);
     refetch().finally(() => setIsRefreshing(false));
+  };
+
+  const toggleFolder = (folderName: string) => {
+    setActiveFolder(current => current === folderName ? null : folderName);
   };
 
   const { data: projectFiles, isLoading, error, refetch } = useQuery({
@@ -326,6 +338,17 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     window.open(url, '_blank');
   };
 
+  useEffect(() => {
+    if (!activeFolder && projectFiles && projectFiles.length > 0) {
+      const firstNonEmptyFolder = Object.entries(filesByType)
+        .find(([_, files]) => files.length > 0)?.[0];
+      
+      if (firstNonEmptyFolder) {
+        setActiveFolder(firstNonEmptyFolder);
+      }
+    }
+  }, [projectFiles, activeFolder, filesByType]);
+
   return (
     <Card className="p-6">
       <div className="flex justify-end mb-4">
@@ -345,7 +368,9 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
             key={folderName} 
             title={folderName} 
             files={files} 
-            onFileClick={setSelectedFile} 
+            onFileClick={setSelectedFile}
+            isActive={activeFolder === folderName}
+            onToggle={() => toggleFolder(folderName)}
           />
         ))}
       </div>
