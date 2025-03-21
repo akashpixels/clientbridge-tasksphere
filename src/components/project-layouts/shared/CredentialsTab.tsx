@@ -165,7 +165,7 @@ const CredentialsTab = ({ projectId }: CredentialsTabProps) => {
   const isLoading = isLoadingProfile || isLoadingCredentials;
 
   return (
-    <Card className="p-0">
+    <div className="p-0">
       {isLoading ? (
         <div>Loading credentials...</div>
       ) : credentials && credentials.length > 0 ? (
@@ -182,7 +182,7 @@ const CredentialsTab = ({ projectId }: CredentialsTabProps) => {
           <p className="text-gray-500">No credentials found for this project.</p>
         </div>
       )}
-    </Card>
+    </div>
   );
 };
 
