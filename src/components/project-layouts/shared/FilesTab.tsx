@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -175,10 +176,95 @@ interface FilesTabProps {
 }
 
 const FilesTab = ({ projectId }: FilesTabProps) => {
+  // Place ALL hooks at the top level, before any conditional logic
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
 
+  // Fetch query must be defined unconditionally
+  const { 
+    data: projectFiles, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useQuery({
+    queryKey: ['project-files', projectId],
+    queryFn: async () => {
+      console.log('Fetching files for project:', projectId);
+      
+      if (!projectId) {
+        console.error('No project ID provided to FilesTab');
+        return [];
+      }
+      
+      const { data, error } = await supabase
+        .from('files')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching files:', error);
+        throw error;
+      }
+      
+      console.log(`Found ${data?.length || 0} files for project ${projectId}:`, data);
+      return data || [];
+    },
+    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Define filesByType using useMemo - handle the case where projectFiles might be undefined
+  const filesByType = useMemo(() => {
+    const result: Record<string, any[]> = {
+      "Project Files": [],
+      "Deliverables": [],
+      "Inputs": [],
+      "Credentials": [],
+      "Others": []
+    };
+
+    if (projectFiles) {
+      projectFiles.forEach(file => {
+        switch(file.file_type_id) {
+          case 1:
+            result["Project Files"].push(file);
+            break;
+          case 2:
+            result["Deliverables"].push(file);
+            break;
+          case 3:
+            result["Inputs"].push(file);
+            break;
+          case 4:
+            result["Credentials"].push(file);
+            break;
+          default:
+            result["Others"].push(file);
+            break;
+        }
+      });
+    }
+    
+    return result;
+  }, [projectFiles]);
+
+  // Define all handlers before any conditional rendering
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    refetch().finally(() => setIsRefreshing(false));
+  };
+
+  const toggleFolder = (folderName: string) => {
+    setActiveFolder(current => current === folderName ? null : folderName);
+  };
+
+  const handleDownload = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  // useEffect must come after all other hook definitions
   useEffect(() => {
     const checkDirectAccess = async () => {
       console.log("Directly checking files for project:", projectId);
@@ -208,43 +294,19 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     checkDirectAccess();
   }, [projectId]);
 
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    refetch().finally(() => setIsRefreshing(false));
-  };
-
-  const toggleFolder = (folderName: string) => {
-    setActiveFolder(current => current === folderName ? null : folderName);
-  };
-
-  const { data: projectFiles, isLoading, error, refetch } = useQuery({
-    queryKey: ['project-files', projectId],
-    queryFn: async () => {
-      console.log('Fetching files for project:', projectId);
+  // This useEffect depends on filesByType, so it must come after that definition
+  useEffect(() => {
+    if (!activeFolder && projectFiles && projectFiles.length > 0) {
+      const firstNonEmptyFolder = Object.entries(filesByType)
+        .find(([_, files]) => files.length > 0)?.[0];
       
-      if (!projectId) {
-        console.error('No project ID provided to FilesTab');
-        return [];
+      if (firstNonEmptyFolder) {
+        setActiveFolder(firstNonEmptyFolder);
       }
-      
-      const { data, error } = await supabase
-        .from('files')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: false });
+    }
+  }, [projectFiles, activeFolder, filesByType]);
 
-      if (error) {
-        console.error('Error fetching files:', error);
-        throw error;
-      }
-      
-      console.log(`Found ${data?.length || 0} files for project ${projectId}:`, data);
-      return data || [];
-    },
-    refetchOnWindowFocus: true,
-    staleTime: 1000 * 60 * 5,
-  });
-
+  // Now handle conditional rendering
   if (isLoading) {
     return (
       <Card className="p-6">
@@ -304,53 +366,7 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     );
   }
 
-  const filesByType = useMemo(() => {
-    const result: Record<string, any[]> = {
-      "Project Files": [],
-      "Deliverables": [],
-      "Inputs": [],
-      "Credentials": [],
-      "Others": []
-    };
-
-    projectFiles.forEach(file => {
-      switch(file.file_type_id) {
-        case 1:
-          result["Project Files"].push(file);
-          break;
-        case 2:
-          result["Deliverables"].push(file);
-          break;
-        case 3:
-          result["Inputs"].push(file);
-          break;
-        case 4:
-          result["Credentials"].push(file);
-          break;
-        default:
-          result["Others"].push(file);
-          break;
-      }
-    });
-    
-    return result;
-  }, [projectFiles]);
-
-  const handleDownload = (url: string) => {
-    window.open(url, '_blank');
-  };
-
-  useEffect(() => {
-    if (!activeFolder && projectFiles && projectFiles.length > 0) {
-      const firstNonEmptyFolder = Object.entries(filesByType)
-        .find(([_, files]) => files.length > 0)?.[0];
-      
-      if (firstNonEmptyFolder) {
-        setActiveFolder(firstNonEmptyFolder);
-      }
-    }
-  }, [projectFiles, activeFolder, filesByType]);
-
+  // Main render
   return (
     <Card className="p-6">
       <div className="flex justify-end mb-4">
