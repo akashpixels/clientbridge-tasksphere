@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -8,29 +9,26 @@ import { Send } from "lucide-react";
 
 interface CommentSenderProps {
   taskId: string;
-  newComment: string;
-  setNewComment: (text: string) => void;
   selectedFiles: File[];
   setSelectedFiles: (files: File[]) => void;
   onCommentPosted: () => void;
-  isInputRequest?: boolean;
+  isRequestingInput?: boolean;
   isInputResponse?: boolean;
   parentCommentId?: string;
-  isRequestingInput: boolean;
+  placeholderText?: string;
 }
 
-const CommentSender = ({ 
-  taskId, 
-  newComment, 
-  setNewComment, 
-  selectedFiles, 
-  setSelectedFiles, 
+const CommentSender = ({
+  taskId,
+  selectedFiles,
+  setSelectedFiles,
   onCommentPosted,
-  isInputRequest,
-  isInputResponse,
+  isRequestingInput = false,
+  isInputResponse = false,
   parentCommentId,
-  isRequestingInput
+  placeholderText = "Add a comment..."
 }: CommentSenderProps) => {
+  const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { session } = useAuth();
@@ -57,69 +55,118 @@ const CommentSender = ({
         hasFiles: selectedFiles.length > 0
       });
       
+      // Track timing for performance monitoring
+      const startTime = performance.now();
       const uploadedFiles: string[] = [];
 
       // Upload each file to Supabase Storage
-      for (const file of selectedFiles) {
-        const fileExt = file.name.split('.').pop();
-        const filePath = `${taskId}/${crypto.randomUUID()}.${fileExt}`;
+      if (selectedFiles.length > 0) {
+        console.log(`CommentSender: Uploading ${selectedFiles.length} files`);
+        for (const file of selectedFiles) {
+          const fileName = `${Date.now()}_${file.name}`;
+          const filePath = `task_comments/${taskId}/${fileName}`;
+          
+          console.log(`CommentSender: Uploading file ${fileName}`);
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from("task-attachments")
+            .upload(filePath, file);
 
-        const { error: uploadError } = await supabase.storage
-          .from('comment_attachments')
-          .upload(filePath, file);
+          if (uploadError) {
+            console.error("CommentSender: File upload error:", uploadError);
+            throw uploadError;
+          }
 
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('comment_attachments')
-          .getPublicUrl(filePath);
-
-        uploadedFiles.push(publicUrl);
+          if (uploadData) {
+            const { data: urlData } = supabase.storage
+              .from("task-attachments")
+              .getPublicUrl(filePath);
+            
+            uploadedFiles.push(urlData.publicUrl);
+            console.log(`CommentSender: File uploaded successfully, URL: ${urlData.publicUrl}`);
+          }
+        }
       }
 
-      // Insert comment with attachments
-      const { error: commentError } = await supabase
-        .from('task_comments')
+      // Insert comment with files (if any)
+      console.log("CommentSender: Inserting comment into database", {
+        content: newComment,
+        fileCount: uploadedFiles.length,
+        isInputRequest: isRequestingInput,
+        isInputResponse
+      });
+      
+      const { data: commentData, error: commentError } = await supabase
+        .from("task_comments")
         .insert({
           task_id: taskId,
-          content: newComment,
-          images: uploadedFiles,
           user_id: session.user.id,
+          content: newComment.trim() || (uploadedFiles.length > 0 ? "Attached files" : ""),
+          images: uploadedFiles,
           is_input_request: isRequestingInput,
           is_input_response: isInputResponse,
           parent_id: parentCommentId
-        });
+        })
+        .select();
 
-      if (commentError) throw commentError;
+      if (commentError) {
+        console.error("CommentSender: Database error when posting comment:", commentError);
+        throw commentError;
+      }
 
-      console.log("CommentSender: Comment posted successfully");
+      const endTime = performance.now();
+      console.log(`CommentSender: Comment posted successfully in ${endTime - startTime}ms`, commentData);
+      
       setNewComment("");
       setSelectedFiles([]);
       onCommentPosted();
 
-      toast({ title: isRequestingInput ? "Input requested" : "Comment posted successfully" });
+      toast({ 
+        title: isRequestingInput 
+          ? "Input requested" 
+          : isInputResponse
+            ? "Response submitted"
+            : "Comment posted successfully" 
+      });
     } catch (error) {
       console.error("CommentSender: Error posting comment:", error);
-      toast({ title: "Error posting comment", variant: "destructive" });
+      toast({ 
+        title: "Error posting comment", 
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive" 
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Button 
-        onClick={handleSubmit} 
-        disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
-        size="icon"
-        className="p-2 w-12 h-9 flex items-center justify-center"
-      >
-        {isSubmitting ? (
-          <span className="animate-spin">⏳</span>
-        ) : (
+    <div className="mt-4 space-y-2">
+      <Textarea
+        placeholder={
+          isInputResponse 
+            ? "Provide your input..." 
+            : placeholderText
+        }
+        value={newComment}
+        onChange={(e) => setNewComment(e.target.value)}
+        className="resize-none"
+        rows={3}
+      />
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isSubmitting || (!newComment.trim() && selectedFiles.length === 0)}
+          className="flex items-center gap-1"
+        >
           <Send className="h-4 w-4" />
-        )}
-      </Button>
+          {isSubmitting 
+            ? "Sending..." 
+            : isInputResponse 
+              ? "Submit Input" 
+              : "Send"}
+        </Button>
+      </div>
     </div>
   );
 };
