@@ -1,9 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/auth/AuthProvider";
+import { useAuth } from "@/context/auth";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 
 interface CommentInputRequestProps {
   isInputResponse?: boolean;
@@ -22,7 +21,7 @@ const CommentInputRequest = ({
   useEffect(() => {
     const checkUserRole = async () => {
       if (session?.user) {
-        console.log("Checking user role for user:", session.user.id);
+        console.log("CommentInputRequest: Checking user role for user:", session.user.id);
         
         const { data: userProfile, error } = await supabase
           .from('user_profiles')
@@ -38,20 +37,22 @@ const CommentInputRequest = ({
           .single();
         
         if (error) {
-          console.error("Error fetching user role:", error);
+          console.error("CommentInputRequest: Error fetching user role:", error);
           return;
         }
 
-        console.log("Full user profile data:", userProfile);
+        console.log("CommentInputRequest: Full user profile data:", userProfile);
         
         const isAgency = 
           userProfile?.user_roles?.name === 'Agency Admin' || 
           userProfile?.user_roles?.name === 'Agency Staff';
         
-        console.log("Is agency user:", isAgency);
-        console.log("Role name:", userProfile?.user_roles?.name);
+        console.log("CommentInputRequest: Is agency user:", isAgency);
+        console.log("CommentInputRequest: Role name:", userProfile?.user_roles?.name);
         
         setIsAgencyUser(isAgency);
+      } else {
+        console.log("CommentInputRequest: No user session found");
       }
     };
 
@@ -59,9 +60,12 @@ const CommentInputRequest = ({
   }, [session]);
 
   if (!isAgencyUser || isInputResponse) {
+    console.log("CommentInputRequest: Not displaying checkbox - isAgencyUser:", isAgencyUser, "isInputResponse:", isInputResponse);
     return null;
   }
 
+  console.log("CommentInputRequest: Displaying checkbox - isRequestingInput:", isRequestingInput);
+  
   return (
     <div className="flex items-center space-x-2 mb-2">
       <Checkbox

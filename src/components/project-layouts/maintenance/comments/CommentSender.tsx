@@ -3,7 +3,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/components/auth/AuthProvider";
+import { useAuth } from "@/context/auth";
 import { Send } from "lucide-react";
 
 interface CommentSenderProps {
@@ -37,13 +37,26 @@ const CommentSender = ({
 
   const handleSubmit = async () => {
     if (!newComment.trim() && selectedFiles.length === 0) return;
+    
+    console.log("CommentSender: Session check", { sessionExists: !!session, userId: session?.user?.id });
+    
     if (!session?.user?.id) {
+      console.error("CommentSender: No user session found");
       toast({ title: "Error", description: "You must be logged in", variant: "destructive" });
       return;
     }
 
     setIsSubmitting(true);
     try {
+      console.log("CommentSender: Submitting comment", { 
+        taskId, 
+        userId: session.user.id,
+        isRequestingInput,
+        isInputResponse,
+        parentCommentId,
+        hasFiles: selectedFiles.length > 0
+      });
+      
       const uploadedFiles: string[] = [];
 
       // Upload each file to Supabase Storage
@@ -79,13 +92,14 @@ const CommentSender = ({
 
       if (commentError) throw commentError;
 
+      console.log("CommentSender: Comment posted successfully");
       setNewComment("");
       setSelectedFiles([]);
       onCommentPosted();
 
       toast({ title: isRequestingInput ? "Input requested" : "Comment posted successfully" });
     } catch (error) {
-      console.error("Error posting comment:", error);
+      console.error("CommentSender: Error posting comment:", error);
       toast({ title: "Error posting comment", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
