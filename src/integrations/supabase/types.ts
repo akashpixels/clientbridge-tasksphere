@@ -965,6 +965,7 @@ export type Database = {
           target_device: Database["public"]["Enums"]["device_type"]
           task_code: string | null
           task_type_id: number
+          total_blocked_duration: unknown | null
           updated_at: string
         }
         Insert: {
@@ -992,6 +993,7 @@ export type Database = {
           target_device?: Database["public"]["Enums"]["device_type"]
           task_code?: string | null
           task_type_id: number
+          total_blocked_duration?: unknown | null
           updated_at?: string
         }
         Update: {
@@ -1019,6 +1021,7 @@ export type Database = {
           target_device?: Database["public"]["Enums"]["device_type"]
           task_code?: string | null
           task_type_id?: number
+          total_blocked_duration?: unknown | null
           updated_at?: string
         }
         Relationships: [
@@ -1173,6 +1176,12 @@ export type Database = {
       calculate_monthly_subscription_usage: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      calculate_total_blocked_duration: {
+        Args: {
+          p_task_id: string
+        }
+        Returns: unknown
       }
       calculate_total_blocking_time: {
         Args: {

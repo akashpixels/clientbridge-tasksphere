@@ -251,3 +251,13 @@ export const intervalToHours = (interval: any): number => {
   
   return 0;
 };
+
+/**
+ * Format blocked duration interval for display
+ * Specifically designed for the total_blocked_duration field
+ */
+export const formatBlockedDuration = (duration: any): string => {
+  if (!duration) return "None";
+  
+  return formatDuration(duration);
+};
