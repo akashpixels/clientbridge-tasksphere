@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/context/auth";
 import { Send } from "lucide-react";
+import AttachmentHandler from "./AttachmentHandler";
 
 interface CommentSenderProps {
   taskId: string;
@@ -152,7 +153,11 @@ const CommentSender = ({
         className="resize-none"
         rows={3}
       />
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center">
+        <AttachmentHandler 
+          selectedFiles={selectedFiles} 
+          setSelectedFiles={setSelectedFiles} 
+        />
         <Button
           type="button"
           onClick={handleSubmit}

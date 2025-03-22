@@ -32,7 +32,6 @@ interface Comment {
 }
 
 const TaskCommentThread = ({ taskId, taskCode = "Task" }: TaskCommentThreadProps) => {
-  const [newComment, setNewComment] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [respondingToComment, setRespondingToComment] = useState<string | null>(null);
@@ -70,10 +69,6 @@ const TaskCommentThread = ({ taskId, taskCode = "Task" }: TaskCommentThreadProps
       supabase.removeChannel(channel);
     };
   }, [taskId, queryClient]);
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    return;
-  };
 
   const handleFileClick = (url: string) => {
     const fileExtension = url.split('.').pop()?.toLowerCase();
