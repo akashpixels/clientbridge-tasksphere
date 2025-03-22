@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -149,30 +150,19 @@ const TaskCommentThread = ({ taskId, taskCode = "Task" }: TaskCommentThreadProps
           setIsRequestingInput={setIsRequestingInput}
         />
         
-        <Textarea 
-          value={newComment} 
-          onChange={(e) => setNewComment(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={pendingInputRequest ? "Provide input..." : "Add a comment..."} 
+        <CommentSender 
+          taskId={taskId}
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          isInputResponse={!!pendingInputRequest}
+          parentCommentId={pendingInputRequest?.id}
+          isRequestingInput={isRequestingInput}
+          onCommentPosted={() => {
+            queryClient.invalidateQueries({ queryKey: ['taskComments', taskId] });
+            setIsRequestingInput(false);
+          }}
+          placeholderText={pendingInputRequest ? "Provide input..." : "Add a comment..."}
         />
-        
-        <div className="flex items-center mt-2 justify-end gap-2">
-          <AttachmentHandler selectedFiles={selectedFiles} setSelectedFiles={setSelectedFiles} />
-          <CommentSender 
-            taskId={taskId} 
-            newComment={newComment} 
-            setNewComment={setNewComment} 
-            selectedFiles={selectedFiles} 
-            setSelectedFiles={setSelectedFiles}
-            isInputResponse={!!pendingInputRequest}
-            parentCommentId={pendingInputRequest?.id}
-            isRequestingInput={isRequestingInput}
-            onCommentPosted={() => {
-              queryClient.invalidateQueries({ queryKey: ['taskComments', taskId] });
-              setIsRequestingInput(false);
-            }}
-          />
-        </div>
       </div>
 
       <PreviewDialog
