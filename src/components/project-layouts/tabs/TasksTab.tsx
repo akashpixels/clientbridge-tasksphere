@@ -1,16 +1,12 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase, updateTaskETAs, updateTaskStatuses } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useLayout } from "@/context/layout";
 import TasksTabContent from "../maintenance/TasksTabContent";
 import TaskCommentThread from "../maintenance/comments/TaskCommentThread";
 import ImageViewerDialog from "../maintenance/ImageViewerDialog";
-import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 interface TasksTabProps {
   projectId: string;
@@ -22,11 +18,9 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const { setRightSidebarContent } = useLayout();
-  const { toast } = useToast();
 
-  const { data: tasks, isLoading: isLoadingTasks, refetch } = useQuery({
+  const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['tasks', projectId, selectedMonth],
     queryFn: async () => {
       console.log('Fetching tasks for project:', projectId);
@@ -84,38 +78,6 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
       setSelectedImage(selectedTaskImages[currentImageIndex + 1]);
     }
   };
-  
-  const handleRefreshETAs = async () => {
-    setIsRefreshing(true);
-    
-    try {
-      // First update any tasks that should be in progress
-      await updateTaskStatuses();
-      
-      // Then update the ETAs
-      const result = await updateTaskETAs(projectId);
-      
-      toast({
-        title: result.success ? "ETAs Updated" : "Error",
-        description: result.message,
-        variant: result.success ? "default" : "destructive",
-      });
-      
-      // Refresh the task list
-      if (result.success) {
-        await refetch();
-      }
-    } catch (error) {
-      toast({
-        title: "Error Refreshing ETAs",
-        description: "An unexpected error occurred while updating ETAs.",
-        variant: "destructive",
-      });
-      console.error("Error refreshing ETAs:", error);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
 
   // Process tasks data for display
   const processedTasks = tasks ? tasks.map(task => ({
@@ -149,20 +111,6 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
 
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Tasks</h2>
-        <Button 
-          size="sm" 
-          variant="outline" 
-          onClick={handleRefreshETAs} 
-          disabled={isRefreshing}
-          className="flex items-center gap-1"
-        >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? "Updating..." : "Refresh ETAs"}
-        </Button>
-      </div>
-      
       <TasksTabContent
         isLoadingTasks={isLoadingTasks}
         tasks={sortedTasks}

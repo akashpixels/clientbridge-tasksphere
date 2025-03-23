@@ -726,31 +726,38 @@ export type Database = {
         Row: {
           blocking_type: string
           created_at: string
+          created_by: string
           ended_at: string | null
           id: string
           reason: string | null
           task_id: string
-          user_id: string
         }
         Insert: {
           blocking_type: string
           created_at?: string
+          created_by: string
           ended_at?: string | null
           id?: string
           reason?: string | null
           task_id: string
-          user_id: string
         }
         Update: {
           blocking_type?: string
           created_at?: string
+          created_by?: string
           ended_at?: string | null
           id?: string
           reason?: string | null
           task_id?: string
-          user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "task_blocking_history_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "task_blocking_history_task_id_fkey"
             columns: ["task_id"]
