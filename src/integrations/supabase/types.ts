@@ -730,9 +730,7 @@ export type Database = {
           ended_at: string | null
           id: string
           reason: string | null
-          started_at: string
           task_id: string
-          updated_at: string
         }
         Insert: {
           blocking_type: string
@@ -741,9 +739,7 @@ export type Database = {
           ended_at?: string | null
           id?: string
           reason?: string | null
-          started_at?: string
           task_id: string
-          updated_at?: string
         }
         Update: {
           blocking_type?: string
@@ -752,9 +748,7 @@ export type Database = {
           ended_at?: string | null
           id?: string
           reason?: string | null
-          started_at?: string
           task_id?: string
-          updated_at?: string
         }
         Relationships: [
           {
@@ -1173,22 +1167,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      calculate_monthly_subscription_usage: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      calculate_total_blocked_duration: {
-        Args: {
-          p_task_id: string
-        }
-        Returns: unknown
-      }
-      calculate_total_blocking_time: {
-        Args: {
-          p_task_id: string
-        }
-        Returns: unknown
-      }
       calculate_working_hours: {
         Args: {
           start_time: string
