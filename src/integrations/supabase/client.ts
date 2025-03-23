@@ -10,3 +10,64 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+// Function to update task ETAs for a specific project
+export const updateTaskETAs = async (projectId?: string): Promise<{ success: boolean, message: string, updated?: number }> => {
+  try {
+    console.log('Calling update-task-etas edge function...');
+    const { data, error } = await supabase.functions.invoke('update-task-etas', {
+      body: { projectId },
+    });
+    
+    if (error) {
+      console.error('Error updating task ETAs:', error);
+      return { 
+        success: false, 
+        message: `Failed to update ETAs: ${error.message}` 
+      };
+    }
+    
+    console.log('Task ETAs updated successfully:', data);
+    return { 
+      success: true, 
+      message: `Successfully updated ETAs for ${data.updated} tasks`,
+      updated: data.updated 
+    };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Exception updating task ETAs:', errorMessage);
+    return { 
+      success: false, 
+      message: `Error: ${errorMessage}` 
+    };
+  }
+};
+
+// Function to update task statuses (useful for tasks that should be in-progress)
+export const updateTaskStatuses = async (): Promise<{ success: boolean, message: string }> => {
+  try {
+    console.log('Calling update-task-status edge function...');
+    const { data, error } = await supabase.functions.invoke('update-task-status');
+    
+    if (error) {
+      console.error('Error updating task statuses:', error);
+      return { 
+        success: false, 
+        message: `Failed to update task statuses: ${error.message}` 
+      };
+    }
+    
+    console.log('Task statuses updated successfully:', data);
+    return { 
+      success: true, 
+      message: 'Task statuses updated successfully' 
+    };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Exception updating task statuses:', errorMessage);
+    return { 
+      success: false, 
+      message: `Error: ${errorMessage}` 
+    };
+  }
+};

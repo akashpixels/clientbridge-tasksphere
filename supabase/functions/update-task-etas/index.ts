@@ -16,6 +16,12 @@ Deno.serve(async (req) => {
   try {
     console.log('Updating task ETAs...');
     
+    // Get project_id from request body, if provided
+    const requestData = await req.json().catch(() => ({}));
+    const projectId = requestData.projectId;
+    
+    console.log('Project ID filter:', projectId || 'All projects');
+    
     // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -23,8 +29,8 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     );
     
-    // Get tasks that need ETAs updated
-    const { data: tasks, error: tasksError } = await supabaseClient
+    // Build the query for tasks
+    let tasksQuery = supabaseClient
       .from('tasks')
       .select(`
         id, 
@@ -38,6 +44,14 @@ Deno.serve(async (req) => {
       .not('is_onhold', 'eq', true)   // Not on hold
       .not('is_awaiting_input', 'eq', true)  // Not awaiting input
       .order('priority_level_id', { ascending: true }); // Process highest priority first
+      
+    // Add project filter if specified  
+    if (projectId) {
+      tasksQuery = tasksQuery.eq('project_id', projectId);
+    }
+    
+    // Execute the query
+    const { data: tasks, error: tasksError } = await tasksQuery;
     
     if (tasksError) {
       console.error('Error fetching tasks:', tasksError);
