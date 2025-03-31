@@ -1,6 +1,5 @@
-
 import { Tables } from "@/integrations/supabase/types";
-import { Monitor, Smartphone, Maximize, Link2, ListFilter } from "lucide-react";
+import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
 import {
   Table,
@@ -217,14 +216,6 @@ const TasksTable = ({
           <TableHead>Task Code</TableHead>
           <TableHead>
             Status
-            <Tooltip>
-              <TooltipTrigger>
-                <ListFilter className="inline w-4 h-4 ml-1 text-amber-500" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-xs">Sorted by: Completed → Active → Scheduled tasks</p>
-              </TooltipContent>
-            </Tooltip>
           </TableHead>
           <TableHead>Details</TableHead>
           <TableHead>Device</TableHead>
