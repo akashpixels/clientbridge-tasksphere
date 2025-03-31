@@ -14,7 +14,7 @@ interface TasksTabProps {
 }
 
 const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: TasksTabProps) => {
-  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' as 'asc' | 'desc' });
+  const [sortConfig, setSortConfig] = useState({ key: 'default_sort', direction: 'asc' as 'asc' | 'desc' });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
@@ -79,7 +79,6 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
     }
   };
 
-  // Process tasks data for display
   const processedTasks = tasks ? tasks.map(task => ({
     ...task,
     actual_duration: typeof task.actual_duration === 'object' && task.actual_duration !== null
@@ -98,15 +97,64 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
               : null))
   })) : [];
 
+  const getTaskSortOrder = (task: any) => {
+    const statusName = task.status?.name?.toLowerCase() || '';
+    
+    if (statusName.includes('complete') || statusName.includes('approved') || 
+        statusName.includes('verified') || statusName.includes('done') || 
+        task.completed_at) {
+      return 1;
+    }
+    
+    if (statusName.includes('progress') || statusName === 'open' || 
+        statusName.includes('active') || statusName.includes('work')) {
+      return 2;
+    }
+    
+    if (statusName.includes('queue') || task.queue_position) {
+      return 3;
+    }
+    
+    return 4;
+  };
+
   const sortedTasks = processedTasks.sort((a, b) => {
-    const aValue = a[sortConfig.key as keyof typeof a];
-    const bValue = b[sortConfig.key as keyof typeof b];
-    
-    if (aValue === null) return 1;
-    if (bValue === null) return -1;
-    
-    const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-    return sortConfig.direction === 'asc' ? comparison : -comparison;
+    if (sortConfig.key === 'default_sort') {
+      const aOrder = getTaskSortOrder(a);
+      const bOrder = getTaskSortOrder(b);
+      
+      if (aOrder !== bOrder) {
+        return aOrder - bOrder;
+      }
+      
+      if (aOrder === 1 && a.completed_at && b.completed_at) {
+        return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime();
+      }
+      
+      if (aOrder === 2) {
+        const aPriority = a.priority_level_id || 999;
+        const bPriority = b.priority_level_id || 999;
+        return aPriority - bPriority;
+      }
+      
+      if (aOrder === 3) {
+        const aPosition = a.queue_position || 999;
+        const bPosition = b.queue_position || 999;
+        return aPosition - bPosition;
+      }
+      
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    } 
+    else {
+      const aValue = a[sortConfig.key as keyof typeof a];
+      const bValue = b[sortConfig.key as keyof typeof b];
+      
+      if (aValue === null) return 1;
+      if (bValue === null) return -1;
+      
+      const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    }
   });
 
   return (

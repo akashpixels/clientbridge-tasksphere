@@ -726,38 +726,31 @@ export type Database = {
         Row: {
           blocking_type: string
           created_at: string
-          created_by: string
           ended_at: string | null
           id: string
           reason: string | null
           task_id: string
+          user_id: string
         }
         Insert: {
           blocking_type: string
           created_at?: string
-          created_by: string
           ended_at?: string | null
           id?: string
           reason?: string | null
           task_id: string
+          user_id: string
         }
         Update: {
           blocking_type?: string
           created_at?: string
-          created_by?: string
           ended_at?: string | null
           id?: string
           reason?: string | null
           task_id?: string
+          user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "task_blocking_history_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "task_blocking_history_task_id_fkey"
             columns: ["task_id"]
@@ -954,6 +947,7 @@ export type Database = {
           logged_duration: unknown | null
           priority_level_id: number
           project_id: string
+          queue_position: number | null
           reference_links: Json | null
           started_at: string | null
           target_device: Database["public"]["Enums"]["device_type"]
@@ -982,6 +976,7 @@ export type Database = {
           logged_duration?: unknown | null
           priority_level_id?: number
           project_id: string
+          queue_position?: number | null
           reference_links?: Json | null
           started_at?: string | null
           target_device?: Database["public"]["Enums"]["device_type"]
@@ -1010,6 +1005,7 @@ export type Database = {
           logged_duration?: unknown | null
           priority_level_id?: number
           project_id?: string
+          queue_position?: number | null
           reference_links?: Json | null
           started_at?: string | null
           target_device?: Database["public"]["Enums"]["device_type"]
@@ -1167,6 +1163,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_next_queued_task: {
+        Args: {
+          project_id_param: string
+        }
+        Returns: undefined
+      }
+      assign_task_queue_positions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       calculate_working_hours: {
         Args: {
           start_time: string
@@ -1206,7 +1212,7 @@ export type Database = {
         | "seo"
         | "marketing"
         | "general"
-      task_status_type: "scheduled" | "active" | "completion" | "specialcase"
+      task_status_type: "scheduled" | "active" | "completed" | "specialcase"
     }
     CompositeTypes: {
       [_ in never]: never
