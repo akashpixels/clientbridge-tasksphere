@@ -1,5 +1,6 @@
+
 import { Tables } from "@/integrations/supabase/types";
-import { Monitor, Smartphone, ArrowUp, ArrowDown, Maximize, Link2, ListFilter } from "lucide-react";
+import { Monitor, Smartphone, Maximize, Link2, ListFilter } from "lucide-react";
 import { format } from "date-fns";
 import {
   Table,
@@ -213,71 +214,24 @@ const TasksTable = ({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead 
-            className="cursor-pointer"
-            onClick={() => onSort('task_code')}
-          >
-            Task Code {sortConfig.key === 'task_code' && (
-              sortConfig.direction === 'asc' ? <ArrowUp className="inline w-4 h-4" /> : <ArrowDown className="inline w-4 h-4" />
-            )}
+          <TableHead>Task Code</TableHead>
+          <TableHead>
+            Status
+            <Tooltip>
+              <TooltipTrigger>
+                <ListFilter className="inline w-4 h-4 ml-1 text-amber-500" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs">Sorted by: Completed → Active → Scheduled tasks</p>
+              </TooltipContent>
+            </Tooltip>
           </TableHead>
-          <TableHead 
-            className="cursor-pointer"
-            onClick={() => onSort('status')}
-          >
-            Status {sortConfig.key === 'status' && (
-              sortConfig.direction === 'asc' ? <ArrowUp className="inline w-4 h-4" /> : <ArrowDown className="inline w-4 h-4" />
-            )}
-          </TableHead>
-          <TableHead 
-            className="cursor-pointer"
-            onClick={() => onSort('details')}
-          >
-            Details {sortConfig.key === 'default_sort' && (
-              <Tooltip>
-                <TooltipTrigger>
-                  <ListFilter className="inline w-4 h-4 ml-1 text-amber-500" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Default sorting: Completed → Active → Scheduled tasks</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </TableHead>
-          <TableHead 
-            className="cursor-pointer"
-            onClick={() => onSort('target_device')}
-          >
-            Device
-          </TableHead>
-          <TableHead 
-            className="cursor-pointer"
-            onClick={() => onSort('priority_level_id')}
-          >
-            Priority
-          </TableHead>
-          <TableHead 
-            className="cursor-pointer"
-            onClick={() => onSort('complexity_level_id')}
-          >
-            Level
-          </TableHead>
-          <TableHead 
-            className="cursor-pointer"
-            onClick={() => onSort('est_start')}
-          >
-            Start Time {sortConfig.key === 'est_start' && (
-              sortConfig.direction === 'asc' ? <ArrowUp className="inline w-4 h-4" /> : <ArrowDown className="inline w-4 h-4" />
-            )}
-          </TableHead>
-          <TableHead 
-            className="cursor-pointer"
-            onClick={() => onSort('est_end')}
-          >
-            ETA {sortConfig.key === 'est_end' && (
-              sortConfig.direction === 'asc' ? <ArrowUp className="inline w-4 h-4" /> : <ArrowDown className="inline w-4 h-4" />
-            )}
-          </TableHead>
+          <TableHead>Details</TableHead>
+          <TableHead>Device</TableHead>
+          <TableHead>Priority</TableHead>
+          <TableHead>Level</TableHead>
+          <TableHead>Start Time</TableHead>
+          <TableHead>ETA</TableHead>
           <TableHead>Links</TableHead>
           <TableHead>Assets</TableHead>
         </TableRow>

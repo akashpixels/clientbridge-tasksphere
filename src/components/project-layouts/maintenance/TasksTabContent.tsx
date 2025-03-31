@@ -1,37 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card } from "@/components/ui/card";
 import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertCircle } from "lucide-react";
-
-/**
- * The calculate_total_blocking_time SQL function calculates the total time a task has been blocked:
- * 
- * 1. It sums up all completed blocking periods (where ended_at is set)
- * 2. It adds any ongoing blocking periods (where ended_at is NULL, using current_timestamp)
- * 3. Returns the total as an interval type
- * 
- * SQL function signature:
- * CREATE OR REPLACE FUNCTION calculate_total_blocking_time(task_id UUID)
- * RETURNS INTERVAL AS $$
- * DECLARE
- *   total_time INTERVAL := '0 seconds'::INTERVAL;
- * BEGIN
- *   -- Sum up all completed blocking periods
- *   SELECT COALESCE(SUM(ended_at - started_at), '0 seconds'::INTERVAL) INTO total_time
- *   FROM task_blocking_history
- *   WHERE task_id = $1 AND ended_at IS NOT NULL;
- *   
- *   -- Add any ongoing blocking periods
- *   SELECT total_time + COALESCE(SUM(CURRENT_TIMESTAMP - started_at), '0 seconds'::INTERVAL) INTO total_time
- *   FROM task_blocking_history
- *   WHERE task_id = $1 AND ended_at IS NULL;
- *   
- *   RETURN total_time;
- * END;
- * $$ LANGUAGE plpgsql;
- */
 
 interface TasksTabContentProps {
   isLoadingTasks: boolean;
@@ -46,7 +19,7 @@ interface TasksTabContentProps {
     } | null;
     priority: {
       name: string;
-      color_hex: string; // Updated from color to color_hex to match database change
+      color_hex: string; 
     } | null;
     complexity: {
       name: string;
@@ -87,7 +60,6 @@ const TasksTabContent = ({
   
   useEffect(() => {
     console.log("TasksTabContent rendered with tasks:", tasks?.length || 0);
-    console.log("isLoadingTasks:", isLoadingTasks);
     
     const checkTasksAccess = async () => {
       try {

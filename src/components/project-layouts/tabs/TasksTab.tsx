@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +15,6 @@ interface TasksTabProps {
 }
 
 const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: TasksTabProps) => {
-  const [sortConfig, setSortConfig] = useState({ key: 'default_sort', direction: 'asc' as 'asc' | 'desc' });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
@@ -51,13 +51,6 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
     },
     enabled: !!projectId && !!selectedMonth,
   });
-
-  const handleSort = (key: string) => {
-    setSortConfig(current => ({
-      key,
-      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
-    }));
-  };
 
   const handleImageClick = (image: string, images: string[]) => {
     setSelectedTaskImages(images);
@@ -103,58 +96,48 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
     if (statusName.includes('complete') || statusName.includes('approved') || 
         statusName.includes('verified') || statusName.includes('done') || 
         task.completed_at) {
-      return 1;
+      return 1; // Completed tasks
     }
     
     if (statusName.includes('progress') || statusName === 'open' || 
         statusName.includes('active') || statusName.includes('work')) {
-      return 2;
+      return 2; // Active tasks
     }
     
     if (statusName.includes('queue') || task.queue_position) {
-      return 3;
+      return 3; // Scheduled tasks
     }
     
-    return 4;
+    return 4; // Special case tasks
   };
 
   const sortedTasks = processedTasks.sort((a, b) => {
-    if (sortConfig.key === 'default_sort') {
-      const aOrder = getTaskSortOrder(a);
-      const bOrder = getTaskSortOrder(b);
-      
-      if (aOrder !== bOrder) {
-        return aOrder - bOrder;
-      }
-      
-      if (aOrder === 1 && a.completed_at && b.completed_at) {
-        return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime();
-      }
-      
-      if (aOrder === 2) {
-        const aPriority = a.priority_level_id || 999;
-        const bPriority = b.priority_level_id || 999;
-        return aPriority - bPriority;
-      }
-      
-      if (aOrder === 3) {
-        const aPosition = a.queue_position || 999;
-        const bPosition = b.queue_position || 999;
-        return aPosition - bPosition;
-      }
-      
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    } 
-    else {
-      const aValue = a[sortConfig.key as keyof typeof a];
-      const bValue = b[sortConfig.key as keyof typeof b];
-      
-      if (aValue === null) return 1;
-      if (bValue === null) return -1;
-      
-      const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    const aOrder = getTaskSortOrder(a);
+    const bOrder = getTaskSortOrder(b);
+    
+    if (aOrder !== bOrder) {
+      return aOrder - bOrder;
     }
+    
+    if (aOrder === 1 && a.completed_at && b.completed_at) {
+      // For completed tasks, sort by completion date (newest first)
+      return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime();
+    }
+    
+    if (aOrder === 2) {
+      // For active tasks, sort by creation date (newest first)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+    
+    if (aOrder === 3) {
+      // For scheduled tasks, sort by queue position
+      const aPosition = a.queue_position || 999;
+      const bPosition = b.queue_position || 999;
+      return aPosition - bPosition;
+    }
+    
+    // Default sort by creation date (newest first)
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
   return (
@@ -162,8 +145,8 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
       <TasksTabContent
         isLoadingTasks={isLoadingTasks}
         tasks={sortedTasks}
-        sortConfig={sortConfig}
-        onSort={handleSort}
+        sortConfig={{ key: 'default_sort', direction: 'asc' }}
+        onSort={() => {}} // Empty function since we don't need sorting
         onImageClick={handleImageClick}
         onCommentClick={(taskId: string) => {
           setRightSidebarContent(
