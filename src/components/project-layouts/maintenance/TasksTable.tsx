@@ -10,9 +10,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  TooltipProvider,
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useLayout } from "@/context/layout";
@@ -270,11 +270,6 @@ const TasksTable = ({
                   <span className="text-xs text-gray-500 pl-2">
                     {task.logged_duration ? formatInterval(task.logged_duration) : 
                      task.actual_duration ? formatInterval(task.actual_duration) : '0h'}
-                  </span>
-                )}
-                {task.status?.name === 'In Queue' && task.queue_position && (
-                  <span className="text-xs text-gray-500 pl-2">
-                    Queue position: #{task.queue_position}
                   </span>
                 )}
                 {task.status?.name === 'Open' && task.est_start && (
