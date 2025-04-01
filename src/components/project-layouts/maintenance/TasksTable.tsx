@@ -1,4 +1,3 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -143,7 +142,6 @@ const TasksTable = ({
 }: TasksTableProps) => {
   const { setRightSidebarContent } = useLayout();
 
-  // Group tasks by their status
   const groupedTasks: Record<string, typeof tasks> = {
     active: [],
     scheduled: [],
@@ -410,85 +408,70 @@ const TasksTable = ({
   };
 
   const renderSectionHeader = (sectionName: string) => (
-    <div className="flex items-center gap-2 px-4 py-3">
-      <span className="text-sm font-medium text-gray-700">{getGroupLabel(sectionName)}</span>
+    <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+      {getGroupLabel(sectionName)}
       <Separator className="flex-grow bg-gray-200" />
+    </h3>
+  );
+
+  const StickyHeader = () => (
+    <div className="sticky top-0 z-10 bg-white shadow-sm rounded-lg mb-6">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Task Code</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Details</TableHead>
+            <TableHead>Device</TableHead>
+            <TableHead>Priority</TableHead>
+            <TableHead>Level</TableHead>
+            <TableHead>Start Time</TableHead>
+            <TableHead>ETA</TableHead>
+            <TableHead>Links</TableHead>
+            <TableHead>Assets</TableHead>
+          </TableRow>
+        </TableHeader>
+      </Table>
     </div>
   );
 
+  const TaskSection = ({ title, taskList }: { title: string, taskList: typeof tasks }) => {
+    if (taskList.length === 0) return null;
+    
+    return (
+      <div className="mb-6">
+        {renderSectionHeader(title)}
+        <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+          <Table>
+            <TableBody>
+              {taskList.map(task => renderTaskRow(task))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="relative space-y-6">
-      {/* Sticky header section */}
-      <div className="sticky top-0 z-10 bg-white shadow-sm rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Task Code</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Details</TableHead>
-              <TableHead>Device</TableHead>
-              <TableHead>Priority</TableHead>
-              <TableHead>Level</TableHead>
-              <TableHead>Start Time</TableHead>
-              <TableHead>ETA</TableHead>
-              <TableHead>Links</TableHead>
-              <TableHead>Assets</TableHead>
-            </TableRow>
-          </TableHeader>
-        </Table>
-      </div>
+    <>
+      <StickyHeader />
       
-      {/* Task sections */}
-      <div className="task-sections space-y-6">
-        {/* Active Tasks Section */}
-        {groupedTasks.active.length > 0 && (
-          <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
-            {renderSectionHeader('active')}
-            <Table>
-              <TableBody>
-                {groupedTasks.active.map(task => renderTaskRow(task))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-        
-        {/* Scheduled Tasks Section */}
-        {groupedTasks.scheduled.length > 0 && (
-          <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
-            {renderSectionHeader('scheduled')}
-            <Table>
-              <TableBody>
-                {groupedTasks.scheduled.map(task => renderTaskRow(task))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-        
-        {/* Completed Tasks Section */}
-        {groupedTasks.completed.length > 0 && (
-          <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
-            {renderSectionHeader('completed')}
-            <Table>
-              <TableBody>
-                {groupedTasks.completed.map(task => renderTaskRow(task))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-        
-        {/* Special Case Tasks Section */}
-        {groupedTasks.special.length > 0 && (
-          <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
-            {renderSectionHeader('special')}
-            <Table>
-              <TableBody>
-                {groupedTasks.special.map(task => renderTaskRow(task))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </div>
-    </div>
+      {groupedTasks.active.length > 0 && (
+        <TaskSection title="active" taskList={groupedTasks.active} />
+      )}
+      
+      {groupedTasks.scheduled.length > 0 && (
+        <TaskSection title="scheduled" taskList={groupedTasks.scheduled} />
+      )}
+      
+      {groupedTasks.completed.length > 0 && (
+        <TaskSection title="completed" taskList={groupedTasks.completed} />
+      )}
+      
+      {groupedTasks.special.length > 0 && (
+        <TaskSection title="special" taskList={groupedTasks.special} />
+      )}
+    </>
   );
 };
 
