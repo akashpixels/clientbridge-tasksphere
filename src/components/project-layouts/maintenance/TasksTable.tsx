@@ -324,7 +324,7 @@ const TasksTable = ({
         {String(text)}
       </a>);
   };
-  const renderSectionHeader = (sectionName: string) => <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+  const renderSectionHeader = (sectionName: string) => <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2 px-[16px]">
       {getGroupLabel(sectionName)}
       
     </h3>;
