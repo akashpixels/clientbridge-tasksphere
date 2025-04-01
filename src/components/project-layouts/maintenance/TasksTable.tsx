@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -412,7 +413,8 @@ const TasksTable = ({
     </h3>
   );
 
-  const TableHeader = () => {
+  // Renamed from TableHeader to TaskTableHeader to avoid naming conflict
+  const TaskTableHeader = () => {
     return (
       <div className="sticky top-0 z-10 bg-white shadow-sm rounded-lg mb-6">
         <Table>
@@ -454,7 +456,7 @@ const TasksTable = ({
 
   return (
     <>
-      <TableHeader />
+      <TaskTableHeader />
       
       {groupedTasks.active.length > 0 && (
         <TaskSection title="active" taskList={groupedTasks.active} />
