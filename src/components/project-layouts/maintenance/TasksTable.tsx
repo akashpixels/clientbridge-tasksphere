@@ -410,22 +410,16 @@ const TasksTable = ({
   };
 
   const renderSectionHeader = (sectionName: string) => (
-    <TableRow className="group-separator">
-      <TableCell colSpan={10} className="p-0">
-        <div className="py-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-500">{getGroupLabel(sectionName)}</span>
-            <Separator className="flex-grow bg-gray-200" />
-          </div>
-        </div>
-      </TableCell>
-    </TableRow>
+    <div className="flex items-center gap-2 px-4 py-3">
+      <span className="text-sm font-medium text-gray-700">{getGroupLabel(sectionName)}</span>
+      <Separator className="flex-grow bg-gray-200" />
+    </div>
   );
 
   return (
-    <div className="relative">
+    <div className="relative space-y-6">
       {/* Sticky header section */}
-      <div className="sticky top-0 z-10 bg-white shadow-sm">
+      <div className="sticky top-0 z-10 bg-white shadow-sm rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
@@ -445,45 +439,53 @@ const TasksTable = ({
       </div>
       
       {/* Task sections */}
-      <div className="task-sections">
+      <div className="task-sections space-y-6">
         {/* Active Tasks Section */}
         {groupedTasks.active.length > 0 && (
-          <Table>
-            <TableBody>
-              {renderSectionHeader('active')}
-              {groupedTasks.active.map(task => renderTaskRow(task))}
-            </TableBody>
-          </Table>
+          <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+            {renderSectionHeader('active')}
+            <Table>
+              <TableBody>
+                {groupedTasks.active.map(task => renderTaskRow(task))}
+              </TableBody>
+            </Table>
+          </div>
         )}
         
         {/* Scheduled Tasks Section */}
         {groupedTasks.scheduled.length > 0 && (
-          <Table>
-            <TableBody>
-              {renderSectionHeader('scheduled')}
-              {groupedTasks.scheduled.map(task => renderTaskRow(task))}
-            </TableBody>
-          </Table>
+          <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+            {renderSectionHeader('scheduled')}
+            <Table>
+              <TableBody>
+                {groupedTasks.scheduled.map(task => renderTaskRow(task))}
+              </TableBody>
+            </Table>
+          </div>
         )}
         
         {/* Completed Tasks Section */}
         {groupedTasks.completed.length > 0 && (
-          <Table>
-            <TableBody>
-              {renderSectionHeader('completed')}
-              {groupedTasks.completed.map(task => renderTaskRow(task))}
-            </TableBody>
-          </Table>
+          <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+            {renderSectionHeader('completed')}
+            <Table>
+              <TableBody>
+                {groupedTasks.completed.map(task => renderTaskRow(task))}
+              </TableBody>
+            </Table>
+          </div>
         )}
         
         {/* Special Case Tasks Section */}
         {groupedTasks.special.length > 0 && (
-          <Table>
-            <TableBody>
-              {renderSectionHeader('special')}
-              {groupedTasks.special.map(task => renderTaskRow(task))}
-            </TableBody>
-          </Table>
+          <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+            {renderSectionHeader('special')}
+            <Table>
+              <TableBody>
+                {groupedTasks.special.map(task => renderTaskRow(task))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </div>
     </div>
