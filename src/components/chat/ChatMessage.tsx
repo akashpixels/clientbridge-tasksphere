@@ -52,13 +52,13 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick, isRead = false }: Ch
         
         <div>
           <div 
-            className={`px-3 py-1.5 rounded-lg relative ${
+            className={`px-3 py-1.5 rounded-lg relative min-w-[120px] ${
               isCurrentUser 
                 ? 'bg-muted text-foreground rounded-tr-none' 
                 : 'bg-background text-foreground rounded-tl-none'
             }`}
           >
-            <div className="text-sm pr-12"> {/* Add right padding to make space for timestamp */}
+            <div className="text-sm pr-14 pb-4"> {/* Increased right padding and added bottom padding */}
               {formattedContent}
             </div>
             
