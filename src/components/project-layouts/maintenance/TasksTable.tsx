@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -343,10 +344,11 @@ const TasksTable = ({
       {getGroupLabel(sectionName)}
     </h3>;
 
-  const RegularHeader = () => <div className="rounded-lg mb-6">
+  const RegularHeader = () => (
+    <div className="bg-white border rounded-lg overflow-hidden mb-6">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-white">
             <TableHead>Task Code</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Details</TableHead>
@@ -360,7 +362,8 @@ const TasksTable = ({
           </TableRow>
         </TableHeader>
       </Table>
-    </div>;
+    </div>
+  );
 
   const TaskSection = ({
     title,
