@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card } from "@/components/ui/card";
 import TasksTable from "./TasksTable";
@@ -106,7 +105,6 @@ const TasksTabContent = ({
     onCommentClick(taskId);
   };
 
-  // Process the tasks data to ensure actual_duration and logged_duration are properly converted to numbers
   const processedTasks = tasks?.map(task => ({
     ...task,
     actual_duration: typeof task.actual_duration === 'object' && task.actual_duration !== null
@@ -126,8 +124,7 @@ const TasksTabContent = ({
   })) || [];
 
   return (
-<Card className="p-0 border-0 shadow-none bg-transparent">
-
+    <Card className="p-0 border-0 shadow-none bg-transparent">
       {isLoadingTasks ? (
         <div className="flex items-center justify-center p-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />

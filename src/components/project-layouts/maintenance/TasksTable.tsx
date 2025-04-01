@@ -7,6 +7,7 @@ import { useLayout } from "@/context/layout";
 import { Badge } from "@/components/ui/badge";
 import TaskCommentThread from "./comments/TaskCommentThread";
 import { Separator } from "@/components/ui/separator";
+
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
     task_type: {
@@ -48,6 +49,7 @@ interface TasksTableProps {
   onCommentClick: (taskId: string) => void;
   selectedTaskId?: string;
 }
+
 const formatInterval = (intervalValue: any): string => {
   if (!intervalValue) return "0h";
   if (typeof intervalValue === 'number') {
@@ -81,6 +83,7 @@ const formatInterval = (intervalValue: any): string => {
     return "0h";
   }
 };
+
 const getTaskGroup = (task: any) => {
   const statusName = (task.status?.name || '').toLowerCase();
   if (statusName.includes('progress') || statusName === 'open' || statusName.includes('active') || statusName.includes('work')) {
@@ -94,6 +97,7 @@ const getTaskGroup = (task: any) => {
   }
   return 'special'; // Special case tasks
 };
+
 const getGroupLabel = (groupId: string) => {
   switch (groupId) {
     case 'active':
@@ -108,6 +112,7 @@ const getGroupLabel = (groupId: string) => {
       return "Tasks";
   }
 };
+
 const TasksTable = ({
   tasks,
   sortConfig,
@@ -119,21 +124,29 @@ const TasksTable = ({
   const {
     setRightSidebarContent
   } = useLayout();
+  
   const groupedTasks: Record<string, typeof tasks> = {
     active: [],
     scheduled: [],
     completed: [],
     special: []
   };
+  
   tasks.forEach(task => {
     const group = getTaskGroup(task);
     groupedTasks[group].push(task);
   });
-  const renderTaskRow = (task: typeof tasks[0]) => <TableRow key={task.id} className={`cursor-pointer ${selectedTaskId === task.id ? 'bg-muted/30' : 'hover:bg-muted/30'}`} onClick={() => {
-    onCommentClick(task.id);
-    setRightSidebarContent(<TaskCommentThread taskId={task.id} taskCode={typeof task.task_code === 'string' ? task.task_code : String(task.task_code || 'No Code')} />);
-  }}>
-      <TableCell>
+  
+  const renderTaskRow = (task: typeof tasks[0]) => (
+    <TableRow 
+      key={task.id} 
+      className={`cursor-pointer ${selectedTaskId === task.id ? 'bg-muted/30' : 'hover:bg-muted/30'}`} 
+      onClick={() => {
+        onCommentClick(task.id);
+        setRightSidebarContent(<TaskCommentThread taskId={task.id} taskCode={typeof task.task_code === 'string' ? task.task_code : String(task.task_code || 'No Code')} />);
+      }}
+    >
+      <TableCell className="w-24">
         <Badge variant="outline" className="font-mono text-xs">
           {task.task_code || '—'}
           {task.queue_position && <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
@@ -141,7 +154,7 @@ const TasksTable = ({
             </span>}
         </Badge>
       </TableCell>
-      <TableCell>
+      <TableCell className="w-32">
         <div className="flex flex-col items-start gap-1">
           <span className="px-2 py-1 text-xs rounded-full font-semibold" style={{
           backgroundColor: getStatusColor(task.status || {
@@ -163,13 +176,13 @@ const TasksTable = ({
             </span>}
         </div>
       </TableCell>
-      <TableCell>
-        <div className="flex-1 min-w-0 max-w-[350px]">
+      <TableCell className="min-w-[250px] max-w-[350px]">
+        <div className="flex-1 min-w-0">
           <p className="text-sm break-words">{task.details}</p>
           <p className="text-xs text-gray-500 mt-1">{task.task_type?.name}</p>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="w-16">
         <div className="flex gap-1">
           {task.target_device === 'desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
           {task.target_device === 'mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
@@ -179,7 +192,7 @@ const TasksTable = ({
             </>}
         </div>
       </TableCell>  
-      <TableCell>
+      <TableCell className="w-24">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full" style={{
           backgroundColor: getPriorityColor(task.priority)
@@ -189,7 +202,7 @@ const TasksTable = ({
           </span>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="w-24">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
@@ -203,27 +216,27 @@ const TasksTable = ({
           </Tooltip>
         </TooltipProvider>
       </TableCell>
-      <TableCell className="text-left">
+      <TableCell className="w-28">
         {task.est_start ? <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-600">{format(new Date(task.est_start), "h:mm a")}</span>
             <span className="text-xs text-gray-700">{format(new Date(task.est_start), "MMM d")}</span>
           </div> : <span className="text-xs text-gray-700">Not set</span>}
       </TableCell>
       
-      <TableCell className="text-left">
+      <TableCell className="w-28">
         {task.est_end ? <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-600">{format(new Date(task.est_end), "h:mm a")}</span>
             <span className="text-xs text-gray-700">{format(new Date(task.est_end), "MMM d")}</span>
           </div> : <span className="text-xs text-gray-700">Not set</span>}
       </TableCell>
       
-      <TableCell>
+      <TableCell className="w-24">
         <div className="flex flex-col gap-1">
           {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
         </div>
       </TableCell>
 
-      <TableCell>
+      <TableCell className="w-24">
         <div className="flex -space-x-2">
           {task.images && Array.isArray(task.images) && task.images.length > 0 && (task.images as string[]).map((image, index) => <div key={index} className="w-8 h-8 relative cursor-pointer" onClick={() => onImageClick(image, task.images as string[])}>
                 <img src={image as string} alt={`Task image ${index + 1}`} className="w-8 h-8 rounded-lg border-2 border-white object-cover" />
@@ -231,13 +244,17 @@ const TasksTable = ({
               </div>)}
         </div>
       </TableCell>
-    </TableRow>;
+    </TableRow>
+  );
+
   const formatETA = (date: string) => {
     return format(new Date(date), "h.mmaaa do MMM");
   };
+
   const formatDateTime = (date: string) => {
     return format(new Date(date), "MMM d, h:mm a");
   };
+
   const getStatusColor = (status: {
     name: string | null;
     color_hex: string | null;
@@ -283,6 +300,7 @@ const TasksTable = ({
       text: enhancedColor
     };
   };
+
   const getComplexityBars = (complexity: {
     name: string;
     multiplier: number;
@@ -300,6 +318,7 @@ const TasksTable = ({
     };
     return complexityMap[complexity.name] || 1;
   };
+
   const getPriorityColor = (priority: {
     name: string;
     color_hex: string;
@@ -317,6 +336,7 @@ const TasksTable = ({
     };
     return priorityColors[priority.name] || priority.color_hex || '#9CA3AF';
   };
+
   const renderReferenceLinks = (links: Record<string, string> | null) => {
     if (!links) return null;
     return Object.entries(links).map(([text, url], index) => <a key={index} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-gray-800 hover:text-gray-600">
@@ -324,28 +344,32 @@ const TasksTable = ({
         {String(text)}
       </a>);
   };
-  const renderSectionHeader = (sectionName: string) => <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2 px-[6px]">
+
+  const renderSectionHeader = (sectionName: string) => (
+    <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2 px-[6px]">
       {getGroupLabel(sectionName)}
-      
-    </h3>;
-  const StickyHeader = () => <div className="sticky top-0 z-10 bg-white shadow-sm rounded-lg mb-6">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Task Code</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Details</TableHead>
-            <TableHead>Device</TableHead>
-            <TableHead>Priority</TableHead>
-            <TableHead>Level</TableHead>
-            <TableHead>Start Time</TableHead>
-            <TableHead>ETA</TableHead>
-            <TableHead>Links</TableHead>
-            <TableHead>Assets</TableHead>
-          </TableRow>
-        </TableHeader>
-      </Table>
-    </div>;
+    </h3>
+  );
+
+  const TableHeader = () => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-24">Task Code</TableHead>
+          <TableHead className="w-32">Status</TableHead>
+          <TableHead className="min-w-[250px] max-w-[350px]">Details</TableHead>
+          <TableHead className="w-16">Device</TableHead>
+          <TableHead className="w-24">Priority</TableHead>
+          <TableHead className="w-24">Level</TableHead>
+          <TableHead className="w-28">Start Time</TableHead>
+          <TableHead className="w-28">ETA</TableHead>
+          <TableHead className="w-24">Links</TableHead>
+          <TableHead className="w-24">Assets</TableHead>
+        </TableRow>
+      </TableHeader>
+    </Table>
+  );
+
   const TaskSection = ({
     title,
     taskList
@@ -354,19 +378,23 @@ const TasksTable = ({
     taskList: typeof tasks;
   }) => {
     if (taskList.length === 0) return null;
-    return <div className="mb-6">
+    return (
+      <div className="mb-6">
         {renderSectionHeader(title)}
-        <div className="bg-white border rounded-lg  overflow-hidden">
+        <div className="bg-white rounded-lg overflow-hidden">
           <Table>
             <TableBody>
               {taskList.map(task => renderTaskRow(task))}
             </TableBody>
           </Table>
         </div>
-      </div>;
+      </div>
+    );
   };
-  return <>
-      <StickyHeader />
+
+  return (
+    <>
+      <TableHeader />
       
       {groupedTasks.active.length > 0 && <TaskSection title="active" taskList={groupedTasks.active} />}
       
@@ -375,6 +403,8 @@ const TasksTable = ({
       {groupedTasks.completed.length > 0 && <TaskSection title="completed" taskList={groupedTasks.completed} />}
       
       {groupedTasks.special.length > 0 && <TaskSection title="special" taskList={groupedTasks.special} />}
-    </>;
+    </>
+  );
 };
+
 export default TasksTable;
