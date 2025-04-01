@@ -351,7 +351,7 @@ const TasksTable = ({
     </h3>
   );
 
-  const TableHeader = () => (
+  const renderTableHeader = () => (
     <Table>
       <TableHeader>
         <TableRow>
@@ -394,7 +394,7 @@ const TasksTable = ({
 
   return (
     <>
-      <TableHeader />
+      {renderTableHeader()}
       
       {groupedTasks.active.length > 0 && <TaskSection title="active" taskList={groupedTasks.active} />}
       
