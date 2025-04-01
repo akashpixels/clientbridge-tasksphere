@@ -58,7 +58,7 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick, isRead = false }: Ch
                 : 'bg-background text-foreground rounded-tl-none'
             }`}
           >
-            <div className="text-sm pr-14 pb-4"> {/* Increased right padding and added bottom padding */}
+            <div className="text-sm pr-14 pb-0"> {/* Increased right padding and added bottom padding */}
               {formattedContent}
             </div>
             
