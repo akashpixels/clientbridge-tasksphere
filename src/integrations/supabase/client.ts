@@ -10,3 +10,36 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+// Add a helper function to get unread message count
+export const getUnreadMessageCount = async (userId: string | undefined): Promise<number> => {
+  if (!userId) return 0;
+  
+  try {
+    // Get all messages
+    const { data: messages, error: msgError } = await supabase
+      .from('chat_messages')
+      .select('id, created_at')
+      .order('created_at', { ascending: false });
+      
+    if (msgError) throw msgError;
+    if (!messages || messages.length === 0) return 0;
+    
+    // Get all messages read by the current user
+    const { data: reads, error: readError } = await supabase
+      .from('message_reads')
+      .select('message_id')
+      .eq('user_id', userId);
+      
+    if (readError) throw readError;
+    
+    // Calculate unread count
+    const readMessageIds = reads?.map(read => read.message_id) || [];
+    const unreadCount = messages.filter(msg => !readMessageIds.includes(msg.id)).length;
+    
+    return unreadCount;
+  } catch (error) {
+    console.error('Error getting unread message count:', error);
+    return 0;
+  }
+};
