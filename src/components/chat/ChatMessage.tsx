@@ -69,19 +69,28 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick, isRead = false }: Ch
               </div>
             )}
             
-            <div className="flex items-center justify-end mt-1 space-x-1">
-              {isCurrentUser && (
-                <div className="flex items-center">
-                  <Check 
-                    className={`h-3 w-3 ${isRead ? 'text-blue-500' : 'text-muted-foreground'}`} 
-                    strokeWidth={3}
-                  />
-                  {isRead && <Check className="h-3 w-3 text-blue-500 -ml-1.5" strokeWidth={3} />}
-                </div>
-              )}
-              <span className="text-[10px] text-muted-foreground">
+            <div className="flex items-center justify-end mt-1 space-x-1 text-[10px] text-muted-foreground">
+              <span>
                 {format(new Date(message.created_at), 'h:mm a')}
               </span>
+              
+              {isCurrentUser && (
+                <div className="flex items-center ml-1">
+                  {isRead ? (
+                    // Blue double tick (read)
+                    <>
+                      <Check className="h-3 w-3 text-blue-500" strokeWidth={2} />
+                      <Check className="h-3 w-3 text-blue-500 -ml-1.5" strokeWidth={2} />
+                    </>
+                  ) : (
+                    // Grey double tick (delivered but not read)
+                    <>
+                      <Check className="h-3 w-3 text-muted-foreground" strokeWidth={2} />
+                      <Check className="h-3 w-3 text-muted-foreground -ml-1.5" strokeWidth={2} />
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

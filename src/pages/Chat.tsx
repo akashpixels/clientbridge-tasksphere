@@ -313,7 +313,7 @@ const Chat = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 flex justify-center h-screen">
+    <div className="container mx-auto px-4 py-6 flex items-center justify-center min-h-screen">
       <Card className="flex flex-col h-[90vh] max-w-[600px] w-full">
         <div className="p-4 border-b">
           <h2 className="text-xl font-bold">Team Chat</h2>
