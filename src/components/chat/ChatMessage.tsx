@@ -40,10 +40,10 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick, isRead = false }: Ch
   };
 
   return (
-    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-1.5`}>
-      <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} max-w-[70%] group`}>
+    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-2`}>
+      <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} max-w-[80%] group`}>
         {!isCurrentUser && (
-          <Avatar className="w-8 h-8 mt-1 mr-1.5">
+          <Avatar className="w-8 h-8 mt-1 mr-2">
             <AvatarFallback className="bg-muted text-muted-foreground">
               {getInitials()}
             </AvatarFallback>
@@ -52,7 +52,7 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick, isRead = false }: Ch
         
         <div>
           <div 
-            className={`px-2.5 py-1.5 rounded-lg ${
+            className={`px-3 py-2 rounded-lg ${
               isCurrentUser 
                 ? 'bg-muted text-foreground rounded-tr-none' 
                 : 'bg-background text-foreground rounded-tl-none'
@@ -61,7 +61,7 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick, isRead = false }: Ch
             <p className="text-sm whitespace-pre-line">{formattedContent}</p>
             
             {message.attachments && message.attachments.length > 0 && (
-              <div className="mt-1.5">
+              <div className="mt-2">
                 <FilePreview 
                   files={message.attachments} 
                   onFileClick={onFileClick} 
@@ -69,7 +69,7 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick, isRead = false }: Ch
               </div>
             )}
             
-            <div className="flex items-center justify-end mt-0.5 space-x-1 text-[10px] text-muted-foreground">
+            <div className="flex items-center justify-end mt-1 space-x-1 text-[10px] text-muted-foreground">
               <span>
                 {format(new Date(message.created_at), 'h:mm a')}
               </span>
