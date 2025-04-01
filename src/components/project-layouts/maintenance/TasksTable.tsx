@@ -1,4 +1,3 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -142,7 +141,7 @@ const TasksTable = ({
     onCommentClick(task.id);
     setRightSidebarContent(<TaskCommentThread taskId={task.id} taskCode={typeof task.task_code === 'string' ? task.task_code : String(task.task_code || 'No Code')} />);
   }}>
-      <TableCell>
+      <TableCell className="w-[8%]">
         <Badge variant="outline" className="font-mono text-xs">
           {task.task_code || '—'}
           {task.queue_position && <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
@@ -150,7 +149,7 @@ const TasksTable = ({
             </span>}
         </Badge>
       </TableCell>
-      <TableCell>
+      <TableCell className="w-[10%]">
         <div className="flex flex-col items-start gap-1">
           <span className="px-2 py-1 text-xs rounded-full font-semibold" style={{
           backgroundColor: getStatusColor(task.status || {
@@ -172,13 +171,13 @@ const TasksTable = ({
             </span>}
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="w-[30%]">
         <div className="flex-1 min-w-0 max-w-[350px]">
           <p className="text-sm break-words">{task.details}</p>
           <p className="text-xs text-gray-500 mt-1">{task.task_type?.name}</p>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="w-[5%]">
         <div className="flex gap-1">
           {task.target_device === 'desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
           {task.target_device === 'mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
@@ -188,7 +187,7 @@ const TasksTable = ({
             </>}
         </div>
       </TableCell>  
-      <TableCell>
+      <TableCell className="w-[7%]">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full" style={{
           backgroundColor: getPriorityColor(task.priority)
@@ -198,7 +197,7 @@ const TasksTable = ({
           </span>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="w-[7%]">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
@@ -212,27 +211,27 @@ const TasksTable = ({
           </Tooltip>
         </TooltipProvider>
       </TableCell>
-      <TableCell className="text-left">
+      <TableCell className="text-left w-[8%]">
         {task.est_start ? <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-600">{format(new Date(task.est_start), "h:mm a")}</span>
             <span className="text-xs text-gray-700">{format(new Date(task.est_start), "MMM d")}</span>
           </div> : <span className="text-xs text-gray-700">Not set</span>}
       </TableCell>
       
-      <TableCell className="text-left">
+      <TableCell className="text-left w-[8%]">
         {task.est_end ? <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-600">{format(new Date(task.est_end), "h:mm a")}</span>
             <span className="text-xs text-gray-700">{format(new Date(task.est_end), "MMM d")}</span>
           </div> : <span className="text-xs text-gray-700">Not set</span>}
       </TableCell>
       
-      <TableCell>
+      <TableCell className="w-[9%]">
         <div className="flex flex-col gap-1">
           {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
         </div>
       </TableCell>
 
-      <TableCell>
+      <TableCell className="w-[8%]">
         <div className="flex -space-x-2">
           {task.images && Array.isArray(task.images) && task.images.length > 0 && (task.images as string[]).map((image, index) => <div key={index} className="w-8 h-8 relative cursor-pointer" onClick={() => onImageClick(image, task.images as string[])}>
                 <img src={image as string} alt={`Task image ${index + 1}`} className="w-8 h-8 rounded-lg border-2 border-white object-cover" />
@@ -349,16 +348,16 @@ const TasksTable = ({
       <Table>
         <TableHeader>
           <TableRow className="bg-white">
-            <TableHead>Task Code</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Details</TableHead>
-            <TableHead>Device</TableHead>
-            <TableHead>Priority</TableHead>
-            <TableHead>Level</TableHead>
-            <TableHead>Start Time</TableHead>
-            <TableHead>ETA</TableHead>
-            <TableHead>Links</TableHead>
-            <TableHead>Assets</TableHead>
+            <TableHead className="w-[8%]">Task Code</TableHead>
+            <TableHead className="w-[10%]">Status</TableHead>
+            <TableHead className="w-[30%]">Details</TableHead>
+            <TableHead className="w-[5%]">Device</TableHead>
+            <TableHead className="w-[7%]">Priority</TableHead>
+            <TableHead className="w-[7%]">Level</TableHead>
+            <TableHead className="w-[8%]">Start Time</TableHead>
+            <TableHead className="w-[8%]">ETA</TableHead>
+            <TableHead className="w-[9%]">Links</TableHead>
+            <TableHead className="w-[8%]">Assets</TableHead>
           </TableRow>
         </TableHeader>
       </Table>
