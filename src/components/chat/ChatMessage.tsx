@@ -37,29 +37,23 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick }: ChatMessageProps) 
     return '?';
   };
 
-  // Get user name
-  const getUserName = () => {
-    if (message.user_profiles) {
-      return `${message.user_profiles.first_name || ''} ${message.user_profiles.last_name || ''}`.trim();
-    }
-    return 'Unknown User';
-  };
-
   return (
-    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} max-w-[85%]`}>
-        <Avatar className="w-8 h-8 mt-1">
-          <AvatarFallback className={isCurrentUser ? "bg-muted text-muted-foreground" : "bg-muted text-muted-foreground"}>
-            {getInitials()}
-          </AvatarFallback>
-        </Avatar>
+    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-2`}>
+      <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} max-w-[80%] group`}>
+        {!isCurrentUser && (
+          <Avatar className="w-8 h-8 mt-1 mr-2">
+            <AvatarFallback className="bg-muted text-muted-foreground">
+              {getInitials()}
+            </AvatarFallback>
+          </Avatar>
+        )}
         
-        <div className={`mx-2 ${isCurrentUser ? 'text-right' : 'text-left'}`}>
+        <div>
           <div 
-            className={`px-4 py-2 rounded-lg ${
+            className={`px-3 py-2 rounded-lg ${
               isCurrentUser 
-                ? 'border border-border bg-card text-card-foreground rounded-tr-none' 
-                : 'border border-border bg-background text-foreground rounded-tl-none'
+                ? 'bg-muted text-foreground rounded-tr-none' 
+                : 'bg-background text-foreground rounded-tl-none'
             }`}
           >
             <p className="text-sm whitespace-pre-line">{formattedContent}</p>
@@ -72,11 +66,10 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick }: ChatMessageProps) 
                 />
               </div>
             )}
-          </div>
-          
-          <div className={`text-xs text-muted-foreground mt-1 ${isCurrentUser ? 'text-right' : 'text-left'}`}>
-            <span className="mr-2">{getUserName()}</span>
-            <span>{format(new Date(message.created_at), 'MMM d, h:mmaaa')}</span>
+            
+            <span className="text-[10px] text-muted-foreground float-right ml-2 mt-1">
+              {format(new Date(message.created_at), 'h:mm a')}
+            </span>
           </div>
         </div>
       </div>

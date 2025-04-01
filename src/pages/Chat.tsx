@@ -10,6 +10,7 @@ import { RealtimeChannel } from "@supabase/supabase-js";
 import ChatMessage from "@/components/chat/ChatMessage";
 import AttachmentHandler from "@/components/project-layouts/maintenance/comments/AttachmentHandler";
 import PreviewDialog from "@/components/project-layouts/maintenance/comments/PreviewDialog";
+import { format, isSameDay } from "date-fns";
 
 interface ChatMessageType {
   id: string;
@@ -228,14 +229,50 @@ const Chat = () => {
     }
   };
 
+  const renderMessages = () => {
+    if (messages.length === 0) return null;
+    
+    let currentDate = '';
+    
+    return messages.map((message, index) => {
+      const messageDate = new Date(message.created_at);
+      const dateStr = format(messageDate, 'EEE, dd MMM'); // e.g., "Tue, 25 Mar"
+      
+      // Check if we need to display a date separator
+      const showDateSeparator = index === 0 || 
+        !isSameDay(messageDate, new Date(messages[index - 1].created_at));
+      
+      if (showDateSeparator) {
+        currentDate = dateStr;
+      }
+      
+      return (
+        <div key={message.id}>
+          {showDateSeparator && (
+            <div className="flex justify-center my-4">
+              <div className="px-3 py-1 text-xs text-muted-foreground bg-muted rounded-full">
+                {currentDate}
+              </div>
+            </div>
+          )}
+          <ChatMessage 
+            message={message}
+            isCurrentUser={message.sender_id === session?.user?.id}
+            onFileClick={handleFileClick}
+          />
+        </div>
+      );
+    });
+  };
+
   return (
-    <div className="container mx-auto p-6 flex justify-center">
-      <Card className="flex flex-col h-[calc(100vh-200px)] max-w-[600px] w-full">
+    <div className="container mx-auto px-4 py-6 flex justify-center h-screen">
+      <Card className="flex flex-col h-[90vh] max-w-[600px] w-full">
         <div className="p-4 border-b">
           <h2 className="text-xl font-bold">Team Chat</h2>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {isLoading ? (
             <div className="flex justify-center items-center h-full">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -246,14 +283,7 @@ const Chat = () => {
             </div>
           ) : (
             <>
-              {messages.map((message) => (
-                <ChatMessage 
-                  key={message.id}
-                  message={message}
-                  isCurrentUser={message.sender_id === session?.user?.id}
-                  onFileClick={handleFileClick}
-                />
-              ))}
+              {renderMessages()}
               <div ref={messagesEndRef} />
             </>
           )}
