@@ -149,11 +149,6 @@ const TasksTable = ({
       <TableCell className="w-[8%] px-4">
         <Badge variant="outline" className="font-mono text-xs">
           {task.task_code || '—'}
-          {task.queue_position && (
-            <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
-              #{task.queue_position}
-            </span>
-          )}
         </Badge>
       </TableCell>
       <TableCell className="w-[10%] px-4">
@@ -171,7 +166,11 @@ const TasksTable = ({
               }, task.is_awaiting_input, task.is_onhold).text
             }}
           >
-            {task.is_awaiting_input ? 'Awaiting Input' : task.is_onhold ? 'On Hold' : task.status?.name}
+            {task.is_awaiting_input ? 'Awaiting Input' : 
+             task.is_onhold ? 'On Hold' :
+             (task.queue_position && task.status?.name?.toLowerCase().includes('queue')) ? 
+               `Queue #${task.queue_position} - ${task.status?.name}` : 
+               task.status?.name}
           </span>
           {task.completed_at && (
             <span className="text-xs text-gray-500 pl-2">
