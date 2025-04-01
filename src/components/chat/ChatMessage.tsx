@@ -47,9 +47,9 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick }: ChatMessageProps) 
 
   return (
     <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} max-w-[80%]`}>
+      <div className={`flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} max-w-[85%]`}>
         <Avatar className="w-8 h-8 mt-1">
-          <AvatarFallback className={isCurrentUser ? "bg-blue-500 text-white" : "bg-gray-300"}>
+          <AvatarFallback className={isCurrentUser ? "bg-muted text-muted-foreground" : "bg-muted text-muted-foreground"}>
             {getInitials()}
           </AvatarFallback>
         </Avatar>
@@ -58,8 +58,8 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick }: ChatMessageProps) 
           <div 
             className={`px-4 py-2 rounded-lg ${
               isCurrentUser 
-                ? 'bg-blue-500 text-white rounded-tr-none' 
-                : 'bg-gray-100 rounded-tl-none'
+                ? 'border border-border bg-card text-card-foreground rounded-tr-none' 
+                : 'border border-border bg-background text-foreground rounded-tl-none'
             }`}
           >
             <p className="text-sm whitespace-pre-line">{formattedContent}</p>
@@ -74,7 +74,7 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick }: ChatMessageProps) 
             )}
           </div>
           
-          <div className={`text-xs text-gray-500 mt-1 ${isCurrentUser ? 'text-right' : 'text-left'}`}>
+          <div className={`text-xs text-muted-foreground mt-1 ${isCurrentUser ? 'text-right' : 'text-left'}`}>
             <span className="mr-2">{getUserName()}</span>
             <span>{format(new Date(message.created_at), 'MMM d, h:mmaaa')}</span>
           </div>

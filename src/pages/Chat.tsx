@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/auth";
@@ -36,7 +35,6 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
-  // Fetch initial messages and set up real-time subscription
   useEffect(() => {
     if (!session?.user) return;
 
@@ -54,7 +52,6 @@ const Chat = () => {
         if (error) throw error;
         setMessages((data as unknown) as ChatMessageType[] || []);
 
-        // Mark all messages as read
         await markAllMessagesAsRead();
       } catch (error) {
         console.error("Error fetching messages:", error);
@@ -67,7 +64,6 @@ const Chat = () => {
       }
     };
 
-    // Subscribe to real-time changes
     const setupRealtimeSubscription = () => {
       const channel = supabase
         .channel("chat-updates")
@@ -81,7 +77,6 @@ const Chat = () => {
           async (payload) => {
             console.log("Realtime chat update:", payload);
             if (payload.eventType === "INSERT") {
-              // Fetch the full message with user data
               const { data } = await supabase
                 .from('chat_messages' as any)
                 .select(`
@@ -95,7 +90,6 @@ const Chat = () => {
                 const typedData = data as unknown as ChatMessageType;
                 setMessages((prevMessages) => [...prevMessages, typedData]);
                 
-                // Mark message as read if it's not from the current user
                 if (typedData.sender_id !== session.user?.id) {
                   await markMessageAsRead(typedData.id);
                 }
@@ -118,7 +112,6 @@ const Chat = () => {
     };
   }, [session?.user, toast]);
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -131,7 +124,6 @@ const Chat = () => {
     if (!session?.user?.id) return;
 
     try {
-      // Get all unread messages
       const { data: unreadMessages } = await supabase
         .from('chat_messages' as any)
         .select("id")
@@ -143,7 +135,6 @@ const Chat = () => {
 
       if (!unreadMessages || unreadMessages.length === 0) return;
 
-      // Mark each message as read
       for (const msg of unreadMessages) {
         await markMessageAsRead((msg as any).id);
       }
@@ -174,7 +165,6 @@ const Chat = () => {
 
     setIsSubmitting(true);
     try {
-      // Upload attachments if any
       const uploadedFiles: string[] = [];
 
       if (selectedFiles.length > 0) {
@@ -200,7 +190,6 @@ const Chat = () => {
         }
       }
 
-      // Insert the message
       const { error: messageError } = await supabase
         .from('chat_messages' as any)
         .insert({
@@ -240,13 +229,12 @@ const Chat = () => {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <Card className="flex flex-col h-[calc(100vh-200px)]">
+    <div className="container mx-auto p-6 flex justify-center">
+      <Card className="flex flex-col h-[calc(100vh-200px)] max-w-[600px] w-full">
         <div className="p-4 border-b">
           <h2 className="text-xl font-bold">Team Chat</h2>
         </div>
 
-        {/* Message container */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {isLoading ? (
             <div className="flex justify-center items-center h-full">
@@ -271,7 +259,6 @@ const Chat = () => {
           )}
         </div>
 
-        {/* Message input */}
         <div className="border-t p-4">
           <div className="space-y-2">
             <Textarea
