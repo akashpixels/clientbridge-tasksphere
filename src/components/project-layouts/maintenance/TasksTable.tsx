@@ -169,7 +169,7 @@ const TasksTable = ({
             {task.is_awaiting_input ? 'Awaiting Input' : 
              task.is_onhold ? 'On Hold' :
              (task.queue_position && task.status?.name?.toLowerCase().includes('queue')) ? 
-               `#${task.queue_position} | ${task.status?.name}` : 
+               `#${task.queue_position}  ${task.status?.name}` : 
                task.status?.name}
           </span>
           {task.completed_at && (
