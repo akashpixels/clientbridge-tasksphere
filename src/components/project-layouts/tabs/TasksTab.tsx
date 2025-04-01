@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -93,22 +92,22 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
   const getTaskSortOrder = (task: any) => {
     const statusName = task.status?.name?.toLowerCase() || '';
     
-    if (statusName.includes('complete') || statusName.includes('approved') || 
-        statusName.includes('verified') || statusName.includes('done') || 
-        task.completed_at) {
-      return 1; // Completed tasks
-    }
-    
     if (statusName.includes('progress') || statusName === 'open' || 
         statusName.includes('active') || statusName.includes('work')) {
-      return 2; // Active tasks
+      return 1; // Active tasks - highest priority
     }
     
     if (statusName.includes('queue') || task.queue_position) {
-      return 3; // Scheduled tasks
+      return 2; // Scheduled/queue tasks - second priority
     }
     
-    return 4; // Special case tasks
+    if (statusName.includes('complete') || statusName.includes('approved') || 
+        statusName.includes('verified') || statusName.includes('done') || 
+        task.completed_at) {
+      return 3; // Completed tasks - third priority
+    }
+    
+    return 4; // Special case tasks - lowest priority
   };
 
   const sortedTasks = processedTasks.sort((a, b) => {
@@ -119,21 +118,21 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
       return aOrder - bOrder;
     }
     
-    if (aOrder === 1 && a.completed_at && b.completed_at) {
-      // For completed tasks, sort by completion date (newest first)
-      return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime();
-    }
-    
-    if (aOrder === 2) {
+    if (aOrder === 1) {
       // For active tasks, sort by creation date (newest first)
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     }
     
-    if (aOrder === 3) {
+    if (aOrder === 2) {
       // For scheduled tasks, sort by queue position
       const aPosition = a.queue_position || 999;
       const bPosition = b.queue_position || 999;
       return aPosition - bPosition;
+    }
+    
+    if (aOrder === 3 && a.completed_at && b.completed_at) {
+      // For completed tasks, sort by completion date (newest first)
+      return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime();
     }
     
     // Default sort by creation date (newest first)
