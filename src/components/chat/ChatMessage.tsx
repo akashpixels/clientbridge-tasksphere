@@ -52,46 +52,46 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick, isRead = false }: Ch
         
         <div>
           <div 
-            className={`px-3 py-2 rounded-lg ${
+            className={`px-3 py-1.5 rounded-lg ${
               isCurrentUser 
                 ? 'bg-muted text-foreground rounded-tr-none' 
                 : 'bg-background text-foreground rounded-tl-none'
             }`}
           >
-            <p className="text-sm whitespace-pre-line">{formattedContent}</p>
+            <div className="flex flex-wrap items-end justify-between gap-1">
+              <div className="flex-grow text-sm">
+                {formattedContent}
+              </div>
+              
+              <div className="flex items-center text-[10px] text-muted-foreground whitespace-nowrap ml-1.5 mb-0.5 flex-shrink-0">
+                <span>{format(new Date(message.created_at), 'h:mm a')}</span>
+                
+                {isCurrentUser && (
+                  <span className="flex items-center ml-1">
+                    {isRead ? (
+                      <>
+                        <Check className="h-3 w-3 text-blue-500" strokeWidth={2} />
+                        <Check className="h-3 w-3 text-blue-500 -ml-1.5" strokeWidth={2} />
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-3 w-3 text-muted-foreground" strokeWidth={2} />
+                        <Check className="h-3 w-3 text-muted-foreground -ml-1.5" strokeWidth={2} />
+                      </>
+                    )}
+                  </span>
+                )}
+              </div>
+            </div>
             
             {message.attachments && message.attachments.length > 0 && (
-              <div className="mt-2">
+              <div className="mt-1">
                 <FilePreview 
                   files={message.attachments} 
                   onFileClick={onFileClick} 
                 />
               </div>
             )}
-            
-            <div className="flex items-center justify-end mt-1 space-x-1 text-[10px] text-muted-foreground">
-              <span>
-                {format(new Date(message.created_at), 'h:mm a')}
-              </span>
-              
-              {isCurrentUser && (
-                <div className="flex items-center ml-1">
-                  {isRead ? (
-                    // Blue double tick (read)
-                    <>
-                      <Check className="h-3 w-3 text-blue-500" strokeWidth={2} />
-                      <Check className="h-3 w-3 text-blue-500 -ml-1.5" strokeWidth={2} />
-                    </>
-                  ) : (
-                    // Grey double tick (delivered but not read)
-                    <>
-                      <Check className="h-3 w-3 text-muted-foreground" strokeWidth={2} />
-                      <Check className="h-3 w-3 text-muted-foreground -ml-1.5" strokeWidth={2} />
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>
