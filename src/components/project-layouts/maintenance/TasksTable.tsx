@@ -18,7 +18,6 @@ import {
 import { useLayout } from "@/context/layout";
 import { Badge } from "@/components/ui/badge";
 import TaskCommentThread from "./comments/TaskCommentThread";
-import { Separator } from "@/components/ui/separator";
 
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
@@ -408,13 +407,12 @@ const TasksTable = ({
   };
 
   const renderSectionHeader = (sectionName: string) => (
-    <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+    <h3 className="text-sm font-medium text-gray-700 mb-2">
       {getGroupLabel(sectionName)}
-      <Separator className="flex-grow bg-gray-200" />
     </h3>
   );
 
-  const StickyHeader = () => (
+  const TableHeader = () => (
     <div className="sticky top-0 z-10 bg-white shadow-sm rounded-lg mb-6">
       <Table>
         <TableHeader>
@@ -439,22 +437,22 @@ const TasksTable = ({
     if (taskList.length === 0) return null;
     
     return (
-      <div className="mb-6">
+      <>
         {renderSectionHeader(title)}
-        <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white border rounded-lg shadow-sm overflow-hidden mb-6">
           <Table>
             <TableBody>
               {taskList.map(task => renderTaskRow(task))}
             </TableBody>
           </Table>
         </div>
-      </div>
+      </>
     );
   };
 
   return (
     <>
-      <StickyHeader />
+      <TableHeader />
       
       {groupedTasks.active.length > 0 && (
         <TaskSection title="active" taskList={groupedTasks.active} />
