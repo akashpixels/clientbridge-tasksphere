@@ -412,26 +412,28 @@ const TasksTable = ({
     </h3>
   );
 
-  const TableHeader = () => (
-    <div className="sticky top-0 z-10 bg-white shadow-sm rounded-lg mb-6">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Task Code</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Details</TableHead>
-            <TableHead>Device</TableHead>
-            <TableHead>Priority</TableHead>
-            <TableHead>Level</TableHead>
-            <TableHead>Start Time</TableHead>
-            <TableHead>ETA</TableHead>
-            <TableHead>Links</TableHead>
-            <TableHead>Assets</TableHead>
-          </TableRow>
-        </TableHeader>
-      </Table>
-    </div>
-  );
+  const TableHeader = () => {
+    return (
+      <div className="sticky top-0 z-10 bg-white shadow-sm rounded-lg mb-6">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Task Code</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Details</TableHead>
+              <TableHead>Device</TableHead>
+              <TableHead>Priority</TableHead>
+              <TableHead>Level</TableHead>
+              <TableHead>Start Time</TableHead>
+              <TableHead>ETA</TableHead>
+              <TableHead>Links</TableHead>
+              <TableHead>Assets</TableHead>
+            </TableRow>
+          </TableHeader>
+        </Table>
+      </div>
+    );
+  };
 
   const TaskSection = ({ title, taskList }: { title: string, taskList: typeof tasks }) => {
     if (taskList.length === 0) return null;
