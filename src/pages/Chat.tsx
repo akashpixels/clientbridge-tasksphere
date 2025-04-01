@@ -92,11 +92,12 @@ const Chat = () => {
                 .single();
 
               if (data) {
-                setMessages((prevMessages) => [...prevMessages, (data as unknown) as ChatMessageType]);
+                const typedData = data as unknown as ChatMessageType;
+                setMessages((prevMessages) => [...prevMessages, typedData]);
                 
                 // Mark message as read if it's not from the current user
-                if (data.sender_id !== session.user?.id) {
-                  await markMessageAsRead(data.id);
+                if (typedData.sender_id !== session.user?.id) {
+                  await markMessageAsRead(typedData.id);
                 }
               }
             }
@@ -144,7 +145,7 @@ const Chat = () => {
 
       // Mark each message as read
       for (const msg of unreadMessages) {
-        await markMessageAsRead(msg.id);
+        await markMessageAsRead((msg as any).id);
       }
     } catch (error) {
       console.error("Error marking messages as read:", error);

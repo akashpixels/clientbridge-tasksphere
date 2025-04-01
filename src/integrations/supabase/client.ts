@@ -35,8 +35,8 @@ export const getUnreadMessageCount = async (userId: string | undefined): Promise
     if (readError) throw readError;
     
     // Calculate unread count
-    const readMessageIds = reads?.map(read => read.message_id) || [];
-    const unreadCount = messages.filter(msg => !readMessageIds.includes(msg.id)).length;
+    const readMessageIds = reads?.map((read: any) => read.message_id) || [];
+    const unreadCount = messages.filter((msg: any) => !readMessageIds.includes(msg.id)).length;
     
     return unreadCount;
   } catch (error) {
