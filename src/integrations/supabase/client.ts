@@ -17,8 +17,9 @@ export const getUnreadMessageCount = async (userId: string | undefined): Promise
   
   try {
     // Get all messages
+    // Using any type here as a workaround since the generated types don't include the new tables yet
     const { data: messages, error: msgError } = await supabase
-      .from('chat_messages')
+      .from('chat_messages' as any)
       .select('id, created_at')
       .order('created_at', { ascending: false });
       
@@ -27,7 +28,7 @@ export const getUnreadMessageCount = async (userId: string | undefined): Promise
     
     // Get all messages read by the current user
     const { data: reads, error: readError } = await supabase
-      .from('message_reads')
+      .from('message_reads' as any)
       .select('message_id')
       .eq('user_id', userId);
       

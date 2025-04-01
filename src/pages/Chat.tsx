@@ -1,12 +1,12 @@
 
 import { useEffect, useState, useRef } from "react";
-import { supabase, getUnreadMessageCount } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/auth";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Send, Paperclip } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import ChatMessage from "@/components/chat/ChatMessage";
 import AttachmentHandler from "@/components/project-layouts/maintenance/comments/AttachmentHandler";
@@ -44,7 +44,7 @@ const Chat = () => {
       try {
         setIsLoading(true);
         const { data, error } = await supabase
-          .from("chat_messages")
+          .from('chat_messages' as any)
           .select(`
             *,
             user_profiles(first_name, last_name)
@@ -52,7 +52,7 @@ const Chat = () => {
           .order("created_at", { ascending: true });
 
         if (error) throw error;
-        setMessages(data || []);
+        setMessages((data as unknown) as ChatMessageType[] || []);
 
         // Mark all messages as read
         await markAllMessagesAsRead();
@@ -83,7 +83,7 @@ const Chat = () => {
             if (payload.eventType === "INSERT") {
               // Fetch the full message with user data
               const { data } = await supabase
-                .from("chat_messages")
+                .from('chat_messages' as any)
                 .select(`
                   *,
                   user_profiles(first_name, last_name)
@@ -92,7 +92,7 @@ const Chat = () => {
                 .single();
 
               if (data) {
-                setMessages((prevMessages) => [...prevMessages, data]);
+                setMessages((prevMessages) => [...prevMessages, (data as unknown) as ChatMessageType]);
                 
                 // Mark message as read if it's not from the current user
                 if (data.sender_id !== session.user?.id) {
@@ -132,10 +132,10 @@ const Chat = () => {
     try {
       // Get all unread messages
       const { data: unreadMessages } = await supabase
-        .from("chat_messages")
+        .from('chat_messages' as any)
         .select("id")
         .not("id", "in", supabase
-          .from("message_reads")
+          .from('message_reads' as any)
           .select("message_id")
           .eq("user_id", session.user.id)
         );
@@ -155,7 +155,7 @@ const Chat = () => {
     if (!session?.user?.id) return;
 
     try {
-      await supabase.from("message_reads").upsert(
+      await supabase.from('message_reads' as any).upsert(
         {
           message_id: messageId,
           user_id: session.user.id,
@@ -201,7 +201,7 @@ const Chat = () => {
 
       // Insert the message
       const { error: messageError } = await supabase
-        .from("chat_messages")
+        .from('chat_messages' as any)
         .insert({
           sender_id: session.user.id,
           content: newMessage.trim() || (uploadedFiles.length > 0 ? "Attached files" : ""),
