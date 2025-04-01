@@ -1,6 +1,5 @@
 
 import React, { useEffect, useState } from 'react';
-import { Card } from "@/components/ui/card";
 import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
@@ -126,8 +125,7 @@ const TasksTabContent = ({
   })) || [];
 
   return (
-<div className="p-0">
-
+    <div className="p-0">
       {isLoadingTasks ? (
         <div className="flex items-center justify-center p-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />

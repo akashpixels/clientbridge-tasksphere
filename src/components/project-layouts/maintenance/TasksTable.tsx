@@ -7,6 +7,7 @@ import { useLayout } from "@/context/layout";
 import { Badge } from "@/components/ui/badge";
 import TaskCommentThread from "./comments/TaskCommentThread";
 import { Separator } from "@/components/ui/separator";
+
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
     task_type: {
@@ -48,6 +49,7 @@ interface TasksTableProps {
   onCommentClick: (taskId: string) => void;
   selectedTaskId?: string;
 }
+
 const formatInterval = (intervalValue: any): string => {
   if (!intervalValue) return "0h";
   if (typeof intervalValue === 'number') {
@@ -81,6 +83,7 @@ const formatInterval = (intervalValue: any): string => {
     return "0h";
   }
 };
+
 const getTaskGroup = (task: any) => {
   const statusName = (task.status?.name || '').toLowerCase();
   if (statusName.includes('progress') || statusName === 'open' || statusName.includes('active') || statusName.includes('work')) {
@@ -94,6 +97,7 @@ const getTaskGroup = (task: any) => {
   }
   return 'special'; // Special case tasks
 };
+
 const getGroupLabel = (groupId: string) => {
   switch (groupId) {
     case 'active':
@@ -108,6 +112,7 @@ const getGroupLabel = (groupId: string) => {
       return "Tasks";
   }
 };
+
 const TasksTable = ({
   tasks,
   sortConfig,
@@ -119,16 +124,19 @@ const TasksTable = ({
   const {
     setRightSidebarContent
   } = useLayout();
+
   const groupedTasks: Record<string, typeof tasks> = {
     active: [],
     scheduled: [],
     completed: [],
     special: []
   };
+
   tasks.forEach(task => {
     const group = getTaskGroup(task);
     groupedTasks[group].push(task);
   });
+
   const renderTaskRow = (task: typeof tasks[0]) => <TableRow key={task.id} className={`cursor-pointer ${selectedTaskId === task.id ? 'bg-muted/30' : 'hover:bg-muted/30'}`} onClick={() => {
     onCommentClick(task.id);
     setRightSidebarContent(<TaskCommentThread taskId={task.id} taskCode={typeof task.task_code === 'string' ? task.task_code : String(task.task_code || 'No Code')} />);
@@ -232,12 +240,15 @@ const TasksTable = ({
         </div>
       </TableCell>
     </TableRow>;
+
   const formatETA = (date: string) => {
     return format(new Date(date), "h.mmaaa do MMM");
   };
+
   const formatDateTime = (date: string) => {
     return format(new Date(date), "MMM d, h:mm a");
   };
+
   const getStatusColor = (status: {
     name: string | null;
     color_hex: string | null;
@@ -283,6 +294,7 @@ const TasksTable = ({
       text: enhancedColor
     };
   };
+
   const getComplexityBars = (complexity: {
     name: string;
     multiplier: number;
@@ -300,6 +312,7 @@ const TasksTable = ({
     };
     return complexityMap[complexity.name] || 1;
   };
+
   const getPriorityColor = (priority: {
     name: string;
     color_hex: string;
@@ -317,6 +330,7 @@ const TasksTable = ({
     };
     return priorityColors[priority.name] || priority.color_hex || '#9CA3AF';
   };
+
   const renderReferenceLinks = (links: Record<string, string> | null) => {
     if (!links) return null;
     return Object.entries(links).map(([text, url], index) => <a key={index} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-gray-800 hover:text-gray-600">
@@ -324,11 +338,12 @@ const TasksTable = ({
         {String(text)}
       </a>);
   };
+
   const renderSectionHeader = (sectionName: string) => <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2 px-[6px]">
       {getGroupLabel(sectionName)}
-      
     </h3>;
-  const StickyHeader = () => <div className="sticky top-0 z-10 bg-white shadow-sm rounded-lg mb-6">
+
+  const RegularHeader = () => <div className="rounded-lg mb-6">
       <Table>
         <TableHeader>
           <TableRow>
@@ -346,6 +361,7 @@ const TasksTable = ({
         </TableHeader>
       </Table>
     </div>;
+
   const TaskSection = ({
     title,
     taskList
@@ -356,7 +372,7 @@ const TasksTable = ({
     if (taskList.length === 0) return null;
     return <div className="mb-6">
         {renderSectionHeader(title)}
-        <div className="bg-white border rounded-lg  overflow-hidden">
+        <div className="bg-white border rounded-lg overflow-hidden">
           <Table>
             <TableBody>
               {taskList.map(task => renderTaskRow(task))}
@@ -365,8 +381,9 @@ const TasksTable = ({
         </div>
       </div>;
   };
+
   return <>
-      <StickyHeader />
+      <RegularHeader />
       
       {groupedTasks.active.length > 0 && <TaskSection title="active" taskList={groupedTasks.active} />}
       
@@ -377,4 +394,5 @@ const TasksTable = ({
       {groupedTasks.special.length > 0 && <TaskSection title="special" taskList={groupedTasks.special} />}
     </>;
 };
+
 export default TasksTable;
