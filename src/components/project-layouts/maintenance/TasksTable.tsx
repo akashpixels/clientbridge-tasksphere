@@ -356,7 +356,7 @@ const TasksTable = ({
     if (taskList.length === 0) return null;
     return <div className="mb-6">
         {renderSectionHeader(title)}
-        <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white  rounded-lg shadow-sm overflow-hidden">
           <Table>
             <TableBody>
               {taskList.map(task => renderTaskRow(task))}
