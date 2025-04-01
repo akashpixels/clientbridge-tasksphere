@@ -180,10 +180,10 @@ const Chat = () => {
       if (selectedFiles.length > 0) {
         for (const file of selectedFiles) {
           const fileName = `${Date.now()}_${file.name}`;
-          const filePath = `chat_messages/${session.user.id}/${fileName}`;
+          const filePath = `${session.user.id}/${fileName}`;
           
           const { data: uploadData, error: uploadError } = await supabase.storage
-            .from("task-attachments")
+            .from("chat_attachment")  // Use the new bucket name
             .upload(filePath, file);
 
           if (uploadError) {
@@ -192,7 +192,7 @@ const Chat = () => {
 
           if (uploadData) {
             const { data: urlData } = supabase.storage
-              .from("task-attachments")
+              .from("chat_attachment")  // Use the new bucket name
               .getPublicUrl(filePath);
             
             uploadedFiles.push(urlData.publicUrl);

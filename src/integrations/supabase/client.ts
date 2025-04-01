@@ -23,7 +23,11 @@ export const getUnreadMessageCount = async (userId: string | undefined): Promise
       .select('id, created_at')
       .order('created_at', { ascending: false });
       
-    if (msgError) throw msgError;
+    if (msgError) {
+      console.error('Error fetching messages:', msgError);
+      return 0;
+    }
+    
     if (!messages || messages.length === 0) return 0;
     
     // Get all messages read by the current user
@@ -32,7 +36,10 @@ export const getUnreadMessageCount = async (userId: string | undefined): Promise
       .select('message_id')
       .eq('user_id', userId);
       
-    if (readError) throw readError;
+    if (readError) {
+      console.error('Error fetching message reads:', readError);
+      return 0;
+    }
     
     // Calculate unread count
     const readMessageIds = reads?.map((read: any) => read.message_id) || [];
