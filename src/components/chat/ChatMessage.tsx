@@ -52,36 +52,35 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick, isRead = false }: Ch
         
         <div>
           <div 
-            className={`px-3 py-1.5 rounded-lg ${
+            className={`px-3 py-1.5 rounded-lg relative ${
               isCurrentUser 
                 ? 'bg-muted text-foreground rounded-tr-none' 
                 : 'bg-background text-foreground rounded-tl-none'
             }`}
           >
-            <div className="flex flex-wrap items-end justify-between gap-1">
-              <div className="flex-grow text-sm">
-                {formattedContent}
-              </div>
+            <div className="text-sm pr-12"> {/* Add right padding to make space for timestamp */}
+              {formattedContent}
+            </div>
+            
+            {/* Timestamp and read receipts - absolutely positioned at bottom right */}
+            <div className="absolute bottom-1 right-2 flex items-center text-[10px] text-muted-foreground whitespace-nowrap">
+              <span>{format(new Date(message.created_at), 'h:mm a')}</span>
               
-              <div className="flex items-center text-[10px] text-muted-foreground whitespace-nowrap ml-1.5 mb-0.5 flex-shrink-0">
-                <span>{format(new Date(message.created_at), 'h:mm a')}</span>
-                
-                {isCurrentUser && (
-                  <span className="flex items-center ml-1">
-                    {isRead ? (
-                      <>
-                        <Check className="h-3 w-3 text-blue-500" strokeWidth={2} />
-                        <Check className="h-3 w-3 text-blue-500 -ml-1.5" strokeWidth={2} />
-                      </>
-                    ) : (
-                      <>
-                        <Check className="h-3 w-3 text-muted-foreground" strokeWidth={2} />
-                        <Check className="h-3 w-3 text-muted-foreground -ml-1.5" strokeWidth={2} />
-                      </>
-                    )}
-                  </span>
-                )}
-              </div>
+              {isCurrentUser && (
+                <span className="flex items-center ml-1">
+                  {isRead ? (
+                    <>
+                      <Check className="h-3 w-3 text-blue-500" strokeWidth={2} />
+                      <Check className="h-3 w-3 text-blue-500 -ml-1.5" strokeWidth={2} />
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-3 w-3 text-muted-foreground" strokeWidth={2} />
+                      <Check className="h-3 w-3 text-muted-foreground -ml-1.5" strokeWidth={2} />
+                    </>
+                  )}
+                </span>
+              )}
             </div>
             
             {message.attachments && message.attachments.length > 0 && (

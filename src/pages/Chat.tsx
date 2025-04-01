@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/auth";
@@ -60,7 +59,6 @@ const Chat = () => {
         if (error) throw error;
         setMessages((data as unknown) as ChatMessageType[] || []);
 
-        // Fetch message read status
         const { data: readData, error: readError } = await supabase
           .from('message_reads' as any)
           .select('message_id, user_id');
@@ -194,7 +192,6 @@ const Chat = () => {
   const isMessageRead = (messageId: string) => {
     if (!session?.user?.id) return false;
     
-    // For the current user's messages, check if ANY other user has read it
     const senderMessage = messages.find(m => m.id === messageId);
     if (senderMessage?.sender_id === session.user.id) {
       return messageReads.some(read => 
@@ -203,7 +200,6 @@ const Chat = () => {
       );
     }
     
-    // For messages from others, always return false (no read receipts)
     return false;
   };
 
@@ -282,9 +278,8 @@ const Chat = () => {
     
     return messages.map((message, index) => {
       const messageDate = new Date(message.created_at);
-      const dateStr = format(messageDate, 'EEE, dd MMM'); // e.g., "Tue, 25 Mar"
+      const dateStr = format(messageDate, 'EEE, dd MMM');
       
-      // Check if we need to display a date separator
       const showDateSeparator = index === 0 || 
         !isSameDay(messageDate, new Date(messages[index - 1].created_at));
       
@@ -313,12 +308,8 @@ const Chat = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 flex items-center justify-center min-h-screen">
+    <div className="container mx-auto px-4 py-6 flex items-center justify-center h-screen">
       <Card className="flex flex-col h-[90vh] max-w-[600px] w-full">
-        <div className="p-4 border-b">
-          <h2 className="text-xl font-bold">Team Chat</h2>
-        </div>
-
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {isLoading ? (
             <div className="flex justify-center items-center h-full">
