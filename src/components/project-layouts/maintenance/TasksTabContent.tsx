@@ -126,7 +126,7 @@ const TasksTabContent = ({
   })) || [];
 
   return (
-<Card className="p-0 border-0 shadow-none bg-transparent">
+<div className="p-0">
 
       {isLoadingTasks ? (
         <div className="flex items-center justify-center p-8">
@@ -158,7 +158,7 @@ const TasksTabContent = ({
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 };
 
