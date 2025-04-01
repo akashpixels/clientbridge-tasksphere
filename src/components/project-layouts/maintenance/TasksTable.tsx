@@ -392,7 +392,7 @@ const TasksTable = ({
       <Table>
         <TableHeader>
           <TableRow className="bg-white">
-            <TableHead className="w-[8%] px-4">Task Code</TableHead>
+            <TableHead className="w-[8%] px-4">No</TableHead>
             <TableHead className="w-[10%] px-4">Status</TableHead>
             <TableHead className="w-[30%] px-4">Details</TableHead>
             <TableHead className="w-[5%] px-4 text-center">Device</TableHead>
