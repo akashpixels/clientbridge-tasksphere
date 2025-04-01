@@ -2,6 +2,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import FilePreview from "@/components/project-layouts/maintenance/comments/FilePreview";
+import { Check } from "lucide-react";
 
 interface ChatMessageProps {
   message: {
@@ -17,9 +18,10 @@ interface ChatMessageProps {
   };
   isCurrentUser: boolean;
   onFileClick: (url: string) => void;
+  isRead?: boolean;
 }
 
-const ChatMessage = ({ message, isCurrentUser, onFileClick }: ChatMessageProps) => {
+const ChatMessage = ({ message, isCurrentUser, onFileClick, isRead = false }: ChatMessageProps) => {
   const formattedContent = message.content.split('\n').map((line, index) => (
     <span key={index}>
       {line}
@@ -67,9 +69,20 @@ const ChatMessage = ({ message, isCurrentUser, onFileClick }: ChatMessageProps) 
               </div>
             )}
             
-            <span className="text-[10px] text-muted-foreground float-right ml-2 mt-1">
-              {format(new Date(message.created_at), 'h:mm a')}
-            </span>
+            <div className="flex items-center justify-end mt-1 space-x-1">
+              {isCurrentUser && (
+                <div className="flex items-center">
+                  <Check 
+                    className={`h-3 w-3 ${isRead ? 'text-blue-500' : 'text-muted-foreground'}`} 
+                    strokeWidth={3}
+                  />
+                  {isRead && <Check className="h-3 w-3 text-blue-500 -ml-1.5" strokeWidth={3} />}
+                </div>
+              )}
+              <span className="text-[10px] text-muted-foreground">
+                {format(new Date(message.created_at), 'h:mm a')}
+              </span>
+            </div>
           </div>
         </div>
       </div>

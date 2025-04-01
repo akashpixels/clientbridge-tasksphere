@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/auth";
@@ -24,10 +25,16 @@ interface ChatMessageType {
   } | null;
 }
 
+interface MessageRead {
+  message_id: string;
+  user_id: string;
+}
+
 const Chat = () => {
   const { session } = useAuth();
   const { toast } = useToast();
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
+  const [messageReads, setMessageReads] = useState<MessageRead[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,6 +59,14 @@ const Chat = () => {
 
         if (error) throw error;
         setMessages((data as unknown) as ChatMessageType[] || []);
+
+        // Fetch message read status
+        const { data: readData, error: readError } = await supabase
+          .from('message_reads' as any)
+          .select('message_id, user_id');
+
+        if (readError) throw readError;
+        setMessageReads((readData as unknown) as MessageRead[] || []);
 
         await markAllMessagesAsRead();
       } catch (error) {
@@ -96,6 +111,21 @@ const Chat = () => {
                 }
               }
             }
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "message_reads",
+          },
+          (payload) => {
+            console.log("Message read update:", payload);
+            setMessageReads(prev => [
+              ...prev,
+              { message_id: payload.new.message_id, user_id: payload.new.user_id } as MessageRead
+            ]);
           }
         )
         .subscribe();
@@ -161,6 +191,22 @@ const Chat = () => {
     }
   };
 
+  const isMessageRead = (messageId: string) => {
+    if (!session?.user?.id) return false;
+    
+    // For the current user's messages, check if ANY other user has read it
+    const senderMessage = messages.find(m => m.id === messageId);
+    if (senderMessage?.sender_id === session.user.id) {
+      return messageReads.some(read => 
+        read.message_id === messageId && 
+        read.user_id !== session.user.id
+      );
+    }
+    
+    // For messages from others, always return false (no read receipts)
+    return false;
+  };
+
   const handleSendMessage = async () => {
     if ((!newMessage.trim() && selectedFiles.length === 0) || !session?.user?.id) return;
 
@@ -174,7 +220,7 @@ const Chat = () => {
           const filePath = `${session.user.id}/${fileName}`;
           
           const { data: uploadData, error: uploadError } = await supabase.storage
-            .from("chat_attachment")  // Use the new bucket name
+            .from("chat_attachment") 
             .upload(filePath, file);
 
           if (uploadError) {
@@ -183,7 +229,7 @@ const Chat = () => {
 
           if (uploadData) {
             const { data: urlData } = supabase.storage
-              .from("chat_attachment")  // Use the new bucket name
+              .from("chat_attachment")
               .getPublicUrl(filePath);
             
             uploadedFiles.push(urlData.publicUrl);
@@ -259,6 +305,7 @@ const Chat = () => {
             message={message}
             isCurrentUser={message.sender_id === session?.user?.id}
             onFileClick={handleFileClick}
+            isRead={isMessageRead(message.id)}
           />
         </div>
       );
