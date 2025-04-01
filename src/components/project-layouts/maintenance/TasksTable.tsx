@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -102,32 +103,32 @@ const formatInterval = (intervalValue: any): string => {
 };
 
 const getTaskGroup = (task: any) => {
-  const statusName = task.status?.name?.toLowerCase() || '';
+  const statusName = (task.status?.name || '').toLowerCase();
   
   if (statusName.includes('progress') || statusName === 'open' || 
       statusName.includes('active') || statusName.includes('work')) {
-    return 1; // Active tasks
+    return 'active'; // Active tasks
   }
   
   if (statusName.includes('queue') || task.queue_position) {
-    return 2; // Scheduled/queue tasks
+    return 'scheduled'; // Scheduled/queue tasks
   }
   
   if (statusName.includes('complete') || statusName.includes('approved') || 
-      statusName.includes('verified') || statusName.includes('done') || 
-      task.completed_at) {
-    return 3; // Completed tasks
+      statusName.includes('verified') || statusName.includes('done') ||
+      statusName.includes('closed') || task.completed_at) {
+    return 'completed'; // Completed tasks
   }
   
-  return 4; // Special case tasks
+  return 'special'; // Special case tasks
 };
 
-const getGroupLabel = (groupId: number) => {
+const getGroupLabel = (groupId: string) => {
   switch (groupId) {
-    case 1: return "Active Tasks";
-    case 2: return "Scheduled Tasks";
-    case 3: return "Completed Tasks";
-    case 4: return "Other Tasks";
+    case 'active': return "Active Tasks";
+    case 'scheduled': return "Scheduled Tasks";
+    case 'completed': return "Completed Tasks";
+    case 'special': return "Other Tasks";
     default: return "Tasks";
   }
 };
@@ -141,6 +142,173 @@ const TasksTable = ({
   selectedTaskId 
 }: TasksTableProps) => {
   const { setRightSidebarContent } = useLayout();
+
+  // Group tasks by their status
+  const groupedTasks: Record<string, typeof tasks> = {
+    active: [],
+    scheduled: [],
+    completed: [],
+    special: [],
+  };
+  
+  tasks.forEach(task => {
+    const group = getTaskGroup(task);
+    groupedTasks[group].push(task);
+  });
+
+  const renderTaskRow = (task: typeof tasks[0]) => (
+    <TableRow 
+      key={task.id}
+      className={`cursor-pointer ${selectedTaskId === task.id ? 'bg-muted/30' : 'hover:bg-muted/30'}`}
+      onClick={() => {
+        onCommentClick(task.id);
+        setRightSidebarContent(
+          <TaskCommentThread 
+            taskId={task.id} 
+            taskCode={typeof task.task_code === 'string' ? task.task_code : String(task.task_code || 'No Code')} 
+          />
+        );
+      }}
+    >
+      <TableCell>
+        <Badge 
+          variant="outline" 
+          className="font-mono text-xs"
+        >
+          {task.task_code || '—'}
+          {task.queue_position && (
+            <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
+              #{task.queue_position}
+            </span>
+          )}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <div className="flex flex-col items-start gap-1">
+          <span 
+            className="px-2 py-1 text-xs rounded-full font-semibold"
+            style={{
+              backgroundColor: getStatusColor(task.status || { name: null, color_hex: null }, task.is_awaiting_input, task.is_onhold).bg,
+              color: getStatusColor(task.status || { name: null, color_hex: null }, task.is_awaiting_input, task.is_onhold).text
+            }}
+          >
+            {task.is_awaiting_input ? 'Awaiting Input' : task.is_onhold ? 'On Hold' : task.status?.name}
+          </span>
+          {task.completed_at && (
+            <span className="text-xs text-gray-500 pl-2">
+              {task.logged_duration ? formatInterval(task.logged_duration) : 
+               task.actual_duration ? formatInterval(task.actual_duration) : '0h'}
+            </span>
+          )}
+          {task.status?.name === 'Open' && task.est_start && (
+            <span className="text-xs text-gray-500 pl-2">
+              {format(new Date(task.est_start), "h:mmaaa d MMM")}
+            </span>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex-1 min-w-0 max-w-[350px]">
+          <p className="text-sm break-words">{task.details}</p>
+          <p className="text-xs text-gray-500 mt-1">{task.task_type?.name}</p>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex gap-1">
+          {task.target_device === 'desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
+          {task.target_device === 'mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
+          {task.target_device === 'both' && (
+            <>
+              <Monitor className="w-4 h-4 text-gray-500" />
+              <Smartphone className="w-4 h-4 text-gray-500" />
+            </>
+          )}
+        </div>
+      </TableCell>  
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <div 
+            className="w-2 h-2 rounded-full"
+            style={{ backgroundColor: getPriorityColor(task.priority) }}
+          />
+          <span className="text-xs text-gray-700">
+            {task.priority?.name || 'Not set'}
+          </span>
+        </div>
+      </TableCell>
+      <TableCell>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <div className="flex gap-0.5">
+                {[...Array(6)].map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-1 h-4 rounded-sm ${
+                      index < getComplexityBars(task.complexity)
+                        ? 'bg-gray-600'
+                        : 'bg-gray-200'
+                    }`}
+                  />
+                ))}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="bg-[#fcfcfc]">
+              <p>{task.complexity?.name || 'Not set'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </TableCell>
+      <TableCell className="text-left">
+        {task.est_start ? (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-gray-600">{format(new Date(task.est_start), "h:mm a")}</span>
+            <span className="text-xs text-gray-700">{format(new Date(task.est_start), "MMM d")}</span>
+          </div>
+        ) : (
+          <span className="text-xs text-gray-700">Not set</span>
+        )}
+      </TableCell>
+      
+      <TableCell className="text-left">
+        {task.est_end ? (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-gray-600">{format(new Date(task.est_end), "h:mm a")}</span>
+            <span className="text-xs text-gray-700">{format(new Date(task.est_end), "MMM d")}</span>
+          </div>
+        ) : (
+          <span className="text-xs text-gray-700">Not set</span>
+        )}
+      </TableCell>
+      
+      <TableCell>
+        <div className="flex flex-col gap-1">
+          {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
+        </div>
+      </TableCell>
+
+      <TableCell>
+        <div className="flex -space-x-2">
+          {task.images && Array.isArray(task.images) && task.images.length > 0 && (
+            (task.images as string[]).map((image, index) => (
+              <div
+                key={index}
+                className="w-8 h-8 relative cursor-pointer"
+                onClick={() => onImageClick(image, task.images as string[])}
+              >
+                <img 
+                  src={image as string}
+                  alt={`Task image ${index + 1}`}
+                  className="w-8 h-8 rounded-lg border-2 border-white object-cover"
+                />
+                <Maximize className="w-3 h-3 absolute top-0 right-0 text-gray-600 bg-white rounded-full p-0.5" />
+              </div>
+            ))
+          )}
+        </div>
+      </TableCell>
+    </TableRow>
+  );
 
   const formatETA = (date: string) => {
     return format(new Date(date), "h.mmaaa do MMM");
@@ -241,213 +409,84 @@ const TasksTable = ({
     ));
   };
 
-  const renderTasksWithSeparators = () => {
-    let currentGroup = 0;
-    const result = [];
-    
-    for (let i = 0; i < tasks.length; i++) {
-      const task = tasks[i];
-      const taskGroup = getTaskGroup(task);
-      
-      if (taskGroup !== currentGroup) {
-        currentGroup = taskGroup;
-        
-        if (i > 0) {
-          result.push(
-            <TableRow key={`separator-${taskGroup}`} className="group-separator">
-              <TableCell colSpan={10} className="p-0">
-                <div className="py-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-gray-500">{getGroupLabel(taskGroup)}</span>
-                    <Separator className="flex-grow bg-gray-200" />
-                  </div>
-                </div>
-              </TableCell>
-            </TableRow>
-          );
-        }
-      }
-      
-      result.push(
-        <TableRow 
-          key={task.id}
-          className={`cursor-pointer ${selectedTaskId === task.id ? 'bg-muted/30' : 'hover:bg-muted/30'}`}
-          onClick={() => {
-            onCommentClick(task.id);
-            setRightSidebarContent(
-              <TaskCommentThread 
-                taskId={task.id} 
-                taskCode={typeof task.task_code === 'string' ? task.task_code : String(task.task_code || 'No Code')} 
-              />
-            );
-          }}
-        >
-          <TableCell>
-            <Badge 
-              variant="outline" 
-              className="font-mono text-xs"
-            >
-              {task.task_code || '—'}
-              {task.queue_position && (
-                <span className="ml-1 text-[10px] bg-gray-100 px-1 rounded-full">
-                  #{task.queue_position}
-                </span>
-              )}
-            </Badge>
-          </TableCell>
-          <TableCell>
-            <div className="flex flex-col items-start gap-1">
-              <span 
-                className="px-2 py-1 text-xs rounded-full font-semibold"
-                style={{
-                  backgroundColor: getStatusColor(task.status || { name: null, color_hex: null }, task.is_awaiting_input, task.is_onhold).bg,
-                  color: getStatusColor(task.status || { name: null, color_hex: null }, task.is_awaiting_input, task.is_onhold).text
-                }}
-              >
-                {task.is_awaiting_input ? 'Awaiting Input' : task.is_onhold ? 'On Hold' : task.status?.name}
-              </span>
-              {task.completed_at && (
-                <span className="text-xs text-gray-500 pl-2">
-                  {task.logged_duration ? formatInterval(task.logged_duration) : 
-                   task.actual_duration ? formatInterval(task.actual_duration) : '0h'}
-                </span>
-              )}
-              {task.status?.name === 'Open' && task.est_start && (
-                <span className="text-xs text-gray-500 pl-2">
-                  {format(new Date(task.est_start), "h:mmaaa d MMM")}
-                </span>
-              )}
-            </div>
-          </TableCell>
-          <TableCell>
-            <div className="flex-1 min-w-0 max-w-[350px]">
-              <p className="text-sm break-words">{task.details}</p>
-              <p className="text-xs text-gray-500 mt-1">{task.task_type?.name}</p>
-            </div>
-          </TableCell>
-          <TableCell>
-            <div className="flex gap-1">
-              {task.target_device === 'desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
-              {task.target_device === 'mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
-              {task.target_device === 'both' && (
-                <>
-                  <Monitor className="w-4 h-4 text-gray-500" />
-                  <Smartphone className="w-4 h-4 text-gray-500" />
-                </>
-              )}
-            </div>
-          </TableCell>  
-          <TableCell>
-            <div className="flex items-center gap-2">
-              <div 
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: getPriorityColor(task.priority) }}
-              />
-              <span className="text-xs text-gray-700">
-                {task.priority?.name || 'Not set'}
-              </span>
-            </div>
-          </TableCell>
-          <TableCell>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <div className="flex gap-0.5">
-                    {[...Array(6)].map((_, index) => (
-                      <div
-                        key={index}
-                        className={`w-1 h-4 rounded-sm ${
-                          index < getComplexityBars(task.complexity)
-                            ? 'bg-gray-600'
-                            : 'bg-gray-200'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent className="bg-[#fcfcfc]">
-                  <p>{task.complexity?.name || 'Not set'}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </TableCell>
-          <TableCell className="text-left">
-            {task.est_start ? (
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-gray-600">{format(new Date(task.est_start), "h:mm a")}</span>
-                <span className="text-xs text-gray-700">{format(new Date(task.est_start), "MMM d")}</span>
-              </div>
-            ) : (
-              <span className="text-xs text-gray-700">Not set</span>
-            )}
-          </TableCell>
-          
-          <TableCell className="text-left">
-            {task.est_end ? (
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-gray-600">{format(new Date(task.est_end), "h:mm a")}</span>
-                <span className="text-xs text-gray-700">{format(new Date(task.est_end), "MMM d")}</span>
-              </div>
-            ) : (
-              <span className="text-xs text-gray-700">Not set</span>
-            )}
-          </TableCell>
-          
-          <TableCell>
-            <div className="flex flex-col gap-1">
-              {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
-            </div>
-          </TableCell>
-
-          <TableCell>
-            <div className="flex -space-x-2">
-              {task.images && Array.isArray(task.images) && task.images.length > 0 && (
-                (task.images as string[]).map((image, index) => (
-                  <div
-                    key={index}
-                    className="w-8 h-8 relative cursor-pointer"
-                    onClick={() => onImageClick(image, task.images as string[])}
-                  >
-                    <img 
-                      src={image as string}
-                      alt={`Task image ${index + 1}`}
-                      className="w-8 h-8 rounded-lg border-2 border-white object-cover"
-                    />
-                    <Maximize className="w-3 h-3 absolute top-0 right-0 text-gray-600 bg-white rounded-full p-0.5" />
-                  </div>
-                ))
-              )}
-            </div>
-          </TableCell>
-        </TableRow>
-      );
-    }
-    
-    return result;
-  };
+  const renderSectionHeader = (sectionName: string) => (
+    <TableRow className="group-separator">
+      <TableCell colSpan={10} className="p-0">
+        <div className="py-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-500">{getGroupLabel(sectionName)}</span>
+            <Separator className="flex-grow bg-gray-200" />
+          </div>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Task Code</TableHead>
-          <TableHead>
-            Status
-          </TableHead>
-          <TableHead>Details</TableHead>
-          <TableHead>Device</TableHead>
-          <TableHead>Priority</TableHead>
-          <TableHead>Level</TableHead>
-          <TableHead>Start Time</TableHead>
-          <TableHead>ETA</TableHead>
-          <TableHead>Links</TableHead>
-          <TableHead>Assets</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {renderTasksWithSeparators()}
-      </TableBody>
-    </Table>
+    <div className="relative">
+      {/* Sticky header section */}
+      <div className="sticky top-0 z-10 bg-white shadow-sm">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Task Code</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Details</TableHead>
+              <TableHead>Device</TableHead>
+              <TableHead>Priority</TableHead>
+              <TableHead>Level</TableHead>
+              <TableHead>Start Time</TableHead>
+              <TableHead>ETA</TableHead>
+              <TableHead>Links</TableHead>
+              <TableHead>Assets</TableHead>
+            </TableRow>
+          </TableHeader>
+        </Table>
+      </div>
+      
+      {/* Task sections */}
+      <div className="task-sections">
+        {/* Active Tasks Section */}
+        {groupedTasks.active.length > 0 && (
+          <Table>
+            <TableBody>
+              {renderSectionHeader('active')}
+              {groupedTasks.active.map(task => renderTaskRow(task))}
+            </TableBody>
+          </Table>
+        )}
+        
+        {/* Scheduled Tasks Section */}
+        {groupedTasks.scheduled.length > 0 && (
+          <Table>
+            <TableBody>
+              {renderSectionHeader('scheduled')}
+              {groupedTasks.scheduled.map(task => renderTaskRow(task))}
+            </TableBody>
+          </Table>
+        )}
+        
+        {/* Completed Tasks Section */}
+        {groupedTasks.completed.length > 0 && (
+          <Table>
+            <TableBody>
+              {renderSectionHeader('completed')}
+              {groupedTasks.completed.map(task => renderTaskRow(task))}
+            </TableBody>
+          </Table>
+        )}
+        
+        {/* Special Case Tasks Section */}
+        {groupedTasks.special.length > 0 && (
+          <Table>
+            <TableBody>
+              {renderSectionHeader('special')}
+              {groupedTasks.special.map(task => renderTaskRow(task))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+    </div>
   );
 };
 
