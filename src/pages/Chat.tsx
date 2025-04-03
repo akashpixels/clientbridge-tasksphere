@@ -342,7 +342,7 @@ const Chat = () => {
                 }
               }}
             />
-            <div className="flex justify-between items-center">
+            <div className="flex justify-end items-center gap-2">
               <AttachmentHandler
                 selectedFiles={selectedFiles}
                 setSelectedFiles={setSelectedFiles}
@@ -351,7 +351,7 @@ const Chat = () => {
                 type="button"
                 onClick={handleSendMessage}
                 disabled={isSubmitting || (!newMessage.trim() && selectedFiles.length === 0)}
-                className="flex items-center gap-1"
+                className="h-10"
               >
                 {isSubmitting ? (
                   <>
