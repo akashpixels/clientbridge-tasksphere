@@ -2,7 +2,7 @@
 import React from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Phone, Video } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 
 interface ChatHeaderProps {
   userName: string;
@@ -33,13 +33,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ userName }) => {
         </div>
       </div>
 
-      <div className="flex items-center space-x-1">
-        <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
-          <Phone className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
-          <Video className="h-4 w-4" />
-        </Button>
+      <div className="flex items-center">
         <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
           <MoreVertical className="h-4 w-4" />
         </Button>

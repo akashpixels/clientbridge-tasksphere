@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import ChatUsersList from "./ChatUsersList";
 import ChatConversation from "./ChatConversation";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 
@@ -35,17 +34,17 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({ children }) => {
   };
 
   return (
-    <Card className="flex h-[85vh] w-full max-w-6xl overflow-hidden">
+    <div className="flex h-[calc(100vh-80px)] w-full overflow-hidden">
       {/* User list - Hidden on mobile when conversation is shown */}
       {(!isMobile || !showConversation) && (
-        <div className="w-full md:w-1/3 border-r">
+        <div className="w-full md:w-1/3 border-r bg-card">
           <ChatUsersList onSelectUser={handleSelectUser} selectedUserId={selectedUser} />
         </div>
       )}
 
       {/* Conversation area - Full width on mobile, 2/3 on desktop */}
       {(!isMobile || showConversation) && (
-        <div className="flex flex-col w-full md:w-2/3">
+        <div className="flex flex-col w-full md:w-2/3 bg-card">
           {isMobile && showConversation && (
             <div className="border-b p-2">
               <Button variant="ghost" size="sm" onClick={handleBackToList}>
@@ -65,7 +64,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({ children }) => {
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 };
 

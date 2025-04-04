@@ -16,7 +16,7 @@ const Chat = () => {
   }, [session?.user, resetUnreadCount]);
 
   return (
-    <div className="flex items-center justify-center h-full w-full py-4">
+    <div className="h-full w-full">
       <ChatLayout>
         {/* Content will be rendered by the layout */}
       </ChatLayout>
