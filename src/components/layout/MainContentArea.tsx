@@ -26,12 +26,16 @@ const MainContentArea = ({ isLeftSidebarOpen }: MainContentAreaProps) => {
     console.log('MainContentArea: Current tab is', currentTab);
   }, [currentTab]);
   
+  // Check if the current route is the chat page
+  const isChatPage = location.pathname === '/chat';
+  
   console.log('MainContentArea: Rendering', { 
     isLeftSidebarOpen, 
     hasRightSidebar: !!rightSidebarContent, 
     isMobile, 
     path: location.pathname,
-    currentTab
+    currentTab,
+    isChatPage
   });
   
   return (
@@ -43,7 +47,7 @@ const MainContentArea = ({ isLeftSidebarOpen }: MainContentAreaProps) => {
       )}
     >
       <ScrollArea className="h-screen w-full">
-        <div className="p-8">
+        <div className={cn(isChatPage ? 'p-0' : 'p-8')}>
           <Outlet />
         </div>
       </ScrollArea>
