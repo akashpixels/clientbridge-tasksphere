@@ -308,7 +308,7 @@ const Chat = () => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-background">
+    <div className="flex items-center justify-center h-full w-full py-4">
       <Card className="flex flex-col h-[90vh] max-w-[600px] w-full">
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {isLoading ? (
