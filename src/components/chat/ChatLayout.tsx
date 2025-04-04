@@ -6,8 +6,9 @@ import ChatConversation from "./ChatConversation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 
+// Making children optional with ? since it's not actually being used
 interface ChatLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const ChatLayout: React.FC<ChatLayoutProps> = ({ children }) => {
