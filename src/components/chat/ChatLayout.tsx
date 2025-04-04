@@ -35,7 +35,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-80px)] w-full overflow-hidden">
+    <div className="flex h-full w-full overflow-hidden">
       {/* User list - Hidden on mobile when conversation is shown */}
       {(!isMobile || !showConversation) && (
         <div className="w-full md:w-1/3 border-r bg-card">

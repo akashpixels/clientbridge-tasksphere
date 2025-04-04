@@ -16,10 +16,8 @@ const Chat = () => {
   }, [session?.user, resetUnreadCount]);
 
   return (
-    <div className="h-full w-full">
-      <ChatLayout>
-        {/* Content will be rendered by the layout */}
-      </ChatLayout>
+    <div className="h-full w-full flex">
+      <ChatLayout />
     </div>
   );
 };
