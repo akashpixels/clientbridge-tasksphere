@@ -22,8 +22,8 @@ const Layout = () => {
   console.log('Layout: Rendering with path', location.pathname);
   
   return (
-    <div className="min-h-screen bg-background">
-      <div className="flex relative">
+    <div className="min-h-screen h-full bg-background">
+      <div className="flex relative h-full">
         <LeftSidebar isOpen={isLeftSidebarOpen} onToggle={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} />
         
         <MainContentArea isLeftSidebarOpen={isLeftSidebarOpen} />
