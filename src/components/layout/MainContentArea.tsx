@@ -46,7 +46,7 @@ const MainContentArea = ({ isLeftSidebarOpen }: MainContentAreaProps) => {
         rightSidebarContent ? (isMobile ? 'mr-0' : 'mr-[300px]') : ''
       )}
     >
-      <ScrollArea className={cn(isChatPage ? 'h-full' : 'h-screen', 'w-full')}>
+      <ScrollArea className="h-screen w-full">
         <div className={cn(isChatPage ? 'p-0' : 'p-8')}>
           <Outlet />
         </div>
