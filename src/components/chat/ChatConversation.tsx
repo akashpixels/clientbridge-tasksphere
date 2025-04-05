@@ -31,7 +31,19 @@ interface MessageRead {
   user_id: string;
 }
 
-const ChatConversation: React.FC = () => {
+interface ConversationParticipant {
+  user_id: string;
+  user_profiles?: {
+    first_name: string;
+    last_name: string;
+  } | null;
+}
+
+interface ChatConversationProps {
+  conversationId: string | null;
+}
+
+const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) => {
   const { session } = useAuth();
   const { toast } = useToast();
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
@@ -40,39 +52,75 @@ const ChatConversation: React.FC = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [participants, setParticipants] = useState<ConversationParticipant[]>([]);
+  const [conversationTitle, setConversationTitle] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
+  // This effect runs when the conversation ID changes or when a user logs in
   useEffect(() => {
-    if (!session?.user) return;
+    if (!session?.user || !conversationId) return;
 
-    const fetchMessages = async () => {
+    // If we're switching conversations, clear messages and set loading
+    setMessages([]);
+    setIsLoading(true);
+
+    const fetchConversationData = async () => {
       try {
-        setIsLoading(true);
-        const { data, error } = await supabase
-          .from('chat_messages' as any)
+        // Get conversation participants
+        const { data: participantsData, error: participantsError } = await supabase
+          .from('conversation_participants')
+          .select(`
+            user_id,
+            user_profiles (
+              first_name,
+              last_name
+            )
+          `)
+          .eq('conversation_id', conversationId);
+
+        if (participantsError) throw participantsError;
+        setParticipants(participantsData);
+
+        // Get conversation details
+        const { data: conversationData, error: conversationError } = await supabase
+          .from('conversations')
+          .select('title')
+          .eq('id', conversationId)
+          .single();
+
+        if (conversationError) throw conversationError;
+        setConversationTitle(conversationData.title);
+
+        // Get messages
+        const { data: messagesData, error: messagesError } = await supabase
+          .from('chat_messages')
           .select(`
             *,
             user_profiles(first_name, last_name)
           `)
+          .eq('conversation_id', conversationId)
           .order("created_at", { ascending: true });
 
-        if (error) throw error;
-        setMessages((data as unknown) as ChatMessageType[] || []);
+        if (messagesError) throw messagesError;
+        setMessages(messagesData);
 
+        // Get message reads
         const { data: readData, error: readError } = await supabase
-          .from('message_reads' as any)
-          .select('message_id, user_id');
+          .from('message_reads')
+          .select('message_id, user_id')
+          .in('message_id', messagesData.map((m: any) => m.id));
 
         if (readError) throw readError;
-        setMessageReads((readData as unknown) as MessageRead[] || []);
+        setMessageReads(readData || []);
 
-        await markAllMessagesAsRead();
+        // Mark all messages as read
+        await markAllMessagesAsRead(messagesData);
       } catch (error) {
-        console.error("Error fetching messages:", error);
+        console.error("Error fetching conversation data:", error);
         toast({
-          title: "Error loading messages",
+          title: "Error loading conversation",
           variant: "destructive",
         });
       } finally {
@@ -80,21 +128,32 @@ const ChatConversation: React.FC = () => {
       }
     };
 
+    // Only fetch data if we have a valid conversation ID
+    if (conversationId) {
+      fetchConversationData();
+    }
+
     const setupRealtimeSubscription = () => {
+      // Clean up any existing subscription
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+
       const channel = supabase
-        .channel("chat-updates")
+        .channel(`chat-${conversationId}`)
         .on(
           "postgres_changes",
           {
             event: "*",
             schema: "public",
             table: "chat_messages",
+            filter: `conversation_id=eq.${conversationId}`
           },
           async (payload) => {
             console.log("Realtime chat update:", payload);
             if (payload.eventType === "INSERT") {
               const { data } = await supabase
-                .from('chat_messages' as any)
+                .from('chat_messages')
                 .select(`
                   *,
                   user_profiles(first_name, last_name)
@@ -103,11 +162,10 @@ const ChatConversation: React.FC = () => {
                 .single();
 
               if (data) {
-                const typedData = data as unknown as ChatMessageType;
-                setMessages((prevMessages) => [...prevMessages, typedData]);
+                setMessages((prevMessages) => [...prevMessages, data]);
                 
-                if (typedData.sender_id !== session.user?.id) {
-                  await markMessageAsRead(typedData.id);
+                if (data.sender_id !== session.user?.id) {
+                  await markMessageAsRead(data.id);
                 }
               }
             }
@@ -122,10 +180,18 @@ const ChatConversation: React.FC = () => {
           },
           (payload) => {
             console.log("Message read update:", payload);
-            setMessageReads(prev => [
-              ...prev,
-              { message_id: payload.new.message_id, user_id: payload.new.user_id } as MessageRead
-            ]);
+            const newRead = {
+              message_id: payload.new.message_id,
+              user_id: payload.new.user_id
+            };
+            
+            setMessageReads(prev => {
+              // Only add if it doesn't already exist
+              if (!prev.some(r => r.message_id === newRead.message_id && r.user_id === newRead.user_id)) {
+                return [...prev, newRead];
+              }
+              return prev;
+            });
           }
         )
         .subscribe();
@@ -133,15 +199,16 @@ const ChatConversation: React.FC = () => {
       channelRef.current = channel;
     };
 
-    fetchMessages();
-    setupRealtimeSubscription();
+    if (conversationId) {
+      setupRealtimeSubscription();
+    }
 
     return () => {
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
       }
     };
-  }, [session?.user, toast]);
+  }, [conversationId, session?.user, toast]);
 
   useEffect(() => {
     scrollToBottom();
@@ -151,24 +218,35 @@ const ChatConversation: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const markAllMessagesAsRead = async () => {
-    if (!session?.user?.id) return;
+  const markAllMessagesAsRead = async (messagesData: any[] = []) => {
+    if (!session?.user?.id || !conversationId) return;
+
+    const msgsToMark = messagesData.length > 0 ? messagesData : messages;
+    if (msgsToMark.length === 0) return;
 
     try {
-      const { data: unreadMessages } = await supabase
-        .from('chat_messages' as any)
-        .select("id")
-        .not("id", "in", supabase
-          .from('message_reads' as any)
-          .select("message_id")
-          .eq("user_id", session.user.id)
-        );
+      // Get message IDs that aren't from the current user and haven't been read yet
+      const messagesToMark = msgsToMark
+        .filter(msg => msg.sender_id !== session.user.id)
+        .filter(msg => !messageReads.some(read => 
+          read.message_id === msg.id && read.user_id === session.user.id
+        ))
+        .map(msg => msg.id);
 
-      if (!unreadMessages || unreadMessages.length === 0) return;
+      if (messagesToMark.length === 0) return;
 
-      for (const msg of unreadMessages) {
-        await markMessageAsRead((msg as any).id);
-      }
+      // Insert reads for all these messages
+      const reads = messagesToMark.map(messageId => ({
+        message_id: messageId,
+        user_id: session.user.id,
+        read_at: new Date().toISOString(),
+      }));
+
+      const { error } = await supabase
+        .from('message_reads')
+        .upsert(reads, { onConflict: 'message_id,user_id' });
+
+      if (error) throw error;
     } catch (error) {
       console.error("Error marking messages as read:", error);
     }
@@ -178,7 +256,7 @@ const ChatConversation: React.FC = () => {
     if (!session?.user?.id) return;
 
     try {
-      await supabase.from('message_reads' as any).upsert(
+      await supabase.from('message_reads').upsert(
         {
           message_id: messageId,
           user_id: session.user.id,
@@ -196,9 +274,14 @@ const ChatConversation: React.FC = () => {
     
     const senderMessage = messages.find(m => m.id === messageId);
     if (senderMessage?.sender_id === session.user.id) {
-      return messageReads.some(read => 
-        read.message_id === messageId && 
-        read.user_id !== session.user.id
+      // Check if at least one other participant has read it
+      const otherParticipants = participants.filter(p => p.user_id !== session.user.id);
+      
+      return otherParticipants.some(participant =>
+        messageReads.some(read => 
+          read.message_id === messageId && 
+          read.user_id === participant.user_id
+        )
       );
     }
     
@@ -206,7 +289,7 @@ const ChatConversation: React.FC = () => {
   };
 
   const handleSendMessage = async () => {
-    if ((!newMessage.trim() && selectedFiles.length === 0) || !session?.user?.id) return;
+    if ((!newMessage.trim() && selectedFiles.length === 0) || !session?.user?.id || !conversationId) return;
 
     setIsSubmitting(true);
     try {
@@ -236,9 +319,10 @@ const ChatConversation: React.FC = () => {
       }
 
       const { error: messageError } = await supabase
-        .from('chat_messages' as any)
+        .from('chat_messages')
         .insert({
           sender_id: session.user.id,
+          conversation_id: conversationId,
           content: newMessage.trim() || (uploadedFiles.length > 0 ? "Attached files" : ""),
           attachments: uploadedFiles,
         });
@@ -309,17 +393,33 @@ const ChatConversation: React.FC = () => {
     });
   };
 
-  // This is a placeholder - in phase 2 we would get real user data
-  const activeUserName = "Support Team";
+  // Generate a display name for the conversation
+  const getDisplayName = () => {
+    if (conversationTitle) return conversationTitle;
+    
+    if (!session?.user?.id || participants.length === 0) return "Chat";
+    
+    const otherParticipants = participants.filter(p => p.user_id !== session.user.id);
+    
+    if (otherParticipants.length === 0) return "Chat with yourself";
+    
+    return otherParticipants
+      .map(p => p.user_profiles ? `${p.user_profiles.first_name} ${p.user_profiles.last_name}` : "Unknown User")
+      .join(", ");
+  };
 
   return (
     <div className="flex flex-col h-full">
-      <ChatHeader userName={activeUserName} />
+      <ChatHeader userName={getDisplayName()} />
       
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {isLoading ? (
           <div className="flex justify-center items-center h-full">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : !conversationId ? (
+          <div className="flex justify-center items-center h-full text-muted-foreground">
+            Select a conversation to start chatting
           </div>
         ) : messages.length === 0 ? (
           <div className="flex justify-center items-center h-full text-muted-foreground">
@@ -333,47 +433,49 @@ const ChatConversation: React.FC = () => {
         )}
       </div>
 
-      <div className="border-t p-4">
-        <div className="space-y-2">
-          <Textarea
-            placeholder="Type your message..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            className="resize-none"
-            rows={3}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-              }
-            }}
-          />
-          <div className="flex justify-end items-center gap-2">
-            <AttachmentHandler
-              selectedFiles={selectedFiles}
-              setSelectedFiles={setSelectedFiles}
+      {conversationId && (
+        <div className="border-t p-4">
+          <div className="space-y-2">
+            <Textarea
+              placeholder="Type your message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              className="resize-none"
+              rows={3}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
             />
-            <Button
-              type="button"
-              onClick={handleSendMessage}
-              disabled={isSubmitting || (!newMessage.trim() && selectedFiles.length === 0)}
-              className="h-10"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4" />
-                  Send
-                </>
-              )}
-            </Button>
+            <div className="flex justify-end items-center gap-2">
+              <AttachmentHandler
+                selectedFiles={selectedFiles}
+                setSelectedFiles={setSelectedFiles}
+              />
+              <Button
+                type="button"
+                onClick={handleSendMessage}
+                disabled={isSubmitting || (!newMessage.trim() && selectedFiles.length === 0)}
+                className="h-10"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    Send
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <PreviewDialog
         selectedImage={selectedImage}

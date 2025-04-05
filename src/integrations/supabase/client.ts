@@ -16,36 +16,18 @@ export const getUnreadMessageCount = async (userId: string | undefined): Promise
   if (!userId) return 0;
   
   try {
-    // Get all messages
-    // Using any type here as a workaround since the generated types don't include the new tables yet
-    const { data: messages, error: msgError } = await supabase
-      .from('chat_messages' as any)
-      .select('id, created_at')
-      .order('created_at', { ascending: false });
+    // Use the database function we created to get unread counts
+    const { data, error } = await supabase
+      .rpc('get_unread_messages_count', { user_id_param: userId });
       
-    if (msgError) {
-      console.error('Error fetching messages:', msgError);
+    if (error) {
+      console.error('Error fetching unread message counts:', error);
       return 0;
     }
     
-    if (!messages || messages.length === 0) return 0;
-    
-    // Get all messages read by the current user
-    const { data: reads, error: readError } = await supabase
-      .from('message_reads' as any)
-      .select('message_id')
-      .eq('user_id', userId);
-      
-    if (readError) {
-      console.error('Error fetching message reads:', readError);
-      return 0;
-    }
-    
-    // Calculate unread count
-    const readMessageIds = reads?.map((read: any) => read.message_id) || [];
-    const unreadCount = messages.filter((msg: any) => !readMessageIds.includes(msg.id)).length;
-    
-    return unreadCount;
+    // Sum up all unread counts from all conversations
+    const totalUnread = data?.reduce((sum: number, item: any) => sum + Number(item.unread_count), 0) || 0;
+    return totalUnread;
   } catch (error) {
     console.error('Error getting unread message count:', error);
     return 0;

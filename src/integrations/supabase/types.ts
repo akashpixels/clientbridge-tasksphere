@@ -84,6 +84,7 @@ export type Database = {
         Row: {
           attachments: Json | null
           content: string
+          conversation_id: string | null
           created_at: string
           id: string
           sender_id: string
@@ -92,6 +93,7 @@ export type Database = {
         Insert: {
           attachments?: Json | null
           content: string
+          conversation_id?: string | null
           created_at?: string
           id?: string
           sender_id: string
@@ -100,12 +102,20 @@ export type Database = {
         Update: {
           attachments?: Json | null
           content?: string
+          conversation_id?: string | null
           created_at?: string
           id?: string
           sender_id?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chat_messages_sender_id_fkey1"
             columns: ["sender_id"]
@@ -182,6 +192,69 @@ export type Database = {
           is_active?: boolean
           multiplier?: number
           name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      conversation_participants: {
+        Row: {
+          conversation_id: string
+          id: string
+          joined_at: string
+          last_read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          id?: string
+          joined_at?: string
+          last_read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          id?: string
+          joined_at?: string
+          last_read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          title?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1266,6 +1339,15 @@ export type Database = {
           start_time: string
         }
         Returns: string
+      }
+      get_unread_messages_count: {
+        Args: {
+          user_id_param: string
+        }
+        Returns: {
+          conversation_id: string
+          unread_count: number
+        }[]
       }
     }
     Enums: {
