@@ -81,7 +81,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
           .eq('conversation_id', conversationId);
 
         if (participantsError) throw participantsError;
-        setParticipants(participantsData);
+        setParticipants(participantsData || []);
 
         // Get conversation details
         const { data: conversationData, error: conversationError } = await supabase
@@ -90,8 +90,8 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
           .eq('id', conversationId)
           .single();
 
-        if (conversationError) throw conversationError;
-        setConversationTitle(conversationData.title);
+        if (conversationError && conversationError.code !== 'PGRST116') throw conversationError;
+        setConversationTitle(conversationData?.title || null);
 
         // Get messages
         const { data: messagesData, error: messagesError } = await supabase
@@ -104,19 +104,25 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
           .order("created_at", { ascending: true });
 
         if (messagesError) throw messagesError;
-        setMessages(messagesData);
+        // Transform attachments from Json to string[]
+        const formattedMessages = messagesData?.map((msg: any) => ({
+          ...msg,
+          attachments: Array.isArray(msg.attachments) ? msg.attachments : []
+        })) || [];
+        
+        setMessages(formattedMessages);
 
         // Get message reads
         const { data: readData, error: readError } = await supabase
           .from('message_reads')
           .select('message_id, user_id')
-          .in('message_id', messagesData.map((m: any) => m.id));
+          .in('message_id', formattedMessages.map((m: any) => m.id));
 
         if (readError) throw readError;
         setMessageReads(readData || []);
 
         // Mark all messages as read
-        await markAllMessagesAsRead(messagesData);
+        await markAllMessagesAsRead(formattedMessages);
       } catch (error) {
         console.error("Error fetching conversation data:", error);
         toast({
@@ -162,7 +168,13 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
                 .single();
 
               if (data) {
-                setMessages((prevMessages) => [...prevMessages, data]);
+                // Transform attachments
+                const formattedMessage = {
+                  ...data,
+                  attachments: Array.isArray(data.attachments) ? data.attachments : []
+                };
+                
+                setMessages((prevMessages) => [...prevMessages, formattedMessage]);
                 
                 if (data.sender_id !== session.user?.id) {
                   await markMessageAsRead(data.id);

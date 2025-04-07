@@ -72,7 +72,7 @@ const ChatUsersList: React.FC<ChatUsersListProps> = ({ onSelectConversation, sel
         if (unreadError) throw unreadError;
         
         // Get the last message for each conversation
-        const conversationIds = participantData.map(p => p.conversation_id);
+        const conversationIds = participantData.map((p: any) => p.conversation_id);
         const { data: lastMessagesData, error: lastMessagesError } = await supabase
           .from('chat_messages')
           .select('conversation_id, content')
@@ -86,7 +86,7 @@ const ChatUsersList: React.FC<ChatUsersListProps> = ({ onSelectConversation, sel
         const conversationMap: Record<string, Conversation> = {};
         
         // First gather all conversations with basic info
-        participantData.forEach(participant => {
+        participantData.forEach((participant: any) => {
           const conversation = participant.conversations;
           if (!conversation) return;
           
@@ -108,20 +108,24 @@ const ChatUsersList: React.FC<ChatUsersListProps> = ({ onSelectConversation, sel
         });
         
         // Add unread counts
-        unreadData.forEach((unread: { conversation_id: string, unread_count: number }) => {
-          if (conversationMap[unread.conversation_id]) {
-            conversationMap[unread.conversation_id].unread_count = unread.unread_count;
-          }
-        });
+        if (unreadData) {
+          unreadData.forEach((unread: { conversation_id: string, unread_count: number }) => {
+            if (conversationMap[unread.conversation_id]) {
+              conversationMap[unread.conversation_id].unread_count = unread.unread_count;
+            }
+          });
+        }
         
         // Add last messages
-        lastMessagesData?.forEach((msg: { conversation_id: string, content: string }) => {
-          if (conversationMap[msg.conversation_id]) {
-            conversationMap[msg.conversation_id].last_message = {
-              content: msg.content
-            };
-          }
-        });
+        if (lastMessagesData) {
+          lastMessagesData.forEach((msg: { conversation_id: string, content: string }) => {
+            if (conversationMap[msg.conversation_id]) {
+              conversationMap[msg.conversation_id].last_message = {
+                content: msg.content
+              };
+            }
+          });
+        }
         
         // Convert to array and sort by last message time
         const conversationList = Object.values(conversationMap).sort(
