@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +12,7 @@ import { format, isSameDay } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import ChatHeader from "./ChatHeader";
+import { Json } from "@/integrations/supabase/types";
 
 interface ChatMessageType {
   id: string;
@@ -58,17 +58,36 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
-  // This effect runs when the conversation ID changes or when a user logs in
+  const convertAttachmentsToStringArray = (attachments: Json | null): string[] => {
+    if (!attachments) return [];
+    
+    if (Array.isArray(attachments)) {
+      return attachments.map(item => String(item));
+    }
+    
+    if (typeof attachments === 'string') {
+      try {
+        const parsed = JSON.parse(attachments);
+        if (Array.isArray(parsed)) {
+          return parsed.map(item => String(item));
+        }
+        return [];
+      } catch {
+        return [attachments];
+      }
+    }
+    
+    return [];
+  };
+
   useEffect(() => {
     if (!session?.user || !conversationId) return;
 
-    // If we're switching conversations, clear messages and set loading
     setMessages([]);
     setIsLoading(true);
 
     const fetchConversationData = async () => {
       try {
-        // Get conversation participants
         const { data: participantsData, error: participantsError } = await supabase
           .from('conversation_participants')
           .select(`
@@ -83,7 +102,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
         if (participantsError) throw participantsError;
         setParticipants(participantsData || []);
 
-        // Get conversation details
         const { data: conversationData, error: conversationError } = await supabase
           .from('conversations')
           .select('title')
@@ -93,7 +111,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
         if (conversationError && conversationError.code !== 'PGRST116') throw conversationError;
         setConversationTitle(conversationData?.title || null);
 
-        // Get messages
         const { data: messagesData, error: messagesError } = await supabase
           .from('chat_messages')
           .select(`
@@ -104,15 +121,14 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
           .order("created_at", { ascending: true });
 
         if (messagesError) throw messagesError;
-        // Transform attachments from Json to string[]
-        const formattedMessages = messagesData?.map((msg: any) => ({
+        
+        const formattedMessages: ChatMessageType[] = (messagesData || []).map((msg: any) => ({
           ...msg,
-          attachments: Array.isArray(msg.attachments) ? msg.attachments : []
-        })) || [];
+          attachments: convertAttachmentsToStringArray(msg.attachments)
+        }));
         
         setMessages(formattedMessages);
 
-        // Get message reads
         const { data: readData, error: readError } = await supabase
           .from('message_reads')
           .select('message_id, user_id')
@@ -121,7 +137,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
         if (readError) throw readError;
         setMessageReads(readData || []);
 
-        // Mark all messages as read
         await markAllMessagesAsRead(formattedMessages);
       } catch (error) {
         console.error("Error fetching conversation data:", error);
@@ -134,13 +149,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
       }
     };
 
-    // Only fetch data if we have a valid conversation ID
     if (conversationId) {
       fetchConversationData();
     }
 
     const setupRealtimeSubscription = () => {
-      // Clean up any existing subscription
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
       }
@@ -168,10 +181,9 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
                 .single();
 
               if (data) {
-                // Transform attachments
-                const formattedMessage = {
+                const formattedMessage: ChatMessageType = {
                   ...data,
-                  attachments: Array.isArray(data.attachments) ? data.attachments : []
+                  attachments: convertAttachmentsToStringArray(data.attachments)
                 };
                 
                 setMessages((prevMessages) => [...prevMessages, formattedMessage]);
@@ -198,7 +210,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
             };
             
             setMessageReads(prev => {
-              // Only add if it doesn't already exist
               if (!prev.some(r => r.message_id === newRead.message_id && r.user_id === newRead.user_id)) {
                 return [...prev, newRead];
               }
@@ -222,10 +233,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
     };
   }, [conversationId, session?.user, toast]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -237,7 +244,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
     if (msgsToMark.length === 0) return;
 
     try {
-      // Get message IDs that aren't from the current user and haven't been read yet
       const messagesToMark = msgsToMark
         .filter(msg => msg.sender_id !== session.user.id)
         .filter(msg => !messageReads.some(read => 
@@ -247,7 +253,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
 
       if (messagesToMark.length === 0) return;
 
-      // Insert reads for all these messages
       const reads = messagesToMark.map(messageId => ({
         message_id: messageId,
         user_id: session.user.id,
@@ -286,7 +291,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
     
     const senderMessage = messages.find(m => m.id === messageId);
     if (senderMessage?.sender_id === session.user.id) {
-      // Check if at least one other participant has read it
       const otherParticipants = participants.filter(p => p.user_id !== session.user.id);
       
       return otherParticipants.some(participant =>
@@ -405,7 +409,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
     });
   };
 
-  // Generate a display name for the conversation
   const getDisplayName = () => {
     if (conversationTitle) return conversationTitle;
     
