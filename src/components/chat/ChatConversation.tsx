@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,6 +89,8 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
 
     const fetchConversationData = async () => {
       try {
+        console.log("Fetching conversation data for ID:", conversationId);
+
         const { data: participantsData, error: participantsError } = await supabase
           .from('conversation_participants')
           .select(`
@@ -99,7 +102,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
           `)
           .eq('conversation_id', conversationId);
 
-        if (participantsError) throw participantsError;
+        if (participantsError) {
+          console.error("Error fetching participants:", participantsError);
+          throw participantsError;
+        }
+        console.log("Participants data:", participantsData);
         setParticipants(participantsData || []);
 
         const { data: conversationData, error: conversationError } = await supabase
@@ -108,7 +115,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
           .eq('id', conversationId)
           .single();
 
-        if (conversationError && conversationError.code !== 'PGRST116') throw conversationError;
+        if (conversationError && conversationError.code !== 'PGRST116') {
+          console.error("Error fetching conversation title:", conversationError);
+          throw conversationError;
+        }
+        console.log("Conversation data:", conversationData);
         setConversationTitle(conversationData?.title || null);
 
         const { data: messagesData, error: messagesError } = await supabase
@@ -120,7 +131,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
           .eq('conversation_id', conversationId)
           .order("created_at", { ascending: true });
 
-        if (messagesError) throw messagesError;
+        if (messagesError) {
+          console.error("Error fetching messages:", messagesError);
+          throw messagesError;
+        }
+        console.log("Messages data:", messagesData);
         
         const formattedMessages: ChatMessageType[] = (messagesData || []).map((msg: any) => ({
           ...msg,
@@ -134,7 +149,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
           .select('message_id, user_id')
           .in('message_id', formattedMessages.map((m: any) => m.id));
 
-        if (readError) throw readError;
+        if (readError) {
+          console.error("Error fetching read receipts:", readError);
+          throw readError;
+        }
+        console.log("Read receipts data:", readData);
         setMessageReads(readData || []);
 
         await markAllMessagesAsRead(formattedMessages);
@@ -233,6 +252,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
     };
   }, [conversationId, session?.user, toast]);
 
+  useEffect(() => {
+    // Auto-scroll to bottom when messages change
+    scrollToBottom();
+  }, [messages]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -252,6 +276,8 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
         .map(msg => msg.id);
 
       if (messagesToMark.length === 0) return;
+      
+      console.log("Marking messages as read:", messagesToMark);
 
       const reads = messagesToMark.map(messageId => ({
         message_id: messageId,
@@ -334,6 +360,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
         }
       }
 
+      console.log("Sending message to conversation:", conversationId);
       const { error: messageError } = await supabase
         .from('chat_messages')
         .insert({
@@ -477,12 +504,12 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Sending...
                   </>
                 ) : (
                   <>
-                    <Send className="h-4 w-4" />
+                    <Send className="h-4 w-4 mr-2" />
                     Send
                   </>
                 )}
