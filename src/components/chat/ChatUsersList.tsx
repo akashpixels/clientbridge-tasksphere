@@ -45,16 +45,14 @@ const ChatUsersList: React.FC<ChatUsersListProps> = ({ onSelectConversation, sel
     const fetchConversations = async () => {
       setLoading(true);
       try {
+        console.log("Fetching conversations for user:", session.user.id);
+        
         // Get conversations where the user is a participant
         const { data: participantData, error: participantError } = await supabase
           .from('conversation_participants')
           .select(`
             conversation_id,
             user_id,
-            user_profiles (
-              first_name,
-              last_name
-            ),
             conversations!inner (
               id,
               title,
@@ -63,24 +61,79 @@ const ChatUsersList: React.FC<ChatUsersListProps> = ({ onSelectConversation, sel
           `)
           .eq('user_id', session.user.id);
           
-        if (participantError) throw participantError;
+        if (participantError) {
+          console.error("Error fetching conversation participants:", participantError);
+          throw participantError;
+        }
+        
+        console.log("User's conversation data:", participantData);
+        
+        if (!participantData || participantData.length === 0) {
+          setConversations([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Get all participants for these conversations
+        const conversationIds = participantData.map((p: any) => p.conversation_id);
+        
+        const { data: allParticipantsData, error: allParticipantsError } = await supabase
+          .from('conversation_participants')
+          .select(`
+            conversation_id,
+            user_id,
+            user:user_id (
+              profile:user_profiles (
+                first_name,
+                last_name
+              )
+            )
+          `)
+          .in('conversation_id', conversationIds);
+          
+        if (allParticipantsError) {
+          console.error("Error fetching all participants:", allParticipantsError);
+          throw allParticipantsError;
+        }
+        
+        console.log("All participants data:", allParticipantsData);
         
         // Get unread count per conversation
         const { data: unreadData, error: unreadError } = await supabase
           .rpc('get_unread_messages_count', { user_id_param: session.user.id });
           
-        if (unreadError) throw unreadError;
+        if (unreadError) {
+          console.error("Error fetching unread counts:", unreadError);
+          throw unreadError;
+        }
+        
+        console.log("Unread counts:", unreadData);
         
         // Get the last message for each conversation
-        const conversationIds = participantData.map((p: any) => p.conversation_id);
         const { data: lastMessagesData, error: lastMessagesError } = await supabase
           .from('chat_messages')
-          .select('conversation_id, content')
+          .select('id, conversation_id, content')
           .in('conversation_id', conversationIds)
-          .order('created_at', { ascending: false })
-          .limit(1, { foreignTable: 'conversations' });
+          .order('created_at', { ascending: false });
           
-        if (lastMessagesError) throw lastMessagesError;
+        if (lastMessagesError) {
+          console.error("Error fetching last messages:", lastMessagesError);
+          throw lastMessagesError;
+        }
+        
+        console.log("Last messages:", lastMessagesData);
+        
+        // Group messages by conversation
+        const lastMessagesByConversation: { [key: string]: { content: string } } = {};
+        if (lastMessagesData) {
+          for (const msg of lastMessagesData) {
+            if (!lastMessagesByConversation[msg.conversation_id]) {
+              lastMessagesByConversation[msg.conversation_id] = {
+                content: msg.content
+              };
+            }
+          }
+        }
         
         // Organize by conversation
         const conversationMap: Record<string, Conversation> = {};
@@ -100,12 +153,20 @@ const ChatUsersList: React.FC<ChatUsersListProps> = ({ onSelectConversation, sel
               unread_count: 0
             };
           }
-          
-          conversationMap[conversationId].participants.push({
-            user_id: participant.user_id,
-            user_profiles: participant.user_profiles
-          });
         });
+        
+        // Add participants info
+        if (allParticipantsData) {
+          allParticipantsData.forEach((participant: any) => {
+            const conversationId = participant.conversation_id;
+            if (!conversationMap[conversationId]) return;
+            
+            conversationMap[conversationId].participants.push({
+              user_id: participant.user_id,
+              user_profiles: participant.user?.profile || null
+            });
+          });
+        }
         
         // Add unread counts
         if (unreadData) {
@@ -117,14 +178,10 @@ const ChatUsersList: React.FC<ChatUsersListProps> = ({ onSelectConversation, sel
         }
         
         // Add last messages
-        if (lastMessagesData) {
-          lastMessagesData.forEach((msg: { conversation_id: string, content: string }) => {
-            if (conversationMap[msg.conversation_id]) {
-              conversationMap[msg.conversation_id].last_message = {
-                content: msg.content
-              };
-            }
-          });
+        for (const [convId, msg] of Object.entries(lastMessagesByConversation)) {
+          if (conversationMap[convId]) {
+            conversationMap[convId].last_message = msg;
+          }
         }
         
         // Convert to array and sort by last message time
@@ -132,11 +189,13 @@ const ChatUsersList: React.FC<ChatUsersListProps> = ({ onSelectConversation, sel
           (a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
         );
         
+        console.log("Final conversation list:", conversationList);
         setConversations(conversationList);
       } catch (error) {
         console.error('Error fetching conversations:', error);
         toast({
           title: "Failed to load conversations",
+          description: error instanceof Error ? error.message : "Unknown error",
           variant: "destructive"
         });
       } finally {
@@ -194,12 +253,18 @@ const ChatUsersList: React.FC<ChatUsersListProps> = ({ onSelectConversation, sel
   
   // Filter conversations by search term
   const filteredConversations = conversations.filter(conversation => {
-    // Simple title search
-    return conversation.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      // Participant name search
-      conversation.participants.some(p => 
-        p.user_profiles?.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.user_profiles?.last_name.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (!searchTerm) return true;
+    
+    // Title search
+    if (conversation.title?.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return true;
+    }
+    
+    // Participant name search
+    return conversation.participants.some(p => 
+      p.user_profiles?.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.user_profiles?.last_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   });
   
   // Mock data for when no conversations exist yet

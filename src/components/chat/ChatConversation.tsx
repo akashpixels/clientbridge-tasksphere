@@ -91,13 +91,34 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
       try {
         console.log("Fetching conversation data for ID:", conversationId);
 
+        // First, check if the user is a participant in this conversation
+        const { data: userParticipation, error: participationError } = await supabase
+          .from('conversation_participants')
+          .select('conversation_id')
+          .eq('conversation_id', conversationId)
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (participationError && participationError.code !== 'PGRST116') {
+          console.error("Error checking user participation:", participationError);
+          throw new Error("You don't have access to this conversation");
+        }
+
+        if (!userParticipation) {
+          console.error("User is not a participant in this conversation");
+          throw new Error("You don't have access to this conversation");
+        }
+
+        // Fetch conversation participants
         const { data: participantsData, error: participantsError } = await supabase
           .from('conversation_participants')
           .select(`
             user_id,
-            user_profiles (
-              first_name,
-              last_name
+            user:user_id (
+              profile:user_profiles (
+                first_name,
+                last_name
+              )
             )
           `)
           .eq('conversation_id', conversationId);
@@ -106,8 +127,17 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
           console.error("Error fetching participants:", participantsError);
           throw participantsError;
         }
-        console.log("Participants data:", participantsData);
-        setParticipants(participantsData || []);
+        
+        console.log("Raw participants data:", participantsData);
+        
+        // Transform the data structure to match our expected format
+        const formattedParticipants: ConversationParticipant[] = participantsData?.map((p: any) => ({
+          user_id: p.user_id,
+          user_profiles: p.user?.profile || null
+        })) || [];
+        
+        console.log("Formatted participants:", formattedParticipants);
+        setParticipants(formattedParticipants);
 
         const { data: conversationData, error: conversationError } = await supabase
           .from('conversations')
@@ -122,11 +152,21 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
         console.log("Conversation data:", conversationData);
         setConversationTitle(conversationData?.title || null);
 
+        // Fetch messages with user profiles
         const { data: messagesData, error: messagesError } = await supabase
           .from('chat_messages')
           .select(`
-            *,
-            user_profiles(first_name, last_name)
+            id,
+            sender_id,
+            content,
+            attachments,
+            created_at,
+            sender:sender_id (
+              profile:user_profiles (
+                first_name,
+                last_name
+              )
+            )
           `)
           .eq('conversation_id', conversationId)
           .order("created_at", { ascending: true });
@@ -135,13 +175,16 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
           console.error("Error fetching messages:", messagesError);
           throw messagesError;
         }
-        console.log("Messages data:", messagesData);
+        console.log("Raw messages data:", messagesData);
         
+        // Transform the data structure to match our expected format
         const formattedMessages: ChatMessageType[] = (messagesData || []).map((msg: any) => ({
           ...msg,
-          attachments: convertAttachmentsToStringArray(msg.attachments)
+          attachments: convertAttachmentsToStringArray(msg.attachments),
+          user_profiles: msg.sender?.profile || null
         }));
         
+        console.log("Formatted messages:", formattedMessages);
         setMessages(formattedMessages);
 
         const { data: readData, error: readError } = await supabase
@@ -161,6 +204,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
         console.error("Error fetching conversation data:", error);
         toast({
           title: "Error loading conversation",
+          description: error instanceof Error ? error.message : "Failed to load conversation data",
           variant: "destructive",
         });
       } finally {
@@ -190,11 +234,21 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
           async (payload) => {
             console.log("Realtime chat update:", payload);
             if (payload.eventType === "INSERT") {
+              // Fetch the complete message with user profile
               const { data } = await supabase
                 .from('chat_messages')
                 .select(`
-                  *,
-                  user_profiles(first_name, last_name)
+                  id,
+                  sender_id,
+                  content,
+                  attachments,
+                  created_at,
+                  sender:sender_id (
+                    profile:user_profiles (
+                      first_name,
+                      last_name
+                    )
+                  )
                 `)
                 .eq("id", payload.new.id)
                 .single();
@@ -202,7 +256,8 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ conversationId }) =
               if (data) {
                 const formattedMessage: ChatMessageType = {
                   ...data,
-                  attachments: convertAttachmentsToStringArray(data.attachments)
+                  attachments: convertAttachmentsToStringArray(data.attachments),
+                  user_profiles: data.sender?.profile || null
                 };
                 
                 setMessages((prevMessages) => [...prevMessages, formattedMessage]);
