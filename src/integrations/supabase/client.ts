@@ -10,26 +10,3 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-
-// Add a helper function to get unread message count
-export const getUnreadMessageCount = async (userId: string | undefined): Promise<number> => {
-  if (!userId) return 0;
-  
-  try {
-    // Use the database function we created to get unread counts
-    const { data, error } = await supabase
-      .rpc('get_unread_messages_count', { user_id_param: userId });
-      
-    if (error) {
-      console.error('Error fetching unread message counts:', error);
-      return 0;
-    }
-    
-    // Sum up all unread counts from all conversations
-    const totalUnread = data?.reduce((sum: number, item: any) => sum + Number(item.unread_count), 0) || 0;
-    return totalUnread;
-  } catch (error) {
-    console.error('Error getting unread message count:', error);
-    return 0;
-  }
-};

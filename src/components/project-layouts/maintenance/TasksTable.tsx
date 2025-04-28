@@ -169,7 +169,7 @@ const TasksTable = ({
             {task.is_awaiting_input ? 'Awaiting Input' : 
              task.is_onhold ? 'On Hold' :
              (task.queue_position && task.status?.name?.toLowerCase().includes('queue')) ? 
-               `#${task.queue_position}  ${task.status?.name}` : 
+               `Queue #${task.queue_position} - ${task.status?.name}` : 
                task.status?.name}
           </span>
           {task.completed_at && (
@@ -392,13 +392,13 @@ const TasksTable = ({
       <Table>
         <TableHeader>
           <TableRow className="bg-white">
-            <TableHead className="w-[8%] px-4">No</TableHead>
+            <TableHead className="w-[8%] px-4">Task Code</TableHead>
             <TableHead className="w-[10%] px-4">Status</TableHead>
             <TableHead className="w-[30%] px-4">Details</TableHead>
             <TableHead className="w-[5%] px-4 text-center">Device</TableHead>
             <TableHead className="w-[7%] px-4">Priority</TableHead>
             <TableHead className="w-[7%] px-4 text-center">Level</TableHead>
-            <TableHead className="w-[8%] px-4 text-left">Start</TableHead>
+            <TableHead className="w-[8%] px-4 text-left">Start Time</TableHead>
             <TableHead className="w-[8%] px-4 text-left">ETA</TableHead>
             <TableHead className="w-[9%] px-4">Links</TableHead>
             <TableHead className="w-[8%] px-4 text-center">Assets</TableHead>
