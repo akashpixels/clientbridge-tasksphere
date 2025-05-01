@@ -51,7 +51,7 @@ export const TaskDebugInfo = ({ taskId }: TaskDebugInfoProps) => {
         throw error;
       }
       
-      return data as EtaDebugInfo;
+      return data as unknown as EtaDebugInfo;
     },
     enabled: !!taskId,
   });
