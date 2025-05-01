@@ -11,16 +11,26 @@ interface TaskDebugInfoProps {
 
 interface EtaDebugInfo {
   task_id: string;
+  project_id: string;
+  queue_position?: number;
   priority_level_id: number;
   priority_name: string;
   start_delay: string;
-  base_time: string;
-  task_spacing: string;
-  est_start: string;
-  est_end: string;
+  lane_capacity: number;
+  project_task_count: number;
   created_at: string;
+  base_time: string;
+  gap_time: string;
+  spent_time: string;
+  delta: string;
+  task_spacing: string;
   est_duration: string;
   total_blocked_duration: string | null;
+  est_start: string;
+  est_end: string;
+  working_days: string[];
+  working_start_time: string;
+  working_end_time: string;
 }
 
 const formatIsoDate = (date: string | null) => {
@@ -68,42 +78,133 @@ export const TaskDebugInfo = ({ taskId }: TaskDebugInfoProps) => {
     <Card className="p-3 bg-slate-50 text-xs space-y-2 mt-1">
       <h4 className="font-semibold text-sm border-b pb-1">ETA Calculation Debug</h4>
       
-      <div className="grid grid-cols-2 gap-2">
+      <div className="space-y-4">
+        {/* Task and Priority Information */}
         <div>
-          <span className="font-medium">Priority:</span>{" "}
-          {data.priority_name} (ID: {data.priority_level_id})
+          <h5 className="font-medium text-xs mb-1 text-gray-700">Task & Priority</h5>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <span className="font-medium">Priority:</span>{" "}
+              {data.priority_name} (ID: {data.priority_level_id})
+            </div>
+            <div>
+              <span className="font-medium">Start Delay:</span>{" "}
+              {formatInterval(data.start_delay)}
+            </div>
+            <div>
+              <span className="font-medium">Queue Position:</span>{" "}
+              {data.queue_position || "N/A"}
+            </div>
+            <div>
+              <span className="font-medium">Created At:</span>{" "}
+              {formatIsoDate(data.created_at)}
+            </div>
+          </div>
         </div>
+        
+        {/* Lane Information */}
         <div>
-          <span className="font-medium">Start Delay:</span>{" "}
-          {formatInterval(data.start_delay)}
+          <h5 className="font-medium text-xs mb-1 text-gray-700">Lane Information</h5>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <span className="font-medium">Lane Capacity:</span>{" "}
+              {data.lane_capacity}
+            </div>
+            <div>
+              <span className="font-medium">Project Task Count:</span>{" "}
+              {data.project_task_count}
+            </div>
+          </div>
         </div>
+        
+        {/* Calculation Steps */}
         <div>
-          <span className="font-medium">Base Time:</span>{" "}
-          {formatIsoDate(data.base_time)}
+          <h5 className="font-medium text-xs mb-1 text-gray-700">Calculation Steps</h5>
+          <div className="grid grid-cols-1 gap-1">
+            <div className="grid grid-cols-2 gap-1">
+              <div>
+                <span className="font-medium">Base Time:</span>{" "}
+                <span className="bg-blue-100 px-1">{formatIsoDate(data.base_time)}</span>
+              </div>
+              <div>
+                <span className="font-medium">Est Duration:</span>{" "}
+                {formatInterval(data.est_duration)}
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              <div>
+                <span className="font-medium">Gap Time:</span>{" "}
+                {formatInterval(data.gap_time)}
+              </div>
+              <div>
+                <span className="font-medium">Spent Time:</span>{" "}
+                {formatInterval(data.spent_time)}
+              </div>
+              <div>
+                <span className="font-medium">Delta:</span>{" "}
+                {formatInterval(data.delta)}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-1">
+              <div>
+                <span className="font-medium">Task Spacing:</span>{" "}
+                <span className="bg-violet-100 px-1">{formatInterval(data.task_spacing)}</span>
+              </div>
+              <div>
+                <span className="font-medium">Blocked Duration:</span>{" "}
+                {formatInterval(data.total_blocked_duration)}
+              </div>
+            </div>
+          </div>
         </div>
+        
+        {/* Final Results */}
         <div>
-          <span className="font-medium">Task Spacing:</span>{" "}
-          {formatInterval(data.task_spacing)}
+          <h5 className="font-medium text-xs mb-1 text-gray-700">Final Results</h5>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <span className="font-medium">Est Start:</span>{" "}
+              <span className="bg-yellow-100 px-1">{formatIsoDate(data.est_start)}</span>
+            </div>
+            <div>
+              <span className="font-medium">Est End:</span>{" "}
+              <span className="bg-yellow-100 px-1">{formatIsoDate(data.est_end)}</span>
+            </div>
+          </div>
         </div>
-        <div>
-          <span className="font-medium">Created At:</span>{" "}
-          {formatIsoDate(data.created_at)}
+        
+        {/* Working Hours Configuration */}
+        <div className="mt-2">
+          <h5 className="font-medium text-xs mb-1 text-gray-700">Working Hours Config</h5>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="col-span-1">
+              <span className="font-medium">Working Days:</span>{" "}
+              <span className="text-gray-600">{data.working_days?.join(", ")}</span>
+            </div>
+            <div>
+              <span className="font-medium">Start Time:</span>{" "}
+              <span className="text-gray-600">{data.working_start_time}</span>
+            </div>
+            <div>
+              <span className="font-medium">End Time:</span>{" "}
+              <span className="text-gray-600">{data.working_end_time}</span>
+            </div>
+          </div>
         </div>
-        <div>
-          <span className="font-medium">Est Duration:</span>{" "}
-          {formatInterval(data.est_duration)}
-        </div>
-        <div>
-          <span className="font-medium">Est Start:</span>{" "}
-          <span className="bg-yellow-100 px-1">{formatIsoDate(data.est_start)}</span>
-        </div>
-        <div>
-          <span className="font-medium">Est End:</span>{" "}
-          <span className="bg-yellow-100 px-1">{formatIsoDate(data.est_end)}</span>
-        </div>
-        <div>
-          <span className="font-medium">Blocked Duration:</span>{" "}
-          {formatInterval(data.total_blocked_duration)}
+        
+        {/* Debug History Link */}
+        <div className="text-right pt-1">
+          <a 
+            href="#" 
+            onClick={(e) => {
+              e.preventDefault();
+              console.log("Task ETA history would be shown here");
+              // Future enhancement: Show modal with ETA debug history
+            }} 
+            className="text-xs text-blue-600 hover:underline"
+          >
+            View ETA History
+          </a>
         </div>
       </div>
     </Card>
