@@ -1,5 +1,5 @@
 import { Tables } from "@/integrations/supabase/types";
-import { Monitor, Smartphone, Maximize, Link2, Bug } from "lucide-react";
+import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -7,10 +7,6 @@ import { useLayout } from "@/context/layout";
 import { Badge } from "@/components/ui/badge";
 import TaskCommentThread from "./comments/TaskCommentThread";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
-import { TaskDebugInfo } from "./TaskDebugInfo";
 
 interface TasksTableProps {
   tasks: (Tables<"tasks"> & {
@@ -128,20 +124,6 @@ const TasksTable = ({
   const {
     setRightSidebarContent
   } = useLayout();
-  
-  const [expandedDebugTasks, setExpandedDebugTasks] = useState<Set<string>>(new Set());
-  
-  const toggleTaskDebug = (taskId: string) => {
-    setExpandedDebugTasks(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(taskId)) {
-        newSet.delete(taskId);
-      } else {
-        newSet.add(taskId);
-      }
-      return newSet;
-    });
-  };
 
   const groupedTasks: Record<string, typeof tasks> = {
     active: [],
@@ -156,176 +138,151 @@ const TasksTable = ({
   });
 
   const renderTaskRow = (task: typeof tasks[0]) => (
-    <>
-      <TableRow 
-        key={task.id} 
-        className={`cursor-pointer ${selectedTaskId === task.id ? 'bg-muted/30' : 'hover:bg-muted/30'}`} 
-      >
-        <TableCell className="w-[8%] px-4">
-          <div className="flex items-center gap-1">
-            <Badge variant="outline" className="font-mono text-xs">
-              {task.task_code || '—'}
-            </Badge>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-6 w-6 p-0 ml-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleTaskDebug(task.id);
-              }}
-            >
-              <Bug className="h-3 w-3 text-muted-foreground" />
-            </Button>
-          </div>
-        </TableCell>
-        <TableCell 
-          className="w-[10%] px-4"
-          onClick={() => {
-            onCommentClick(task.id);
-            setRightSidebarContent(<TaskCommentThread taskId={task.id} taskCode={typeof task.task_code === 'string' ? task.task_code : String(task.task_code || 'No Code')} />);
-          }}
-        >
-          <div className="flex flex-col items-start gap-1">
-            <span 
-              className="px-2 py-1 text-xs rounded-full font-semibold" 
-              style={{
-                backgroundColor: getStatusColor(task.status || {
-                  name: null,
-                  color_hex: null
-                }, task.is_awaiting_input, task.is_onhold).bg,
-                color: getStatusColor(task.status || {
-                  name: null,
-                  color_hex: null
-                }, task.is_awaiting_input, task.is_onhold).text
-              }}
-            >
-              {task.is_awaiting_input ? 'Awaiting Input' : 
-               task.is_onhold ? 'On Hold' :
-               (task.queue_position && task.status?.name?.toLowerCase().includes('queue')) ? 
-                 `Queue #${task.queue_position} - ${task.status?.name}` : 
-                 task.status?.name}
+    <TableRow 
+      key={task.id} 
+      className={`cursor-pointer ${selectedTaskId === task.id ? 'bg-muted/30' : 'hover:bg-muted/30'}`} 
+      onClick={() => {
+        onCommentClick(task.id);
+        setRightSidebarContent(<TaskCommentThread taskId={task.id} taskCode={typeof task.task_code === 'string' ? task.task_code : String(task.task_code || 'No Code')} />);
+      }}
+    >
+      <TableCell className="w-[8%] px-4">
+        <Badge variant="outline" className="font-mono text-xs">
+          {task.task_code || '—'}
+        </Badge>
+      </TableCell>
+      <TableCell className="w-[10%] px-4">
+        <div className="flex flex-col items-start gap-1">
+          <span 
+            className="px-2 py-1 text-xs rounded-full font-semibold" 
+            style={{
+              backgroundColor: getStatusColor(task.status || {
+                name: null,
+                color_hex: null
+              }, task.is_awaiting_input, task.is_onhold).bg,
+              color: getStatusColor(task.status || {
+                name: null,
+                color_hex: null
+              }, task.is_awaiting_input, task.is_onhold).text
+            }}
+          >
+            {task.is_awaiting_input ? 'Awaiting Input' : 
+             task.is_onhold ? 'On Hold' :
+             (task.queue_position && task.status?.name?.toLowerCase().includes('queue')) ? 
+               `Queue #${task.queue_position} - ${task.status?.name}` : 
+               task.status?.name}
+          </span>
+          {task.completed_at && (
+            <span className="text-xs text-gray-500 pl-2">
+              {task.logged_duration ? formatInterval(task.logged_duration) : task.actual_duration ? formatInterval(task.actual_duration) : '0h'}
             </span>
-            {task.completed_at && (
-              <span className="text-xs text-gray-500 pl-2">
-                {task.logged_duration ? formatInterval(task.logged_duration) : task.actual_duration ? formatInterval(task.actual_duration) : '0h'}
-              </span>
-            )}
-            {task.status?.name === 'Open' && task.est_start && (
-              <span className="text-xs text-gray-500 pl-2">
-                {format(new Date(task.est_start), "h:mmaaa d MMM")}
-              </span>
-            )}
-          </div>
-        </TableCell>
-        <TableCell className="w-[30%] px-4">
-          <div className="flex-1 min-w-0 max-w-[350px]">
-            <p className="text-sm break-words">{task.details}</p>
-            <p className="text-xs text-gray-500 mt-1">{task.task_type?.name}</p>
-          </div>
-        </TableCell>
-        <TableCell className="w-[5%] px-4 text-center">
-          <div className="flex gap-1 justify-center">
-            {task.target_device === 'desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
-            {task.target_device === 'mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
-            {task.target_device === 'both' && (
-              <>
-                <Monitor className="w-4 h-4 text-gray-500" />
-                <Smartphone className="w-4 h-4 text-gray-500" />
-              </>
-            )}
-          </div>
-        </TableCell>  
-        <TableCell className="w-[7%] px-4">
-          <div className="flex items-center gap-2">
-            <div 
-              className="w-2 h-2 rounded-full" 
-              style={{
-                backgroundColor: getPriorityColor(task.priority)
-              }} 
-            />
-            <span className="text-xs text-gray-700">
-              {task.priority?.name || 'Not set'}
+          )}
+          {task.status?.name === 'Open' && task.est_start && (
+            <span className="text-xs text-gray-500 pl-2">
+              {format(new Date(task.est_start), "h:mmaaa d MMM")}
             </span>
-          </div>
-        </TableCell>
-        <TableCell className="w-[7%] px-4 text-center">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="flex gap-0.5 justify-center">
-                  {[...Array(6)].map((_, index) => (
-                    <div 
-                      key={index} 
-                      className={`w-1 h-4 rounded-sm ${index < getComplexityBars(task.complexity) ? 'bg-gray-600' : 'bg-gray-200'}`} 
-                    />
-                  ))}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="bg-[#fcfcfc]">
-                <p>{task.complexity?.name || 'Not set'}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </TableCell>
-        <TableCell className="w-[8%] px-4 text-left">
-          {task.est_start ? (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-gray-600">{format(new Date(task.est_start), "h:mm a")}</span>
-              <span className="text-xs text-gray-700">{format(new Date(task.est_start), "MMM d")}</span>
-            </div>
-          ) : (
-            <span className="text-xs text-gray-700">Not set</span>
           )}
-        </TableCell>
-        
-        <TableCell className="w-[8%] px-4 text-left">
-          {task.est_end ? (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-gray-600">{format(new Date(task.est_end), "h:mm a")}</span>
-              <span className="text-xs text-gray-700">{format(new Date(task.est_end), "MMM d")}</span>
-            </div>
-          ) : (
-            <span className="text-xs text-gray-700">Not set</span>
+        </div>
+      </TableCell>
+      <TableCell className="w-[30%] px-4">
+        <div className="flex-1 min-w-0 max-w-[350px]">
+          <p className="text-sm break-words">{task.details}</p>
+          <p className="text-xs text-gray-500 mt-1">{task.task_type?.name}</p>
+        </div>
+      </TableCell>
+      <TableCell className="w-[5%] px-4 text-center">
+        <div className="flex gap-1 justify-center">
+          {task.target_device === 'desktop' && <Monitor className="w-4 h-4 text-gray-500" />}
+          {task.target_device === 'mobile' && <Smartphone className="w-4 h-4 text-gray-500" />}
+          {task.target_device === 'both' && (
+            <>
+              <Monitor className="w-4 h-4 text-gray-500" />
+              <Smartphone className="w-4 h-4 text-gray-500" />
+            </>
           )}
-        </TableCell>
-        
-        <TableCell className="w-[9%] px-4">
-          <div className="flex flex-col gap-1">
-            {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
-          </div>
-        </TableCell>
-
-        <TableCell className="w-[8%] px-4 text-center">
-          <div className="flex -space-x-2 justify-center">
-            {task.images && Array.isArray(task.images) && task.images.length > 0 && 
-              (task.images as string[]).map((image, index) => (
-                <div 
-                  key={index} 
-                  className="w-8 h-8 relative cursor-pointer" 
-                  onClick={() => onImageClick(image, task.images as string[])}
-                >
-                  <img 
-                    src={image as string} 
-                    alt={`Task image ${index + 1}`} 
-                    className="w-8 h-8 rounded-lg border-2 border-white object-cover" 
+        </div>
+      </TableCell>  
+      <TableCell className="w-[7%] px-4">
+        <div className="flex items-center gap-2">
+          <div 
+            className="w-2 h-2 rounded-full" 
+            style={{
+              backgroundColor: getPriorityColor(task.priority)
+            }} 
+          />
+          <span className="text-xs text-gray-700">
+            {task.priority?.name || 'Not set'}
+          </span>
+        </div>
+      </TableCell>
+      <TableCell className="w-[7%] px-4 text-center">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <div className="flex gap-0.5 justify-center">
+                {[...Array(6)].map((_, index) => (
+                  <div 
+                    key={index} 
+                    className={`w-1 h-4 rounded-sm ${index < getComplexityBars(task.complexity) ? 'bg-gray-600' : 'bg-gray-200'}`} 
                   />
-                  <Maximize className="w-3 h-3 absolute top-0 right-0 text-gray-600 bg-white rounded-full p-0.5" />
-                </div>
-              ))
-            }
+                ))}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="bg-[#fcfcfc]">
+              <p>{task.complexity?.name || 'Not set'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </TableCell>
+      <TableCell className="w-[8%] px-4 text-left">
+        {task.est_start ? (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-gray-600">{format(new Date(task.est_start), "h:mm a")}</span>
+            <span className="text-xs text-gray-700">{format(new Date(task.est_start), "MMM d")}</span>
           </div>
-        </TableCell>
-      </TableRow>
+        ) : (
+          <span className="text-xs text-gray-700">Not set</span>
+        )}
+      </TableCell>
       
-      {expandedDebugTasks.has(task.id) && (
-        <TableRow>
-          <TableCell colSpan={10} className="px-4 py-0 border-0">
-            <TaskDebugInfo taskId={task.id} />
-          </TableCell>
-        </TableRow>
-      )}
-    </>
+      <TableCell className="w-[8%] px-4 text-left">
+        {task.est_end ? (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-gray-600">{format(new Date(task.est_end), "h:mm a")}</span>
+            <span className="text-xs text-gray-700">{format(new Date(task.est_end), "MMM d")}</span>
+          </div>
+        ) : (
+          <span className="text-xs text-gray-700">Not set</span>
+        )}
+      </TableCell>
+      
+      <TableCell className="w-[9%] px-4">
+        <div className="flex flex-col gap-1">
+          {task.reference_links && renderReferenceLinks(task.reference_links as Record<string, string>)}
+        </div>
+      </TableCell>
+
+      <TableCell className="w-[8%] px-4 text-center">
+        <div className="flex -space-x-2 justify-center">
+          {task.images && Array.isArray(task.images) && task.images.length > 0 && 
+            (task.images as string[]).map((image, index) => (
+              <div 
+                key={index} 
+                className="w-8 h-8 relative cursor-pointer" 
+                onClick={() => onImageClick(image, task.images as string[])}
+              >
+                <img 
+                  src={image as string} 
+                  alt={`Task image ${index + 1}`} 
+                  className="w-8 h-8 rounded-lg border-2 border-white object-cover" 
+                />
+                <Maximize className="w-3 h-3 absolute top-0 right-0 text-gray-600 bg-white rounded-full p-0.5" />
+              </div>
+            ))
+          }
+        </div>
+      </TableCell>
+    </TableRow>
   );
 
   const formatETA = (date: string) => {
