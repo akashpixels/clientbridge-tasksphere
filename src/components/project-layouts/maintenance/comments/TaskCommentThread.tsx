@@ -2,9 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import CommentList from "./CommentList";
-import CommentSender from "./CommentSender";
-import CommentInputRequest from "./CommentInputRequest";
 import { Button } from "@/components/ui/button";
 import { X, MessageCircle, PenLine, Image, RefreshCw, Clock } from "lucide-react";
 import { useLayout } from "@/context/layout";
@@ -12,6 +9,18 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import TaskDebugInfo from "../TaskDebugInfo";
 
+// Define interface for the CommentList component
+interface Comment {
+  id: string;
+  content: string;
+  created_at: string;
+  user_profiles: {
+    first_name: string;
+  } | null;
+  images: string[] | null;
+}
+
+// Define interface for TaskCommentThreadProps
 interface TaskCommentThreadProps {
   taskId: string;
   taskCode?: string;
@@ -21,6 +30,9 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
   const [isRequestingInput, setIsRequestingInput] = useState(false);
   const { closeRightSidebar } = useLayout();
   const scrollBottomRef = useRef<HTMLDivElement>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
 
   // Fetch task details including extra_details
   const { data: task, isLoading: isLoadingTask } = useQuery({
@@ -31,7 +43,7 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
         .select(`
           *,
           task_type:task_types(name, category),
-          status:task_statuses(name, color_hex),
+          status:task_statuses!tasks_current_status_id_fkey(name, color_hex),
           priority:priority_levels(name, color_hex),
           complexity:complexity_levels(name, multiplier),
           assigned_user:user_profiles!tasks_assigned_user_id_fkey(first_name, last_name)
@@ -48,6 +60,42 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
     },
     enabled: !!taskId,
   });
+
+  // Fetch comments for the task
+  useEffect(() => {
+    if (!taskId) return;
+    
+    const fetchComments = async () => {
+      setIsLoadingComments(true);
+      try {
+        const { data, error } = await supabase
+          .from('task_comments')
+          .select(`
+            id,
+            content,
+            created_at,
+            images,
+            user_profiles (
+              first_name
+            )
+          `)
+          .eq('task_id', taskId)
+          .order('created_at', { ascending: true });
+        
+        if (error) {
+          console.error('Error fetching comments:', error);
+        } else {
+          setComments(data || []);
+        }
+      } catch (err) {
+        console.error('Error in fetchComments:', err);
+      } finally {
+        setIsLoadingComments(false);
+      }
+    };
+    
+    fetchComments();
+  }, [taskId]);
 
   // Mark comments as viewed
   useEffect(() => {
@@ -79,6 +127,7 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
     markCommentsAsViewed();
   }, [taskId]);
 
+  // Helper function for status color
   const getStatusColor = (status: {
     name: string;
     color_hex: string | null;
@@ -104,6 +153,48 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
       bg: status.color_hex,
       text: enhancedColor
     };
+  };
+
+  // Handle file click for CommentList
+  const handleFileClick = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  // Handle comment posting
+  const handleCommentPosted = () => {
+    // Refresh comments after posting
+    const fetchComments = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('task_comments')
+          .select(`
+            id,
+            content,
+            created_at,
+            images,
+            user_profiles (
+              first_name
+            )
+          `)
+          .eq('task_id', taskId)
+          .order('created_at', { ascending: true });
+        
+        if (error) {
+          console.error('Error fetching comments:', error);
+        } else {
+          setComments(data || []);
+        }
+      } catch (err) {
+        console.error('Error in fetchComments:', err);
+      }
+    };
+    
+    fetchComments();
+    
+    // Scroll to bottom after posting
+    setTimeout(() => {
+      scrollBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
 
   return (
@@ -154,29 +245,98 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
                 </div>
               </div>
               
-              {/* Add TaskDebugInfo component */}
+              {/* Add TaskDebugInfo component with explicit type casting for extra_details */}
               <TaskDebugInfo 
                 taskId={taskId} 
-                extraDetails={task.extra_details} 
+                extraDetails={task.extra_details as Record<string, any> | null} 
               />
             </div>
           )}
           
           <div className="flex-1 overflow-auto p-4">
-            <CommentList
-              taskId={taskId}
-            />
+            {isLoadingComments ? (
+              <div className="flex items-center justify-center p-4">
+                <RefreshCw className="animate-spin mr-2" size={16} />
+                <span>Loading comments...</span>
+              </div>
+            ) : comments.length > 0 ? (
+              <div className="space-y-4">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="bg-muted/40 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-sm">
+                        {comment.user_profiles?.first_name || 'Unknown User'}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(comment.created_at), "MMM d, h:mm a")}
+                      </span>
+                    </div>
+                    <p className="text-sm">{comment.content}</p>
+                    {comment.images && comment.images.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {comment.images.map((url, idx) => (
+                          <div 
+                            key={idx} 
+                            className="cursor-pointer"
+                            onClick={() => handleFileClick(url as string)}
+                          >
+                            <img 
+                              src={url as string} 
+                              alt="Attachment" 
+                              className="h-20 w-auto rounded border object-cover" 
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center p-4 text-muted-foreground">
+                No comments yet. Be the first to comment!
+              </div>
+            )}
             
             <div ref={scrollBottomRef} />
           </div>
           
           <div className="border-t p-3 bg-background">
             {isRequestingInput ? (
-              <CommentInputRequest
-                taskId={taskId}
-                onCancel={() => setIsRequestingInput(false)}
-                onSuccess={() => setIsRequestingInput(false)}
-              />
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="requestInput"
+                    checked={isRequestingInput}
+                    onChange={(e) => setIsRequestingInput(e.target.checked)}
+                    className="rounded border-gray-300 text-primary"
+                  />
+                  <label htmlFor="requestInput" className="text-sm">
+                    Request Input
+                  </label>
+                </div>
+                
+                <div className="flex gap-2 mt-2">
+                  <Button
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setIsRequestingInput(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="default" 
+                    size="sm"
+                    onClick={() => {
+                      // Handle input request
+                      setIsRequestingInput(false);
+                    }}
+                  >
+                    Request Input
+                  </Button>
+                </div>
+              </div>
             ) : (
               <div className="space-y-3">
                 <div className="flex gap-2">
@@ -190,7 +350,38 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
                     Request Input
                   </Button>
                 </div>
-                <CommentSender taskId={taskId} />
+                
+                <div className="mt-4 space-y-2">
+                  <textarea
+                    placeholder="Add a comment..."
+                    className="w-full p-2 border rounded-md resize-none"
+                    rows={3}
+                  />
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <Button variant="outline" size="sm">
+                        <Image className="h-4 w-4 mr-1" />
+                        Add files
+                      </Button>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            setSelectedFiles(Array.from(e.target.files));
+                          }
+                        }}
+                        hidden
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={handleCommentPosted}
+                    >
+                      Send
+                    </Button>
+                  </div>
+                </div>
               </div>
             )}
           </div>

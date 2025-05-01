@@ -1227,6 +1227,10 @@ export type Database = {
         }
         Returns: string
       }
+      get_eta_debug_info: {
+        Args: { task_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       attachment_type: "image" | "document" | "other"

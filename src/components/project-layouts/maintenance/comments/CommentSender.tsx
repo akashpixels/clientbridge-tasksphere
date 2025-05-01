@@ -10,9 +10,9 @@ import AttachmentHandler from "./AttachmentHandler";
 
 interface CommentSenderProps {
   taskId: string;
-  selectedFiles: File[];
-  setSelectedFiles: (files: File[]) => void;
-  onCommentPosted: () => void;
+  selectedFiles?: File[];
+  setSelectedFiles?: (files: File[]) => void;
+  onCommentPosted?: () => void;
   isRequestingInput?: boolean;
   isInputResponse?: boolean;
   parentCommentId?: string;
@@ -21,9 +21,9 @@ interface CommentSenderProps {
 
 const CommentSender = ({
   taskId,
-  selectedFiles,
-  setSelectedFiles,
-  onCommentPosted,
+  selectedFiles = [],
+  setSelectedFiles = () => {},
+  onCommentPosted = () => {},
   isRequestingInput = false,
   isInputResponse = false,
   parentCommentId,
