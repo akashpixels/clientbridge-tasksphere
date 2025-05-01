@@ -863,6 +863,35 @@ export type Database = {
           },
         ]
       }
+      task_eta_debug_history: {
+        Row: {
+          created_at: string
+          debug_data: Json
+          id: string
+          task_id: string
+        }
+        Insert: {
+          created_at?: string
+          debug_data: Json
+          id?: string
+          task_id: string
+        }
+        Update: {
+          created_at?: string
+          debug_data?: Json
+          id?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_eta_debug_history_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_statuses: {
         Row: {
           color_hex: string | null
@@ -933,6 +962,7 @@ export type Database = {
           est_duration: unknown | null
           est_end: string | null
           est_start: string | null
+          extra_details: Json | null
           id: string
           images: Json | null
           is_awaiting_input: boolean | null
@@ -962,6 +992,7 @@ export type Database = {
           est_duration?: unknown | null
           est_end?: string | null
           est_start?: string | null
+          extra_details?: Json | null
           id?: string
           images?: Json | null
           is_awaiting_input?: boolean | null
@@ -991,6 +1022,7 @@ export type Database = {
           est_duration?: unknown | null
           est_end?: string | null
           est_start?: string | null
+          extra_details?: Json | null
           id?: string
           images?: Json | null
           is_awaiting_input?: boolean | null
@@ -1166,25 +1198,16 @@ export type Database = {
         Returns: undefined
       }
       calculate_base_time: {
-        Args:
-          | { p_project_id: string }
-          | { p_project_id: string; p_queue_pos: number }
+        Args: { p_project_id: string }
         Returns: string
       }
       calculate_task_spacing: {
-        Args:
-          | {
-              p_created_at: string
-              p_priority_level_id: number
-              p_base_time: string
-              p_is_recalc: boolean
-            }
-          | {
-              p_created_at: string
-              p_start_delay: unknown
-              p_base_time: string
-              p_is_recalc: boolean
-            }
+        Args: {
+          p_created_at: string
+          p_priority_level_id: number
+          p_base_time: string
+          p_is_recalc: boolean
+        }
         Returns: unknown
       }
       calculate_working_hours: {
