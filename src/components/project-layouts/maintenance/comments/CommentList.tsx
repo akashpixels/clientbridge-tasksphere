@@ -1,4 +1,3 @@
-
 import { formatDistanceToNow } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -11,16 +10,15 @@ interface Comment {
   user_profiles: {
     first_name: string;
   } | null;
-  images: string[] | any; // Updated to handle Json type from Supabase
+  images: string[] | null;
 }
 
 interface CommentListProps {
-  comments?: Comment[];
-  onFileClick?: (url: string) => void;
-  taskId?: string; // Added taskId as an optional prop
+  comments: Comment[] | undefined;
+  onFileClick: (url: string) => void;
 }
 
-const CommentList = ({ comments = [], onFileClick = () => {} }: CommentListProps) => {
+const CommentList = ({ comments, onFileClick }: CommentListProps) => {
   return (
     <ScrollArea className="flex-1 p-4 space-y-2">
       {comments?.map((comment, index) => (

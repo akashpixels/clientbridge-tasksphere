@@ -8,18 +8,12 @@ interface CommentInputRequestProps {
   isInputResponse?: boolean;
   isRequestingInput: boolean;
   setIsRequestingInput: (value: boolean) => void;
-  taskId?: string; // Added taskId as an optional prop
-  onCancel?: () => void;
-  onSuccess?: () => void;
 }
 
 const CommentInputRequest = ({
   isInputResponse,
   isRequestingInput,
   setIsRequestingInput,
-  taskId,
-  onCancel,
-  onSuccess,
 }: CommentInputRequestProps) => {
   const [isAgencyUser, setIsAgencyUser] = useState(false);
   const { session } = useAuth();
