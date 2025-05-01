@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { AlertCircle } from "lucide-react";
 
 interface TaskDebugInfoProps {
   taskId: string;
@@ -31,6 +32,7 @@ interface EtaDebugInfo {
   working_days: string[];
   working_start_time: string;
   working_end_time: string;
+  error?: string;
 }
 
 const formatIsoDate = (date: string | null) => {
@@ -51,6 +53,8 @@ export const TaskDebugInfo = ({ taskId }: TaskDebugInfoProps) => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['taskDebug', taskId],
     queryFn: async () => {
+      console.log(`Fetching debug info for task: ${taskId}`);
+      
       // @ts-ignore - We know this function exists but TypeScript doesn't
       const { data, error } = await supabase.rpc('get_eta_debug_info', { 
         p_task_id: taskId
@@ -61,17 +65,35 @@ export const TaskDebugInfo = ({ taskId }: TaskDebugInfoProps) => {
         throw error;
       }
       
+      console.log('Debug info received:', data);
+      
+      if (data.error) {
+        console.error('Error in debug data:', data.error);
+        throw new Error(data.error);
+      }
+      
       return data as unknown as EtaDebugInfo;
     },
     enabled: !!taskId,
+    retry: 1 // Only retry once to avoid excessive calls on permanent errors
   });
 
   if (isLoading) {
     return <div className="p-2 text-xs text-muted-foreground">Loading debug data...</div>;
   }
 
-  if (error || !data) {
-    return <div className="p-2 text-xs text-red-500">Error loading debug data</div>;
+  if (error) {
+    console.error('Rendering error state with:', error);
+    return (
+      <div className="p-2 text-xs text-red-500 flex items-center gap-1">
+        <AlertCircle className="h-3 w-3" />
+        <span>Error loading debug data: {(error as Error).message}</span>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return <div className="p-2 text-xs text-red-500">No debug data available</div>;
   }
 
   return (
@@ -85,7 +107,7 @@ export const TaskDebugInfo = ({ taskId }: TaskDebugInfoProps) => {
           <div className="grid grid-cols-2 gap-2">
             <div>
               <span className="font-medium">Priority:</span>{" "}
-              {data.priority_name} (ID: {data.priority_level_id})
+              {data.priority_name || 'N/A'} (ID: {data.priority_level_id})
             </div>
             <div>
               <span className="font-medium">Start Delay:</span>{" "}
@@ -179,15 +201,15 @@ export const TaskDebugInfo = ({ taskId }: TaskDebugInfoProps) => {
           <div className="grid grid-cols-3 gap-2">
             <div className="col-span-1">
               <span className="font-medium">Working Days:</span>{" "}
-              <span className="text-gray-600">{data.working_days?.join(", ")}</span>
+              <span className="text-gray-600">{Array.isArray(data.working_days) ? data.working_days.join(", ") : "N/A"}</span>
             </div>
             <div>
               <span className="font-medium">Start Time:</span>{" "}
-              <span className="text-gray-600">{data.working_start_time}</span>
+              <span className="text-gray-600">{data.working_start_time || "N/A"}</span>
             </div>
             <div>
               <span className="font-medium">End Time:</span>{" "}
-              <span className="text-gray-600">{data.working_end_time}</span>
+              <span className="text-gray-600">{data.working_end_time || "N/A"}</span>
             </div>
           </div>
         </div>
