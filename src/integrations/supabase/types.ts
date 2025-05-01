@@ -1166,25 +1166,16 @@ export type Database = {
         Returns: undefined
       }
       calculate_base_time: {
-        Args:
-          | { p_project_id: string }
-          | { p_project_id: string; p_queue_pos: number }
+        Args: { p_project_id: string }
         Returns: string
       }
       calculate_task_spacing: {
-        Args:
-          | {
-              p_created_at: string
-              p_priority_level_id: number
-              p_base_time: string
-              p_is_recalc: boolean
-            }
-          | {
-              p_created_at: string
-              p_start_delay: unknown
-              p_base_time: string
-              p_is_recalc: boolean
-            }
+        Args: {
+          p_created_at: string
+          p_priority_level_id: number
+          p_base_time: string
+          p_is_recalc: boolean
+        }
         Returns: unknown
       }
       calculate_working_hours: {
@@ -1203,6 +1194,10 @@ export type Database = {
           start_time: string
         }
         Returns: string
+      }
+      get_eta_debug_info: {
+        Args: { p_task_id: string }
+        Returns: Json
       }
     }
     Enums: {

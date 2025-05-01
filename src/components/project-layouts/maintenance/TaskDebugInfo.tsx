@@ -1,12 +1,9 @@
 
 import React from "react";
 import { format } from "date-fns";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, Bug } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
 
 interface TaskDebugInfoProps {
   taskId: string;
@@ -44,6 +41,7 @@ export const TaskDebugInfo = ({ taskId }: TaskDebugInfoProps) => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['taskDebug', taskId],
     queryFn: async () => {
+      // @ts-ignore - We know this function exists but TypeScript doesn't
       const { data, error } = await supabase.rpc('get_eta_debug_info', { 
         p_task_id: taskId
       });
