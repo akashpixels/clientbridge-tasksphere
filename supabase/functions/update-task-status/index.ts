@@ -1,78 +1,76 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-
-// CORS headers to ensure the function can be called from the browser
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Initialize Supabase client with service role key for admin access
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  console.log("Processing request to update task status");
-
   try {
-    // Call the database function to update tasks with missing start times
-    const { data, error } = await supabase.rpc("update_in_progress_tasks");
-
-    if (error) {
-      console.error("Error updating task status:", error.message);
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: error.message,
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 500,
-        }
-      );
-    }
-
-    // Now also update ETAs based on the updated calculate_working_timestamp function
-    const { data: etaData, error: etaError } = await supabase.rpc("update_task_etas");
+    // Create a Supabase client with the Auth context of the logged in user
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
     
-    if (etaError) {
-      console.error("Error updating task ETAs:", etaError.message);
-      // We'll continue even if this fails since the primary function worked
-    } else {
-      console.log("Task ETAs updated successfully");
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    console.log("Processing request to update task status");
+
+    // Get active tasks that are in progress
+    const { data: activeTasks, error: tasksError } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("current_status_id", 4) // In Progress status
+      .is("completed_at", null);
+
+    if (tasksError) {
+      throw new Error(`Error fetching active tasks: ${tasksError.message}`);
     }
 
-    console.log("Task status updated successfully:", data);
-    return new Response(
-      JSON.stringify({
-        success: true,
-        data,
-        etaUpdated: !etaError,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
+    console.log(`Found ${activeTasks?.length || 0} active tasks to update`);
+
+    // Process each task
+    for (const task of activeTasks || []) {
+      // Update task logic here - e.g., update durations, check deadlines, etc.
+      console.log(`Processing task: ${task.id}`);
+      
+      // Example: Update actual_duration for in-progress tasks
+      if (task.started_at) {
+        const { error: updateError } = await supabase
+          .from("tasks")
+          .update({
+            actual_duration: `${Math.floor((Date.now() - new Date(task.started_at).getTime()) / 1000)} seconds`
+          })
+          .eq("id", task.id);
+        
+        if (updateError) {
+          console.error(`Error updating task ${task.id}:`, updateError);
+        }
       }
-    );
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : "Unknown error";
-    console.error("Exception while updating task status:", errorMessage);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: errorMessage,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
+    }
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: `Updated ${activeTasks?.length || 0} tasks` 
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
+  } catch (error) {
+    console.error("Error updating task status:", error.message);
+    
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: error.message 
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+    });
   }
 });

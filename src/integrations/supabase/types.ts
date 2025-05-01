@@ -1165,6 +1165,28 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      calculate_base_time: {
+        Args:
+          | { p_project_id: string }
+          | { p_project_id: string; p_queue_pos: number }
+        Returns: string
+      }
+      calculate_task_spacing: {
+        Args:
+          | {
+              p_created_at: string
+              p_priority_level_id: number
+              p_base_time: string
+              p_is_recalc: boolean
+            }
+          | {
+              p_created_at: string
+              p_start_delay: unknown
+              p_base_time: string
+              p_is_recalc: boolean
+            }
+        Returns: unknown
+      }
       calculate_working_hours: {
         Args: { start_time: string; end_time: string }
         Returns: unknown
