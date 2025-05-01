@@ -7,7 +7,6 @@ import { X, MessageCircle, PenLine, Image, RefreshCw, Clock } from "lucide-react
 import { useLayout } from "@/context/layout";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import TaskDebugInfo from "../TaskDebugInfo";
 
 // Define interface for the CommentList component
 interface Comment {
@@ -17,7 +16,7 @@ interface Comment {
   user_profiles: {
     first_name: string;
   } | null;
-  images: string[] | null;
+  images: string[] | any; // Updated to handle Json type from Supabase
 }
 
 // Define interface for TaskCommentThreadProps
@@ -85,7 +84,11 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
         if (error) {
           console.error('Error fetching comments:', error);
         } else {
-          setComments(data || []);
+          // Cast the data to Comment[] to fix TypeScript error
+          setComments(data?.map(comment => ({
+            ...comment,
+            images: Array.isArray(comment.images) ? comment.images : []
+          })) || []);
         }
       } catch (err) {
         console.error('Error in fetchComments:', err);
@@ -182,7 +185,11 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
         if (error) {
           console.error('Error fetching comments:', error);
         } else {
-          setComments(data || []);
+          // Cast the data to Comment[] to fix TypeScript error
+          setComments(data?.map(comment => ({
+            ...comment,
+            images: Array.isArray(comment.images) ? comment.images : []
+          })) || []);
         }
       } catch (err) {
         console.error('Error in fetchComments:', err);
@@ -244,12 +251,6 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
                   {task.est_start && <div>ETA: {format(new Date(task.est_start), "MMM d, h:mm a")}</div>}
                 </div>
               </div>
-              
-              {/* Add TaskDebugInfo component with explicit type casting for extra_details */}
-              <TaskDebugInfo 
-                taskId={taskId} 
-                extraDetails={task.extra_details as Record<string, any> | null} 
-              />
             </div>
           )}
           
@@ -272,7 +273,7 @@ const TaskCommentThread = ({ taskId, taskCode }: TaskCommentThreadProps) => {
                       </span>
                     </div>
                     <p className="text-sm">{comment.content}</p>
-                    {comment.images && comment.images.length > 0 && (
+                    {comment.images && Array.isArray(comment.images) && comment.images.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
                         {comment.images.map((url, idx) => (
                           <div 

@@ -11,7 +11,7 @@ interface Comment {
   user_profiles: {
     first_name: string;
   } | null;
-  images: string[] | null;
+  images: string[] | any; // Updated to handle Json type from Supabase
 }
 
 interface CommentListProps {
