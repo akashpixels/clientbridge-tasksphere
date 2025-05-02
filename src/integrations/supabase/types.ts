@@ -933,7 +933,6 @@ export type Database = {
           est_duration: unknown | null
           est_end: string | null
           est_start: string | null
-          extra_details: Json | null
           id: string
           images: Json | null
           is_awaiting_input: boolean | null
@@ -963,7 +962,6 @@ export type Database = {
           est_duration?: unknown | null
           est_end?: string | null
           est_start?: string | null
-          extra_details?: Json | null
           id?: string
           images?: Json | null
           is_awaiting_input?: boolean | null
@@ -993,7 +991,6 @@ export type Database = {
           est_duration?: unknown | null
           est_end?: string | null
           est_start?: string | null
-          extra_details?: Json | null
           id?: string
           images?: Json | null
           is_awaiting_input?: boolean | null
