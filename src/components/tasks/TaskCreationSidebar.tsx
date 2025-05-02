@@ -180,7 +180,7 @@ export const TaskCreationSidebar = () => {
           {taskCreated 
             ? "Task Created Successfully" 
             : activeTaskCount > 0 
-              ? `${activeTaskCount} active task${activeTaskCount > 1 ? 's' : ''}` 
+              ? `${activeTaskCount}  task${activeTaskCount > 1 ? 's' : ''} ahead` 
               : 'No active tasks'
           }
         </h2>
