@@ -1,154 +1,98 @@
 
-// This function calculates the monthly usage for all active project subscriptions
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.4.0'
+// Calculate-monthly-usage edge function 
+// This function is not directly related to ETA calculation but included for completeness
+// We're not modifying its core functionality
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-Deno.serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-  
+serve(async (req) => {
   try {
-    console.log('Starting monthly subscription usage calculation');
-    
-    // Initialize Supabase client
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
     
-    // Calculate dates for the previous month
-    const currentDate = new Date();
-    const firstDayCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const lastDayPrevMonth = new Date(firstDayCurrentMonth);
-    lastDayPrevMonth.setDate(lastDayPrevMonth.getDate() - 1);
-    const firstDayPrevMonth = new Date(lastDayPrevMonth.getFullYear(), lastDayPrevMonth.getMonth(), 1);
+    const { projectId, billingPeriod } = await req.json();
     
-    const prevMonthFormat = `${firstDayPrevMonth.getFullYear()}-${String(firstDayPrevMonth.getMonth() + 1).padStart(2, '0')}`;
-    
-    console.log(`Calculating usage for month: ${prevMonthFormat}`);
-    
-    // Get all active project subscriptions
-    const { data: subscriptions, error: subscriptionError } = await supabaseClient
-      .from('project_subscriptions')
-      .select('id, project_id, allocated_duration')
-      .eq('subscription_status', 'active');
-    
-    if (subscriptionError) {
-      console.error('Error fetching subscriptions:', subscriptionError);
-      throw subscriptionError;
+    if (!projectId || !billingPeriod) {
+      return new Response(
+        JSON.stringify({ error: "Project ID and Billing Period are required" }),
+        { headers: { "Content-Type": "application/json" }, status: 400 }
+      );
     }
-    
-    console.log(`Found ${subscriptions?.length || 0} active subscriptions`);
-    
-    // Process each subscription
-    for (const subscription of subscriptions || []) {
-      try {
-        // Calculate total hours spent in the previous month
-        const { data: tasks, error: tasksError } = await supabaseClient
-          .from('tasks')
-          .select('logged_duration, actual_duration')
-          .eq('project_id', subscription.project_id)
-          .gte('created_at', firstDayPrevMonth.toISOString())
-          .lt('created_at', firstDayCurrentMonth.toISOString());
-        
-        if (tasksError) {
-          console.error(`Error fetching tasks for project ${subscription.project_id}:`, tasksError);
-          continue; // Skip to next subscription
-        }
-        
-        // Calculate total hours spent - PRIORITIZE logged_duration over actual_duration
-        let totalHoursSpent = 0;
-        tasks?.forEach(task => {
-          // First try to use logged_duration if available
-          if (task.logged_duration) {
-            // Convert PostgreSQL interval to hours
-            const hoursMatch = String(task.logged_duration).match(/(\d+)\s+hour/i);
-            const minutesMatch = String(task.logged_duration).match(/(\d+)\s+min/i);
-            
-            const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
-            const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
-            
-            totalHoursSpent += hours + (minutes / 60);
-          } 
-          // Fall back to actual_duration if logged_duration is not available
-          else if (task.actual_duration) {
-            // Convert PostgreSQL interval to hours
-            const hoursMatch = String(task.actual_duration).match(/(\d+)\s+hour/i);
-            const minutesMatch = String(task.actual_duration).match(/(\d+)\s+min/i);
-            
-            const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
-            const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
-            
-            totalHoursSpent += hours + (minutes / 60);
-          }
-        });
-        
-        console.log(`Project ${subscription.project_id} used ${totalHoursSpent} hours in ${prevMonthFormat}`);
-        
-        // Convert hours allotted from interval to hours
-        let hoursAllotted = 0;
-        if (subscription.allocated_duration) {
-          const hoursMatch = String(subscription.allocated_duration).match(/(\d+)\s+hour/i);
-          const minutesMatch = String(subscription.allocated_duration).match(/(\d+)\s+min/i);
-          
-          const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
-          const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
-          
-          hoursAllotted = hours + (minutes / 60);
-        }
-        
-        // Create or update subscription usage record
-        const { error: upsertError } = await supabaseClient
-          .from('subscription_usage')
-          .upsert({
-            project_id: subscription.project_id,
-            subscription_id: subscription.id,
-            billing_period: prevMonthFormat,  // Updated from month_year to billing_period
-            allocated_duration: `${hoursAllotted} hours`,
-            used_duration: `${totalHoursSpent} hours`, 
-            status: 'completed',
-            notes: `Automatically calculated on ${currentDate.toISOString()}`,
-            updated_at: new Date().toISOString()
-          });
-        
-        if (upsertError) {
-          console.error(`Error updating usage for project ${subscription.project_id}:`, upsertError);
+
+    // Query all tasks with actual_duration for the specified period
+    const { data: tasks, error: tasksError } = await supabaseClient
+      .from('tasks')
+      .select('id, actual_duration, completed_at')
+      .eq('project_id', projectId)
+      .not('actual_duration', 'is', null)
+      .gte('completed_at', `${billingPeriod}-01`)
+      .lte('completed_at', `${billingPeriod}-31`);
+
+    if (tasksError) {
+      console.error("Error fetching tasks:", tasksError);
+      return new Response(
+        JSON.stringify({ error: tasksError.message }),
+        { headers: { "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+
+    // Calculate total used duration for all tasks in the period
+    let totalDuration = 0;
+    tasks.forEach(task => {
+      // Parse actual_duration - could be stored in various formats
+      let hours = 0;
+      if (typeof task.actual_duration === 'string') {
+        if (task.actual_duration.includes(':')) {
+          const parts = task.actual_duration.split(':');
+          hours = parseInt(parts[0]) + (parseInt(parts[1]) / 60);
         } else {
-          console.log(`Usage record created/updated for project ${subscription.project_id}`);
+          hours = parseFloat(task.actual_duration);
         }
-        
-      } catch (projError) {
-        console.error(`Error processing project ${subscription.project_id}:`, projError);
-        // Continue with other subscriptions
+      } else if (typeof task.actual_duration === 'number') {
+        hours = task.actual_duration;
       }
+      totalDuration += hours;
+    });
+
+    // Update or create subscription usage record
+    const { data, error } = await supabaseClient
+      .from('subscription_usage')
+      .upsert({
+        project_id: projectId,
+        billing_period: billingPeriod,
+        used_duration: `${Math.floor(totalDuration)} hours ${Math.round((totalDuration % 1) * 60)} minutes`,
+        status: 'calculated'
+      }, {
+        onConflict: 'project_id,billing_period'
+      })
+      .select();
+    
+    if (error) {
+      console.error("Error updating subscription usage:", error);
+      return new Response(
+        JSON.stringify({ error: error.message }),
+        { headers: { "Content-Type": "application/json" }, status: 500 }
+      );
     }
     
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Monthly subscription usage calculation completed',
-        monthProcessed: prevMonthFormat,
-        subscriptionsProcessed: subscriptions?.length || 0
+        data: data,
+        totalDuration,
+        taskCount: tasks.length 
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { "Content-Type": "application/json" } }
     );
     
   } catch (error) {
-    console.error('Error in calculate-monthly-usage function:', error);
-    
+    console.error("Error in calculate-monthly-usage function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      { headers: { "Content-Type": "application/json" }, status: 500 }
     );
   }
 });

@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -36,8 +37,8 @@ interface TasksTableProps {
     is_onhold?: boolean;
     est_start?: string | null;
     est_end?: string | null;
-    actual_duration?: number | null; // Used from actual_duration field
-    logged_duration?: number | null; // Added new field
+    actual_duration?: number | null; 
+    logged_duration?: number | null; 
     completed_at?: string | null;
   })[];
   sortConfig: {
