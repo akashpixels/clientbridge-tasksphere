@@ -4,6 +4,7 @@ import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertCircle } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface TasksTabContentProps {
   isLoadingTasks: boolean;
@@ -56,6 +57,7 @@ const TasksTabContent = ({
   onCommentClick,
 }: TasksTabContentProps) => {
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   
   useEffect(() => {
     console.log("TasksTabContent rendered with tasks:", tasks?.length || 0);
@@ -104,6 +106,45 @@ const TasksTabContent = ({
     setSelectedTaskId(taskId);
     onCommentClick(taskId);
   };
+  
+  const updateTaskStatus = async (taskId: string, statusId: number) => {
+    try {
+      setIsUpdatingStatus(true);
+      
+      // Use the edge function to update the task status
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-task-status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({ taskId, statusId })
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update task status');
+      }
+      
+      toast({
+        title: "Status updated",
+        description: "Task status has been updated successfully."
+      });
+      
+      // Task list will be refreshed by the parent component
+      
+    } catch (error) {
+      console.error("Error updating task status:", error);
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "Failed to update task status",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
 
   // Process the tasks data to ensure actual_duration and logged_duration are properly converted to numbers
   const processedTasks = tasks?.map(task => ({
@@ -140,6 +181,8 @@ const TasksTabContent = ({
             onImageClick={onImageClick}
             onCommentClick={handleTaskClick}
             selectedTaskId={selectedTaskId}
+            onStatusChange={updateTaskStatus}
+            isUpdatingStatus={isUpdatingStatus}
           />
         </div>
       ) : (

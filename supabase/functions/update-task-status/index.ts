@@ -18,10 +18,25 @@ serve(async (req) => {
       );
     }
 
-    // Update task status
+    // First, get the current task data
+    const { data: taskData, error: taskError } = await supabaseClient
+      .from('tasks')
+      .select('current_status_id, project_id')
+      .eq('id', taskId)
+      .single();
+      
+    if (taskError) {
+      console.error("Error fetching task:", taskError);
+      return new Response(
+        JSON.stringify({ error: taskError.message }),
+        { headers: { "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+    
+    // We're updating the status here
     const { data, error } = await supabaseClient
       .from('tasks')
-      .update({ current_status_id: statusId })
+      .update({ current_status_id: statusId, last_status_id: taskData.current_status_id })
       .eq('id', taskId)
       .select();
     
