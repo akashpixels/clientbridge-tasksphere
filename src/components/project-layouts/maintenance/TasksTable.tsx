@@ -1,6 +1,5 @@
-
 import { Tables } from "@/integrations/supabase/types";
-import { Monitor, Smartphone, Maximize, Link2, Info } from "lucide-react";
+import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -189,24 +188,6 @@ const TasksTable = ({
         <div className="flex-1 min-w-0 max-w-[350px]">
           <p className="text-sm break-words">{task.details}</p>
           <p className="text-xs text-gray-500 mt-1">{task.task_type?.name}</p>
-          <div className="text-xs text-gray-500 mt-1 flex items-center">
-            <span className="mr-1">Est. Duration:</span>
-            <Badge variant="outline" className="font-mono text-xs">
-              {formatInterval(task.est_duration || '0')}
-            </Badge>
-            {task.complexity?.multiplier && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="h-3 w-3 ml-1 text-gray-400" />
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-[#fcfcfc]">
-                    <p>Complexity: {task.complexity.name} (x{task.complexity.multiplier})</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
         </div>
       </TableCell>
       <TableCell className="w-[5%] px-4 text-center">
@@ -254,57 +235,25 @@ const TasksTable = ({
         </TooltipProvider>
       </TableCell>
       <TableCell className="w-[8%] px-4 text-left">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              {task.est_start ? (
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs text-gray-600">{format(new Date(task.est_start), "h:mm a")}</span>
-                  <span className="text-xs text-gray-700">{format(new Date(task.est_start), "MMM d")}</span>
-                </div>
-              ) : (
-                <span className="text-xs text-gray-700">Not set</span>
-              )}
-            </TooltipTrigger>
-            <TooltipContent className="bg-[#fcfcfc]">
-              {task.extra_details ? (
-                <div className="max-w-xs">
-                  <p className="font-semibold mb-1">Calculation Details:</p>
-                  <p>Base Time: {task.extra_details.base_time ? format(new Date(task.extra_details.base_time), "MMM d, h:mm a") : 'Not available'}</p>
-                  <p>Delay: {task.extra_details.delay || 'Not available'}</p>
-                  <p>Priority: {task.extra_details.priority_name || task.priority?.name || 'Not available'}</p>
-                </div>
-              ) : (
-                <p>No calculation details available</p>
-              )}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        {task.est_start ? (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-gray-600">{format(new Date(task.est_start), "h:mm a")}</span>
+            <span className="text-xs text-gray-700">{format(new Date(task.est_start), "MMM d")}</span>
+          </div>
+        ) : (
+          <span className="text-xs text-gray-700">Not set</span>
+        )}
       </TableCell>
       
       <TableCell className="w-[8%] px-4 text-left">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              {task.est_end ? (
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs text-gray-600">{format(new Date(task.est_end), "h:mm a")}</span>
-                  <span className="text-xs text-gray-700">{format(new Date(task.est_end), "MMM d")}</span>
-                </div>
-              ) : (
-                <span className="text-xs text-gray-700">Not set</span>
-              )}
-            </TooltipTrigger>
-            <TooltipContent className="bg-[#fcfcfc]">
-              <div className="max-w-xs">
-                <p className="font-semibold">Estimated Duration: {formatInterval(task.est_duration || '0')}</p>
-                {task.total_blocked_duration && task.total_blocked_duration !== '00:00:00' && (
-                  <p>+ Blocked Duration: {formatInterval(task.total_blocked_duration || '0')}</p>
-                )}
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        {task.est_end ? (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-gray-600">{format(new Date(task.est_end), "h:mm a")}</span>
+            <span className="text-xs text-gray-700">{format(new Date(task.est_end), "MMM d")}</span>
+          </div>
+        ) : (
+          <span className="text-xs text-gray-700">Not set</span>
+        )}
       </TableCell>
       
       <TableCell className="w-[9%] px-4">
