@@ -33,9 +33,6 @@ serve(async (req) => {
       );
     }
     
-    // We're no longer logging to task_eta_debug_history since that table is being removed
-    // The compute_eta function already populates the extra_details field
-    
     return new Response(
       JSON.stringify({ success: true, data }),
       { headers: { "Content-Type": "application/json" } }

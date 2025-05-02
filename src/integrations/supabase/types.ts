@@ -863,35 +863,6 @@ export type Database = {
           },
         ]
       }
-      task_eta_debug_history: {
-        Row: {
-          created_at: string
-          debug_data: Json
-          id: string
-          task_id: string
-        }
-        Insert: {
-          created_at?: string
-          debug_data: Json
-          id?: string
-          task_id: string
-        }
-        Update: {
-          created_at?: string
-          debug_data?: Json
-          id?: string
-          task_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "task_eta_debug_history_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       task_statuses: {
         Row: {
           color_hex: string | null
@@ -1230,10 +1201,6 @@ export type Database = {
           start_time: string
         }
         Returns: string
-      }
-      get_eta_debug_info: {
-        Args: { task_id: string }
-        Returns: Json
       }
     }
     Enums: {
