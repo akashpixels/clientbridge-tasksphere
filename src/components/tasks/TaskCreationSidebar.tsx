@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -76,29 +77,6 @@ export const TaskCreationSidebar = () => {
   const { closeRightSidebar } = useLayout();
   const [taskCreated, setTaskCreated] = useState(false);
   const [createdTaskData, setCreatedTaskData] = useState<TaskData | null>(null);
-  const [maxConcurrentTasks, setMaxConcurrentTasks] = useState(1);
-
-  const fetchProjectSettings = async () => {
-    if (!projectId) return;
-    try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('max_concurrent_tasks')
-        .eq('id', projectId)
-        .single();
-
-      if (error) {
-        console.error("Error fetching project settings:", error);
-        return;
-      }
-      
-      if (data) {
-        setMaxConcurrentTasks(data.max_concurrent_tasks || 1);
-      }
-    } catch (error) {
-      console.error("Error in fetchProjectSettings:", error);
-    }
-  };
 
   const fetchActiveTaskCount = async () => {
     if (!projectId) return;
@@ -123,7 +101,6 @@ export const TaskCreationSidebar = () => {
   };
 
   useEffect(() => {
-    fetchProjectSettings();
     fetchActiveTaskCount();
   }, [projectId]);
 
@@ -150,10 +127,6 @@ export const TaskCreationSidebar = () => {
         project_id: projectId,
         created_by: userData.user?.id
       };
-
-      // Add a delay to avoid concurrent update issues
-      await new Promise(resolve => setTimeout(resolve, 100));
-
       console.log("Sending task data to supabase:", taskData);
       const {
         data,
@@ -203,17 +176,14 @@ export const TaskCreationSidebar = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
-        <div>
-          <h2 className="font-semibold text-[14px]">
-            {taskCreated 
-              ? "Task Created Successfully" 
-              : activeTaskCount > 0 
-                ? `${activeTaskCount} active task${activeTaskCount > 1 ? 's' : ''}` 
-                : 'No active tasks'
-            }
-          </h2>
-          {!taskCreated && <p className="text-xs text-muted-foreground">Project limit: {maxConcurrentTasks} concurrent tasks</p>}
-        </div>
+        <h2 className="font-semibold text-[14px]">
+          {taskCreated 
+            ? "Task Created Successfully" 
+            : activeTaskCount > 0 
+              ? `${activeTaskCount} active task${activeTaskCount > 1 ? 's' : ''}` 
+              : 'No active tasks'
+          }
+        </h2>
         <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
           <X size={18} />
         </Button>

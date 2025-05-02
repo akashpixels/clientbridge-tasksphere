@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -48,8 +49,6 @@ interface TasksTableProps {
   onImageClick: (image: string, images: string[]) => void;
   onCommentClick: (taskId: string) => void;
   selectedTaskId?: string;
-  onStatusChange?: (taskId: string, statusId: number) => void;
-  isUpdatingStatus?: boolean;
 }
 
 const formatInterval = (intervalValue: any): string => {
@@ -121,9 +120,7 @@ const TasksTable = ({
   onSort,
   onImageClick,
   onCommentClick,
-  selectedTaskId,
-  onStatusChange,
-  isUpdatingStatus = false
+  selectedTaskId
 }: TasksTableProps) => {
   const {
     setRightSidebarContent
@@ -158,7 +155,7 @@ const TasksTable = ({
       <TableCell className="w-[10%] px-4">
         <div className="flex flex-col items-start gap-1">
           <span 
-            className={`px-2 py-1 text-xs rounded-full font-semibold ${onStatusChange ? 'cursor-pointer hover:ring-2 hover:ring-offset-1' : ''}`}
+            className="px-2 py-1 text-xs rounded-full font-semibold" 
             style={{
               backgroundColor: getStatusColor(task.status || {
                 name: null,
@@ -169,22 +166,12 @@ const TasksTable = ({
                 color_hex: null
               }, task.is_awaiting_input, task.is_onhold).text
             }}
-            onClick={(e) => {
-              // Prevent the row click from triggering
-              if (onStatusChange && !isUpdatingStatus) {
-                e.stopPropagation();
-                // For now, we'll just toggle between Open (3) and In Queue (2)
-                const newStatusId = task.current_status_id === 3 ? 2 : 3;
-                onStatusChange(task.id, newStatusId);
-              }
-            }}
           >
             {task.is_awaiting_input ? 'Awaiting Input' : 
              task.is_onhold ? 'On Hold' :
              (task.queue_position && task.status?.name?.toLowerCase().includes('queue')) ? 
                `Queue #${task.queue_position} - ${task.status?.name}` : 
                task.status?.name}
-            {onStatusChange && !isUpdatingStatus && <span className="ml-1 opacity-70">↓</span>}
           </span>
           {task.completed_at && (
             <span className="text-xs text-gray-500 pl-2">
