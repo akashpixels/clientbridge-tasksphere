@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TaskForm } from "./TaskForm";
 import { useLayout } from "@/context/layout";
-import { X } from "lucide-react";
+import { X, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 // Define a type for the task data that includes the formatted property
@@ -19,6 +19,8 @@ interface TaskData {
   priority_level_id: number;
   actual_duration?: any;
   actual_duration_formatted?: string;
+  is_onhold?: boolean;
+  is_awaiting_input?: boolean;
   [key: string]: any; // Allow other properties
 }
 
@@ -173,6 +175,26 @@ export const TaskCreationSidebar = () => {
     setCreatedTaskData(null);
   };
 
+  // Function to render task status badges
+  const renderTaskStatusBadges = (task: TaskData) => {
+    return (
+      <div className="flex flex-wrap gap-2 mt-2">
+        {task.is_onhold && (
+          <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            On Hold
+          </Badge>
+        )}
+        {task.is_awaiting_input && (
+          <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            Awaiting Input
+          </Badge>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
@@ -208,6 +230,9 @@ export const TaskCreationSidebar = () => {
                     </div>
                     <p><span className="font-medium">Status:</span> {createdTaskData?.current_status_id === 1 ? 'Open' : 'Pending'}</p>
                     <p><span className="font-medium">Priority:</span> {createdTaskData?.priority_level_id}</p>
+                    
+                    {/* Render status badges if task is on hold or awaiting input */}
+                    {createdTaskData && renderTaskStatusBadges(createdTaskData)}
                   </div>
                 </div>
               </div>
