@@ -1189,6 +1189,10 @@ export type Database = {
         Args: { start_time: string; work_hours: unknown }
         Returns: string
       }
+      compute_eta_after_ins_for_update: {
+        Args: { task_id: string }
+        Returns: undefined
+      }
       find_next_working_day: {
         Args: {
           input_date: string
