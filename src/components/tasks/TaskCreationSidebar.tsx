@@ -231,11 +231,12 @@ export const TaskCreationSidebar = () => {
       
       // Update the debug data
       setEtaDebugData({
-        base_time: baseTimeData,
-        gap_time: gapTimeData,
-        delta: delta.data,
-        est_start: estStart.data,
-        est_end: estEnd.data
+        // Type casting to ensure string type
+        base_time: baseTimeData as string,
+        gap_time: gapTimeData as string,
+        delta: delta.data as string,
+        est_start: estStart.data as string,
+        est_end: estEnd.data as string
       });
       
     } catch (error) {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useForm } from "react-hook-form";
@@ -13,7 +12,7 @@ import { Select, SelectContent, SelectTrigger, SelectValue, SelectItem } from "@
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PrioritySelector } from "./PrioritySelector";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 
 interface TaskFormProps {
   onSubmit: (data: any) => void;
@@ -245,7 +244,7 @@ export const TaskForm = ({ onSubmit, isSubmitting, activeTaskCount, onFormChange
                             priority_level_id: value
                           });
                         }
-                      }} 
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
