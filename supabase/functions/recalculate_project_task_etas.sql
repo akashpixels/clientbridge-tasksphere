@@ -64,4 +64,3 @@ BEGIN
     RAISE NOTICE 'Completed recalculation of all ETAs for project %', project_id_param;
 END;
 $function$;
-
