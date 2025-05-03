@@ -1,448 +1,307 @@
+
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 import { useParams } from "react-router-dom";
-import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from "@/components/ui/form";
+import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Upload, X, Plus, Monitor, Smartphone, MonitorSmartphone, Loader2 } from "lucide-react";
-import { PrioritySelector } from "./PrioritySelector";
-import { formatDuration } from "@/lib/date-utils";
+import { Select, SelectContent, SelectTrigger, SelectValue, SelectItem } from "@/components/ui/select";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-const taskFormSchema = z.object({
-  details: z.string().max(1000, {
-    message: "Task details must be less than 1000 characters"
-  }),
-  task_type_id: z.coerce.number({
-    required_error: "Task type is required"
-  }),
-  priority_level_id: z.coerce.number().default(3),
-  complexity_level_id: z.coerce.number().default(3),
-  target_device: z.enum(["desktop", "mobile", "both"]).default("both"),
-  reference_links: z.array(z.string().url({
-    message: "Must be a valid URL"
-  })).default([]),
-  image_urls: z.array(z.string().url({
-    message: "Must be a valid URL"
-  })).default([])
-});
-
-type TaskFormValues = z.infer<typeof taskFormSchema>;
+import { PrioritySelector } from "./PrioritySelector";
+import { Loader2 } from "lucide-react";
 
 interface TaskFormProps {
-  onSubmit: (data: TaskFormValues) => void;
+  onSubmit: (data: any) => void;
   isSubmitting: boolean;
   activeTaskCount: number;
+  onFormChange?: (data: any) => void;
 }
 
-export const TaskForm = ({
-  onSubmit,
-  isSubmitting,
-  activeTaskCount
-}: {
-  onSubmit: (data: TaskFormValues) => void;
-  isSubmitting: boolean;
-  activeTaskCount: number;
-}) => {
-  const {
-    id: projectId
-  } = useParams<{
-    id: string;
-  }>();
+const formSchema = z.object({
+  details: z.string().min(5, "Task description must be at least 5 characters"),
+  task_type_id: z.string(),
+  priority_level_id: z.coerce.number(),
+  current_status_id: z.coerce.number().default(1),
+  complexity_level_id: z.coerce.number().default(3),
+  target_device: z.enum(["desktop", "mobile", "both"]).default("both"),
+});
+
+export const TaskForm = ({ onSubmit, isSubmitting, activeTaskCount, onFormChange }: TaskFormProps) => {
+  const { id: projectId } = useParams<{ id: string }>();
   const [taskTypes, setTaskTypes] = useState<any[]>([]);
-  const [priorityLevels, setPriorityLevels] = useState<any[]>([]);
   const [complexityLevels, setComplexityLevels] = useState<any[]>([]);
-  const [project, setProject] = useState<any>(null);
-  const [timelineParams, setTimelineParams] = useState<any>({
-    taskTypeId: null,
-    priorityLevelId: null,
-    complexityLevelId: 3
-  });
-  const [newReferenceLink, setNewReferenceLink] = useState("");
-  const [newImageUrl, setNewImageUrl] = useState("");
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const form = useForm<TaskFormValues>({
-    resolver: zodResolver(taskFormSchema),
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       details: "",
-      complexity_level_id: 3,
-      priority_level_id: 3,
+      task_type_id: "",
+      priority_level_id: 3, // Default to Normal priority
+      current_status_id: 1, // Default to Unassigned status
+      complexity_level_id: 3, // Default to Standard complexity
       target_device: "both",
-      reference_links: [],
-      image_urls: []
     },
-    mode: "onChange"
   });
-
+  
+  // Watch for form changes to trigger ETA calculation
   useEffect(() => {
-    const fetchProject = async () => {
-      if (!projectId) return;
-      const {
-        data,
-        error
-      } = await supabase.from('projects').select(`
-          id,
-          name,
-          task_type_options
-        `).eq('id', projectId).single();
-      if (error) {
-        console.error("Error fetching project:", error);
-        return;
+    const subscription = form.watch((formValues) => {
+      if (onFormChange && formValues.task_type_id && formValues.complexity_level_id && formValues.priority_level_id) {
+        onFormChange(formValues);
       }
-      setProject(data);
-    };
-    fetchProject();
-  }, [projectId]);
-
-  useEffect(() => {
-    const fetchTaskTypes = async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('task_types').select('*').order('category').order('name');
-      if (error) {
-        console.error("Error fetching task types:", error);
-        return;
-      }
-      if (project?.task_type_options && project.task_type_options.length > 0) {
-        const filteredTaskTypes = data.filter(type => project.task_type_options.includes(type.id));
-        setTaskTypes(filteredTaskTypes);
-      } else {
-        setTaskTypes(data);
-      }
-    };
-    if (project) {
-      fetchTaskTypes();
-    }
-  }, [project]);
-
-  useEffect(() => {
-    const fetchPriorityLevels = async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('priority_levels').select('*').order('id');
-      if (error) {
-        console.error("Error fetching priority levels:", error);
-        return;
-      }
-      setPriorityLevels(data);
-    };
-    fetchPriorityLevels();
-  }, []);
-
-  useEffect(() => {
-    const fetchComplexityLevels = async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('complexity_levels').select('*').eq('is_active', true).order('id');
-      if (error) {
-        console.error("Error fetching complexity levels:", error);
-        return;
-      }
-      setComplexityLevels(data);
-    };
-    fetchComplexityLevels();
-  }, []);
-
-  useEffect(() => {
-    const subscription = form.watch(value => {
-      setTimelineParams({
-        taskTypeId: value.task_type_id,
-        priorityLevelId: value.priority_level_id,
-        complexityLevelId: value.complexity_level_id || 3
-      });
     });
+    
     return () => subscription.unsubscribe();
-  }, [form.watch]);
+  }, [form, onFormChange]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      setImageFiles(prev => [...prev, ...Array.from(files)]);
-    }
-  };
+  useEffect(() => {
+    // Fetch task types
+    const fetchTaskTypes = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("task_types")
+          .select("id, name, category")
+          .order("name");
 
-  const handleImagePaste = (e: React.ClipboardEvent) => {
-    const items = e.clipboardData.items;
-    if (items) {
-      let pastedImage = false;
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf("image") !== -1) {
-          const blob = items[i].getAsFile();
-          if (blob) {
-            setImageFiles(prev => [...prev, blob]);
-            pastedImage = true;
+        if (error) {
+          console.error("Error fetching task types:", error);
+        } else {
+          setTaskTypes(data || []);
+          // Set default task type if available
+          if (data && data.length > 0) {
+            form.setValue("task_type_id", data[0].id.toString());
+            
+            // If onFormChange exists, trigger it with the initial form data
+            if (onFormChange) {
+              setTimeout(() => {
+                onFormChange(form.getValues());
+              }, 100);
+            }
           }
         }
+      } catch (error) {
+        console.error("Failed to fetch task types:", error);
       }
-      if (!pastedImage) {
-        const text = e.clipboardData.getData('text/plain');
-        if (text && /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|svg)$/i.test(text)) {
-          form.setValue("image_urls", [...form.getValues("image_urls"), text]);
-          setNewImageUrl("");
-          pastedImage = true;
+    };
+
+    // Fetch complexity levels
+    const fetchComplexityLevels = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("complexity_levels")
+          .select("id, name, multiplier")
+          .order("id");
+
+        if (error) {
+          console.error("Error fetching complexity levels:", error);
+        } else {
+          setComplexityLevels(data || []);
         }
+      } catch (error) {
+        console.error("Failed to fetch complexity levels:", error);
       }
-      if (pastedImage) {
-        e.preventDefault();
-      }
-    }
+    };
+
+    fetchTaskTypes();
+    fetchComplexityLevels();
+  }, [projectId]);
+
+  const handleFormSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (!projectId) return;
+    
+    // Convert task_type_id from string to number for database compatibility
+    const taskData = {
+      ...data,
+      task_type_id: parseInt(data.task_type_id),
+      project_id: projectId
+    };
+    
+    onSubmit(taskData);
   };
 
-  const removeImage = (index: number) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const addReferenceLink = () => {
-    if (newReferenceLink && /^https?:\/\/.+/.test(newReferenceLink)) {
-      const currentLinks = form.getValues("reference_links");
-      form.setValue("reference_links", [...currentLinks, newReferenceLink]);
-      setNewReferenceLink("");
-    }
-  };
-
-  const removeReferenceLink = (index: number) => {
-    const currentLinks = form.getValues("reference_links");
-    form.setValue("reference_links", currentLinks.filter((_, i) => i !== index));
-  };
-
-  const addImageUrl = () => {
-    if (newImageUrl && /^https?:\/\/.+/.test(newImageUrl)) {
-      const currentUrls = form.getValues("image_urls");
-      form.setValue("image_urls", [...currentUrls, newImageUrl]);
-      setNewImageUrl("");
-    }
-  };
-
-  const removeImageUrl = (index: number) => {
-    const currentUrls = form.getValues("image_urls");
-    form.setValue("image_urls", currentUrls.filter((_, i) => i !== index));
-  };
-
-  const getPriorityTooltip = (level: any) => {
-    if (!level) return "";
-    const timeToStart = level.start_delay !== undefined ? formatDuration(level.start_delay) : "immediate";
-    const multiplier = level.multiplier ? `${level.multiplier}x duration` : "standard duration";
-    return `${timeToStart} delay, ${multiplier}`;
-  };
-
-  const handleFormSubmit = (data: TaskFormValues) => {
-    console.log("Form submission data:", data);
-    if (!form.formState.isValid) {
-      console.error("Form is invalid, not submitting");
-      return;
-    }
-    onSubmit(data);
-  };
-
-  const isFormValid = form.formState.isValid;
-  const errors = form.formState.errors;
-  
-  return <div className="flex flex-col h-full">
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="flex flex-col h-full">
-        <ScrollArea className="flex-1">
-          <div className="space-y-5 p-4">
-            <FormField control={form.control} name="details" render={({
-              field
-            }) => <FormItem>
-              <FormControl>
-                <Textarea placeholder="Describe what needs to be done..." className="min-h-[100px] focus:outline-none" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>} />
-
-            <div className="grid grid-cols-2 gap-4 ">
-              <FormField control={form.control} name="task_type_id" render={({
-                field
-              }) => <FormItem>
-                <FormControl>
-                  <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
-                    <SelectTrigger className={`text-muted-foreground ${errors.task_type_id ? 'border-red-500' : ''}`}>
-                      <SelectValue placeholder="Task type" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#fcfcfc]">
-                      {taskTypes.length > 0 && taskTypes.reduce((acc: any[], type: any) => {
-                        const categoryExists = acc.some(item => item.category === type.category);
-                        if (!categoryExists) {
-                          acc.push({
-                            category: type.category,
-                            items: taskTypes.filter(t => t.category === type.category)
+  return (
+    <ScrollArea className="h-full pb-8">
+      <div className="p-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="details"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Task Description</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Describe the task in detail" 
+                      {...field} 
+                      rows={4}
+                      className="resize-none"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="task_type_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Task Type</FormLabel>
+                    <Select 
+                      value={field.value} 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        // Trigger onFormChange if it exists
+                        if (onFormChange) {
+                          const currentValues = form.getValues();
+                          onFormChange({
+                            ...currentValues,
+                            task_type_id: value
                           });
                         }
-                        return acc;
-                      }, []).map((categoryGroup: any) => <div key={categoryGroup.category} className="mb-2">
-                            <div className="px-2 py-1.5 text-xs font-semibold bg-muted">{categoryGroup.category}</div>
-                            {categoryGroup.items.map((type: any) => <SelectItem key={type.id} value={type.id.toString()}>
-                                {type.name}
-                              </SelectItem>)}
-                          </div>)}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>} />
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {taskTypes.map((type) => (
+                          <SelectItem key={type.id} value={type.id.toString()}>
+                            {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="complexity_level_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Complexity</FormLabel>
+                    <Select 
+                      value={field.value.toString()} 
+                      onValueChange={(value) => {
+                        field.onChange(parseInt(value));
+                        // Trigger onFormChange if it exists
+                        if (onFormChange) {
+                          const currentValues = form.getValues();
+                          onFormChange({
+                            ...currentValues,
+                            complexity_level_id: parseInt(value)
+                          });
+                        }
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select complexity" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {complexityLevels.map((level) => (
+                          <SelectItem key={level.id} value={level.id.toString()}>
+                            {level.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             
-              <FormField control={form.control} name="complexity_level_id" render={({
-                field
-              }) => <FormItem>
-                <FormControl>
-                  <Select onValueChange={value => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
-                    <SelectTrigger className="text-muted-foreground">
-                      <SelectValue placeholder="Complexity" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#fcfcfc]">
-                      {complexityLevels.map(level => <SelectItem key={level.id} value={level.id.toString()}>
-                          {level.name}
-                        </SelectItem>)}
+            <FormField
+              control={form.control}
+              name="priority_level_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Priority</FormLabel>
+                  <FormControl>
+                    <PrioritySelector 
+                      value={field.value} 
+                      onChange={(value) => {
+                        field.onChange(value);
+                        // Trigger onFormChange if it exists
+                        if (onFormChange) {
+                          const currentValues = form.getValues();
+                          onFormChange({
+                            ...currentValues,
+                            priority_level_id: value
+                          });
+                        }
+                      }} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="target_device"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Target Device</FormLabel>
+                  <Select 
+                    value={field.value} 
+                    onValueChange={field.onChange}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select device" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="desktop">Desktop</SelectItem>
+                      <SelectItem value="mobile">Mobile</SelectItem>
+                      <SelectItem value="both">Both</SelectItem>
                     </SelectContent>
                   </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>} />
-            </div>
-
-            <FormField control={form.control} name="target_device" render={({
-              field
-            }) => <FormItem>
-                <div className="flex gap-5 mt-0 justify-center">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'desktop' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('desktop')}>
-                          <Monitor size={24} />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Desktop view only</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'mobile' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('mobile')}>
-                          <Smartphone size={24} />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Mobile view only</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className={`flex items-center justify-center p-2 cursor-pointer ${field.value === 'both' ? 'text-black' : 'text-gray-300'}`} onClick={() => field.onChange('both')}>
-                          <MonitorSmartphone size={24} />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Responsive - works on all devices</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <FormMessage />
-              </FormItem>} />
-
-            <div className="mt-8 mb-8">
-              <FormField control={form.control} name="priority_level_id" render={({
-                field
-              }) => <FormItem className="mt-[30px] mb-[40px]">
-                <FormLabel className="text-gray-500 text-xs mb-4">
-                  Priority Level
-                </FormLabel>
-                <div className="py-4 px-0 mt-2 border-t border-b border-gray-200">
-                  <FormControl>
-                    <div className="mt-1">
-                      <PrioritySelector priorityLevels={priorityLevels} value={field.value} onChange={field.onChange} />
-                    </div>
-                  </FormControl>
-                </div>
-                <FormMessage />
-              </FormItem>} />
-            </div>
-
-            <div>
-              <div className="flex gap-2 mb-2">
-                <Input type="url" value={newReferenceLink} onChange={e => setNewReferenceLink(e.target.value)} placeholder="Paste reference link URL" className="flex-1" />
-                <Button type="button" size="icon" variant="outline" onClick={addReferenceLink}>
-                  <Plus size={16} />
-                </Button>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {activeTaskCount > 0 && (
+              <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
+                <p className="flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  There {activeTaskCount === 1 ? 'is' : 'are'} currently {activeTaskCount} active task{activeTaskCount === 1 ? '' : 's'}.
+                  This task may be queued.
+                </p>
               </div>
-              {form.watch("reference_links").map((link, index) => <div key={index} className="flex items-center gap-2 mb-2">
-                  <div className="flex-1 text-sm truncate">{link}</div>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => removeReferenceLink(index)}>
-                    <X size={14} />
-                  </Button>
-                </div>)}
-            </div>
-
-            <div>
-              <div className="flex gap-2 mb-2">
-                <div className="relative flex-1">
-                  <Input type="text" value={newImageUrl} onChange={e => setNewImageUrl(e.target.value)} placeholder="Upload or paste image/URL" className="pr-10 w-full" onPaste={handleImagePaste} />
-                  <input type="file" accept="image/*" multiple id="image-upload" className="hidden" onChange={handleImageUpload} />
-                  <label htmlFor="image-upload" className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer">
-                    <Upload size={16} className="text-gray-500 hover:text-gray-700" />
-                  </label>
-                </div>
-                <Button type="button" size="icon" variant="outline" onClick={addImageUrl} disabled={!newImageUrl}>
-                  <Plus size={16} />
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-2">
-                {form.watch("image_urls").map((url, index) => <div key={`url-${index}`} className="relative group">
-                    <img src={url} alt="" className="w-[50px] h-[50px] object-cover rounded-md" onError={e => {
-                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/50?text=Error';
-                    }} />
-                    <Button type="button" variant="destructive" size="sm" className="absolute -top-2 -right-2 h-5 w-5 p-0 rounded-full" onClick={() => removeImageUrl(index)}>
-                      <X size={12} />
-                    </Button>
-                  </div>)}
-                {imageFiles.map((file, index) => <div key={`file-${index}`} className="relative group">
-                    <img src={URL.createObjectURL(file)} alt="" className="w-[50px] h-[50px] object-cover rounded-md" />
-                    <Button type="button" variant="destructive" size="sm" className="absolute -top-2 -right-2 h-5 w-5 p-0 rounded-full" onClick={() => removeImage(index)}>
-                      <X size={12} />
-                    </Button>
-                  </div>)}
-              </div>
-            </div>
-          </div>
-        </ScrollArea>
-
-        <div className="border-t p-4 bg-background sticky bottom-0 z-10">
-          <Button 
-            type="submit" 
-            disabled={isSubmitting || !isFormValid} 
-            className="w-full"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
-              </>
-            ) : "Create Task"}
-          </Button>
-          {!isFormValid && Object.keys(errors).length > 0 && (
-            <p className="text-red-500 text-xs mt-2 text-center">
-              Please fill in all required fields correctly
-            </p>
-          )}
-        </div>
-      </form>
-    </Form>
-  </div>;
+            )}
+            
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Task"
+              )}
+            </Button>
+          </form>
+        </Form>
+      </div>
+    </ScrollArea>
+  );
 };
