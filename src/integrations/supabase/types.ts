@@ -1169,16 +1169,8 @@ export type Database = {
         Args: { p_project_id: string; p_queue_pos: number }
         Returns: string
       }
-      calculate_delta: {
-        Args: { p_start_delay: unknown; p_gap_time: unknown }
-        Returns: unknown
-      }
       calculate_est_duration_helper: {
         Args: { complexity_level_id: number; task_type_id: number }
-        Returns: unknown
-      }
-      calculate_gap_time: {
-        Args: { p_created_at: string; p_base_time: string }
         Returns: unknown
       }
       calculate_working_hours: {

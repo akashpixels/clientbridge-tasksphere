@@ -7,9 +7,8 @@ import { useParams } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TaskForm } from "./TaskForm";
 import { useLayout } from "@/context/layout";
-import { X, AlertCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { X, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
 
 // Define a type for the task data that includes the formatted property
 interface TaskData {
@@ -23,15 +22,6 @@ interface TaskData {
   is_onhold?: boolean;
   is_awaiting_input?: boolean;
   [key: string]: any; // Allow other properties
-}
-
-// Define a type for the ETA calculation debug data
-interface ETADebugData {
-  base_time: string | null;
-  gap_time: string | null;
-  delta: string | null;
-  est_start: string | null;
-  est_end: string | null;
 }
 
 // Helper function to format interval for display
@@ -89,37 +79,6 @@ export const TaskCreationSidebar = () => {
   const { closeRightSidebar } = useLayout();
   const [taskCreated, setTaskCreated] = useState(false);
   const [createdTaskData, setCreatedTaskData] = useState<TaskData | null>(null);
-  const [etaDebugData, setEtaDebugData] = useState<ETADebugData | null>(null);
-  const [etaCalculating, setEtaCalculating] = useState(false);
-  const [showDebugPanel, setShowDebugPanel] = useState(true);
-  const [queuePosition, setQueuePosition] = useState<number | null>(null);
-
-  // Get the queue position for current project tasks
-  const fetchQueuePosition = async () => {
-    if (!projectId) return;
-    try {
-      // Get the highest queue position for tasks in the project
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('queue_position')
-        .eq('project_id', projectId)
-        .order('queue_position', { ascending: false })
-        .limit(1);
-
-      if (error) {
-        console.error("Error fetching queue position:", error);
-        return;
-      }
-      
-      // Set next queue position (1 more than the highest, or 1 if no tasks)
-      const nextQueuePos = data && data.length > 0 && data[0].queue_position 
-                          ? data[0].queue_position + 1 
-                          : 1;
-      setQueuePosition(nextQueuePos);
-    } catch (error) {
-      console.error("Error in fetchQueuePosition:", error);
-    }
-  };
 
   const fetchActiveTaskCount = async () => {
     if (!projectId) return;
@@ -145,106 +104,7 @@ export const TaskCreationSidebar = () => {
 
   useEffect(() => {
     fetchActiveTaskCount();
-    fetchQueuePosition();
   }, [projectId]);
-
-  // Function to calculate ETA for debugging
-  const calculateETA = async (formData: any) => {
-    if (!projectId || !queuePosition) return;
-    
-    try {
-      setEtaCalculating(true);
-      
-      // Get the task type and complexity to calculate est_duration
-      const { data: durationData, error: durationError } = await supabase.rpc(
-        'calculate_est_duration_helper',
-        { 
-          complexity_level_id: formData.complexity_level_id,
-          task_type_id: formData.task_type_id 
-        }
-      );
-      
-      if (durationError) {
-        console.error("Error calculating duration:", durationError);
-        return;
-      }
-      
-      // Calculate base_time
-      const { data: baseTimeData, error: baseTimeError } = await supabase.rpc(
-        'calculate_base_time',
-        { 
-          p_project_id: projectId,
-          p_queue_pos: queuePosition 
-        }
-      );
-      
-      if (baseTimeError) {
-        console.error("Error calculating base time:", baseTimeError);
-        return;
-      }
-      
-      // For demonstration, simulate gap_time as working hours between now and base_time
-      const { data: gapTimeData, error: gapTimeError } = await supabase.rpc(
-        'calculate_working_hours',
-        {
-          start_time: new Date().toISOString(),
-          end_time: baseTimeData
-        }
-      );
-      
-      if (gapTimeError) {
-        console.error("Error calculating gap time:", gapTimeError);
-        return;
-      }
-      
-      // Simulate calculating delta (priority_levels.start_delay - gap_time, minimum 30 min)
-      // First get the start delay for this priority
-      const { data: priorityData, error: priorityError } = await supabase
-        .from('priority_levels')
-        .select('start_delay')
-        .eq('id', formData.priority_level_id)
-        .single();
-        
-      if (priorityError) {
-        console.error("Error fetching priority data:", priorityError);
-        return;
-      }
-      
-      // Calculate delta as max(start_delay - gap_time, 30min)
-      const startDelay = priorityData.start_delay || '00:00:00';
-      const delta = await supabase.rpc('calculate_delta', {
-        p_start_delay: startDelay,
-        p_gap_time: gapTimeData
-      });
-      
-      // Calculate est_start = base_time + delta
-      const estStart = await supabase.rpc('calculate_working_timestamp', {
-        start_time: baseTimeData,
-        work_hours: delta.data
-      });
-      
-      // Calculate est_end = est_start + est_duration
-      const estEnd = await supabase.rpc('calculate_working_timestamp', {
-        start_time: estStart.data,
-        work_hours: durationData
-      });
-      
-      // Update the debug data
-      setEtaDebugData({
-        // Type casting to ensure string type
-        base_time: baseTimeData as string,
-        gap_time: gapTimeData as string,
-        delta: delta.data as string,
-        est_start: estStart.data as string,
-        est_end: estEnd.data as string
-      });
-      
-    } catch (error) {
-      console.error("Error calculating ETA:", error);
-    } finally {
-      setEtaCalculating(false);
-    }
-  };
 
   const handleSubmit = async (formData: any) => {
     if (!projectId) return;
@@ -313,7 +173,6 @@ export const TaskCreationSidebar = () => {
   const handleAddAnother = () => {
     setTaskCreated(false);
     setCreatedTaskData(null);
-    setEtaDebugData(null);
   };
 
   // Function to render task status badges
@@ -334,40 +193,6 @@ export const TaskCreationSidebar = () => {
         )}
       </div>
     );
-  };
-
-  // Format timestamp for display
-  const formatTimestamp = (timestamp: string | null) => {
-    if (!timestamp) return "N/A";
-    try {
-      return format(new Date(timestamp), "MMM d, h:mm:ss a");
-    } catch (e) {
-      return "Invalid date";
-    }
-  };
-
-  // Format interval for display
-  const formatInterval = (interval: string | null) => {
-    if (!interval) return "N/A";
-    try {
-      // Try to extract hours, minutes, seconds
-      const match = interval.match(/(\d+):(\d+):(\d+)/);
-      if (match) {
-        const hours = parseInt(match[1], 10);
-        const minutes = parseInt(match[2], 10);
-        const seconds = parseInt(match[3], 10);
-        if (hours > 0) {
-          return `${hours}h ${minutes}m ${seconds}s`;
-        } else if (minutes > 0) {
-          return `${minutes}m ${seconds}s`;
-        } else {
-          return `${seconds}s`;
-        }
-      }
-      return interval;
-    } catch (e) {
-      return interval;
-    }
   };
 
   return (
@@ -420,73 +245,11 @@ export const TaskCreationSidebar = () => {
             </div>
           </div>
         ) : (
-          <>
-            <TaskForm 
-              onSubmit={handleSubmit} 
-              isSubmitting={isSubmitting} 
-              activeTaskCount={activeTaskCount}
-              onFormChange={calculateETA}
-            />
-            
-            {/* ETA Calculation Debug Panel */}
-            <div className="border-t border-gray-200 mt-4 pt-2 mx-4 mb-4">
-              <div 
-                className="flex items-center justify-between cursor-pointer py-2"
-                onClick={() => setShowDebugPanel(!showDebugPanel)}
-              >
-                <div className="flex items-center text-sm font-medium text-gray-600">
-                  <Clock className="h-4 w-4 mr-2" />
-                  Debug ETA Calculation
-                </div>
-                {showDebugPanel ? 
-                  <ChevronUp className="h-4 w-4 text-gray-500" /> : 
-                  <ChevronDown className="h-4 w-4 text-gray-500" />
-                }
-              </div>
-              
-              {showDebugPanel && (
-                <div className="py-2 px-3 bg-gray-50 rounded-md text-xs space-y-2 mb-4">
-                  {etaCalculating ? (
-                    <div className="flex items-center justify-center py-4">
-                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500 mr-2"></div>
-                      <p>Calculating...</p>
-                    </div>
-                  ) : etaDebugData ? (
-                    <>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="font-medium">Queue Position:</div>
-                        <div>{queuePosition ?? 'N/A'}</div>
-                        
-                        <div className="font-medium">Base Time:</div>
-                        <div>{formatTimestamp(etaDebugData.base_time)}</div>
-                        
-                        <div className="font-medium">Gap Time:</div>
-                        <div>{formatInterval(etaDebugData.gap_time)}</div>
-                        
-                        <div className="font-medium">Delta:</div>
-                        <div>{formatInterval(etaDebugData.delta)}</div>
-                        
-                        <div className="font-medium">Est Start:</div>
-                        <div className="text-green-700 bg-green-50 px-1.5 py-0.5 rounded">
-                          {formatTimestamp(etaDebugData.est_start)}
-                        </div>
-                        
-                        <div className="font-medium">Est End:</div>
-                        <div className="text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
-                          {formatTimestamp(etaDebugData.est_end)}
-                        </div>
-                      </div>
-                      <p className="italic text-gray-500 pt-1">Debug values will not be saved with the task. This panel is for development only.</p>
-                    </>
-                  ) : (
-                    <div className="py-4 text-center">
-                      <p>Change form values to calculate ETA</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </>
+          <TaskForm 
+            onSubmit={handleSubmit} 
+            isSubmitting={isSubmitting} 
+            activeTaskCount={activeTaskCount} 
+          />
         )}
       </div>
     </div>
