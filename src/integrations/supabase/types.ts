@@ -1173,10 +1173,6 @@ export type Database = {
         Args: { p_start_delay: unknown; p_gap_time: unknown }
         Returns: unknown
       }
-      calculate_est_duration_helper: {
-        Args: { complexity_level_id: number; task_type_id: number }
-        Returns: unknown
-      }
       calculate_gap_time: {
         Args: { p_created_at: string; p_base_time: string }
         Returns: unknown
@@ -1188,10 +1184,6 @@ export type Database = {
       calculate_working_timestamp: {
         Args: { start_time: string; work_hours: unknown }
         Returns: string
-      }
-      compute_eta_after_ins_for_update: {
-        Args: { task_id: string }
-        Returns: undefined
       }
       find_next_working_day: {
         Args: {

@@ -51,10 +51,9 @@ BEGIN
                 NEW.id, NEW.current_status_id;
         END IF;
         
-        -- If priority changed or complexity changed or est_duration changed or status changed to "In Queue", update queue positions
+        -- If priority changed OR status changed to "In Queue", update queue positions
+        -- Removed complexity and est_duration changes as triggers for queue recalculation
         IF (OLD.priority_level_id != NEW.priority_level_id) OR 
-           (OLD.complexity_level_id != NEW.complexity_level_id) OR
-           (OLD.est_duration IS DISTINCT FROM NEW.est_duration) OR
            (OLD.current_status_id != in_queue_status_id AND NEW.current_status_id = in_queue_status_id) THEN
             
             -- Update queue positions first
@@ -63,11 +62,7 @@ BEGIN
             -- Add a delay to ensure queue positions are updated before recalculating ETAs
             PERFORM pg_sleep(0.5);
             
-            -- For any changes that affect task timing, recalculate all ETAs for the project
-            -- This ensures that changes to one task properly propagate to all dependent tasks
-            PERFORM recalculate_project_task_etas(NEW.project_id);
-            
-            RAISE NOTICE 'Recalculated ETAs for all tasks in project % due to changes to task %', 
+            RAISE NOTICE 'Queue positions updated for project % due to changes to task %', 
                 NEW.project_id, NEW.id;
         END IF;
         
