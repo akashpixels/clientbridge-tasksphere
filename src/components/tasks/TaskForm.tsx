@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -186,9 +185,9 @@ export const TaskForm = ({
       if (data && data.length > 0) {
         setEtaPreview({
           projected_queue_position: data[0].projected_queue_position,
-          estimated_start_time: data[0].estimated_start_time,
-          estimated_end_time: data[0].estimated_end_time,
-          estimated_duration: data[0].estimated_duration
+          estimated_start_time: data[0].estimated_start_time ? String(data[0].estimated_start_time) : null,
+          estimated_end_time: data[0].estimated_end_time ? String(data[0].estimated_end_time) : null,
+          estimated_duration: data[0].estimated_duration ? String(data[0].estimated_duration) : null
         });
       }
     } catch (error) {
