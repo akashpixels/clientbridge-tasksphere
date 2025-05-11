@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Upload, X, Plus, Monitor, Smartphone, MonitorSmartphone, Loader2 } from "lucide-react";
 import { PrioritySelector } from "./PrioritySelector";
-import { formatDuration } from "@/lib/date-utils";
+import { formatDuration, formatDateTime } from "@/lib/date-utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const taskFormSchema = z.object({
@@ -67,6 +68,19 @@ export const TaskForm = ({
   const [newReferenceLink, setNewReferenceLink] = useState("");
   const [newImageUrl, setNewImageUrl] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [isEtaLoading, setIsEtaLoading] = useState(false);
+  const [etaPreview, setEtaPreview] = useState<{
+    projected_queue_position: number | null;
+    estimated_start_time: string | null;
+    estimated_end_time: string | null;
+    estimated_duration: string | null;
+  }>({
+    projected_queue_position: null,
+    estimated_start_time: null,
+    estimated_end_time: null,
+    estimated_duration: null
+  });
+  
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
@@ -152,6 +166,38 @@ export const TaskForm = ({
     fetchComplexityLevels();
   }, []);
 
+  const fetchTaskEta = async (taskTypeId: number, priorityLevelId: number, complexityLevelId: number) => {
+    if (!projectId || !taskTypeId || !priorityLevelId || !complexityLevelId) return;
+    
+    setIsEtaLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('calculate_project_task_eta', {
+        project_id_param: projectId,
+        priority_level_id_param: priorityLevelId,
+        complexity_level_id_param: complexityLevelId,
+        task_type_id_param: taskTypeId
+      });
+      
+      if (error) {
+        console.error("Error fetching task ETA:", error);
+        return;
+      }
+      
+      if (data && data.length > 0) {
+        setEtaPreview({
+          projected_queue_position: data[0].projected_queue_position,
+          estimated_start_time: data[0].estimated_start_time,
+          estimated_end_time: data[0].estimated_end_time,
+          estimated_duration: data[0].estimated_duration
+        });
+      }
+    } catch (error) {
+      console.error("Error in fetchTaskEta:", error);
+    } finally {
+      setIsEtaLoading(false);
+    }
+  };
+
   useEffect(() => {
     const subscription = form.watch(value => {
       setTimelineParams({
@@ -159,9 +205,18 @@ export const TaskForm = ({
         priorityLevelId: value.priority_level_id,
         complexityLevelId: value.complexity_level_id || 3
       });
+
+      // Call fetchTaskEta when values change
+      if (value.task_type_id && value.priority_level_id && (value.complexity_level_id || 3)) {
+        fetchTaskEta(
+          value.task_type_id, 
+          value.priority_level_id, 
+          value.complexity_level_id || 3
+        );
+      }
     });
     return () => subscription.unsubscribe();
-  }, [form.watch]);
+  }, [form.watch, projectId]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -419,6 +474,46 @@ export const TaskForm = ({
                     </Button>
                   </div>)}
               </div>
+            </div>
+            
+            {/* Task Timeline Preview Section */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <h3 className="text-sm font-medium mb-2">Task Timeline Preview</h3>
+              {isEtaLoading ? (
+                <div className="flex items-center justify-center p-3 bg-blue-50 rounded-md">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <span className="text-sm">Calculating...</span>
+                </div>
+              ) : etaPreview.projected_queue_position !== null ? (
+                <div className="bg-blue-50 rounded-md p-3 text-sm">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-gray-600">Queue Position:</span>
+                    <span className="font-medium">{etaPreview.projected_queue_position}</span>
+                  </div>
+                  {etaPreview.estimated_start_time && (
+                    <div className="flex justify-between mb-1">
+                      <span className="text-gray-600">Estimated Start:</span>
+                      <span className="font-medium">{formatDateTime(etaPreview.estimated_start_time)}</span>
+                    </div>
+                  )}
+                  {etaPreview.estimated_end_time && (
+                    <div className="flex justify-between mb-1">
+                      <span className="text-gray-600">Estimated End:</span>
+                      <span className="font-medium">{formatDateTime(etaPreview.estimated_end_time)}</span>
+                    </div>
+                  )}
+                  {etaPreview.estimated_duration && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Duration:</span>
+                      <span className="font-medium">{formatDuration(etaPreview.estimated_duration)}</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500 italic p-3 bg-gray-50 rounded-md">
+                  Select task type, priority, and complexity to see estimation
+                </div>
+              )}
             </div>
           </div>
         </ScrollArea>

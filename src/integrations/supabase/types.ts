@@ -1177,6 +1177,20 @@ export type Database = {
         Args: { p_created_at: string; p_base_time: string }
         Returns: unknown
       }
+      calculate_project_task_eta: {
+        Args: {
+          project_id_param: string
+          priority_level_id_param: number
+          complexity_level_id_param: number
+          task_type_id_param: number
+        }
+        Returns: {
+          projected_queue_position: number
+          estimated_start_time: string
+          estimated_end_time: string
+          estimated_duration: unknown
+        }[]
+      }
       calculate_working_hours: {
         Args: { start_time: string; end_time: string }
         Returns: unknown
