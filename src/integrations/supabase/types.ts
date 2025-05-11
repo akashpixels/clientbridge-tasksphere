@@ -1194,6 +1194,10 @@ export type Database = {
         }
         Returns: string
       }
+      recalculate_project_task_etas: {
+        Args: { project_id_param: string }
+        Returns: undefined
+      }
       reset_task_etas: {
         Args: { project_id_param: string }
         Returns: undefined

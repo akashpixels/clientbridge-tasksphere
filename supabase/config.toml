@@ -1,4 +1,5 @@
 
+
 [functions.update-task-status]
 verify_jwt = false
 
