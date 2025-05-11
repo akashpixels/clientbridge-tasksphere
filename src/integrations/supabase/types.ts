@@ -1194,6 +1194,10 @@ export type Database = {
         }
         Returns: string
       }
+      reset_task_etas: {
+        Args: { project_id_param: string }
+        Returns: undefined
+      }
     }
     Enums: {
       attachment_type: "image" | "document" | "other"
