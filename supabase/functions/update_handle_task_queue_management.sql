@@ -51,9 +51,10 @@ BEGIN
                 NEW.id, NEW.current_status_id;
         END IF;
         
-        -- If priority changed or complexity changed or status changed to "In Queue", update queue positions
+        -- If priority changed or complexity changed or est_duration changed or status changed to "In Queue", update queue positions
         IF (OLD.priority_level_id != NEW.priority_level_id) OR 
            (OLD.complexity_level_id != NEW.complexity_level_id) OR
+           (OLD.est_duration IS DISTINCT FROM NEW.est_duration) OR
            (OLD.current_status_id != in_queue_status_id AND NEW.current_status_id = in_queue_status_id) THEN
             
             -- Update queue positions first
