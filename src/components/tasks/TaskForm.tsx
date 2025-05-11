@@ -170,6 +170,13 @@ export const TaskForm = ({
     
     setIsEtaLoading(true);
     try {
+      console.log('Fetching ETA with params:', {
+        project_id_param: projectId,
+        priority_level_id_param: priorityLevelId,
+        complexity_level_id_param: complexityLevelId,
+        task_type_id_param: taskTypeId
+      });
+      
       const { data, error } = await supabase.rpc('calculate_project_task_eta', {
         project_id_param: projectId,
         priority_level_id_param: priorityLevelId,
@@ -179,8 +186,16 @@ export const TaskForm = ({
       
       if (error) {
         console.error("Error fetching task ETA:", error);
+        setEtaPreview({
+          projected_queue_position: null,
+          estimated_start_time: null,
+          estimated_end_time: null,
+          estimated_duration: null
+        });
         return;
       }
+      
+      console.log('ETA data received:', data);
       
       if (data && data.length > 0) {
         setEtaPreview({
@@ -189,9 +204,24 @@ export const TaskForm = ({
           estimated_end_time: data[0].estimated_end_time ? String(data[0].estimated_end_time) : null,
           estimated_duration: data[0].estimated_duration ? String(data[0].estimated_duration) : null
         });
+      } else {
+        // Reset preview if no data returned
+        setEtaPreview({
+          projected_queue_position: null,
+          estimated_start_time: null,
+          estimated_end_time: null,
+          estimated_duration: null
+        });
       }
     } catch (error) {
       console.error("Error in fetchTaskEta:", error);
+      // Reset preview on error
+      setEtaPreview({
+        projected_queue_position: null,
+        estimated_start_time: null,
+        estimated_end_time: null,
+        estimated_duration: null
+      });
     } finally {
       setIsEtaLoading(false);
     }
@@ -199,18 +229,21 @@ export const TaskForm = ({
 
   useEffect(() => {
     const subscription = form.watch(value => {
-      setTimelineParams({
+      const newParams = {
         taskTypeId: value.task_type_id,
         priorityLevelId: value.priority_level_id,
         complexityLevelId: value.complexity_level_id || 3
-      });
+      };
+      
+      setTimelineParams(newParams);
 
-      // Call fetchTaskEta when values change
-      if (value.task_type_id && value.priority_level_id && (value.complexity_level_id || 3)) {
+      // Only call fetchTaskEta when all three required values are present
+      if (newParams.taskTypeId && newParams.priorityLevelId && newParams.complexityLevelId) {
+        console.log('Params changed, fetching new ETA:', newParams);
         fetchTaskEta(
-          value.task_type_id, 
-          value.priority_level_id, 
-          value.complexity_level_id || 3
+          newParams.taskTypeId, 
+          newParams.priorityLevelId, 
+          newParams.complexityLevelId
         );
       }
     });
