@@ -37,7 +37,8 @@ serve(async (req) => {
       .from('tasks')
       .select(`
         id,
-        current_status_id
+        current_status_id,
+        project_id
       `)
       .eq('id', taskId)
       .single()
@@ -69,6 +70,16 @@ serve(async (req) => {
       )
     }
 
+    // Get active status IDs
+    const { data: activeStatusData } = await supabaseAdmin
+      .from('task_statuses')
+      .select('id')
+      .eq('type', 'active')
+
+    const activeStatusIds = activeStatusData?.map(status => status.id) || []
+    const isActiveStatus = activeStatusIds.includes(statusId)
+    const wasActiveStatus = activeStatusIds.includes(taskData.current_status_id)
+
     // Handle status update
     const updatePayload: any = {
       current_status_id: statusId,
@@ -78,6 +89,76 @@ serve(async (req) => {
     // Special handling for completed statuses
     if (statusData.type === 'completed') {
       updatePayload.completed_at = new Date().toISOString()
+    }
+
+    // Special handling for active status when coming from non-active status
+    if (isActiveStatus && !wasActiveStatus) {
+      // Calculate base time using database function instead of using NOW()
+      const { data: baseTimeData } = await supabaseAdmin
+        .rpc('calculate_base_time', { 
+          p_project_id: taskData.project_id, 
+          p_queue_pos: 0 
+        })
+
+      if (baseTimeData) {
+        updatePayload.est_start = baseTimeData
+        
+        // Also fetch est_duration and complexity info for est_end calculation
+        const { data: taskDetails } = await supabaseAdmin
+          .from('tasks')
+          .select(`
+            est_duration,
+            complexity_level_id,
+            task_type_id,
+            total_blocked_duration
+          `)
+          .eq('id', taskId)
+          .single()
+          
+        if (taskDetails) {
+          if (taskDetails.est_duration) {
+            // We have est_duration, use it directly
+            const { data: estEndData } = await supabaseAdmin
+              .rpc('calculate_working_timestamp', {
+                start_time: baseTimeData,
+                work_hours: taskDetails.est_duration + (taskDetails.total_blocked_duration || '0')
+              })
+              
+            if (estEndData) {
+              updatePayload.est_end = estEndData
+            }
+          } else {
+            // No est_duration, calculate from complexity and task type
+            const { data: complexityData } = await supabaseAdmin
+              .from('complexity_levels')
+              .select('multiplier')
+              .eq('id', taskDetails.complexity_level_id || 3)
+              .single()
+              
+            const { data: taskTypeData } = await supabaseAdmin
+              .from('task_types')
+              .select('default_duration')
+              .eq('id', taskDetails.task_type_id)
+              .single()
+              
+            if (complexityData && taskTypeData) {
+              const multiplier = complexityData.multiplier || 1
+              const defaultDuration = taskTypeData.default_duration || '2 hours'
+              
+              // Calculate est_end using the estimated duration
+              const { data: estEndData } = await supabaseAdmin
+                .rpc('calculate_working_timestamp', {
+                  start_time: baseTimeData,
+                  work_hours: `${multiplier * (parseInt(defaultDuration) || 2)} hours` + (taskDetails.total_blocked_duration || '0')
+                })
+                
+              if (estEndData) {
+                updatePayload.est_end = estEndData
+              }
+            }
+          }
+        }
+      }
     }
 
     // Update task status

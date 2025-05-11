@@ -1,8 +1,6 @@
 
-
 [functions.update-task-status]
 verify_jwt = false
 
 [functions.calculate-monthly-usage]
 verify_jwt = false
-
