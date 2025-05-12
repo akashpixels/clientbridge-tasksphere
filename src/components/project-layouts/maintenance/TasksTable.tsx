@@ -1,4 +1,3 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -169,10 +168,13 @@ const TasksTable = ({
           >
             {task.is_awaiting_input ? 'Awaiting Input' : 
              task.is_onhold ? 'On Hold' :
-             (task.queue_position && task.status?.name?.toLowerCase().includes('queue')) ? 
-               ` #${task.queue_position} - ${task.status?.name}` : 
-               task.status?.name}
+             task.status?.name}
           </span>
+          {task.queue_position && (
+            <span className="text-xs text-gray-500 pl-2">
+              #{task.queue_position}
+            </span>
+          )}
           {task.completed_at && (
             <span className="text-xs text-gray-500 pl-2">
               {task.logged_duration ? formatInterval(task.logged_duration) : task.actual_duration ? formatInterval(task.actual_duration) : '0h'}
