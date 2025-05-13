@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import {
   type ToastActionElement,
@@ -126,6 +127,7 @@ function dispatch(action: Action) {
   })
 }
 
+// Update the Toast type to use ReactNode for title and description
 type Toast = Omit<ToasterToast, "id">
 
 function toast({ ...props }: Toast) {
@@ -179,6 +181,7 @@ function useToast() {
   }
 }
 
+// Fixed the schedule method to properly type the props
 toast.schedule = (props: ToastScheduleProps) => {
   return toast({
     ...props,

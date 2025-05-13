@@ -34,7 +34,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { X, Plus, Monitor, Smartphone, MonitorSmartphone, Loader2, Upload } from "lucide-react"
-import { toast } from "@/hooks/use-toast"
+import { toast } from "@/components/ui/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 const formSchema = z.object({
@@ -118,9 +118,14 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
 
         setProject(projectResponse.data);
         
-        // Filter task types if project has task_type_options
-        if (projectResponse.data?.task_type_options && projectResponse.data.task_type_options.length > 0) {
-          const filteredTaskTypes = taskTypesResponse.data?.filter(type => projectResponse.data.task_type_options.includes(type.id)) || [];
+        // Fix TypeScript error: check if task_type_options is an array before using length and includes
+        const taskTypeOptions = projectResponse.data?.task_type_options;
+        const isValidTaskTypeOptions = Array.isArray(taskTypeOptions);
+        
+        if (isValidTaskTypeOptions && taskTypeOptions.length > 0) {
+          const filteredTaskTypes = taskTypesResponse.data?.filter(type => {
+            return taskTypeOptions.includes(type.id);
+          }) || [];
           setTaskTypes(filteredTaskTypes);
         } else {
           setTaskTypes(taskTypesResponse.data || []);
