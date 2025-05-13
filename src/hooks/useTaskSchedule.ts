@@ -46,13 +46,8 @@ export function useTaskSchedule() {
       }
 
       if (data && data.length > 0) {
-        // Ensure calculated_est_duration is a string
-        const result: TaskScheduleResult = {
-          ...data[0],
-          calculated_est_duration: String(data[0].calculated_est_duration)
-        };
-        setScheduleData(result);
-        return result;
+        setScheduleData(data[0]);
+        return data[0];
       }
 
       return null;
