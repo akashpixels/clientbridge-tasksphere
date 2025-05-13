@@ -1157,39 +1157,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      activate_next_queued_task: {
-        Args: { project_id_param: string }
-        Returns: undefined
-      }
-      assign_task_queue_positions: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      calculate_base_time: {
-        Args: { p_project_id: string; p_queue_pos: number }
+      calculate_final_work_base_time: {
+        Args: {
+          p_project_id: string
+          p_priority_level_id: number
+          p_created_at: string
+        }
         Returns: string
       }
-      calculate_delta: {
-        Args: { p_start_delay: unknown; p_gap_time: unknown }
-        Returns: unknown
-      }
-      calculate_gap_time: {
-        Args: { p_created_at: string; p_base_time: string }
-        Returns: unknown
-      }
-      calculate_project_task_eta: {
-        Args: {
-          project_id_param: string
-          priority_level_id_param: number
-          complexity_level_id_param: number
-          task_type_id_param: number
-        }
-        Returns: {
-          projected_queue_position: number
-          estimated_start_time: string
-          estimated_end_time: string
-          estimated_duration: unknown
-        }[]
+      calculate_schedule_for_new_task: {
+        Args:
+          | {
+              p_project_id: string
+              p_priority_level_id: number
+              p_created_at: string
+              p_start_delay: unknown
+              p_est_duration: unknown
+            }
+          | {
+              p_project_id: string
+              p_priority_level_id: number
+              p_task_type_id: number
+              p_complexity_level_id: number
+              p_created_at: string
+            }
+        Returns: Record<string, unknown>
       }
       calculate_working_hours: {
         Args: { start_time: string; end_time: string }
@@ -1208,13 +1200,19 @@ export type Database = {
         }
         Returns: string
       }
-      recalculate_project_task_etas: {
-        Args: { project_id_param: string }
-        Returns: undefined
-      }
-      reset_task_etas: {
-        Args: { project_id_param: string }
-        Returns: undefined
+      get_task_schedule: {
+        Args: {
+          p_project_id: string
+          p_priority_level_id: number
+          p_task_type_id: number
+          p_complexity_level_id: number
+        }
+        Returns: {
+          est_start: string
+          est_end: string
+          initial_status_id: number
+          calculated_est_duration: unknown
+        }[]
       }
     }
     Enums: {
