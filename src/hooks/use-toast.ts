@@ -127,8 +127,12 @@ function dispatch(action: Action) {
   })
 }
 
-// Update the Toast type to use ReactNode for title and description
-type Toast = Omit<ToasterToast, "id">
+// Update the Toast type definition to fix the type error
+type Toast = Omit<ToasterToast, "id"> & {
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+}
 
 function toast({ ...props }: Toast) {
   const id = genId()
@@ -181,7 +185,7 @@ function useToast() {
   }
 }
 
-// Fixed the schedule method to properly type the props
+// Update the schedule method to use the fixed Toast type
 toast.schedule = (props: ToastScheduleProps) => {
   return toast({
     ...props,

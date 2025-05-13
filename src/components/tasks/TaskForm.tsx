@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -34,7 +33,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { X, Plus, Monitor, Smartphone, MonitorSmartphone, Loader2, Upload } from "lucide-react"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "@/hooks/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 const formSchema = z.object({
