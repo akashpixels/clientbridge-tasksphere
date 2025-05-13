@@ -175,14 +175,14 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
 
       if (error) {
         console.error('Error creating task:', error);
-        toast.error({
+        toast({
           title: "Error creating task",
           description: "Please try again."
         });
         return;
       }
 
-      toast.success({
+      toast({
         title: "Task created",
         description: "The task has been created successfully."
       });
@@ -198,7 +198,7 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
       onClose();
     } catch (error) {
       console.error('Unexpected error:', error);
-      toast.error({
+      toast({
         title: "Unexpected error",
         description: "Please try again."
       });
@@ -206,50 +206,106 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      <FormField
-        control={form.control}
-        name="details"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Details</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="Enter task details"
-                className="resize-none"
-                {...field}
-              />
-            </FormControl>
-            <FormDescription>
-              Detailed description of the task.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="taskTypeId"
+          name="details"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Task Type</FormLabel>
+              <FormLabel>Details</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Enter task details"
+                  className="resize-none"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Detailed description of the task.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="taskTypeId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Task Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a task type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {taskTypes.map((taskType) => (
+                      <SelectItem key={taskType.id} value={String(taskType.id)}>
+                        {taskType.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  The type of task.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="priorityLevelId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Priority Level</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a priority level" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {priorityLevels.map((priorityLevel) => (
+                      <SelectItem key={priorityLevel.id} value={String(priorityLevel.id)}>
+                        {priorityLevel.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  The priority level of the task.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <FormField
+          control={form.control}
+          name="complexityLevelId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Complexity Level</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a task type" />
+                    <SelectValue placeholder="Select a complexity level" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {taskTypes.map((taskType) => (
-                    <SelectItem key={taskType.id} value={String(taskType.id)}>
-                      {taskType.name}
+                  {complexityLevels.map((complexityLevel) => (
+                    <SelectItem key={complexityLevel.id} value={String(complexityLevel.id)}>
+                      {complexityLevel.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <FormDescription>
-                The type of task.
+                The complexity level of the task.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -257,193 +313,139 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
         />
         <FormField
           control={form.control}
-          name="priorityLevelId"
+          name="targetDevice"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Priority Level</FormLabel>
+              <FormLabel>Target Device</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a priority level" />
+                    <SelectValue placeholder="Select target device" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {priorityLevels.map((priorityLevel) => (
-                    <SelectItem key={priorityLevel.id} value={String(priorityLevel.id)}>
-                      {priorityLevel.name}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="desktop">Desktop</SelectItem>
+                  <SelectItem value="mobile">Mobile</SelectItem>
+                  <SelectItem value="both">Both</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>
-                The priority level of the task.
+                The device for which the task is targeted.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-      </div>
-      <FormField
-        control={form.control}
-        name="complexityLevelId"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Complexity Level</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a complexity level" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {complexityLevels.map((complexityLevel) => (
-                  <SelectItem key={complexityLevel.id} value={String(complexityLevel.id)}>
-                    {complexityLevel.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormDescription>
-              The complexity level of the task.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="targetDevice"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Target Device</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select target device" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="desktop">Desktop</SelectItem>
-                <SelectItem value="mobile">Mobile</SelectItem>
-                <SelectItem value="both">Both</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormDescription>
-              The device for which the task is targeted.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="estStart"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Estimated Start Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date()
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormDescription>
-                The estimated start date of the task.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="estStart"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Estimated Start Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date < new Date()
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  The estimated start date of the task.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="estEnd"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Estimated End Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date < new Date()
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  The estimated end date of the task.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        
+        {/* Add the TaskScheduleInfo component after the form fields */}
+        <TaskScheduleInfo
+          estStart={scheduleData ? formatScheduleDate(scheduleData.est_start) : undefined}
+          estEnd={scheduleData ? formatScheduleDate(scheduleData.est_end) : undefined}
+          duration={scheduleData ? formatDuration(scheduleData.calculated_est_duration) : undefined}
+          loading={scheduleLoading}
+          error={scheduleError}
         />
-        <FormField
-          control={form.control}
-          name="estEnd"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Estimated End Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date()
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormDescription>
-                The estimated end date of the task.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      
-      {/* Add the TaskScheduleInfo component after the form fields */}
-      <TaskScheduleInfo
-        estStart={scheduleData ? formatScheduleDate(scheduleData.est_start) : undefined}
-        estEnd={scheduleData ? formatScheduleDate(scheduleData.est_end) : undefined}
-        duration={scheduleData ? formatDuration(scheduleData.calculated_est_duration) : undefined}
-        loading={scheduleLoading}
-        error={scheduleError}
-      />
-      
-      <div className="flex justify-end">
-        <Button type="button" variant="secondary" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button type="submit" className="ml-2">
-          Create Task
-        </Button>
-      </div>
-    </form>
+        
+        <div className="flex justify-end">
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" className="ml-2">
+            Create Task
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 
