@@ -33,8 +33,9 @@ import {
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, Paperclip, Laptop, Smartphone, Monitor } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+import AttachmentHandler from '@/components/project-layouts/maintenance/comments/AttachmentHandler';
 
 const formSchema = z.object({
   details: z.string().min(2, {
@@ -68,6 +69,10 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
   const [priorityLevels, setPriorityLevels] = useState<any[]>([]);
   const [complexityLevels, setComplexityLevels] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [referenceLinks, setReferenceLinks] = useState<{[key: string]: string}>({});
+  const [linkName, setLinkName] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -149,26 +154,78 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
     form
   ]);
 
-  const onSubmit = async (data: FormValues) => {
-    const formData: any = {
-      project_id: projectId,
-      details: data.details,
-      task_type_id: parseInt(data.taskTypeId, 10),
-      priority_level_id: parseInt(data.priorityLevelId, 10),
-      complexity_level_id: parseInt(data.complexityLevelId, 10),
-      target_device: data.targetDevice,
-      reference_links: data.referenceLinks,
-      images: data.images,
-    };
-    
-    // Add the est_start, est_end, and current_status_id from scheduleData if available
-    if (scheduleData) {
-      formData.est_start = scheduleData.est_start;
-      formData.est_end = scheduleData.est_end;
-      formData.current_status_id = scheduleData.initial_status_id;
+  const addReferenceLink = () => {
+    if (linkName && linkUrl) {
+      setReferenceLinks(prev => ({
+        ...prev,
+        [linkName]: linkUrl
+      }));
+      setLinkName('');
+      setLinkUrl('');
+      form.setValue('referenceLinks', {
+        ...form.getValues('referenceLinks'),
+        [linkName]: linkUrl
+      });
     }
+  };
 
+  const removeReferenceLink = (key: string) => {
+    const newLinks = {...referenceLinks};
+    delete newLinks[key];
+    setReferenceLinks(newLinks);
+    form.setValue('referenceLinks', newLinks);
+  };
+
+  const onSubmit = async (data: FormValues) => {
     try {
+      const uploadedImages: string[] = [];
+      
+      // Upload files if there are any
+      if (selectedFiles.length > 0) {
+        for (const file of selectedFiles) {
+          const filePath = `tasks/${projectId}/${Date.now()}_${file.name}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('project-files')
+            .upload(filePath, file);
+
+          if (uploadError) {
+            console.error('Error uploading file:', uploadError);
+            toast({
+              title: "Upload failed",
+              description: uploadError.message,
+              variant: "destructive"
+            });
+            return;
+          }
+
+          // Get public URL for the file
+          const { data: urlData } = supabase.storage
+            .from('project-files')
+            .getPublicUrl(filePath);
+          
+          uploadedImages.push(urlData.publicUrl);
+        }
+      }
+      
+      const formData: any = {
+        project_id: projectId,
+        details: data.details,
+        task_type_id: parseInt(data.taskTypeId, 10),
+        priority_level_id: parseInt(data.priorityLevelId, 10),
+        complexity_level_id: parseInt(data.complexityLevelId, 10),
+        target_device: data.targetDevice,
+        reference_links: referenceLinks,
+        images: uploadedImages,
+      };
+      
+      // Add the est_start, est_end, and current_status_id from scheduleData if available
+      if (scheduleData) {
+        formData.est_start = scheduleData.est_start;
+        formData.est_end = scheduleData.est_end;
+        formData.current_status_id = scheduleData.initial_status_id;
+      }
+
       const { error } = await supabase
         .from('tasks')
         .insert(formData);
@@ -189,7 +246,7 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
       
       // If schedule data was used, show a schedule notification
       if (scheduleData) {
-        toast.schedule({
+        toast({
           title: "Schedule Calculated",
           description: `Task scheduled to start at ${formatScheduleDate(scheduleData.est_start)}`
         });
@@ -228,203 +285,212 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="taskTypeId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Task Type</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a task type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {taskTypes.map((taskType) => (
+                        <SelectItem key={taskType.id} value={String(taskType.id)}>
+                          {taskType.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="priorityLevelId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Priority Level</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a priority level" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {priorityLevels.map((priorityLevel) => (
+                        <SelectItem key={priorityLevel.id} value={String(priorityLevel.id)}>
+                          {priorityLevel.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
           <FormField
             control={form.control}
-            name="taskTypeId"
+            name="complexityLevelId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Task Type</FormLabel>
+                <FormLabel>Complexity Level</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a task type" />
+                      <SelectValue placeholder="Select a complexity level" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {taskTypes.map((taskType) => (
-                      <SelectItem key={taskType.id} value={String(taskType.id)}>
-                        {taskType.name}
+                    {complexityLevels.map((complexityLevel) => (
+                      <SelectItem key={complexityLevel.id} value={String(complexityLevel.id)}>
+                        {complexityLevel.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <FormDescription>
-                  The type of task.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
-            name="priorityLevelId"
+            name="targetDevice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Priority Level</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a priority level" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {priorityLevels.map((priorityLevel) => (
-                      <SelectItem key={priorityLevel.id} value={String(priorityLevel.id)}>
-                        {priorityLevel.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  The priority level of the task.
-                </FormDescription>
+                <FormLabel>Target Device</FormLabel>
+                <div className="flex gap-2 mt-1">
+                  <Button
+                    type="button"
+                    variant={field.value === 'desktop' ? 'default' : 'outline'}
+                    className="flex-1 flex items-center gap-2"
+                    onClick={() => form.setValue('targetDevice', 'desktop')}
+                  >
+                    <Laptop className="h-4 w-4" />
+                    Desktop
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={field.value === 'mobile' ? 'default' : 'outline'}
+                    className="flex-1 flex items-center gap-2"
+                    onClick={() => form.setValue('targetDevice', 'mobile')}
+                  >
+                    <Smartphone className="h-4 w-4" />
+                    Mobile
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={field.value === 'both' ? 'default' : 'outline'}
+                    className="flex-1 flex items-center gap-2"
+                    onClick={() => form.setValue('targetDevice', 'both')}
+                  >
+                    <Monitor className="h-4 w-4" />
+                    Both
+                  </Button>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name="complexityLevelId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Complexity Level</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a complexity level" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {complexityLevels.map((complexityLevel) => (
-                    <SelectItem key={complexityLevel.id} value={String(complexityLevel.id)}>
-                      {complexityLevel.name}
-                    </SelectItem>
+        
+        <div className="space-y-4">
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-medium">Reference Links</h3>
+            </div>
+            <div className="flex gap-2 mb-2">
+              <Input
+                value={linkName}
+                onChange={(e) => setLinkName(e.target.value)}
+                placeholder="Link name"
+                className="flex-1"
+              />
+              <Input
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                placeholder="URL"
+                className="flex-1"
+              />
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={addReferenceLink}
+                disabled={!linkName || !linkUrl}
+              >
+                Add
+              </Button>
+            </div>
+            
+            {Object.keys(referenceLinks).length > 0 && (
+              <div className="border rounded-md p-2 space-y-2 mt-2 bg-slate-50">
+                {Object.entries(referenceLinks).map(([key, url]) => (
+                  <div key={key} className="flex items-center justify-between text-sm">
+                    <div>
+                      <span className="font-medium">{key}:</span>{" "}
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate">
+                        {url}
+                      </a>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeReferenceLink(key)}
+                      className="h-6 w-6 p-0"
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h3 className="font-medium mb-2">Attachments</h3>
+            <div className="border rounded-md p-3">
+              <AttachmentHandler 
+                selectedFiles={selectedFiles}
+                setSelectedFiles={setSelectedFiles}
+              />
+              
+              {selectedFiles.length > 0 && (
+                <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
+                  {selectedFiles.map((file, index) => (
+                    <div key={index} className="flex items-center gap-2 text-sm">
+                      <span className="truncate flex-1">{file.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({(file.size / 1024).toFixed(1)} KB)
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
+                        }}
+                        className="h-6 w-6 p-0"
+                      >
+                        ✕
+                      </Button>
+                    </div>
                   ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                The complexity level of the task.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="targetDevice"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Target Device</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select target device" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="desktop">Desktop</SelectItem>
-                  <SelectItem value="mobile">Mobile</SelectItem>
-                  <SelectItem value="both">Both</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                The device for which the task is targeted.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="estStart"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Estimated Start Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date()
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormDescription>
-                  The estimated start date of the task.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="estEnd"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Estimated End Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date()
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormDescription>
-                  The estimated end date of the task.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         
         {/* Add the TaskScheduleInfo component after the form fields */}
@@ -437,10 +503,10 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
         />
         
         <div className="flex justify-end">
-          <Button type="button" variant="secondary" onClick={onClose}>
+          <Button type="button" variant="secondary" onClick={onClose} className="mr-2">
             Cancel
           </Button>
-          <Button type="submit" className="ml-2">
+          <Button type="submit">
             Create Task
           </Button>
         </div>

@@ -49,7 +49,7 @@ const useFormField = () => {
     throw new Error("useFormField should be used within <FormField>")
   }
 
-  // Only attempt to use formContext if it exists
+  // Handle case when component is used outside of FormProvider
   const fieldState = formContext ? 
     formContext.getFieldState(fieldContext.name, formContext.formState) : 
     { invalid: false, isDirty: false, isTouched: false, error: undefined };
