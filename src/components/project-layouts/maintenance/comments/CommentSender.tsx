@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth";
 import { Send } from "lucide-react";
 import AttachmentHandler from "./AttachmentHandler";
@@ -41,7 +40,11 @@ const CommentSender = ({
     
     if (!session?.user?.id) {
       console.error("CommentSender: No user session found");
-      toast({ title: "Error", description: "You must be logged in", variant: "destructive" });
+      toast({
+        title: "Error", 
+        description: "You must be logged in", 
+        variant: "destructive"
+      });
       return;
     }
 

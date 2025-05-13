@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { TaskForm } from "./TaskForm";
+import TaskForm from "./TaskForm";
 import { useLayout } from "@/context/layout";
 import { X, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -246,9 +245,8 @@ export const TaskCreationSidebar = () => {
           </div>
         ) : (
           <TaskForm 
-            onSubmit={handleSubmit} 
-            isSubmitting={isSubmitting} 
-            activeTaskCount={activeTaskCount} 
+            projectId={projectId || ''} 
+            onClose={closeRightSidebar} 
           />
         )}
       </div>
