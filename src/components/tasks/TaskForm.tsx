@@ -7,6 +7,7 @@ import { useTaskSchedule } from '@/hooks/useTaskSchedule';
 import TaskScheduleInfo from './TaskScheduleInfo';
 import { PrioritySelector } from './PrioritySelector';
 import { formatDuration } from '@/lib/date-utils';
+import { useAuth } from '@/context/auth';
 import {
   Form,
   FormControl,
@@ -75,6 +76,7 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [project, setProject] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { session } = useAuth(); // Add auth session to get user ID
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -158,8 +160,8 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
       }
     };
 
-    // Add a small delay to prevent too many calculations when user is actively selecting options
-    const timer = setTimeout(calculateSchedule, 500);
+    // Add a longer delay (500ms → 800ms) to prevent too many calculations when user is actively selecting options
+    const timer = setTimeout(calculateSchedule, 800);
     return () => clearTimeout(timer);
   }, [
     form.watch('priorityLevelId'),
@@ -272,6 +274,7 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
       // Combine uploaded images with image URLs
       const allImages = [...uploadedImages, ...data.imageUrls];
       
+      // Add user ID (created_by) to the form data from the session
       const formData: any = {
         project_id: projectId,
         details: data.details,
@@ -281,6 +284,7 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
         target_device: data.targetDevice,
         reference_links: data.referenceLinks,
         images: allImages,
+        created_by: session?.user?.id, // Add the user ID from the session
       };
       
       // Add the est_start, est_end, and current_status_id from scheduleData if available
@@ -290,6 +294,8 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
         formData.current_status_id = scheduleData.initial_status_id;
       }
 
+      console.log("Submitting task with formData:", formData);
+
       const { error } = await supabase
         .from('tasks')
         .insert(formData);
@@ -298,7 +304,8 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
         console.error('Error creating task:', error);
         toast({
           title: "Error creating task",
-          description: "Please try again."
+          description: error.message,
+          variant: "destructive"
         });
         return;
       }

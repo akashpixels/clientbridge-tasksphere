@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
 
@@ -21,14 +21,28 @@ export function useTaskSchedule() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scheduleData, setScheduleData] = useState<TaskScheduleResult | null>(null);
+  
+  // Use refs to track the last request parameters to avoid duplicate calls
+  const lastRequestRef = useRef<string | null>(null);
 
-  const getTaskSchedule = async ({ 
+  const getTaskSchedule = useCallback(async ({ 
     projectId, 
     priorityLevelId, 
     taskTypeId, 
     complexityLevelId 
   }: TaskScheduleParams) => {
     try {
+      // Create a request signature to compare with previous requests
+      const requestSignature = `${projectId}-${priorityLevelId}-${taskTypeId}-${complexityLevelId}`;
+      
+      // Skip if this is the same request as the last one
+      if (requestSignature === lastRequestRef.current) {
+        return scheduleData;
+      }
+      
+      // Update last request signature
+      lastRequestRef.current = requestSignature;
+      
       setLoading(true);
       setError(null);
 
@@ -63,9 +77,9 @@ export function useTaskSchedule() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [scheduleData]);
 
-  const formatScheduleDate = (dateString?: string) => {
+  const formatScheduleDate = useCallback((dateString?: string) => {
     if (!dateString) return 'Not available';
     
     try {
@@ -74,9 +88,9 @@ export function useTaskSchedule() {
       console.error('Error formatting date:', error);
       return 'Invalid date';
     }
-  };
+  }, []);
 
-  const formatDuration = (durationString?: string) => {
+  const formatDuration = useCallback((durationString?: string) => {
     if (!durationString) return 'Not available';
     
     // Try to handle PostgreSQL interval format like "2 hours 30 mins"
@@ -108,7 +122,7 @@ export function useTaskSchedule() {
       console.error('Error formatting duration:', error);
       return durationString;
     }
-  };
+  }, []);
 
   return {
     getTaskSchedule,
