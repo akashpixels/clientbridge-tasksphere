@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,7 +40,11 @@ const CommentSender = ({
     
     if (!session?.user?.id) {
       console.error("CommentSender: No user session found");
-      toast({ title: "Error", description: "You must be logged in", variant: "destructive" });
+      toast({
+        title: "Error", 
+        description: "You must be logged in", 
+        variant: "destructive"
+      });
       return;
     }
 

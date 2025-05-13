@@ -58,13 +58,6 @@ const useToastStore = create<ToasterStore>((set) => ({
   },
 }));
 
-export function useToast() {
-  return {
-    toast,
-    ...useToastStore.getState(),
-  };
-}
-
 let count = 0;
 
 function showToast({ ...props }: Omit<Toast, "id" | "open">) {
@@ -73,48 +66,73 @@ function showToast({ ...props }: Omit<Toast, "id" | "open">) {
   return id;
 }
 
-export const toast = {
-  success: (props: Omit<Toast, "id" | "open" | "variant">) => {
-    const { title, description, ...rest } = props;
-    return showToast({
-      title: title || "Success",
-      description: description || "Your action was successful.",
-      variant: "success",
-      ...rest,
-    });
-  },
-  error: (props: Omit<Toast, "id" | "open" | "variant">) => {
-    const { title, description, ...rest } = props;
-    return showToast({
-      title: title || "Error",
-      description: description || "Something went wrong. Please try again.",
-      variant: "destructive",
-      ...rest,
-    });
-  },
-  info: (props: Omit<Toast, "id" | "open" | "variant">) => {
-    const { title, description, ...rest } = props;
-    return showToast({
-      title: title || "Info",
-      description: description || "Here is some information for you.",
-      ...rest,
-    });
-  },
-  warning: (props: Omit<Toast, "id" | "open" | "variant">) => {
-    const { title, description, ...rest } = props;
-    return showToast({
-      title: title || "Warning",
-      description: description || "Please be careful.",
-      ...rest,
-    });
-  },
-  schedule: (props: Omit<Toast, "id" | "open" | "variant">) => {
-    const { title, description, ...rest } = props;
-    return showToast({
-      title: title || "Schedule Calculated",
-      description: description || "Task start time and ETA have been calculated.",
-      variant: "success",
-      ...rest,
-    });
-  },
+interface ToastParams {
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  action?: ToastActionElement;
+  variant?: ToastVariant;
+}
+
+// The main toast function that can be called directly
+function toastFunction(props: ToastParams) {
+  return showToast(props);
+}
+
+// Add methods to the toast function
+toastFunction.success = (props: Omit<ToastParams, "variant">) => {
+  const { title, description, ...rest } = props;
+  return showToast({
+    title: title || "Success",
+    description: description || "Your action was successful.",
+    variant: "success",
+    ...rest,
+  });
 };
+
+toastFunction.error = (props: Omit<ToastParams, "variant">) => {
+  const { title, description, ...rest } = props;
+  return showToast({
+    title: title || "Error",
+    description: description || "Something went wrong. Please try again.",
+    variant: "destructive",
+    ...rest,
+  });
+};
+
+toastFunction.info = (props: Omit<ToastParams, "variant">) => {
+  const { title, description, ...rest } = props;
+  return showToast({
+    title: title || "Info",
+    description: description || "Here is some information for you.",
+    ...rest,
+  });
+};
+
+toastFunction.warning = (props: Omit<ToastParams, "variant">) => {
+  const { title, description, ...rest } = props;
+  return showToast({
+    title: title || "Warning",
+    description: description || "Please be careful.",
+    ...rest,
+  });
+};
+
+toastFunction.schedule = (props: Omit<ToastParams, "variant">) => {
+  const { title, description, ...rest } = props;
+  return showToast({
+    title: title || "Schedule Calculated",
+    description: description || "Task start time and ETA have been calculated.",
+    variant: "success",
+    ...rest,
+  });
+};
+
+// Export the toast function with methods
+export const toast = toastFunction;
+
+export function useToast() {
+  return {
+    toast: toastFunction,
+    ...useToastStore.getState(),
+  };
+}
