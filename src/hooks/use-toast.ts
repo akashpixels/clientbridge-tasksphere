@@ -15,10 +15,11 @@ type ToastScheduleProps = {
 const TOAST_LIMIT = 5
 const TOAST_REMOVE_DELAY = 1000000
 
+// Update the ToasterToast type to match the expected types for title and description
 type ToasterToast = ToastProps & {
   id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
+  title?: React.ReactNode // Changed from string to ReactNode
+  description?: React.ReactNode // Changed from string to ReactNode
   action?: ToastActionElement
 }
 
@@ -127,7 +128,7 @@ function dispatch(action: Action) {
   })
 }
 
-// Define a complete Toast type that explicitly includes all required properties
+// Define a complete Toast interface for accepting parameters
 interface Toast {
   variant?: ToastProps["variant"]
   title?: React.ReactNode
@@ -141,7 +142,7 @@ interface Toast {
 function toast(props: Toast) {
   const id = genId()
 
-  const update = (props: ToasterToast) =>
+  const update = (props: Partial<ToasterToast>) =>
     dispatch({
       type: actionTypes.UPDATE_TOAST,
       toast: { ...props, id },
@@ -149,6 +150,7 @@ function toast(props: Toast) {
   const dismiss = () =>
     dispatch({ type: actionTypes.DISMISS_TOAST, toastId: id })
 
+  // Cast the combined properties to ToasterToast to ensure type compatibility
   dispatch({
     type: actionTypes.ADD_TOAST,
     toast: {
@@ -158,7 +160,7 @@ function toast(props: Toast) {
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
-    },
+    } as ToasterToast,
   })
 
   return {
