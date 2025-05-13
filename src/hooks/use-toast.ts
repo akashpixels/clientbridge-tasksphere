@@ -1,9 +1,8 @@
 
-import * as React from "react"
-import { create } from "zustand"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
-import { ToastActionElement, ToastProps } from "@/components/ui/toast"
+import * as React from "react";
+import { create } from "zustand";
+import { cva, type VariantProps } from "class-variance-authority";
+import { ToastActionElement, ToastProps } from "@/components/ui/toast";
 
 const toastVariants = cva(
   "group relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 shadow-lg transition-all data-[swipe]:animate-hide data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe]:duration-100 data-[state=closed]:duration-300 data-[state=open]:duration-700 data-[state=closed]:ease-in data-[state=open]:ease-out",
@@ -20,24 +19,24 @@ const toastVariants = cva(
       variant: "default",
     },
   }
-)
+);
 
-export type ToastVariant = VariantProps<typeof toastVariants>["variant"]
+export type ToastVariant = VariantProps<typeof toastVariants>["variant"];
 
 export interface Toast {
-  id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
-  action?: ToastActionElement
-  variant?: ToastVariant
-  open: boolean
+  id: string;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  action?: ToastActionElement;
+  variant?: ToastVariant;
+  open: boolean;
 }
 
 interface ToasterStore {
-  toasts: Toast[]
-  addToast: (toast: Toast) => void
-  dismissToast: (id: string) => void
-  updateToast: (id: string, toast: Toast) => void
+  toasts: Toast[];
+  addToast: (toast: Toast) => void;
+  dismissToast: (id: string) => void;
+  updateToast: (id: string, toast: Partial<Toast>) => void;
 }
 
 const useToastStore = create<ToasterStore>((set) => ({
@@ -45,31 +44,34 @@ const useToastStore = create<ToasterStore>((set) => ({
   addToast: (toast: Toast) => {
     set((state) => ({
       toasts: [...state.toasts, toast],
-    }))
+    }));
   },
   dismissToast: (id: string) => {
     set((state) => ({
       toasts: state.toasts.filter((toast) => toast.id !== id),
-    }))
+    }));
   },
-  updateToast: (id: string, toast: Toast) => {
+  updateToast: (id: string, toast: Partial<Toast>) => {
     set((state) => ({
       toasts: state.toasts.map((t) => (t.id === id ? { ...t, ...toast } : t)),
-    }))
+    }));
   },
-}))
+}));
 
-export const useToast = () => useToastStore.getState()
-
-let count = 0
-
-const showToast = ({ ...props }: Omit<Toast, "id" | "open">) => {
-  const id = String(count++)
-  useToastStore.getState().addToast({ id, ...props, open: true })
-  return id
+export function useToast() {
+  return {
+    toast,
+    ...useToastStore.getState(),
+  };
 }
 
-export { showToast }
+let count = 0;
+
+function showToast({ ...props }: Omit<Toast, "id" | "open">) {
+  const id = String(count++);
+  useToastStore.getState().addToast({ id, ...props, open: true });
+  return id;
+}
 
 export const toast = {
   success: (props: Omit<Toast, "id" | "open" | "variant">) => {
