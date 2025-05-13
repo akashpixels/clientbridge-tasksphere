@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,10 +31,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon } from "@radix-ui/react-icons"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
-import { toast } from "@/components/ui/use-toast"
+import { CalendarIcon } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
 
 const formSchema = z.object({
   details: z.string().min(2, {
@@ -67,6 +68,21 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
   const [priorityLevels, setPriorityLevels] = useState<any[]>([]);
   const [complexityLevels, setComplexityLevels] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      details: '',
+      taskTypeId: '',
+      priorityLevelId: '',
+      complexityLevelId: '',
+      targetDevice: undefined,
+      estStart: undefined,
+      estEnd: undefined,
+      referenceLinks: {},
+      images: [],
+    },
+  });
   
   const {
     getTaskSchedule,
@@ -133,23 +149,8 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
     form
   ]);
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      details: '',
-      taskTypeId: '',
-      priorityLevelId: '',
-      complexityLevelId: '',
-      targetDevice: undefined,
-      estStart: undefined,
-      estEnd: undefined,
-      referenceLinks: {},
-      images: [],
-    },
-  });
-
   const onSubmit = async (data: FormValues) => {
-    const formData = {
+    const formData: any = {
       project_id: projectId,
       details: data.details,
       task_type_id: parseInt(data.taskTypeId, 10),
@@ -170,29 +171,36 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
     try {
       const { error } = await supabase
         .from('tasks')
-        .insert([formData]);
+        .insert(formData);
 
       if (error) {
         console.error('Error creating task:', error);
-        toast({
+        toast.error({
           title: "Error creating task",
-          description: "Please try again.",
-          variant: "destructive",
+          description: "Please try again."
         });
         return;
       }
 
-      toast({
+      toast.success({
         title: "Task created",
-        description: "The task has been created successfully.",
+        description: "The task has been created successfully."
       });
+      
+      // If schedule data was used, show a schedule notification
+      if (scheduleData) {
+        toast.schedule({
+          title: "Schedule Calculated",
+          description: `Task scheduled to start at ${formatScheduleDate(scheduleData.est_start)}`
+        });
+      }
+      
       onClose();
     } catch (error) {
       console.error('Unexpected error:', error);
-      toast({
+      toast.error({
         title: "Unexpected error",
-        description: "Please try again.",
-        variant: "destructive",
+        description: "Please try again."
       });
     }
   };

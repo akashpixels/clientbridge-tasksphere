@@ -1,6 +1,6 @@
 
 import * as React from "react"
-import { createStore } from "zustand"
+import { create } from "zustand"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { ToastActionElement, ToastProps } from "@/components/ui/toast"
@@ -24,7 +24,7 @@ const toastVariants = cva(
 
 export type ToastVariant = VariantProps<typeof toastVariants>["variant"]
 
-export interface Toast extends ToastProps {
+export interface Toast {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
@@ -40,7 +40,7 @@ interface ToasterStore {
   updateToast: (id: string, toast: Toast) => void
 }
 
-const useToastStore = createStore<ToasterStore>()((set) => ({
+const useToastStore = create<ToasterStore>((set) => ({
   toasts: [],
   addToast: (toast: Toast) => {
     set((state) => ({
