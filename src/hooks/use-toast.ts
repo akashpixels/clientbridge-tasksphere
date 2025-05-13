@@ -127,14 +127,18 @@ function dispatch(action: Action) {
   })
 }
 
-// Update the Toast type definition to fix the type error
-type Toast = Omit<ToasterToast, "id"> & {
+// Define a complete Toast type that explicitly includes all required properties
+interface Toast {
+  variant?: ToastProps["variant"]
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  duration?: number
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-function toast({ ...props }: Toast) {
+function toast(props: Toast) {
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -185,7 +189,7 @@ function useToast() {
   }
 }
 
-// Update the schedule method to use the fixed Toast type
+// Fix the schedule method to match the Toast interface
 toast.schedule = (props: ToastScheduleProps) => {
   return toast({
     ...props,
