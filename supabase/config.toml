@@ -1,5 +1,4 @@
 
-
 [functions.update-task-status]
 verify_jwt = false
 
@@ -11,4 +10,3 @@ enabled = true
 
 [[realtime.tables]]
 name = "tasks"
-
