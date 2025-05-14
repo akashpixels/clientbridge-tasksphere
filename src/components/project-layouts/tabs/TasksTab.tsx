@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +24,28 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
 
   // Set up query key for tasks
   const tasksQueryKey = ['tasks', projectId, selectedMonth];
+
+  // Helper function for sorting tasks - moved here to fix the initialization error
+  const getTaskSortOrder = (task: any) => {
+    const statusName = task.status?.name?.toLowerCase() || '';
+    
+    if (statusName.includes('progress') || statusName === 'open' || 
+        statusName.includes('active') || statusName.includes('work')) {
+      return 1; // Active tasks - highest priority
+    }
+    
+    if (statusName.includes('queue') || task.queue_position) {
+      return 2; // Scheduled/queue tasks - second priority
+    }
+    
+    if (statusName.includes('complete') || statusName.includes('approved') || 
+        statusName.includes('verified') || statusName.includes('done') || 
+        task.completed_at) {
+      return 3; // Completed tasks - third priority
+    }
+    
+    return 4; // Special case tasks - lowest priority
+  };
 
   // Subscribe to real-time changes for the tasks table
   useEffect(() => {
@@ -163,27 +186,6 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
       setCurrentImageIndex(prev => prev + 1);
       setSelectedImage(selectedTaskImages[currentImageIndex + 1]);
     }
-  };
-
-  const getTaskSortOrder = (task: any) => {
-    const statusName = task.status?.name?.toLowerCase() || '';
-    
-    if (statusName.includes('progress') || statusName === 'open' || 
-        statusName.includes('active') || statusName.includes('work')) {
-      return 1; // Active tasks - highest priority
-    }
-    
-    if (statusName.includes('queue') || task.queue_position) {
-      return 2; // Scheduled/queue tasks - second priority
-    }
-    
-    if (statusName.includes('complete') || statusName.includes('approved') || 
-        statusName.includes('verified') || statusName.includes('done') || 
-        task.completed_at) {
-      return 3; // Completed tasks - third priority
-    }
-    
-    return 4; // Special case tasks - lowest priority
   };
 
   return (
