@@ -4,3 +4,9 @@ verify_jwt = false
 
 [functions.calculate-monthly-usage]
 verify_jwt = false
+
+[realtime]
+enabled = true
+
+[[realtime.tables]]
+name = "tasks"

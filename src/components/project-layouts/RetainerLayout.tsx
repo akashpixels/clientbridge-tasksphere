@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useLayout } from "@/context/layout";
@@ -13,6 +13,7 @@ import TeamTab from "./shared/TeamTab";
 import CredentialsTab from "./shared/CredentialsTab";
 import FilesTab from "./shared/FilesTab";
 import ImageViewerDialog from "./maintenance/ImageViewerDialog";
+import { toast } from "@/components/ui/use-toast";
 
 const RetainerLayout = (props: BaseProjectData) => {
   const { project, selectedMonth, onMonthChange, hoursUsageProgress } = props;
@@ -21,13 +22,58 @@ const RetainerLayout = (props: BaseProjectData) => {
   const [selectedTaskImages, setSelectedTaskImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const { setRightSidebarContent, setCurrentTab } = useLayout();
+  const queryClient = useQueryClient();
 
   const shouldFetchTasks = !!selectedMonth && !!project?.id;
+  const tasksQueryKey = ['tasks', project.id, selectedMonth];
+
+  // Subscribe to real-time changes for the tasks table
+  useEffect(() => {
+    if (!project?.id) return;
+    
+    console.log('Setting up real-time subscription for tasks in RetainerLayout, project:', project.id);
+    
+    const channel = supabase
+      .channel('retainer-tasks-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'tasks',
+          filter: `project_id=eq.${project.id}` // Only listen for changes to tasks in this project
+        },
+        (payload) => {
+          console.log('Task change detected in RetainerLayout:', payload);
+          
+          // Show toast notification for new tasks
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: "New task created",
+              description: "A new task has been added to this project",
+              duration: 3000
+            });
+          }
+          
+          // Invalidate the query to trigger a refetch
+          queryClient.invalidateQueries({ queryKey: tasksQueryKey });
+        }
+      )
+      .subscribe((status) => {
+        console.log('Subscription status in RetainerLayout:', status);
+      });
+
+    // Clean up the subscription when the component unmounts
+    return () => {
+      console.log('Cleaning up real-time subscription in RetainerLayout');
+      supabase.removeChannel(channel);
+    };
+  }, [project?.id, queryClient, tasksQueryKey]);
 
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
-    queryKey: ['tasks', project.id, selectedMonth],
+    queryKey: tasksQueryKey,
     queryFn: async () => {
-      console.log('Fetching tasks for project:', project.id);
+      console.log('Fetching tasks for project in RetainerLayout:', project.id);
       const startDate = startOfMonth(new Date(selectedMonth || ''));
       const endDate = endOfMonth(new Date(selectedMonth || ''));
       
@@ -51,10 +97,12 @@ const RetainerLayout = (props: BaseProjectData) => {
         throw error;
       }
       
-      console.log('Fetched tasks:', data);
+      console.log('Fetched tasks in RetainerLayout:', data);
       return data;
     },
     enabled: shouldFetchTasks,
+    refetchOnWindowFocus: false,
+    staleTime: 30000, // Consider data stale after 30 seconds
   });
 
   const handleSort = (key: string) => {
@@ -87,22 +135,22 @@ const RetainerLayout = (props: BaseProjectData) => {
   const getTaskSortOrder = (task: any) => {
     const statusName = task.status?.name?.toLowerCase() || '';
     
-    if (statusName.includes('complete') || statusName.includes('approved') || 
-        statusName.includes('verified') || statusName.includes('done') || 
-        task.completed_at) {
-      return 1;
-    }
-    
     if (statusName.includes('progress') || statusName === 'open' || 
         statusName.includes('active') || statusName.includes('work')) {
-      return 2;
+      return 1; // Active tasks - highest priority
     }
     
     if (statusName.includes('queue') || task.queue_position) {
-      return 3;
+      return 2; // Scheduled/queue tasks - second priority
     }
     
-    return 4;
+    if (statusName.includes('complete') || statusName.includes('approved') || 
+        statusName.includes('verified') || statusName.includes('done') || 
+        task.completed_at) {
+      return 3; // Completed tasks - third priority
+    }
+    
+    return 4; // Special case tasks - lowest priority
   };
 
   const processedTasks = tasks ? tasks.map(task => ({

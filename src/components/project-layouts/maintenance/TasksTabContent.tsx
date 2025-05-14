@@ -59,25 +59,7 @@ const TasksTabContent = ({
   
   useEffect(() => {
     console.log("TasksTabContent rendered with tasks:", tasks?.length || 0);
-    
-    const checkTasksAccess = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('tasks')
-          .select('id, details, task_code, current_status_id, is_onhold, is_awaiting_input')
-          .limit(5);
-          
-        console.log("Direct tasks access test:", data?.length || 0);
-        if (error) {
-          console.error("Direct tasks access error:", error);
-        }
-      } catch (e) {
-        console.error("Error in direct tasks check:", e);
-      }
-    };
-    
-    checkTasksAccess();
-  }, [tasks, isLoadingTasks]);
+  }, [tasks]);
   
   useEffect(() => {
     const channel = supabase

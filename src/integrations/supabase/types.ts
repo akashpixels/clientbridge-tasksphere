@@ -1166,21 +1166,13 @@ export type Database = {
         Returns: string
       }
       calculate_schedule_for_new_task: {
-        Args:
-          | {
-              p_project_id: string
-              p_priority_level_id: number
-              p_created_at: string
-              p_start_delay: unknown
-              p_est_duration: unknown
-            }
-          | {
-              p_project_id: string
-              p_priority_level_id: number
-              p_task_type_id: number
-              p_complexity_level_id: number
-              p_created_at: string
-            }
+        Args: {
+          p_project_id: string
+          p_priority_level_id: number
+          p_task_type_id: number
+          p_complexity_level_id: number
+          p_created_at: string
+        }
         Returns: Record<string, unknown>
       }
       calculate_working_hours: {
@@ -1189,6 +1181,10 @@ export type Database = {
       }
       calculate_working_timestamp: {
         Args: { start_time: string; work_hours: unknown }
+        Returns: string
+      }
+      find_next_available_working_timestamp: {
+        Args: { input_ts: string }
         Returns: string
       }
       find_next_working_day: {
