@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
@@ -15,6 +14,7 @@ interface TasksTabContentProps {
     status: {
       name: string;
       color_hex: string | null;
+      type?: 'active' | 'scheduled' | 'completed' | string;
     } | null;
     priority: {
       name: string;

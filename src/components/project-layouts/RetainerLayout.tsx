@@ -82,7 +82,7 @@ const RetainerLayout = (props: BaseProjectData) => {
         .select(`
           *,
           task_type:task_types(name, category),
-          status:task_statuses!tasks_current_status_id_fkey(name, color_hex),
+          status:task_statuses!tasks_current_status_id_fkey(name, color_hex, type),
           priority:priority_levels(name, color_hex),
           complexity:complexity_levels(name, multiplier),
           assigned_user:user_profiles!tasks_assigned_user_id_fkey(first_name, last_name)
@@ -132,25 +132,23 @@ const RetainerLayout = (props: BaseProjectData) => {
     }
   };
 
+  // Updated task sorting order based on task_statuses.type
   const getTaskSortOrder = (task: any) => {
-    const statusName = task.status?.name?.toLowerCase() || '';
+    const statusType = task.status?.type?.toLowerCase() || '';
     
-    if (statusName.includes('progress') || statusName === 'open' || 
-        statusName.includes('active') || statusName.includes('work')) {
-      return 1; // Active tasks - highest priority
+    if (statusType === 'active') {
+      return 1; // Active tasks
     }
     
-    if (statusName.includes('queue') || task.queue_position) {
-      return 2; // Scheduled/queue tasks - second priority
+    if (statusType === 'scheduled') {
+      return 2; // Scheduled tasks
     }
     
-    if (statusName.includes('complete') || statusName.includes('approved') || 
-        statusName.includes('verified') || statusName.includes('done') || 
-        task.completed_at) {
-      return 3; // Completed tasks - third priority
+    if (statusType === 'completed') {
+      return 3; // Completed tasks
     }
     
-    return 4; // Special case tasks - lowest priority
+    return 4; // Other tasks
   };
 
   const processedTasks = tasks ? tasks.map(task => ({
@@ -171,8 +169,10 @@ const RetainerLayout = (props: BaseProjectData) => {
               : null))
   })) : [];
 
+  // Updated sorting logic with correct type-based grouping and secondary sorting
   const sortedTasks = processedTasks.sort((a, b) => {
     if (sortConfig.key === 'default_sort') {
+      // First, sort by status type order
       const aOrder = getTaskSortOrder(a);
       const bOrder = getTaskSortOrder(b);
       
@@ -180,23 +180,69 @@ const RetainerLayout = (props: BaseProjectData) => {
         return aOrder - bOrder;
       }
       
-      if (aOrder === 1 && a.completed_at && b.completed_at) {
-        return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime();
-      }
-      
-      if (aOrder === 2) {
+      // Secondary sorting within each group
+      if (aOrder === 1) { // Active tasks
+        // Sort by est_start value
+        if (a.est_start && b.est_start) {
+          const dateComparison = new Date(a.est_start).getTime() - new Date(b.est_start).getTime();
+          if (dateComparison !== 0) return dateComparison;
+        } else if (a.est_start) {
+          return -1; // a has est_start, b doesn't
+        } else if (b.est_start) {
+          return 1; // b has est_start, a doesn't
+        }
+        
+        // If est_start is equal or not available, sort by priority level
         const aPriority = a.priority_level_id || 999;
         const bPriority = b.priority_level_id || 999;
-        return aPriority - bPriority;
+        if (aPriority !== bPriority) {
+          return aPriority - bPriority;
+        }
+        
+        // If priority is also equal, sort by creation date (oldest first)
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
       }
       
-      if (aOrder === 3) {
-        const aPosition = a.queue_position || 999;
-        const bPosition = b.queue_position || 999;
-        return aPosition - bPosition;
+      if (aOrder === 2) { // Scheduled tasks
+        // Sort by est_start value
+        if (a.est_start && b.est_start) {
+          const dateComparison = new Date(a.est_start).getTime() - new Date(b.est_start).getTime();
+          if (dateComparison !== 0) return dateComparison;
+        } else if (a.est_start) {
+          return -1; // a has est_start, b doesn't
+        } else if (b.est_start) {
+          return 1; // b has est_start, a doesn't
+        }
+        
+        // If est_start is equal or not available, sort by priority level
+        const aPriority = a.priority_level_id || 999;
+        const bPriority = b.priority_level_id || 999;
+        if (aPriority !== bPriority) {
+          return aPriority - bPriority;
+        }
+        
+        // If priority is also equal, sort by creation date (oldest first)
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
       }
       
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      if (aOrder === 3) { // Completed tasks
+        // Sort by est_end value (recently finished at the top)
+        if (a.est_end && b.est_end) {
+          return new Date(b.est_end).getTime() - new Date(a.est_end).getTime();
+        } else if (a.est_end) {
+          return -1;
+        } else if (b.est_end) {
+          return 1;
+        }
+        
+        // If est_end is not available, fall back to completed_at
+        if (a.completed_at && b.completed_at) {
+          return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime();
+        }
+      }
+      
+      // Default fallback: sort by creation date (oldest first)
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     } 
     else {
       const aValue = a[sortConfig.key as keyof typeof a];

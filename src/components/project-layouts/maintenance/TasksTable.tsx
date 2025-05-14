@@ -84,18 +84,20 @@ const formatInterval = (intervalValue: any): string => {
   }
 };
 
+// Updated function to group tasks by task_statuses.type
 const getTaskGroup = (task: any) => {
-  const statusName = (task.status?.name || '').toLowerCase();
-  if (statusName.includes('progress') || statusName === 'open' || statusName.includes('active') || statusName.includes('work')) {
-    return 'active'; // Active tasks
+  const statusType = (task.status?.type || '').toLowerCase();
+  
+  if (statusType === 'active') {
+    return 'active';
   }
-  if (statusName.includes('queue') || task.queue_position) {
-    return 'scheduled'; // Scheduled/queue tasks
+  if (statusType === 'scheduled') {
+    return 'scheduled';
   }
-  if (statusName.includes('complete') || statusName.includes('approved') || statusName.includes('verified') || statusName.includes('done') || statusName.includes('closed') || task.completed_at) {
-    return 'completed'; // Completed tasks
+  if (statusType === 'completed') {
+    return 'completed';
   }
-  return 'special'; // Special case tasks
+  return 'special'; // Any other type
 };
 
 const getGroupLabel = (groupId: string) => {
