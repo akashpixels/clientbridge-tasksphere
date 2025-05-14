@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
@@ -87,25 +88,6 @@ const TasksTabContent = ({
     onCommentClick(taskId);
   };
 
-  // Process the tasks data to ensure actual_duration and logged_duration are properly converted to numbers
-  const processedTasks = tasks?.map(task => ({
-    ...task,
-    actual_duration: typeof task.actual_duration === 'object' && task.actual_duration !== null
-      ? parseFloat(String(task.actual_duration)) || 0
-      : (typeof task.actual_duration === 'string'
-          ? parseFloat(task.actual_duration) || 0
-          : (typeof task.actual_duration === 'number' 
-              ? task.actual_duration
-              : null)),
-    logged_duration: typeof task.logged_duration === 'object' && task.logged_duration !== null
-      ? parseFloat(String(task.logged_duration)) || 0
-      : (typeof task.logged_duration === 'string'
-          ? parseFloat(task.logged_duration) || 0
-          : (typeof task.logged_duration === 'number' 
-              ? task.logged_duration
-              : null))
-  })) || [];
-
   return (
     <div className="p-0">
       {isLoadingTasks ? (
@@ -113,10 +95,10 @@ const TasksTabContent = ({
           <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
           <p>Loading tasks...</p>
         </div>
-      ) : processedTasks && processedTasks.length > 0 ? (
+      ) : tasks && tasks.length > 0 ? (
         <div className="overflow-x-auto">
           <TasksTable 
-            tasks={processedTasks}
+            tasks={tasks}
             sortConfig={sortConfig}
             onSort={onSort}
             onImageClick={onImageClick}

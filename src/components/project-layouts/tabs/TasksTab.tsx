@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -119,6 +120,7 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
     staleTime: 30000, // Consider data stale after 30 seconds
   });
 
+  // Process the tasks data to ensure actual_duration and logged_duration are properly converted to numbers
   const processedTasks = tasks ? tasks.map(task => ({
     ...task,
     actual_duration: typeof task.actual_duration === 'object' && task.actual_duration !== null
