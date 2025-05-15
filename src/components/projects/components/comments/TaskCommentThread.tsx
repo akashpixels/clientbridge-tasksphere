@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,7 +28,7 @@ interface Comment {
   created_at: string;
   updated_at: string;
   user_id: string;
-  user: UserProfile;
+  user: UserProfile | null; // Making user optional and properly typed
   is_input_request: boolean;
   is_input_response: boolean;
   images: string[];
@@ -109,8 +110,7 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
         *,
         user:user_profiles(
           first_name,
-          last_name,
-          avatar_url
+          last_name
         )
       `)
       .eq('task_id', taskId)
@@ -126,12 +126,16 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
     } else {
       // Transform the data to ensure it matches our Comment type
       const typedComments: Comment[] = (data || []).map(comment => {
-        // Handle potentially undefined user with default values
-        const userProfile: UserProfile = {
-          first_name: comment.user?.first_name || 'Unknown',
-          last_name: comment.user?.last_name || 'User',
-          avatar_url: comment.user?.avatar_url || null
-        };
+        // Create a properly typed user object, handling potential null or error cases
+        let userProfile: UserProfile | null = null;
+        
+        if (comment.user && typeof comment.user === 'object' && !('error' in comment.user)) {
+          userProfile = {
+            first_name: comment.user.first_name || 'Unknown',
+            last_name: comment.user.last_name || 'User',
+            avatar_url: null // We removed avatar_url from the query since it doesn't exist
+          };
+        }
         
         return {
           ...comment,
