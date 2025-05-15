@@ -178,7 +178,7 @@ const TasksTable = ({
           >
             {task.is_awaiting_input ? 'Awaiting Input' : 
              task.is_onhold && task.priority_level_id === 1 ? 'Urgent' :
-             task.is_onhold ? 'On Hold' :
+             task.is_onhold ? 'Onhold' :
              task.priority_level_id === 1 ? 'Urgent' :
              task.status?.name}
           </span>
