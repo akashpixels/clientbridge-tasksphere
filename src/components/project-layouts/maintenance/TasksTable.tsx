@@ -1,3 +1,4 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -169,14 +170,15 @@ const TasksTable = ({
               backgroundColor: getStatusColor(task.status || {
                 name: null,
                 color_hex: null
-              }, task.is_awaiting_input, task.is_onhold).bg,
+              }, task.is_awaiting_input, task.is_onhold, task.priority_level_id).bg,
               color: getStatusColor(task.status || {
                 name: null,
                 color_hex: null
-              }, task.is_awaiting_input, task.is_onhold).text
+              }, task.is_awaiting_input, task.is_onhold, task.priority_level_id).text
             }}
           >
-            {task.is_awaiting_input ? 'Awaiting Input' : 
+            {task.priority_level_id === 1 ? 'Urgent' :
+             task.is_awaiting_input ? 'Awaiting Input' : 
              task.is_onhold ? 'On Hold' :
              task.status?.name}
           </span>
@@ -306,10 +308,19 @@ const TasksTable = ({
     return format(new Date(date), "MMM d, h:mm a");
   };
 
+  // Updated getStatusColor function to handle critical tasks
   const getStatusColor = (status: {
     name: string | null;
     color_hex: string | null;
-  }, is_awaiting_input?: boolean, is_onhold?: boolean) => {
+  }, is_awaiting_input?: boolean, is_onhold?: boolean, priority_level_id?: number) => {
+    // Check for critical tasks first (priority_level_id = 1)
+    if (priority_level_id === 1) {
+      return {
+        bg: '#fff6ca',
+        text: '#834a1e'
+      };
+    }
+    
     if (is_awaiting_input) {
       return {
         bg: '#FEF9C3',
