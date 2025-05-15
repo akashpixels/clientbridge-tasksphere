@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/auth';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -11,6 +12,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { getInitials } from '@/lib/utils';
 import PreviewDialog from './PreviewDialog';
 import CommentInputRequest from './CommentInputRequest';
+import AttachmentHandler from './AttachmentHandler';
+import FilePreview from './FilePreview';
 
 interface TaskCommentThreadProps {
   taskId: string;
@@ -45,6 +48,7 @@ interface Task {
 
 const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode }) => {
   const { toast } = useToast();
+  const { session } = useAuth();
   const [message, setMessage] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +56,7 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
   const [sendingMessage, setSendingMessage] = useState(false);
   const [isLargeTextarea, setIsLargeTextarea] = useState(false);
   const [isRequestingInput, setIsRequestingInput] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [previewFile, setPreviewFile] = useState<{url: string, type: string, name: string} | null>(null);
   const [pendingInputRequest, setPendingInputRequest] = useState<Comment | null>(null);
@@ -170,42 +174,64 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
     setPreviewDialogOpen(true);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
-    }
+  const handleFileClick = (url: string) => {
+    const fileType = url.split('.').pop()?.toLowerCase() || 'file';
+    const fileName = url.split('/').pop() || 'file';
+    
+    handleAttachmentClick({
+      url,
+      type: fileType,
+      name: fileName
+    });
   };
 
-  const uploadFile = async (file: File): Promise<string | null> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-    const filePath = `comments/${taskId}/${fileName}`;
+  const uploadFiles = async (files: File[]): Promise<string[]> => {
+    if (!files.length) return [];
+    
+    const uploadedUrls: string[] = [];
+    
+    for (const file of files) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = `task_comments/${taskId}/${fileName}`;
 
-    const { error: uploadError, data } = await supabase.storage
-      .from('attachments')
-      .upload(filePath, file);
+      const { error: uploadError, data } = await supabase.storage
+        .from('task-attachments')
+        .upload(filePath, file);
 
-    if (uploadError) {
-      console.error('Error uploading file:', uploadError);
-      toast({
-        variant: "destructive",
-        title: "Upload failed",
-        description: uploadError.message,
-      });
-      return null;
+      if (uploadError) {
+        console.error('Error uploading file:', uploadError);
+        toast({
+          variant: "destructive",
+          title: "Upload failed",
+          description: uploadError.message,
+        });
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('task-attachments')
+        .getPublicUrl(filePath);
+
+      uploadedUrls.push(publicUrl);
     }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('attachments')
-      .getPublicUrl(filePath);
-
-    return publicUrl;
+    
+    return uploadedUrls;
   };
 
   const handleSendMessage = async () => {
-    if (!message.trim() && !selectedFile) {
+    if (!message.trim() && !selectedFiles.length) {
       toast({
         description: "Please enter a message or attach a file",
+      });
+      return;
+    }
+    
+    if (!session?.user?.id) {
+      toast({
+        variant: "destructive",
+        title: "Authentication required",
+        description: "You must be logged in to post comments",
       });
       return;
     }
@@ -213,10 +239,8 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
     setSendingMessage(true);
 
     try {
-      let fileUrl = null;
-      if (selectedFile) {
-        fileUrl = await uploadFile(selectedFile);
-      }
+      // Upload all selected files
+      const uploadedUrls = await uploadFiles(selectedFiles);
 
       // Determine if this is an input response
       const isInputResponse = !!pendingInputRequest;
@@ -224,11 +248,12 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
 
       const { error } = await supabase.from('task_comments').insert({
         task_id: taskId,
-        content: message.trim() || (selectedFile ? `Attached file: ${selectedFile.name}` : ''),
+        user_id: session.user.id, // This is crucial for the database function
+        content: message.trim() || (selectedFiles.length ? `Attached ${selectedFiles.length} file(s)` : ''),
         is_input_request: isRequestingInput,
         is_input_response: isInputResponse,
         parent_id: parentId,
-        file_url: fileUrl
+        images: uploadedUrls
       });
 
       if (error) {
@@ -236,7 +261,7 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
       }
 
       setMessage('');
-      setSelectedFile(null);
+      setSelectedFiles([]);
       setIsRequestingInput(false);
       
       toast({
@@ -312,32 +337,17 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
                   </div>
                 )}
                 {comment.images && comment.images.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {comment.images.map((image, index) => (
-                      <img 
-                        key={index} 
-                        src={image} 
-                        alt={`Attachment ${index + 1}`} 
-                        className="h-24 w-auto rounded border object-cover cursor-pointer" 
-                        onClick={() => handleAttachmentClick({
-                          url: image,
-                          type: 'image',
-                          name: `Image ${index + 1}`
-                        })}
-                      />
-                    ))}
-                  </div>
+                  <FilePreview 
+                    files={comment.images} 
+                    onFileClick={handleFileClick}
+                  />
                 )}
                 {comment.file_url && (
                   <div className="mt-2">
                     <Button 
                       variant="ghost" 
                       className="p-0 h-auto text-xs text-blue-500 flex items-center"
-                      onClick={() => handleAttachmentClick({
-                        url: comment.file_url!,
-                        type: comment.file_url!.split('.').pop() || 'file',
-                        name: comment.file_url!.split('/').pop() || 'file'
-                      })}
+                      onClick={() => handleFileClick(comment.file_url!)}
                     >
                       <PaperclipIcon className="h-3 w-3 mr-1" />
                       View Attachment
@@ -376,26 +386,15 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
             className="resize-none"
           />
           <div className="flex justify-between items-center">
-            <div className="flex space-x-2 items-center">
-              <div className="relative">
-                <Button type="button" size="icon" variant="outline" className="h-8 w-8">
-                  <PaperclipIcon className="h-4 w-4" />
-                  <input 
-                    type="file"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    onChange={handleFileChange}
-                  />
-                </Button>
-                {selectedFile && (
-                  <span className="text-xs ml-2">{selectedFile.name}</span>
-                )}
-              </div>
-            </div>
+            <AttachmentHandler
+              selectedFiles={selectedFiles}
+              setSelectedFiles={setSelectedFiles}
+            />
             <Button 
               onClick={handleSendMessage} 
               size="sm" 
               className="flex items-center gap-1"
-              disabled={sendingMessage || (message.trim() === '' && !selectedFile)}
+              disabled={sendingMessage || (message.trim() === '' && selectedFiles.length === 0)}
             >
               {sendingMessage ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />} 
               {pendingInputRequest 
