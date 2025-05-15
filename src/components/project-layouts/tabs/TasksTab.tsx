@@ -25,8 +25,13 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
   // Set up query key for tasks
   const tasksQueryKey = ['tasks', projectId, selectedMonth];
 
-  // Helper function for determining task group order based on task_statuses.type
+  // Helper function for determining task group order based on task_statuses.type and priority
   const getTaskSortOrder = (task: any) => {
+    // Critical tasks (priority_level_id = 1) get the highest priority (0)
+    if (task.priority_level_id === 1) {
+      return 0; // Critical tasks
+    }
+    
     const statusType = task.status?.type?.toLowerCase() || '';
     
     if (statusType === 'active') {
@@ -139,7 +144,7 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
               : null))
   })) : [];
 
-  // Updated sorting logic based on task_statuses.type and secondary sorting criteria
+  // Updated sorting logic based on task priority, task_statuses.type and secondary sorting criteria
   const sortedTasks = processedTasks.sort((a, b) => {
     // First, sort by status type order
     const aOrder = getTaskSortOrder(a);
@@ -150,6 +155,28 @@ const TasksTab = ({ projectId, selectedMonth = format(new Date(), 'yyyy-MM') }: 
     }
     
     // Secondary sorting within each group
+    if (aOrder === 0) { // Critical tasks
+      // Sort by est_start value
+      if (a.est_start && b.est_start) {
+        const dateComparison = new Date(a.est_start).getTime() - new Date(b.est_start).getTime();
+        if (dateComparison !== 0) return dateComparison;
+      } else if (a.est_start) {
+        return -1; // a has est_start, b doesn't
+      } else if (b.est_start) {
+        return 1; // b has est_start, a doesn't
+      }
+      
+      // If est_start is equal or not available, sort by priority level
+      const aPriority = a.priority_level_id || 999;
+      const bPriority = b.priority_level_id || 999;
+      if (aPriority !== bPriority) {
+        return aPriority - bPriority;
+      }
+      
+      // If priority is also equal, sort by creation date (oldest first)
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    }
+    
     if (aOrder === 1) { // Active tasks
       // Sort by est_start value
       if (a.est_start && b.est_start) {

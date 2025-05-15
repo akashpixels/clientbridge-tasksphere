@@ -84,8 +84,13 @@ const formatInterval = (intervalValue: any): string => {
   }
 };
 
-// Updated function to group tasks by task_statuses.type
+// Updated function to group tasks by task_statuses.type and critical priority
 const getTaskGroup = (task: any) => {
+  // First check for critical tasks (priority_level_id = 1)
+  if (task.priority_level_id === 1) {
+    return 'critical';
+  }
+  
   const statusType = (task.status?.type || '').toLowerCase();
   
   if (statusType === 'active') {
@@ -102,6 +107,8 @@ const getTaskGroup = (task: any) => {
 
 const getGroupLabel = (groupId: string) => {
   switch (groupId) {
+    case 'critical':
+      return "Critical Tasks";
     case 'active':
       return "Active Tasks";
     case 'scheduled':
@@ -128,6 +135,7 @@ const TasksTable = ({
   } = useLayout();
 
   const groupedTasks: Record<string, typeof tasks> = {
+    critical: [],
     active: [],
     scheduled: [],
     completed: [],
@@ -438,6 +446,8 @@ const TasksTable = ({
   return (
     <>
       <RegularHeader />
+      
+      {groupedTasks.critical.length > 0 && <TaskSection title="critical" taskList={groupedTasks.critical} />}
       
       {groupedTasks.active.length > 0 && <TaskSection title="active" taskList={groupedTasks.active} />}
       
