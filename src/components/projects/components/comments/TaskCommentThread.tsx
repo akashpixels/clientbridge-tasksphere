@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/auth';
@@ -20,23 +21,24 @@ interface TaskCommentThreadProps {
   taskCode?: string;
 }
 
-interface UserProfile {
-  first_name: string;
-  last_name: string;
-  avatar_url?: string | null;
-}
-
+// Updated Comment interface to be compatible with CommentList & CommentItem
 interface Comment {
   id: string;
   content: string;
   created_at: string;
   updated_at: string;
-  user_id: string;
-  user: UserProfile | null;
+  user_id: string | null;
+  user: {
+    first_name: string;
+    last_name: string;
+  } | null;
+  user_profiles?: {
+    first_name: string;
+  } | null;
   is_input_request: boolean;
   is_input_response: boolean;
   parent_id?: string | null;
-  images: string[];
+  images: string[] | null; // Must be string[] | null to match CommentItem expectation
   file_url?: string | null;
 }
 
@@ -122,7 +124,7 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
     setTask(data);
   };
 
-  // Update the fetchComments function to ensure compatibility with our components
+  // Updated fetchComments to ensure proper type conversion
   const fetchComments = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -148,20 +150,33 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
       // Transform the data to ensure it matches our Comment type
       const typedComments = (data || []).map(comment => {
         // Create a properly typed user object, handling potential null or error cases
-        let userProfile = null;
+        let userObject = null;
         
         if (comment.user && typeof comment.user === 'object' && !('error' in comment.user)) {
-          userProfile = {
+          userObject = {
             first_name: comment.user.first_name || 'Unknown',
             last_name: comment.user.last_name || 'User',
           };
         }
         
+        // Ensure images are properly converted to string[]
+        const images = Array.isArray(comment.images) 
+          ? comment.images.map(img => typeof img === 'string' ? img : String(img))
+          : null;
+        
         return {
-          ...comment,
-          user: userProfile,
-          images: Array.isArray(comment.images) ? comment.images : []
-        };
+          id: comment.id,
+          content: comment.content,
+          created_at: comment.created_at,
+          updated_at: comment.updated_at,
+          user_id: comment.user_id,
+          user: userObject,
+          is_input_request: comment.is_input_request || false,
+          is_input_response: comment.is_input_response || false,
+          parent_id: comment.parent_id,
+          images: images,
+          file_url: comment.file_url
+        } as Comment;
       });
       
       setComments(typedComments);

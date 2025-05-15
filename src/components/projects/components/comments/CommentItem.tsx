@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import FilePreview from "./FilePreview";
 import { Badge } from "@/components/ui/badge";
 
-// Updated interface to handle both data structures
+// Updated interface to match TaskCommentThread.tsx structure
 interface Comment {
   id: string;
   content: string;
