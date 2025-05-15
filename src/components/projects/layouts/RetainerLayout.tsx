@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,6 +24,9 @@ const RetainerLayout = (props: BaseProjectData) => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const { setRightSidebarContent, setCurrentTab } = useLayout();
   const queryClient = useQueryClient();
+
+  const shouldFetchTasks = !!selectedMonth && !!project?.id;
+  const tasksQueryKey = ['tasks', project?.id, selectedMonth];
 
   // Subscribe to real-time changes for the tasks table
   useEffect(() => {

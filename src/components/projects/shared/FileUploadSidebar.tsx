@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,16 +81,19 @@ export const FileUploadSidebar = () => {
       const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       const filePath = `project-files/${projectId}/${fileName}`;
       
+      // Start with 10% progress to indicate the upload has begun
+      setUploadProgress(10);
+      
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('files')
         .upload(filePath, formData.file, {
           cacheControl: '3600',
-          upsert: false,
-          onUploadProgress: (progress) => {
-            const percentage = Math.round((progress.loaded / progress.total) * 100);
-            setUploadProgress(percentage);
-          }
+          upsert: false
+          // onUploadProgress is not supported in the Supabase SDK FileOptions
         });
+      
+      // Set progress to 50% after upload is complete
+      setUploadProgress(50);
       
       if (uploadError) throw uploadError;
       
@@ -99,6 +101,9 @@ export const FileUploadSidebar = () => {
       const { data: urlData } = await supabase.storage
         .from('files')
         .getPublicUrl(filePath);
+      
+      // Set progress to 75% after getting public URL
+      setUploadProgress(75);
       
       const fileUrl = urlData.publicUrl;
       
@@ -117,6 +122,9 @@ export const FileUploadSidebar = () => {
           }
         ])
         .select();
+      
+      // Set progress to 100% when everything is complete
+      setUploadProgress(100);
       
       if (fileError) throw fileError;
       
@@ -146,6 +154,7 @@ export const FileUploadSidebar = () => {
         description: "Failed to upload file. Please try again.",
         variant: "destructive",
       });
+      setUploadProgress(0);
     } finally {
       setIsLoading(false);
     }
@@ -216,7 +225,7 @@ export const FileUploadSidebar = () => {
           )}
         </div>
 
-        {uploadProgress > 0 && uploadProgress < 100 && (
+        {uploadProgress > 0 && (
           <div className="w-full bg-gray-200 rounded-full h-2.5">
             <div
               className="bg-primary h-2.5 rounded-full"
