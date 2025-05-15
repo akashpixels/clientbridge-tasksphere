@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -171,6 +170,7 @@ interface FilesTabProps {
 const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [filePreview, setFilePreview] = useState<{url: string, type: string, name: string} | null>(null);
 
   useEffect(() => {
     const checkDirectAccess = async () => {
@@ -323,6 +323,17 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
     });
   }
 
+  const handleFileClick = (url: string) => {
+    const fileExtension = url.split('.').pop()?.toLowerCase() || '';
+    const fileName = url.split('/').pop() || 'file';
+    
+    setFilePreview({
+      url,
+      type: fileExtension,
+      name: fileName
+    });
+  };
+
   const handleDownload = (url: string) => {
     window.open(url, '_blank');
   };
@@ -346,15 +357,15 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
             key={folderName} 
             title={folderName} 
             files={files} 
-            onFileClick={setSelectedFile} 
+            onFileClick={handleFileClick} 
           />
         ))}
       </div>
 
       <PreviewDialog
-        selectedImage={selectedFile}
-        onClose={() => setSelectedFile(null)}
-        onDownload={handleDownload}
+        isOpen={!!filePreview}
+        onClose={() => setFilePreview(null)}
+        file={filePreview}
       />
     </Card>
   );

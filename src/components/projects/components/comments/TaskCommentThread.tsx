@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,17 +15,19 @@ interface TaskCommentThreadProps {
   taskCode?: string;
 }
 
+interface UserProfile {
+  first_name: string;
+  last_name: string;
+  avatar_url?: string | null;
+}
+
 interface Comment {
   id: string;
   content: string;
   created_at: string;
   updated_at: string;
   user_id: string;
-  user: {
-    first_name: string;
-    last_name: string;
-    avatar_url?: string | null;
-  };
+  user: UserProfile;
   is_input_request: boolean;
   is_input_response: boolean;
   images: string[];
@@ -123,7 +124,23 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
         description: error.message,
       });
     } else {
-      setComments(data || []);
+      // Transform the data to ensure it matches our Comment type
+      const typedComments: Comment[] = (data || []).map(comment => {
+        // Handle potentially undefined user with default values
+        const userProfile: UserProfile = {
+          first_name: comment.user?.first_name || 'Unknown',
+          last_name: comment.user?.last_name || 'User',
+          avatar_url: comment.user?.avatar_url || null
+        };
+        
+        return {
+          ...comment,
+          user: userProfile,
+          images: Array.isArray(comment.images) ? comment.images : []
+        } as Comment;
+      });
+      
+      setComments(typedComments);
     }
     setLoading(false);
   };
