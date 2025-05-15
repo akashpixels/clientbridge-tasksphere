@@ -4,14 +4,21 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import CommentItem from "./CommentItem";
 
+// Updated interface to match TaskCommentThread.tsx structure
 interface Comment {
   id: string;
   content: string;
   created_at: string;
-  user_profiles: {
+  user_profiles?: {
     first_name: string;
   } | null;
+  user?: {
+    first_name: string;
+    last_name: string;
+  } | null;
   images: string[] | null;
+  is_input_request?: boolean;
+  is_input_response?: boolean;
 }
 
 interface CommentListProps {
@@ -26,8 +33,11 @@ const CommentList = ({ comments, onFileClick }: CommentListProps) => {
         <div key={comment.id} className="flex flex-col">
 
           {/* Add a subtle divider when the user changes or after 10 minutes */}
-          {index > 0 && (comment.user_profiles?.first_name !== comments[index - 1]?.user_profiles?.first_name ||
-            new Date(comment.created_at).getTime() - new Date(comments[index - 1].created_at).getTime() > 600000) && (
+          {index > 0 && (
+            (comment.user_profiles?.first_name !== comments[index - 1]?.user_profiles?.first_name || 
+             comment.user?.first_name !== comments[index - 1]?.user?.first_name ||
+             new Date(comment.created_at).getTime() - new Date(comments[index - 1].created_at).getTime() > 600000)
+          ) && (
             <div className="border-t border-gray-300 my-2 opacity-50"></div>
           )}
 

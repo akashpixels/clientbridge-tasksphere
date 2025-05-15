@@ -122,6 +122,7 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
     setTask(data);
   };
 
+  // Update the fetchComments function to ensure compatibility with our components
   const fetchComments = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -145,15 +146,14 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
       });
     } else {
       // Transform the data to ensure it matches our Comment type
-      const typedComments: Comment[] = (data || []).map(comment => {
+      const typedComments = (data || []).map(comment => {
         // Create a properly typed user object, handling potential null or error cases
-        let userProfile: UserProfile | null = null;
+        let userProfile = null;
         
         if (comment.user && typeof comment.user === 'object' && !('error' in comment.user)) {
           userProfile = {
             first_name: comment.user.first_name || 'Unknown',
             last_name: comment.user.last_name || 'User',
-            avatar_url: null // We removed avatar_url from the query since it doesn't exist
           };
         }
         
@@ -161,7 +161,7 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
           ...comment,
           user: userProfile,
           images: Array.isArray(comment.images) ? comment.images : []
-        } as Comment;
+        };
       });
       
       setComments(typedComments);

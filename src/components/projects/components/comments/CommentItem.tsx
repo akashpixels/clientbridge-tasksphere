@@ -5,12 +5,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import FilePreview from "./FilePreview";
 import { Badge } from "@/components/ui/badge";
 
+// Updated interface to handle both data structures
 interface Comment {
   id: string;
   content: string;
   created_at: string;
-  user_profiles: {
+  user_profiles?: {
     first_name: string;
+  } | null;
+  user?: {
+    first_name: string;
+    last_name: string;
   } | null;
   images: string[] | null;
   is_input_request?: boolean;
@@ -23,6 +28,14 @@ interface CommentItemProps {
 }
 
 const CommentItem = ({ comment, onFileClick }: CommentItemProps) => {
+  // Get user's first name from either data structure
+  const userName = comment.user_profiles?.first_name || comment.user?.first_name || "User";
+  
+  // Get user's first initial for avatar
+  const userInitial = (comment.user_profiles?.first_name?.[0] || 
+                       comment.user?.first_name?.[0] || 
+                       "U");
+
   const formattedContent = comment.content.split('\n').map((line, index) => (
     <React.Fragment key={index}>
       {line}
@@ -52,12 +65,12 @@ const CommentItem = ({ comment, onFileClick }: CommentItemProps) => {
       {/* Avatar + Comment Content */}
       <div className="flex gap-3">
         <Avatar>
-          <AvatarFallback>{comment.user_profiles?.first_name?.[0]}</AvatarFallback>
+          <AvatarFallback>{userInitial}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           {/* Name and Timestamp */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">{comment.user_profiles?.first_name}</span>
+            <span className="text-xs text-gray-500">{userName}</span>
             <span className="text-xs text-gray-500">
               {format(new Date(comment.created_at), 'MMM d, h:mmaaa')}
             </span>
