@@ -1,17 +1,19 @@
+
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useProjectData } from "@/hooks/useProjectData";
 import { Tables } from "@/integrations/supabase/types";
-import BaseProjectLayout, { TabDefinition } from "@/components/project-layouts/core/BaseProjectLayout";
-import ProjectHeader from "@/components/project-layouts/shared/ProjectHeader";
-import OverviewTab from "@/components/project-layouts/tabs/OverviewTab";
-import TasksTab from "@/components/project-layouts/tabs/TasksTab";
-import TeamTab from "@/components/project-layouts/shared/TeamTab";
-import CredentialsTab from "@/components/project-layouts/shared/CredentialsTab";
-import FilesTab from "@/components/project-layouts/shared/FilesTab";
-import ProjectStats from "@/components/project-layouts/maintenance/ProjectStats";
+import BaseProjectLayout, { TabDefinition } from "@/components/projects/core/BaseProjectLayout";
+import ProjectHeader from "@/components/projects/shared/ProjectHeader";
+import OverviewTab from "@/components/projects/tabs/OverviewTab";
+import TasksTab from "@/components/projects/tabs/TasksTab";
+import TeamTab from "@/components/projects/shared/TeamTab";
+import CredentialsTab from "@/components/projects/shared/CredentialsTab";
+import FilesTab from "@/components/projects/shared/FilesTab";
+import ProjectStats from "@/components/projects/components/ProjectStats";
 import layoutRegistry from "@/config/layout-registry";
 import { Card } from "@/components/ui/card";
+import RetainerLayout from "@/components/projects/layouts/RetainerLayout";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +30,17 @@ const ProjectDetails = () => {
   // Get layout type from project
   const layoutType = project.layout_type || "RETAINER";
   
+  // For RETAINER layout type, we use the dedicated RetainerLayout component
+  if (layoutType === "RETAINER") {
+    return (
+      <RetainerLayout
+        project={project}
+        selectedMonth={selectedMonth}
+        onMonthChange={setSelectedMonth}
+      />
+    );
+  }
+  
   // Generate tab definitions based on layout type
   const getTabs = () => {
     // Default tabs for all layouts
@@ -36,7 +49,7 @@ const ProjectDetails = () => {
         id: "overview",
         label: "Overview",
         content: <OverviewTab projectId={project.id} />,
-        default: layoutType !== "RETAINER"
+        default: true
       },
       {
         id: "team",
@@ -52,22 +65,6 @@ const ProjectDetails = () => {
 
     // Add layout-specific tabs
     switch(layoutType) {
-      case "RETAINER":
-        return [
-          {
-            id: "tasks",
-            label: "Tasks",
-            content: <TasksTab projectId={project.id} selectedMonth={selectedMonth} />,
-            default: true
-          },
-          ...defaultTabs,
-          {
-            id: "files",
-            label: "Files",
-            content: <FilesTab projectId={project.id} />,
-          }
-        ];
-        
       case "REGULAR":
         return [
           ...defaultTabs,
@@ -113,17 +110,12 @@ const ProjectDetails = () => {
     }
   };
 
-  // Create header content with project stats for RETAINER layout
+  // Create header content with project stats for non-RETAINER layouts
   const headerContent = (
     <ProjectHeader
       project={project}
       selectedMonth={selectedMonth}
       onMonthChange={setSelectedMonth}
-      statsComponent={
-        layoutType === "RETAINER" ? 
-          <ProjectStats project={project} selectedMonth={selectedMonth} /> : 
-          undefined
-      }
     />
   );
 
