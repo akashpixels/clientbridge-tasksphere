@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
 import { getInitials } from '@/lib/utils';
 import PreviewDialog from './PreviewDialog';
+import CommentInputRequest from './CommentInputRequest';
 
 interface TaskCommentThreadProps {
   taskId: string;
@@ -28,9 +29,10 @@ interface Comment {
   created_at: string;
   updated_at: string;
   user_id: string;
-  user: UserProfile | null; // Making user optional and properly typed
+  user: UserProfile | null;
   is_input_request: boolean;
   is_input_response: boolean;
+  parent_id?: string | null;
   images: string[];
   file_url?: string | null;
 }
@@ -49,10 +51,11 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
   const [task, setTask] = useState<Task | null>(null);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [isLargeTextarea, setIsLargeTextarea] = useState(false);
-  const [isInputRequest, setIsInputRequest] = useState(false);
+  const [isRequestingInput, setIsRequestingInput] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [previewFile, setPreviewFile] = useState<{url: string, type: string, name: string} | null>(null);
+  const [pendingInputRequest, setPendingInputRequest] = useState<Comment | null>(null);
   
   useEffect(() => {
     fetchComments();
@@ -82,6 +85,19 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
       supabase.removeChannel(channel);
     };
   }, [taskId]);
+
+  // Determine if there's a pending input request that hasn't been responded to
+  useEffect(() => {
+    if (comments && comments.length) {
+      // Find the most recent input request without a response
+      const inputRequest = comments.find(comment => 
+        comment.is_input_request && 
+        !comments.some(c => c.is_input_response && c.parent_id === comment.id)
+      );
+      
+      setPendingInputRequest(inputRequest || null);
+    }
+  }, [comments]);
 
   const fetchTask = async () => {
     const { data, error } = await supabase
@@ -202,10 +218,16 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
         fileUrl = await uploadFile(selectedFile);
       }
 
+      // Determine if this is an input response
+      const isInputResponse = !!pendingInputRequest;
+      const parentId = isInputResponse ? pendingInputRequest.id : null;
+
       const { error } = await supabase.from('task_comments').insert({
         task_id: taskId,
         content: message.trim() || (selectedFile ? `Attached file: ${selectedFile.name}` : ''),
-        is_input_request: isInputRequest,
+        is_input_request: isRequestingInput,
+        is_input_response: isInputResponse,
+        parent_id: parentId,
         file_url: fileUrl
       });
 
@@ -215,11 +237,14 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
 
       setMessage('');
       setSelectedFile(null);
-      setIsInputRequest(false);
+      setIsRequestingInput(false);
       
       toast({
-        title: "Comment sent",
+        title: isInputResponse ? "Input provided" : (isRequestingInput ? "Input requested" : "Comment sent"),
       });
+      
+      // Fetch the latest comments to update the UI
+      fetchComments();
     } catch (error) {
       console.error('Error sending comment:', error);
       toast({
@@ -331,10 +356,20 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
 
       <div className="p-4 border-t">
         <div className="flex flex-col space-y-2">
+          <CommentInputRequest 
+            isInputResponse={!!pendingInputRequest}
+            isRequestingInput={isRequestingInput}
+            setIsRequestingInput={setIsRequestingInput}
+          />
+          
           <Textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type your comment here..."
+            placeholder={
+              pendingInputRequest 
+                ? "Type your response to the input request..." 
+                : "Type your comment here..."
+            }
             rows={isLargeTextarea ? 4 : 1}
             onFocus={() => setIsLargeTextarea(true)}
             onBlur={() => message.length === 0 && setIsLargeTextarea(false)}
@@ -342,15 +377,6 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
           />
           <div className="flex justify-between items-center">
             <div className="flex space-x-2 items-center">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="text-xs"
-                onClick={() => setIsInputRequest(!isInputRequest)}
-              >
-                {isInputRequest ? "Cancel Input Request" : "Request Input"}
-              </Button>
               <div className="relative">
                 <Button type="button" size="icon" variant="outline" className="h-8 w-8">
                   <PaperclipIcon className="h-4 w-4" />
@@ -372,7 +398,11 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
               disabled={sendingMessage || (message.trim() === '' && !selectedFile)}
             >
               {sendingMessage ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />} 
-              Send
+              {pendingInputRequest 
+                ? "Submit Input"
+                : isRequestingInput 
+                  ? "Request Input" 
+                  : "Send"}
             </Button>
           </div>
         </div>
