@@ -1,4 +1,3 @@
-
 import { Tables } from "@/integrations/supabase/types";
 import { Monitor, Smartphone, Maximize, Link2 } from "lucide-react";
 import { format } from "date-fns";
@@ -165,7 +164,7 @@ const TasksTable = ({
       <TableCell className="w-[10%] px-4">
         <div className="flex flex-col items-start gap-1">
           <span 
-            className="px-2 py-1 text-xs rounded-full font-semibold" 
+            className="px-2 py-1 text-xs rounded-full font-semibold inline-block" 
             style={{
               backgroundColor: getStatusColor(task.status || {
                 name: null,
@@ -177,9 +176,10 @@ const TasksTable = ({
               }, task.is_awaiting_input, task.is_onhold, task.priority_level_id).text
             }}
           >
-            {task.priority_level_id === 1 ? 'Urgent' :
-             task.is_awaiting_input ? 'Awaiting Input' : 
+            {task.is_awaiting_input ? 'Awaiting Input' : 
+             task.is_onhold && task.priority_level_id === 1 ? 'Urgent' :
              task.is_onhold ? 'On Hold' :
+             task.priority_level_id === 1 ? 'Urgent' :
              task.status?.name}
           </span>
           {task.queue_position && (
@@ -313,7 +313,23 @@ const TasksTable = ({
     name: string | null;
     color_hex: string | null;
   }, is_awaiting_input?: boolean, is_onhold?: boolean, priority_level_id?: number) => {
-    // Check for critical tasks first (priority_level_id = 1)
+    // For awaiting input tasks, we use the awaiting input styling
+    if (is_awaiting_input) {
+      return {
+        bg: '#FEF9C3',
+        text: '#854D0E'
+      };
+    }
+    
+    // For on hold tasks, we use the on hold styling
+    if (is_onhold) {
+      return {
+        bg: '#FDE68A',
+        text: '#92400E'
+      };
+    }
+    
+    // For critical tasks (priority_level_id = 1), we use the urgent styling
     if (priority_level_id === 1) {
       return {
         bg: '#fff6ca',
@@ -321,24 +337,13 @@ const TasksTable = ({
       };
     }
     
-    if (is_awaiting_input) {
-      return {
-        bg: '#FEF9C3',
-        text: '#854D0E'
-      };
-    }
-    if (is_onhold) {
-      return {
-        bg: '#FDE68A',
-        text: '#92400E'
-      };
-    }
     if (!status?.color_hex) {
       return {
         bg: '#F3F4F6',
         text: '#374151'
       };
     }
+    
     const [bgColor, textColor] = status.color_hex.split(',').map(color => color.trim());
     if (bgColor && textColor) {
       return {
