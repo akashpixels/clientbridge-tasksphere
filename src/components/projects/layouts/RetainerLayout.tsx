@@ -25,6 +25,7 @@ const RetainerLayout = (props: BaseProjectData) => {
   const { setRightSidebarContent, setCurrentTab } = useLayout();
   const queryClient = useQueryClient();
 
+  // Define these variables only once, at the top level
   const shouldFetchTasks = !!selectedMonth && !!project?.id;
   const tasksQueryKey = ['tasks', project?.id, selectedMonth];
 
@@ -64,8 +65,7 @@ const RetainerLayout = (props: BaseProjectData) => {
     };
   }, [project?.id, queryClient, tasksQueryKey]);
 
-  const shouldFetchTasks = !!selectedMonth && !!project?.id;
-  const tasksQueryKey = ['tasks', project?.id, selectedMonth];
+  // Removed duplicate declarations of shouldFetchTasks and tasksQueryKey
 
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: tasksQueryKey,
