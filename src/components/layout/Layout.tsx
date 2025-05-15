@@ -8,18 +8,8 @@ import { useLocation } from 'react-router-dom';
 
 const Layout = () => {
   const { setRightSidebarContent } = useLayout();
-  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false); // Changed default to false
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const location = useLocation();
-  
-  useEffect(() => {
-    console.log('Layout: Component mounted');
-    console.log('Layout: Current path', location.pathname);
-    return () => {
-      console.log('Layout: Component unmounted');
-    };
-  }, [location.pathname]);
-
-  console.log('Layout: Rendering with path', location.pathname);
   
   return (
     <div className="min-h-screen bg-background">

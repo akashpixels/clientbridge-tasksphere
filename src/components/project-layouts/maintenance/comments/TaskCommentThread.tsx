@@ -102,7 +102,7 @@ const TaskCommentThread = ({ taskId, taskCode = "Task" }: TaskCommentThreadProps
         document.body.removeChild(link);
         URL.revokeObjectURL(blobUrl);
       } catch (error) {
-        console.error("Failed to download image:", error);
+        // If download fails, open in a new tab as fallback
         window.open(url, '_blank');
       }
     } else {

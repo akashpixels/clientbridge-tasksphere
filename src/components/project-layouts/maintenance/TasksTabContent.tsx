@@ -59,10 +59,6 @@ const TasksTabContent = ({
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
   
   useEffect(() => {
-    console.log("TasksTabContent rendered with tasks:", tasks?.length || 0);
-  }, [tasks]);
-  
-  useEffect(() => {
     const channel = supabase
       .channel('task-status-changes')
       .on(
@@ -72,8 +68,8 @@ const TasksTabContent = ({
           schema: 'public',
           table: 'task_blocking_history'
         },
-        (payload) => {
-          console.log('Task blocking status change received:', payload);
+        () => {
+          // Task blocking status change handling
         }
       )
       .subscribe();

@@ -7,11 +7,9 @@ import { AuthProvider } from "@/context/auth";
 import { LayoutProvider } from "@/context/layout";
 import { ProjectLayoutProvider } from './context/project-layout';
 
-console.log('App: Initializing');
 const queryClient = new QueryClient();
 
 function App() {
-  console.log('App: Rendering');
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

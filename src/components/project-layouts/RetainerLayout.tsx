@@ -31,8 +31,6 @@ const RetainerLayout = (props: BaseProjectData) => {
   useEffect(() => {
     if (!project?.id) return;
     
-    console.log('Setting up real-time subscription for tasks in RetainerLayout, project:', project.id);
-    
     const channel = supabase
       .channel('retainer-tasks-changes')
       .on(
@@ -44,8 +42,6 @@ const RetainerLayout = (props: BaseProjectData) => {
           filter: `project_id=eq.${project.id}` // Only listen for changes to tasks in this project
         },
         (payload) => {
-          console.log('Task change detected in RetainerLayout:', payload);
-          
           // Show toast notification for new tasks
           if (payload.eventType === 'INSERT') {
             toast({
@@ -59,13 +55,10 @@ const RetainerLayout = (props: BaseProjectData) => {
           queryClient.invalidateQueries({ queryKey: tasksQueryKey });
         }
       )
-      .subscribe((status) => {
-        console.log('Subscription status in RetainerLayout:', status);
-      });
+      .subscribe();
 
     // Clean up the subscription when the component unmounts
     return () => {
-      console.log('Cleaning up real-time subscription in RetainerLayout');
       supabase.removeChannel(channel);
     };
   }, [project?.id, queryClient, tasksQueryKey]);
@@ -73,7 +66,6 @@ const RetainerLayout = (props: BaseProjectData) => {
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: tasksQueryKey,
     queryFn: async () => {
-      console.log('Fetching tasks for project in RetainerLayout:', project.id);
       const startDate = startOfMonth(new Date(selectedMonth || ''));
       const endDate = endOfMonth(new Date(selectedMonth || ''));
       
@@ -93,11 +85,9 @@ const RetainerLayout = (props: BaseProjectData) => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching tasks:', error);
         throw error;
       }
       
-      console.log('Fetched tasks in RetainerLayout:', data);
       return data;
     },
     enabled: shouldFetchTasks,
