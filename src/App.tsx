@@ -5,7 +5,6 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "@/router/router";
 import { AuthProvider } from "@/context/auth";
 import { LayoutProvider } from "@/context/layout";
-import { ProjectLayoutProvider } from './context/project-layout';
 
 const queryClient = new QueryClient();
 
@@ -14,10 +13,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <LayoutProvider>
-          <ProjectLayoutProvider>
-            <RouterProvider router={router} />
-            <Toaster />
-          </ProjectLayoutProvider>
+          <RouterProvider router={router} />
+          <Toaster />
         </LayoutProvider>
       </AuthProvider>
     </QueryClientProvider>
