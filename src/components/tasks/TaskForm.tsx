@@ -76,6 +76,7 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [project, setProject] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCalculatingSchedule, setIsCalculatingSchedule] = useState(false);
   const { session } = useAuth(); // Add auth session to get user ID
   
   const form = useForm<FormValues>({
@@ -98,7 +99,8 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
     formatDuration,
     loading: scheduleLoading,
     error: scheduleError,
-    scheduleData
+    scheduleData,
+    setScheduleData
   } = useTaskSchedule();
 
   useEffect(() => {
@@ -160,7 +162,7 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
       }
     };
 
-    // Add a longer delay (500ms → 800ms) to prevent too many calculations when user is actively selecting options
+    // Add a longer delay to prevent too many calculations when user is actively selecting options
     const timer = setTimeout(calculateSchedule, 800);
     return () => clearTimeout(timer);
   }, [
@@ -241,6 +243,46 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
     try {
       setIsSubmitting(true);
       
+      // Important: Check if we have valid schedule data
+      let taskScheduleData = scheduleData;
+      
+      // If we don't have schedule data yet, calculate it now and wait for the result
+      if (!taskScheduleData || !taskScheduleData.initial_status_id) {
+        console.log("No valid scheduleData available, calculating now...");
+        setIsCalculatingSchedule(true);
+        
+        try {
+          taskScheduleData = await getTaskSchedule({
+            projectId,
+            priorityLevelId: parseInt(data.priorityLevelId, 10),
+            taskTypeId: parseInt(data.taskTypeId, 10),
+            complexityLevelId: parseInt(data.complexityLevelId, 10)
+          }, true); // Force update
+          
+          console.log("Got fresh schedule data:", taskScheduleData);
+          
+          // If we still don't have valid data, show error and return
+          if (!taskScheduleData || !taskScheduleData.initial_status_id) {
+            toast({
+              title: "Unable to schedule task",
+              description: "Could not determine task status. Please try again later.",
+              variant: "destructive"
+            });
+            return;
+          }
+        } catch (error) {
+          console.error("Error calculating task schedule:", error);
+          toast({
+            title: "Schedule calculation failed",
+            description: "Could not determine task status. Please try again.",
+            variant: "destructive"
+          });
+          return;
+        } finally {
+          setIsCalculatingSchedule(false);
+        }
+      }
+      
       const uploadedImages: string[] = [];
       
       // Upload files if there are any
@@ -287,18 +329,24 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
         created_by: session?.user?.id, // Add the user ID from the session
       };
       
-      // Add the est_start, est_end, and current_status_id from scheduleData if available
-      if (scheduleData) {
-        formData.est_start = scheduleData.est_start;
-        formData.est_end = scheduleData.est_end;
-        formData.current_status_id = scheduleData.initial_status_id;
+      // Add the est_start, est_end, and current_status_id from taskScheduleData if available
+      if (taskScheduleData) {
+        formData.est_start = taskScheduleData.est_start;
+        formData.est_end = taskScheduleData.est_end;
+        formData.current_status_id = taskScheduleData.initial_status_id;
+        
+        console.log("Using status ID from schedule data:", taskScheduleData.initial_status_id);
+      } else {
+        console.error("Missing schedule data, this should not happen at this point");
+        return;
       }
 
       console.log("Submitting task with formData:", formData);
 
-      const { error } = await supabase
+      const { error, data: insertedData } = await supabase
         .from('tasks')
-        .insert(formData);
+        .insert(formData)
+        .select();
 
       if (error) {
         console.error('Error creating task:', error);
@@ -310,18 +358,18 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
         return;
       }
 
+      console.log("Task created successfully:", insertedData);
+      
       toast({
         title: "Task created",
         description: "The task has been created successfully."
       });
       
-      // If schedule data was used, show a schedule notification
-      if (scheduleData) {
-        toast({
-          title: "Schedule Calculated",
-          description: `Task scheduled to start at ${formatScheduleDate(scheduleData.est_start)}`
-        });
-      }
+      // Show schedule notification
+      toast({
+        title: "Schedule Calculated",
+        description: `Task scheduled to start at ${formatScheduleDate(taskScheduleData.est_start)} with status ID ${taskScheduleData.initial_status_id}`
+      });
       
       onClose();
     } catch (error) {
@@ -626,13 +674,13 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
           <div className="border-t p-4 bg-background sticky bottom-0 z-10">
             <Button 
               type="submit" 
-              disabled={isSubmitting || !isFormValid} 
+              disabled={isSubmitting || isCalculatingSchedule || !isFormValid} 
               className="w-full"
             >
-              {isSubmitting ? (
+              {isSubmitting || isCalculatingSchedule ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  {isCalculatingSchedule ? "Calculating Schedule..." : "Creating..."}
                 </>
               ) : "Create Task"}
             </Button>

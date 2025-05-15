@@ -2,6 +2,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
+import { toast } from "@/hooks/use-toast";
 
 interface TaskScheduleParams {
   projectId: string;
@@ -30,13 +31,14 @@ export function useTaskSchedule() {
     priorityLevelId, 
     taskTypeId, 
     complexityLevelId 
-  }: TaskScheduleParams) => {
+  }: TaskScheduleParams, forceUpdate = false) => {
     try {
       // Create a request signature to compare with previous requests
       const requestSignature = `${projectId}-${priorityLevelId}-${taskTypeId}-${complexityLevelId}`;
       
-      // Skip if this is the same request as the last one
-      if (requestSignature === lastRequestRef.current) {
+      // Skip if this is the same request as the last one and we're not forcing an update
+      if (!forceUpdate && requestSignature === lastRequestRef.current) {
+        console.log("Skipping duplicate task schedule request");
         return scheduleData;
       }
       
@@ -45,6 +47,13 @@ export function useTaskSchedule() {
       
       setLoading(true);
       setError(null);
+
+      console.log("Calling get_task_schedule with params:", {
+        projectId,
+        priorityLevelId,
+        taskTypeId,
+        complexityLevelId
+      });
 
       const { data, error } = await supabase.rpc('get_task_schedule', {
         p_project_id: projectId,
@@ -59,16 +68,30 @@ export function useTaskSchedule() {
         return null;
       }
 
+      console.log("Received schedule data:", data);
+      
       if (data && data.length > 0) {
         // Ensure calculated_est_duration is a string
         const result: TaskScheduleResult = {
           ...data[0],
           calculated_est_duration: String(data[0].calculated_est_duration)
         };
+        
+        console.log("Processed schedule result:", result);
+        
+        // Validate that we have an initial_status_id
+        if (!result.initial_status_id) {
+          console.error("Missing initial_status_id in schedule result:", result);
+          setError("Could not determine task status. Please try again.");
+          return null;
+        }
+        
         setScheduleData(result);
         return result;
       }
 
+      console.error("Empty or invalid schedule data returned:", data);
+      setError("Invalid schedule data received");
       return null;
     } catch (err) {
       console.error('Unexpected error in getTaskSchedule:', err);
@@ -130,6 +153,7 @@ export function useTaskSchedule() {
     formatDuration,
     loading,
     error,
-    scheduleData
+    scheduleData,
+    setScheduleData,
   };
 }
