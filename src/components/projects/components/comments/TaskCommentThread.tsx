@@ -18,6 +18,13 @@ interface TaskCommentThreadProps {
   taskId: string;
 }
 
+interface TaskCommentAttachment {
+  id: string;
+  url: string;
+  filename: string;
+  filesize: number;
+}
+
 const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
   const { id: projectId } = useParams<{ id: string }>();
   const { toast } = useToast();
@@ -68,14 +75,29 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
         .from("task_comments")
         .select(`
           *,
-          user:user_profiles(first_name, last_name, avatar_url),
-          task_comment_attachments(*)
+          user:user_profiles(first_name, last_name)
         `)
         .eq("task_id", taskId)
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      return data;
+
+      // For each comment, fetch its attachments manually
+      const commentsWithAttachments = await Promise.all(
+        data.map(async (comment) => {
+          const { data: attachments, error: attachmentsError } = await supabase
+            .from("files")  // using the files table instead of task_comment_attachments
+            .select("*")
+            .eq("task_comment_id", comment.id);
+            
+          return {
+            ...comment,
+            task_comment_attachments: attachmentsError ? [] : (attachments || [])
+          };
+        })
+      );
+
+      return commentsWithAttachments;
     },
     enabled: !!taskId,
     refetchInterval: 10000, // Poll for new comments every 10 seconds
@@ -105,6 +127,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       
       // If there are attachments, upload them
       if (attachments.length > 0) {
+        setUploadingAttachments(true);
         const attachmentPromises = attachments.map(async (file) => {
           const filePath = `task-comments/${comment_id}/${file.name}`;
           
@@ -122,15 +145,17 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
             .from("attachments")
             .getPublicUrl(filePath);
             
-          // Save attachment record in database
+          // Save attachment record in database using the files table
           const { error: attachmentError } = await supabase
-            .from("task_comment_attachments")
+            .from("files")
             .insert([
               {
                 task_comment_id: comment_id,
-                filename: file.name,
-                filesize: file.size,
-                url: urlData.publicUrl,
+                file_name: file.name,
+                size: file.size,
+                file_url: urlData.publicUrl,
+                project_id: projectId,  // Adding required field
+                uploaded_by: (await supabase.auth.getUser()).data.user?.id
               },
             ]);
             
@@ -138,6 +163,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
         });
         
         await Promise.all(attachmentPromises);
+        setUploadingAttachments(false);
       }
       
       return { success: true };
@@ -211,7 +237,7 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
       <div className="flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
         <div>
           <h2 className="font-semibold text-[14px]">
-            {task ? task.title : "Task Comments"}
+            {task ? task.details : "Task Comments"}
           </h2>
           {task && task.status && (
             <span 
@@ -245,15 +271,15 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
             {comments.map((comment) => (
               <div key={comment.id} className="flex gap-3 group">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={comment.user?.avatar_url || undefined} />
+                  <AvatarImage src={undefined} />
                   <AvatarFallback>
-                    {getInitials(`${comment.user?.first_name} ${comment.user?.last_name}`)}
+                    {getInitials(`${comment.user?.first_name || ''} ${comment.user?.last_name || ''}`)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="space-y-1 flex-1">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">
-                      {comment.user?.first_name} {comment.user?.last_name}
+                      {comment.user?.first_name || ''} {comment.user?.last_name || ''}
                     </p>
                     <span className="text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
                       {formatDistanceToNow(parseISO(comment.created_at), { addSuffix: true })}
@@ -265,31 +291,31 @@ const TaskCommentThread = ({ taskId }: TaskCommentThreadProps) => {
                   {/* Comment Attachments */}
                   {comment.task_comment_attachments && comment.task_comment_attachments.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {comment.task_comment_attachments.map((attachment) => {
-                        const isImage = /\.(jpeg|jpg|png|gif|webp)$/i.test(attachment.url);
+                      {comment.task_comment_attachments.map((attachment: any) => {
+                        const isImage = attachment.file_url && /\.(jpeg|jpg|png|gif|webp)$/i.test(attachment.file_url);
                         
                         return isImage ? (
                           <div 
                             key={attachment.id} 
                             className="cursor-pointer relative group"
-                            onClick={() => setPreviewUrl(attachment.url)}
+                            onClick={() => setPreviewUrl(attachment.file_url)}
                           >
                             <img 
-                              src={attachment.url} 
-                              alt={attachment.filename} 
+                              src={attachment.file_url} 
+                              alt={attachment.file_name} 
                               className="h-20 w-20 object-cover rounded"
                             />
                           </div>
                         ) : (
                           <a 
                             key={attachment.id}
-                            href={attachment.url}
+                            href={attachment.file_url}
                             target="_blank"
                             rel="noreferrer"
                             className="flex items-center gap-1.5 text-xs px-2 py-1.5 bg-gray-100 rounded hover:bg-gray-200"
                           >
                             <PaperclipIcon className="h-3 w-3" />
-                            {attachment.filename}
+                            {attachment.file_name}
                           </a>
                         );
                       })}

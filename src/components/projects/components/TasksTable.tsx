@@ -119,10 +119,10 @@ const TasksTable = ({
               variant="ghost" 
               size="sm"
               className="p-0 font-medium"
-              onClick={() => onSort('title')}
+              onClick={() => onSort('details')}
             >
               Task
-              {sortConfig.key === 'title' && (
+              {sortConfig.key === 'details' && (
                 <span className="ml-1">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
               )}
             </Button>
@@ -182,7 +182,7 @@ const TasksTable = ({
               <div className="flex flex-col">
                 <div className="font-medium">
                   {task.task_code && <span className="text-xs font-mono mr-1 text-gray-500">{task.task_code}</span>}
-                  {task.title}
+                  {task.details}
                 </div>
                 {task.task_attachments && task.task_attachments.length > 0 && (
                   <div className="flex flex-wrap mt-1 gap-1">

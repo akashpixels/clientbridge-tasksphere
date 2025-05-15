@@ -1,14 +1,15 @@
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { X } from "lucide-react";
+import { Download, X } from "lucide-react";
 
 interface PreviewDialogProps {
   isOpen: boolean;
   imageUrl: string | null;
   onClose: () => void;
+  onDownload?: (url: string) => void;
 }
 
-const PreviewDialog = ({ isOpen, imageUrl, onClose }: PreviewDialogProps) => {
+const PreviewDialog = ({ isOpen, imageUrl, onClose, onDownload }: PreviewDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
@@ -19,6 +20,16 @@ const PreviewDialog = ({ isOpen, imageUrl, onClose }: PreviewDialogProps) => {
           >
             <X size={20} />
           </button>
+          
+          {onDownload && imageUrl && (
+            <button
+              onClick={() => onDownload(imageUrl)}
+              className="absolute top-2 left-2 z-10 p-1 bg-black/50 rounded-full text-white hover:bg-black/70"
+            >
+              <Download size={20} />
+            </button>
+          )}
+          
           {imageUrl && (
             <img
               src={imageUrl}
