@@ -1,9 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
-import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertCircle } from "lucide-react";
+import TasksTable from "@/components/projects/components/TasksTable";
 
 interface TasksTabContentProps {
   isLoadingTasks: boolean;

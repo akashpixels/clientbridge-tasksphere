@@ -7,7 +7,7 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useLayout } from "@/context/layout";
 import TasksTabContent from "../maintenance/TasksTabContent";
 import TaskCommentThread from "../maintenance/comments/TaskCommentThread";
-import ImageViewerDialog from "../maintenance/ImageViewerDialog";
+import ImageViewerDialog from "@/components/projects/components/ImageViewerDialog";
 import { toast } from "@/components/ui/use-toast";
 
 interface TasksTabProps {

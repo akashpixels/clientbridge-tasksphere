@@ -1,4 +1,4 @@
-
+import React from 'react';
 import { LayoutConfig } from "@/context/project-layout";
 import TeamTab from "@/components/projects/shared/TeamTab";
 import CredentialsTab from "@/components/projects/shared/CredentialsTab";
@@ -6,7 +6,6 @@ import FilesTab from "@/components/projects/shared/FilesTab";
 import OverviewTab from "@/components/projects/tabs/OverviewTab";
 import ProjectHeader from "@/components/projects/shared/ProjectHeader";
 import TasksTab from "@/components/projects/tabs/TasksTab";
-import React from 'react';
 
 // Define the layout registry with all available layouts
 const layoutRegistry: Record<string, LayoutConfig> = {

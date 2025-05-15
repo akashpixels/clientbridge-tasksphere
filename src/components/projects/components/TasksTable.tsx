@@ -285,7 +285,10 @@ const TasksTable = ({
               <div 
                 key={index} 
                 className="w-8 h-8 relative cursor-pointer" 
-                onClick={() => onImageClick(image, task.images as string[])}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onImageClick(image, task.images as string[]);
+                }}
               >
                 <img 
                   src={image as string} 
@@ -301,15 +304,7 @@ const TasksTable = ({
     </TableRow>
   );
 
-  const formatETA = (date: string) => {
-    return format(new Date(date), "h.mmaaa do MMM");
-  };
-
-  const formatDateTime = (date: string) => {
-    return format(new Date(date), "MMM d, h:mm a");
-  };
-
-  // Updated getStatusColor function to handle critical tasks
+  // Function to get status color with styling
   const getStatusColor = (status: {
     name: string | null;
     color_hex: string | null;
