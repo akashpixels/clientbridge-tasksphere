@@ -10,8 +10,6 @@ import TasksTab from "@/components/projects/tabs/TasksTab";
 import TeamTab from "@/components/projects/shared/TeamTab";
 import CredentialsTab from "@/components/projects/shared/CredentialsTab";
 import FilesTab from "@/components/projects/shared/FilesTab";
-import ProjectStats from "@/components/projects/components/ProjectStats";
-import layoutRegistry from "@/config/layout-registry";
 import { Card } from "@/components/ui/card";
 import RetainerLayout from "@/components/projects/layouts/RetainerLayout";
 

@@ -1,9 +1,35 @@
 
-// Import the component from the original location
-// This is a placeholder for the PreviewDialog component
-import PreviewDialogFromOriginalLocation from '@/components/project-layouts/maintenance/comments/PreviewDialog';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { X } from "lucide-react";
 
-// Re-export the component
-const PreviewDialog = PreviewDialogFromOriginalLocation;
+interface PreviewDialogProps {
+  isOpen: boolean;
+  imageUrl: string | null;
+  onClose: () => void;
+}
+
+const PreviewDialog = ({ isOpen, imageUrl, onClose }: PreviewDialogProps) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
+        <div className="relative w-full h-full">
+          <button
+            onClick={onClose}
+            className="absolute top-2 right-2 z-10 p-1 bg-black/50 rounded-full text-white hover:bg-black/70"
+          >
+            <X size={20} />
+          </button>
+          {imageUrl && (
+            <img
+              src={imageUrl}
+              alt="Preview"
+              className="w-full h-full object-contain"
+            />
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 export default PreviewDialog;

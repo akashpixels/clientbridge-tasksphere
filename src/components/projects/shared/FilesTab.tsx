@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import PreviewDialog from "../components/comments/PreviewDialog";
 import { 
   File, 
   FileText, 
@@ -19,6 +18,7 @@ import {
   RefreshCw,
   Folder
 } from "lucide-react";
+import PreviewDialog from "../components/comments/PreviewDialog";
 
 interface FileCardProps {
   file: {
@@ -172,191 +172,101 @@ const FilesTab = ({ projectId }: FilesTabProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    const checkDirectAccess = async () => {
-      console.log("Directly checking files for project:", projectId);
-      
-      try {
-        const { data, error } = await supabase
-          .from('files')
-          .select('*')
-          .limit(10);
-          
-        console.log("Direct access test - all files:", data?.length || 0, data);
-        console.log("Direct access error:", error);
-        
-        const { data: projectData, error: projectError } = await supabase
-          .from('files')
-          .select('*')
-          .eq('project_id', projectId)
-          .limit(10);
-          
-        console.log(`Direct check for project ${projectId} files:`, projectData?.length || 0, projectData);
-        console.log("Project files error:", projectError);
-      } catch (e) {
-        console.error("Error in direct check:", e);
-      }
-    };
-    
-    checkDirectAccess();
-  }, [projectId]);
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    refetch().finally(() => setIsRefreshing(false));
-  };
-
-  const { data: projectFiles, isLoading, error, refetch } = useQuery({
+  // Fetch files for this project
+  const { data: files, isLoading, refetch } = useQuery({
     queryKey: ['project-files', projectId],
     queryFn: async () => {
-      console.log('Fetching files for project:', projectId);
-      
-      if (!projectId) {
-        console.error('No project ID provided to FilesTab');
-        return [];
-      }
+      console.log(`Fetching files for project: ${projectId}`);
       
       const { data, error } = await supabase
         .from('files')
         .select('*')
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
-
+        
       if (error) {
         console.error('Error fetching files:', error);
         throw error;
       }
       
-      console.log(`Found ${data?.length || 0} files for project ${projectId}:`, data);
+      console.log(`Found ${data?.length || 0} files`);
       return data || [];
     },
-    refetchOnWindowFocus: true,
-    staleTime: 1000 * 60 * 5,
   });
 
-  if (isLoading) {
-    return (
-      <Card className="p-6">
-        <div className="flex items-center justify-center p-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-          <p>Loading files...</p>
-        </div>
-      </Card>
-    );
-  }
+  // Group files by type
+  const imageFiles = files?.filter(file => 
+    /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.file_name)
+  ) || [];
   
-  if (error) {
-    console.error('Error in files query:', error);
-    return (
-      <Card className="p-6">
-        <div className="text-center py-8">
-          <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-          <p className="text-lg font-semibold text-red-500">Error loading files</p>
-          <p className="text-sm text-gray-500 mt-2">{(error as Error).message}</p>
-          <p className="text-xs text-gray-400 mt-1">Project ID: {projectId}</p>
-          <button 
-            className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-sm mx-auto"
-            onClick={handleRefresh}
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Try again
-          </button>
-        </div>
-      </Card>
-    );
-  }
+  const documentFiles = files?.filter(file => 
+    /\.(pdf|doc|docx|txt|rtf|xls|xlsx|ppt|pptx)$/i.test(file.file_name)
+  ) || [];
+  
+  const otherFiles = files?.filter(file => 
+    !/\.(jpg|jpeg|png|gif|webp|svg|pdf|doc|docx|txt|rtf|xls|xlsx|ppt|pptx)$/i.test(file.file_name)
+  ) || [];
 
-  if (!projectFiles || projectFiles.length === 0) {
-    return (
-      <Card className="p-6">
-        <div className="text-center py-8">
-          <AlertCircle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
-          <p className="text-lg font-semibold">No files found for this project.</p>
-          <p className="text-sm text-gray-500 mt-2">
-            This could be due to permission settings or because no files exist for this project.
-          </p>
-          <div className="mt-4 p-3 bg-gray-50 rounded-md text-sm text-left max-w-md mx-auto">
-            <p className="font-medium">Debugging information:</p>
-            <p className="mt-1 text-xs">Project ID: {projectId}</p>
-            <p className="mt-1 text-xs">RLS Status: Temporarily disabled</p>
-          </div>
-          <button 
-            className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-sm mx-auto"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Refreshing...' : 'Refresh'}
-          </button>
-        </div>
-      </Card>
-    );
-  }
-
-  const filesByType: Record<string, any[]> = {
-    "Project Files": [],
-    "Deliverables": [],
-    "Inputs": [],
-    "Credentials": [],
-    "Others": []
-  };
-
-  if (projectFiles) {
-    projectFiles.forEach(file => {
-      switch(file.file_type_id) {
-        case 1:
-          filesByType["Project Files"].push(file);
-          break;
-        case 2:
-          filesByType["Deliverables"].push(file);
-          break;
-        case 3:
-          filesByType["Inputs"].push(file);
-          break;
-        case 4:
-          filesByType["Credentials"].push(file);
-          break;
-        default:
-          filesByType["Others"].push(file);
-          break;
-      }
-    });
-  }
-
-  const handleDownload = (url: string) => {
-    window.open(url, '_blank');
+  // Handle refresh button click
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setIsRefreshing(false);
   };
 
   return (
-    <Card className="p-6">
-      <div className="flex justify-end mb-4">
-        <button 
-          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center text-sm"
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold">Project Files</h2>
+        <button
           onClick={handleRefresh}
           disabled={isRefreshing}
+          className="p-2 rounded-full hover:bg-gray-100"
         >
-          <RefreshCw className={`h-4 w-4 mr-1.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
         </button>
       </div>
-      
-      <div className="space-y-4">
-        {Object.entries(filesByType).map(([folderName, files]) => (
-          <FolderSection 
-            key={folderName} 
-            title={folderName} 
-            files={files} 
-            onFileClick={setSelectedFile} 
-          />
-        ))}
-      </div>
 
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="animate-spin h-10 w-10 text-primary mr-2" />
+          <p>Loading files...</p>
+        </div>
+      ) : files && files.length > 0 ? (
+        <div>
+          <FolderSection 
+            title="Images" 
+            files={imageFiles} 
+            onFileClick={(url) => setSelectedFile(url)} 
+          />
+          <FolderSection 
+            title="Documents" 
+            files={documentFiles} 
+            onFileClick={(url) => setSelectedFile(url)} 
+          />
+          <FolderSection 
+            title="Other Files" 
+            files={otherFiles} 
+            onFileClick={(url) => setSelectedFile(url)} 
+          />
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center p-10 bg-gray-50 rounded-lg">
+          <AlertCircle className="h-16 w-16 text-muted-foreground mb-4" />
+          <h3 className="text-xl font-medium mb-2">No Files Found</h3>
+          <p className="text-muted-foreground text-center mb-4">
+            This project doesn't have any files yet. Use the "Add File" button to upload files.
+          </p>
+        </div>
+      )}
+
+      {/* File preview dialog */}
       <PreviewDialog
-        selectedImage={selectedFile}
+        isOpen={!!selectedFile}
+        imageUrl={selectedFile}
         onClose={() => setSelectedFile(null)}
-        onDownload={handleDownload}
       />
-    </Card>
+    </div>
   );
 };
 
