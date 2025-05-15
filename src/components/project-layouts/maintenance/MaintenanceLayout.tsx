@@ -4,7 +4,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
-import ProjectHeader from "./ProjectHeader";
+import ProjectHeader from "../shared/ProjectHeader";
 import TasksTabContent from "./TasksTabContent";
 import ImageViewerDialog from "./ImageViewerDialog";
 import { format, startOfMonth, endOfMonth } from "date-fns";
@@ -13,6 +13,7 @@ import TaskCommentThread from "./comments/TaskCommentThread";
 import CredentialsTab from "../shared/CredentialsTab";
 import FilesTab from "../shared/FilesTab";
 import TeamTab from "../shared/TeamTab";
+import ProjectStats from "./ProjectStats";
 
 interface MaintenanceLayoutProps {
   project: Tables<"projects"> & {
@@ -270,6 +271,7 @@ const MaintenanceLayout = ({ project, selectedMonth, onMonthChange }: Maintenanc
           project={project} 
           selectedMonth={selectedMonth}
           onMonthChange={onMonthChange}
+          statsComponent={<ProjectStats project={project} selectedMonth={selectedMonth} />}
         />
       </div>
 
