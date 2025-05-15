@@ -1165,10 +1165,6 @@ export type Database = {
         }
         Returns: string
       }
-      calculate_schedule_for_existing_task: {
-        Args: { p_input_project_id: string }
-        Returns: undefined
-      }
       calculate_schedule_for_new_task: {
         Args: {
           p_project_id: string

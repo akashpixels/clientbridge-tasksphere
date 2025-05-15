@@ -4,7 +4,6 @@ import TasksTable from "./TasksTable";
 import { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertCircle } from "lucide-react";
-import { useMonthlyUsage } from '@/hooks/useMonthlyUsage'; 
 
 interface TasksTabContentProps {
   isLoadingTasks: boolean;
@@ -58,20 +57,6 @@ const TasksTabContent = ({
   onCommentClick,
 }: TasksTabContentProps) => {
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
-  const projectId = window.location.pathname.split('/').pop();
-  
-  // Use the monthly usage hook to get usage data
-  const { 
-    loading: loadingUsage,
-    usage, 
-    usagePercentage, 
-    formattedAllocated,
-    formattedUsed,
-  } = useMonthlyUsage({
-    projectId,
-    autoRefresh: true,
-    refreshInterval: 300000 // Refresh every 5 minutes
-  });
   
   useEffect(() => {
     console.log("TasksTabContent rendered with tasks:", tasks?.length || 0);
@@ -112,20 +97,6 @@ const TasksTabContent = ({
         </div>
       ) : tasks && tasks.length > 0 ? (
         <div className="overflow-x-auto">
-          {/* Usage information display */}
-          {projectId && (
-            <div className="flex items-center justify-end gap-4 p-2 bg-gray-50 rounded mb-2 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Monthly Usage:</span>
-                {loadingUsage ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <span>{formattedUsed} / {formattedAllocated} ({usagePercentage}%)</span>
-                )}
-              </div>
-            </div>
-          )}
-          
           <TasksTable 
             tasks={tasks}
             sortConfig={sortConfig}
@@ -144,7 +115,7 @@ const TasksTabContent = ({
           </p>
           <div className="mt-4 p-3 bg-gray-50 rounded-md text-sm text-left">
             <p className="font-medium">Debugging information:</p>
-            <p className="mt-1 text-xs">Project ID: {projectId}</p>
+            <p className="mt-1 text-xs">Project ID: {window.location.pathname.split('/').pop()}</p>
             <p className="mt-1 text-xs">Status: Simplified timeline calculation active</p>
           </div>
         </div>
