@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,7 +10,7 @@ import ProjectStats from "@/components/projects/components/ProjectStats";
 import TasksTabContent from "@/components/projects/components/TasksTabContent";
 import TaskCommentThread from "@/components/projects/components/comments/TaskCommentThread";
 import TeamTab from "@/components/projects/shared/TeamTab";
-import CredentialsTab from "@/components/projects/shared/CredentialsTab";
+import CredentialsTab from "@/components/projects/shared/CredentialsTab"; 
 import FilesTab from "@/components/projects/shared/FilesTab";
 import ImageViewerDialog from "@/components/projects/components/ImageViewerDialog";
 import { toast } from "@/components/ui/use-toast";
@@ -62,7 +61,7 @@ const RetainerLayout = (props: BaseProjectData) => {
   }, [project?.id, queryClient, tasksQueryKey]);
 
   const shouldFetchTasks = !!selectedMonth && !!project?.id;
-  const tasksQueryKey = ['tasks', project.id, selectedMonth];
+  const tasksQueryKey = ['tasks', project?.id, selectedMonth];
 
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: tasksQueryKey,

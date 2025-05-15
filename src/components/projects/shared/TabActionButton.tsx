@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, FilePlus, FolderPlus } from "lucide-react";
 import { useLayout } from "@/context/layout";
 import { TaskCreationSidebar } from "@/components/tasks/TaskCreationSidebar";
-import { CredentialCreationSidebar } from "./CredentialCreationSidebar";
-import { FileUploadSidebar } from "./FileUploadSidebar";
+import { CredentialCreationSidebar } from "@/components/projects/shared/CredentialCreationSidebar";
+import { FileUploadSidebar } from "@/components/projects/shared/FileUploadSidebar";
 
 export const TabActionButton = () => {
   const { currentTab, setRightSidebarContent } = useLayout();
@@ -46,3 +46,5 @@ export const TabActionButton = () => {
     </Button>
   );
 };
+
+export default TabActionButton;
