@@ -2,11 +2,12 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useLayout } from "@/context/layout";
-import TasksTabContent from "../components/TasksTabContent";
-import TaskCommentThread from "../components/comments/TaskCommentThread";
-import ImageViewerDialog from "../components/ImageViewerDialog";
+import TasksTabContent from "@/components/projects/components/TasksTabContent";
+import TaskCommentThread from "@/components/projects/components/comments/TaskCommentThread";
+import ImageViewerDialog from "@/components/projects/components/ImageViewerDialog";
 import { toast } from "@/components/ui/use-toast";
 
 interface TasksTabProps {

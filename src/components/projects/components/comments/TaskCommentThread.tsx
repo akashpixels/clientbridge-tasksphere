@@ -1,15 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/auth';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Loader2, PaperclipIcon, Send } from "lucide-react";
 import { format } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
 import { getInitials } from '@/lib/utils';
+import CommentList from './CommentList';
 import PreviewDialog from './PreviewDialog';
 import CommentInputRequest from './CommentInputRequest';
 import AttachmentHandler from './AttachmentHandler';
@@ -304,64 +304,10 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {comments.length > 0 ? (
-          comments.map((comment) => (
-            <div key={comment.id} className="flex gap-2">
-              <Avatar className="h-8 w-8">
-                {comment.user?.avatar_url ? (
-                  <AvatarImage src={comment.user.avatar_url} alt={`${comment.user.first_name} ${comment.user.last_name}`} />
-                ) : (
-                  <AvatarFallback>
-                    {getInitials(comment.user?.first_name || 'U', comment.user?.last_name || 'U')}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <div className="font-medium text-sm">
-                    {comment.user ? `${comment.user.first_name} ${comment.user.last_name}` : 'Unknown User'}
-                  </div>
-                  <div className="text-xs text-gray-500">{formatDate(comment.created_at)}</div>
-                </div>
-                <div className="text-sm mt-1">
-                  {comment.content}
-                </div>
-                {comment.is_input_request && (
-                  <div className="mt-1 text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded-sm inline-block">
-                    Input requested
-                  </div>
-                )}
-                {comment.is_input_response && (
-                  <div className="mt-1 text-xs px-1.5 py-0.5 bg-green-100 text-green-800 rounded-sm inline-block">
-                    Input provided
-                  </div>
-                )}
-                {comment.images && comment.images.length > 0 && (
-                  <FilePreview 
-                    files={comment.images} 
-                    onFileClick={handleFileClick}
-                  />
-                )}
-                {comment.file_url && (
-                  <div className="mt-2">
-                    <Button 
-                      variant="ghost" 
-                      className="p-0 h-auto text-xs text-blue-500 flex items-center"
-                      onClick={() => handleFileClick(comment.file_url!)}
-                    >
-                      <PaperclipIcon className="h-3 w-3 mr-1" />
-                      View Attachment
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            No comments yet. Be the first to comment!
-          </div>
-        )}
+        <CommentList 
+          comments={comments} 
+          onFileClick={handleFileClick} 
+        />
       </div>
 
       <div className="p-4 border-t">
