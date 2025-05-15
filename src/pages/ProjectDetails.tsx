@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useProjectData } from "@/hooks/useProjectData";
-import { Tables } from "@/integrations/supabase/types";
 import BaseProjectLayout, { TabDefinition } from "@/components/projects/core/BaseProjectLayout";
 import ProjectHeader from "@/components/projects/shared/ProjectHeader";
 import OverviewTab from "@/components/projects/tabs/OverviewTab";
@@ -10,10 +9,8 @@ import TasksTab from "@/components/projects/tabs/TasksTab";
 import TeamTab from "@/components/projects/shared/TeamTab";
 import CredentialsTab from "@/components/projects/shared/CredentialsTab";
 import FilesTab from "@/components/projects/shared/FilesTab";
-import ProjectStats from "@/components/projects/components/ProjectStats";
-import layoutRegistry from "@/config/layout-registry";
-import { Card } from "@/components/ui/card";
 import RetainerLayout from "@/components/projects/layouts/RetainerLayout";
+import { Card } from "@/components/ui/card";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
