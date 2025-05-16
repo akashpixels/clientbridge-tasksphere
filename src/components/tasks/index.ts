@@ -1,6 +1,6 @@
 
 // Export components from the tasks directory
-export { default as TaskCreationSidebar } from "./TaskCreationSidebar";
-export { default as TaskForm } from "./TaskForm";
-export { default as TaskScheduleInfo } from "./TaskScheduleInfo";
-export { default as PrioritySelector } from "./PrioritySelector";
+export { TaskCreationSidebar } from "./TaskCreationSidebar";
+export { TaskForm } from "./TaskForm";
+export { TaskScheduleInfo } from "./TaskScheduleInfo";
+export { PrioritySelector } from "./PrioritySelector";

@@ -9,7 +9,7 @@ interface LayoutContextType {
   setCurrentTab: (tab: string) => void;
 }
 
-const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
+export const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
 
 export function useLayout() {
   const context = useContext(LayoutContext);
