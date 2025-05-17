@@ -41,7 +41,11 @@ export const TabActionButton = () => {
   if (!buttonConfig) return null;
 
   return (
-    <Button onClick={buttonConfig.action} className="gap-2">
+    <Button 
+      onClick={buttonConfig.action} 
+      className="gap-2"
+      variant="additionbutton"
+    >
       {buttonConfig.icon} {buttonConfig.label}
     </Button>
   );
