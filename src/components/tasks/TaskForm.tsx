@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -669,17 +668,6 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
                   ))}
                 </div>
               </div>
-            </div>
-            
-            {/* Add the TaskScheduleInfo component after the form fields */}
-            <div className="p-4">
-              <TaskScheduleInfo
-                estStart={scheduleData ? formatScheduleDate(scheduleData.est_start) : undefined}
-                estEnd={scheduleData ? formatScheduleDate(scheduleData.est_end) : undefined}
-                duration={scheduleData ? formatDuration(scheduleData.calculated_est_duration) : undefined}
-                loading={scheduleLoading}
-                error={scheduleError}
-              />
             </div>
           </ScrollArea>
           
