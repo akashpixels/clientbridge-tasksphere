@@ -150,7 +150,7 @@ export function useTaskSchedule() {
       // If it's a simpler format with colon like "2:30"
       if (durationString.includes(':')) {
         const parts = durationString.split(':');
-        // Ensure we parse the parts as integers
+        // Fix: Use parseInt to convert string parts to numbers
         const hours = parseInt(parts[0], 10);
         const minutes = parts.length > 1 ? parseInt(parts[1], 10) : 0;
         
