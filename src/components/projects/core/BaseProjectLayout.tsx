@@ -53,7 +53,7 @@ const BaseProjectLayout = ({
   const defaultTab = tabs.find(tab => tab.default)?.id || tabs[0]?.id;
 
   return (
-    <div className="container mx-auto">
+    <div className="containerx mx-auto">
     
 
       <Tabs 
