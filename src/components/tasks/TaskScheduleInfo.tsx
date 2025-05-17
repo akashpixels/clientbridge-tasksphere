@@ -91,7 +91,7 @@ const TaskScheduleInfo = ({
 
     return (
       <Card className="mt-4 border-blue-100 bg-blue-50">
-        <CardContent className="pt-4 pb-4">
+        <CardContent className="py-1">
           <h3 className="text-xs font-semibold mb-2">Estimated Schedule</h3>
           <div className="relative flex flex-col items-center w-full">
             {duration && (
