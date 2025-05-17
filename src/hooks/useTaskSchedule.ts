@@ -106,23 +106,7 @@ export function useTaskSchedule() {
     if (!dateString) return 'Not available';
     
     try {
-      // Format like "10am, May 28" without year
-      const date = new Date(dateString);
-      const hours = date.getHours();
-      const minutes = date.getMinutes();
-      
-      // Format time (10am, 2:30pm)
-      let timeStr = hours % 12 || 12; // Convert 0 to 12 for 12am
-      if (minutes > 0) {
-        timeStr = `${timeStr}:${minutes.toString().padStart(2, '0')}`;
-      }
-      timeStr += hours >= 12 ? 'pm' : 'am';
-      
-      // Format date (May 28)
-      const monthName = date.toLocaleString('en-US', { month: 'short' });
-      const day = date.getDate();
-      
-      return `${timeStr}, ${monthName} ${day}`;
+      return format(new Date(dateString), 'MMM d, yyyy h:mm a');
     } catch (error) {
       console.error('Error formatting date:', error);
       return 'Invalid date';
@@ -147,17 +131,13 @@ export function useTaskSchedule() {
         return `${hours}h`;
       }
       
-      // If it's a simpler format with colon like "2:30"
+      // If it's a simpler format
       if (durationString.includes(':')) {
-        const parts = durationString.split(':');
-        // Fix: Use parseInt to convert string parts to numbers
-        const hours = parseInt(parts[0], 10);
-        const minutes = parts.length > 1 ? parseInt(parts[1], 10) : 0;
-        
-        if (minutes > 0) {
-          return `${hours}h ${minutes}m`;
+        const [hours, minutes] = durationString.split(':');
+        if (parseInt(minutes, 10) > 0) {
+          return `${parseInt(hours, 10)}h ${parseInt(minutes, 10)}m`;
         }
-        return `${hours}h`;
+        return `${parseInt(hours, 10)}h`;
       }
       
       return durationString;
