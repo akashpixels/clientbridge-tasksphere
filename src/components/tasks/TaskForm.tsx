@@ -391,6 +391,19 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
           <ScrollArea className="flex-1">
+
+ {/* Add the TaskScheduleInfo component after the form fields */}
+            <div className="p-4">
+              <TaskScheduleInfo
+                estStart={scheduleData ? formatScheduleDate(scheduleData.est_start) : undefined}
+                estEnd={scheduleData ? formatScheduleDate(scheduleData.est_end) : undefined}
+                duration={scheduleData ? formatDuration(scheduleData.calculated_est_duration) : undefined}
+                loading={scheduleLoading}
+                error={scheduleError}
+              />
+            </div>
+
+            
             <div className="space-y-5 p-4">
               <FormField
                 control={form.control}
@@ -659,16 +672,7 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
               </div>
             </div>
             
-            {/* Add the TaskScheduleInfo component after the form fields */}
-            <div className="p-4">
-              <TaskScheduleInfo
-                estStart={scheduleData ? formatScheduleDate(scheduleData.est_start) : undefined}
-                estEnd={scheduleData ? formatScheduleDate(scheduleData.est_end) : undefined}
-                duration={scheduleData ? formatDuration(scheduleData.calculated_est_duration) : undefined}
-                loading={scheduleLoading}
-                error={scheduleError}
-              />
-            </div>
+           
           </ScrollArea>
           
           <div className="border-t p-4 bg-background sticky bottom-0 z-10">
