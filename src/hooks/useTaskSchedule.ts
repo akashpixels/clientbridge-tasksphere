@@ -149,11 +149,11 @@ export function useTaskSchedule() {
       
       // If it's a simpler format
       if (durationString.includes(':')) {
-        const [hours, minutes] = durationString.split(':');
-        if (parseInt(minutes, 10) > 0) {
-          return `${parseInt(hours, 10)}h ${parseInt(minutes, 10)}m`;
+        const [hours, minutes] = durationString.split(':').map(part => parseInt(part, 10));
+        if (minutes > 0) {
+          return `${hours}h ${minutes}m`;
         }
-        return `${parseInt(hours, 10)}h`;
+        return `${hours}h`;
       }
       
       return durationString;
