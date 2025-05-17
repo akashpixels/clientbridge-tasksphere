@@ -64,30 +64,30 @@ const TaskScheduleInfo = ({
           
           {/* Timeline visualization */}
           <div className="relative flex items-center justify-between mt-6 mb-6 px-2">
-            {/* Start time with icon */}
-            <div className="flex flex-col items-center gap-1 z-10">
-              <Clock className="h-6 w-6 text-blue-500" />
-              <span className="text-xs font-medium">Start</span>
-              <span className="text-xs">{estStart || "N/A"}</span>
-            </div>
-            
-            {/* Timeline line */}
-            <div className="absolute top-3 left-0 right-0 h-0.5 bg-blue-200 z-0" />
-            
-            {/* Duration indicator in the middle */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center z-10 bg-blue-50 px-2">
-              <Clock className="h-5 w-5 text-blue-400" />
-              <span className="text-xs font-medium">Duration</span>
-              <span className="text-xs">{duration || "N/A"}</span>
-            </div>
-            
-            {/* End time with icon */}
-            <div className="flex flex-col items-center gap-1 z-10">
-              <Clock className="h-6 w-6 text-blue-500" />
-              <span className="text-xs font-medium">ETA</span>
-              <span className="text-xs">{estEnd || "N/A"}</span>
-            </div>
-          </div>
+  {/* Start time */}
+  <div className="flex flex-col items-center gap-1 z-10 min-w-[70px]">
+    <Clock className="h-5 w-5 text-blue-500" />
+    <span className="text-[11px] font-medium">Start</span>
+    <span className="text-[11px]">{estStart || "N/A"}</span>
+  </div>
+
+  {/* Timeline line */}
+  <div className="absolute top-4 left-[34px] right-[34px] h-0.5 bg-blue-200 z-0" />
+
+  {/* Duration - only text, smaller, centered */}
+  <div className="flex flex-col items-center z-10 min-w-[70px]">
+    <span className="text-[11px] font-medium mb-0.5">Duration</span>
+    <span className="text-[11px]">{duration || "N/A"}</span>
+  </div>
+
+  {/* ETA */}
+  <div className="flex flex-col items-center gap-1 z-10 min-w-[70px]">
+    <Clock className="h-5 w-5 text-blue-500" />
+    <span className="text-[11px] font-medium">ETA</span>
+    <span className="text-[11px]">{estEnd || "N/A"}</span>
+  </div>
+</div>
+
 
           {/* Original detailed info (optional, can be hidden if the visual timeline is enough) */}
           <div className="space-y-2 mt-2 hidden">
