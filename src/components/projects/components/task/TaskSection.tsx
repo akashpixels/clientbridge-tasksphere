@@ -19,7 +19,7 @@ export const TaskSection: React.FC<TaskSectionProps> = ({
       <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2 px-[6px]">
         {getGroupLabel(title)}
       </h3>
-      <div className="bg-white border rounded-lg overflow-hidden">
+      <div className="bg-card border rounded-lg overflow-hidden">
         <Table>
           <TableBody>
             {taskList.map(task => (
