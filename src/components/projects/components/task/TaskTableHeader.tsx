@@ -4,10 +4,10 @@ import { Table, TableHeader, TableRow, TableHead } from "@/components/ui/table";
 
 export const TaskTableHeader: React.FC = () => {
   return (
-    <div className="bg-white border rounded-lg overflow-hidden mb-6">
+    <div className="bg-muted border rounded-lg overflow-hidden mb-6">
       <Table>
         <TableHeader>
-          <TableRow className="bg-white">
+          <TableRow className="">
             <TableHead className="w-[8%] px-4">Task</TableHead>
             <TableHead className="w-[10%] px-4">Status</TableHead>
             <TableHead className="w-[30%] px-4">Details</TableHead>
