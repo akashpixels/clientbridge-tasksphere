@@ -61,7 +61,7 @@ const BaseProjectLayout = ({
         className="w-full"
         onValueChange={(value) => setCurrentTab(value)}
       >
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-8 mx-40 my-6">
           <TabsList>
             {tabs.map(tab => (
               <TabsTrigger key={tab.id} value={tab.id}>
