@@ -11,29 +11,34 @@ interface TaskScheduleInfoProps {
   error: string | null;
 }
 
-// Helper function to format date-time strings without the year
-const formatDateTimeWithoutYear = (dateTimeString?: string): string => {
-  if (!dateTimeString) {
-    return "N/A";
-  }
+// Helper function to format time (e.g., "4:00 PM")
+const formatTime = (dateTimeString?: string): string => {
+  if (!dateTimeString) return "N/A";
   try {
     const date = new Date(dateTimeString);
-    // Check if the date is valid
-    if (isNaN(date.getTime())) {
-      return dateTimeString; // Return original string if it's not a valid date (e.g., already "N/A")
-    }
-    // Format to "Month Day, HH:MM AM/PM" (e.g., "May 17, 10:30 AM")
-    const options: Intl.DateTimeFormatOptions = {
-      month: 'short',
-      day: 'numeric',
+    if (isNaN(date.getTime())) return dateTimeString; // Return original if not a valid date (e.g. "N/A")
+    return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
-    };
-    return date.toLocaleString('en-US', options);
+    });
   } catch (e) {
-    // Fallback to the original string in case of any unexpected error during parsing/formatting
-    return dateTimeString;
+    return dateTimeString; // Fallback
+  }
+};
+
+// Helper function to format date as "Month Day" (e.g., "May 19")
+const formatDateMonthDay = (dateTimeString?: string): string => {
+  if (!dateTimeString) return "N/A"; // Consistent handling for N/A
+  try {
+    const date = new Date(dateTimeString);
+    if (isNaN(date.getTime())) return dateTimeString; // Return original if not a valid date
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch (e) {
+    return dateTimeString; // Fallback
   }
 };
 
@@ -79,39 +84,37 @@ const TaskScheduleInfo = ({
       return null;
     }
 
-    const formattedEstStart = formatDateTimeWithoutYear(estStart);
-    const formattedEstEnd = formatDateTimeWithoutYear(estEnd);
+    const startTime = formatTime(estStart);
+    const startDate = formatDateMonthDay(estStart);
+    const endTime = formatTime(estEnd);
+    const endDate = formatDateMonthDay(estEnd);
 
     return (
       <Card className="mt-4 border-blue-100 bg-blue-50">
         <CardContent className="pt-4 pb-4">
           <h3 className="text-xs font-semibold mb-2">Estimated Schedule</h3>
-          {/* Timeline visualization */}
           <div className="relative flex flex-col items-center w-full">
-            {/* Duration above */}
             {duration && (
               <div className="mb-1">
                 <span className="text-xs font-semibold bg-blue-50 px-2 rounded">{duration}</span>
               </div>
             )}
-            {/* Aligned Timeline */}
             <div className="flex items-center w-full justify-between px-4" style={{ height: 28 }}>
-              {/* Vertical bar at start */}
               <span className="text-blue-500 text-xl font-bold flex items-center justify-center" style={{height: '20px', lineHeight: '18px'}}>|</span>
-              {/* Horizontal line (mx-2 removed) */}
               <div className="flex-1 h-0.5 bg-blue-200 relative" />
-              {/* Clock icon at end */}
               <Clock className="h-5 w-5 text-blue-500 flex-shrink-0" style={{marginBottom: '2px'}} />
             </div>
-            {/* Start/ETA times below (labels removed, year removed from time) */}
+            {/* Start/ETA times below - MODIFIED for new format and alignment */}
             <div className="flex justify-between w-full mt-2 px-4">
-              <div className="flex flex-col items-center min-w-[70px]">
-                {/* "Start" label removed */}
-                <span className="text-[11px] text-gray-700 text-center whitespace-nowrap">{formattedEstStart}</span>
+              {/* Start Time/Date Block - Left Aligned */}
+              <div className="flex flex-col items-start min-w-[70px] md:min-w-[80px]"> {/* Adjust min-w as needed */}
+                <span className="text-[11px] text-gray-700 whitespace-nowrap">{startTime}</span>
+                <span className="text-[11px] text-gray-700 whitespace-nowrap">{startDate}</span>
               </div>
-              <div className="flex flex-col items-center min-w-[70px]">
-                {/* "ETA" label removed */}
-                <span className="text-[11px] text-gray-700 text-center whitespace-nowrap">{formattedEstEnd}</span>
+              {/* ETA Time/Date Block - Right Aligned */}
+              <div className="flex flex-col items-end min-w-[70px] md:min-w-[80px]"> {/* Adjust min-w as needed */}
+                <span className="text-[11px] text-gray-700 whitespace-nowrap">{endTime}</span>
+                <span className="text-[11px] text-gray-700 whitespace-nowrap">{endDate}</span>
               </div>
             </div>
           </div>
