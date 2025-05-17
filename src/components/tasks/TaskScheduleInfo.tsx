@@ -54,8 +54,7 @@ const TaskScheduleInfo = ({
       return (
         <Card className="mt-4">
           <CardContent className="pt-6">
-           
-         
+           <h3 className="text-xs font-semibold mb-2">Estimated Schedule</h3>
             <div className="space-y-2">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full" />
@@ -93,10 +92,11 @@ const TaskScheduleInfo = ({
     return (
       <Card className="mt-4 border-blue-100 bg-blue-50">
         <CardContent className="py-1">
-          <h3 className="text-xs font-semibold mb-2">Estimated Schedule</h3>
+          {/*  <h3 className="text-xs font-semibold mb-2">Estimated Schedule</h3> */}
+         
           <div className="relative flex flex-col items-center w-full">
             {duration && (
-              <div className="mb-1">
+              <div className="-mb-3">
                 <span className="text-xs font-semibold bg-blue-50 px-2 rounded">{duration}</span>
               </div>
             )}
