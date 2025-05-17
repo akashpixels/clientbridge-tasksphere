@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, AlertCircle } from "lucide-react";
@@ -11,6 +10,32 @@ interface TaskScheduleInfoProps {
   loading: boolean;
   error: string | null;
 }
+
+// Helper function to format date-time strings without the year
+const formatDateTimeWithoutYear = (dateTimeString?: string): string => {
+  if (!dateTimeString) {
+    return "N/A";
+  }
+  try {
+    const date = new Date(dateTimeString);
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return dateTimeString; // Return original string if it's not a valid date (e.g., already "N/A")
+    }
+    // Format to "Month Day, HH:MM AM/PM" (e.g., "May 17, 10:30 AM")
+    const options: Intl.DateTimeFormatOptions = {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    };
+    return date.toLocaleString('en-US', options);
+  } catch (e) {
+    // Fallback to the original string in case of any unexpected error during parsing/formatting
+    return dateTimeString;
+  }
+};
 
 const TaskScheduleInfo = ({
   estStart,
@@ -33,6 +58,7 @@ const TaskScheduleInfo = ({
         </Card>
       );
     }
+
     if (error) {
       return (
         <Card className="mt-4 border-amber-200 bg-amber-50">
@@ -48,9 +74,14 @@ const TaskScheduleInfo = ({
         </Card>
       );
     }
+
     if (!estStart && !estEnd && !duration) {
       return null;
     }
+
+    const formattedEstStart = formatDateTimeWithoutYear(estStart);
+    const formattedEstEnd = formatDateTimeWithoutYear(estEnd);
+
     return (
       <Card className="mt-4 border-blue-100 bg-blue-50">
         <CardContent className="pt-4 pb-4">
@@ -64,23 +95,23 @@ const TaskScheduleInfo = ({
               </div>
             )}
             {/* Aligned Timeline */}
-            <div className="flex items-center w-full justify-between " style={{ height: 28 }}>
+            <div className="flex items-center w-full justify-between px-4" style={{ height: 28 }}>
               {/* Vertical bar at start */}
               <span className="text-blue-500 text-xl font-bold flex items-center justify-center" style={{height: '20px', lineHeight: '18px'}}>|</span>
-              {/* Horizontal line */}
-              <div className="flex-1 h-0.5 bg-blue-200  relative" />
+              {/* Horizontal line (mx-2 removed) */}
+              <div className="flex-1 h-0.5 bg-blue-200 relative" />
               {/* Clock icon at end */}
               <Clock className="h-5 w-5 text-blue-500 flex-shrink-0" style={{marginBottom: '2px'}} />
             </div>
-            {/* Start/ETA below */}
+            {/* Start/ETA times below (labels removed, year removed from time) */}
             <div className="flex justify-between w-full mt-2 px-4">
               <div className="flex flex-col items-center min-w-[70px]">
-                <span className="text-[11px] font-medium">Start</span>
-                <span className="text-[11px] text-gray-700 text-center whitespace-nowrap">{estStart || "N/A"}</span>
+                {/* "Start" label removed */}
+                <span className="text-[11px] text-gray-700 text-center whitespace-nowrap">{formattedEstStart}</span>
               </div>
               <div className="flex flex-col items-center min-w-[70px]">
-                <span className="text-[11px] font-medium">ETA</span>
-                <span className="text-[11px] text-gray-700 text-center whitespace-nowrap">{estEnd || "N/A"}</span>
+                {/* "ETA" label removed */}
+                <span className="text-[11px] text-gray-700 text-center whitespace-nowrap">{formattedEstEnd}</span>
               </div>
             </div>
           </div>
