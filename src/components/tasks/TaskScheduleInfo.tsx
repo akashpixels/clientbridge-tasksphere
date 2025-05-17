@@ -65,28 +65,38 @@ const TaskScheduleInfo = ({
           {/* Timeline visualization */}
           <div className="relative flex items-center justify-between mt-6 mb-6 px-2">
   {/* Start time */}
-  <div className="flex flex-col items-center gap-1 z-10 min-w-[70px]">
-    <Clock className="h-5 w-5 text-blue-500" />
-    <span className="text-[11px] font-medium">Start</span>
-    <span className="text-[11px]">{estStart || "N/A"}</span>
+ <div className="relative flex flex-col items-center">
+  {/* Top: Duration above the line */}
+  <div className="flex items-center justify-between w-full" style={{ position: "relative" }}>
+    {/* Vertical line at start */}
+    <div className="flex flex-col items-center" style={{ width: "30px" }}>
+      <span className="text-blue-500 text-xl font-bold" style={{ lineHeight: "18px" }}>|</span>
+    </div>
+    {/* Duration value above line, centered */}
+    <div className="absolute left-1/2 transform -translate-x-1/2 -top-4 z-10">
+      <span className="text-xs font-medium bg-blue-50 px-1 rounded">{duration || "N/A"}</span>
+    </div>
+    {/* Horizontal line from after vertical to before clock */}
+    <div className="flex-1 h-0.5 bg-blue-200" style={{ marginTop: "13px" }} />
+    {/* Clock icon at end */}
+    <div className="flex flex-col items-center" style={{ width: "30px" }}>
+      <Clock className="h-5 w-5 text-blue-500" />
+    </div>
   </div>
-
-  {/* Timeline line */}
-  <div className="absolute top-4 left-[34px] right-[34px] h-0.5 bg-blue-200 z-0" />
-
-  {/* Duration - only text, smaller, centered */}
-  <div className="flex flex-col items-center z-10 min-w-[70px]">
-    <span className="text-[11px] font-medium mb-0.5">Duration</span>
-    <span className="text-[11px]">{duration || "N/A"}</span>
-  </div>
-
-  {/* ETA */}
-  <div className="flex flex-col items-center gap-1 z-10 min-w-[70px]">
-    <Clock className="h-5 w-5 text-blue-500" />
-    <span className="text-[11px] font-medium">ETA</span>
-    <span className="text-[11px]">{estEnd || "N/A"}</span>
+  {/* Labels below the line */}
+  <div className="flex justify-between w-full mt-2 px-2">
+    <div className="flex flex-col items-center min-w-[70px]">
+      <span className="text-[11px] font-medium">Start</span>
+      <span className="text-[11px]">{estStart || "N/A"}</span>
+    </div>
+    <div className="flex-1" />
+    <div className="flex flex-col items-center min-w-[70px]">
+      <span className="text-[11px] font-medium">ETA</span>
+      <span className="text-[11px]">{estEnd || "N/A"}</span>
+    </div>
   </div>
 </div>
+
 
 
           {/* Original detailed info (optional, can be hidden if the visual timeline is enough) */}
