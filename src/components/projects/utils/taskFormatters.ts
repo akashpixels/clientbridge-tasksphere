@@ -193,7 +193,7 @@ export const getGroupLabel = (groupId: string): string => {
 /**
  * Format a date in a consistent way
  */
-export const formatTaskDate = (date: string | null | undefined, format: string): string => {
+export const formatTaskDate = (date: string | null | undefined, formatString: string): string => {
   if (!date) return "Not set";
-  return date ? format(new Date(date), format) : "Not set";
+  return date ? format(new Date(date), formatString) : "Not set";
 };

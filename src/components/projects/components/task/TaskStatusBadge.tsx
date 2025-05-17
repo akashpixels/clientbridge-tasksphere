@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { getStatusColor } from '../../utils/taskFormatters';
+import { getStatusColor, formatInterval } from '../../utils/taskFormatters';
+import { format } from 'date-fns';
 
 interface TaskStatusBadgeProps {
   status: {
@@ -32,9 +33,6 @@ export const TaskStatusBadge: React.FC<TaskStatusBadgeProps> = ({
     name: null,
     color_hex: null
   }, is_awaiting_input, is_onhold, priority_level_id);
-  
-  const { formatInterval } = require('../../utils/taskFormatters');
-  const { format } = require('date-fns');
 
   return (
     <div className="flex flex-col items-start gap-1">
