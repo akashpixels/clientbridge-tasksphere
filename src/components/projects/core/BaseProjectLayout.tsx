@@ -54,9 +54,7 @@ const BaseProjectLayout = ({
 
   return (
     <div className="container mx-auto">
-      <div className="mb-8">
-        {headerContent}
-      </div>
+    
 
       <Tabs 
         defaultValue={defaultTab} 
@@ -73,7 +71,11 @@ const BaseProjectLayout = ({
           </TabsList>
           <TabActionButton />
         </div>
-
+        
+  <div className="mb-8">
+        {headerContent}
+      </div>
+        
         {tabs.map(tab => (
           <TabsContent key={tab.id} value={tab.id}>
             {tab.content}
