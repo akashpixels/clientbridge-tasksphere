@@ -99,13 +99,13 @@ const TaskScheduleInfo = ({
                 <span className="text-xs font-semibold bg-blue-50 px-2 rounded">{duration}</span>
               </div>
             )}
-            <div className="flex items-center w-full justify-between px-4" style={{ height: 28 }}>
-              <span className="text-blue-500 text-xl font-bold flex items-center justify-center" style={{height: '20px', lineHeight: '18px'}}>|</span>
+            <div className="flex items-center w-full justify-between" style={{ height: 28 }}>
+              <span className="text-blue-500 text-xl  flex items-center justify-center" style={{height: '20px', lineHeight: '18px'}}>|</span>
               <div className="flex-1 h-0.5 bg-blue-200 relative" />
               <Clock className="h-5 w-5 text-blue-500 flex-shrink-0" style={{marginBottom: '2px'}} />
             </div>
             {/* Start/ETA times below - MODIFIED for new format and alignment */}
-            <div className="flex justify-between w-full mt-2 px-4">
+            <div className="flex justify-between w-full mt-2 ">
               {/* Start Time/Date Block - Left Aligned */}
               <div className="flex flex-col items-start min-w-[70px] md:min-w-[80px]"> {/* Adjust min-w as needed */}
                 <span className="text-[11px] text-gray-700 whitespace-nowrap">{startTime}</span>
