@@ -72,7 +72,7 @@ const BaseProjectLayout = ({
           <TabActionButton />
         </div>
         
-  <div className="mb-8">
+  <div className="mb-8 container">
         {headerContent}
       </div>
         
