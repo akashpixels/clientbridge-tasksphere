@@ -4,7 +4,7 @@ import { Table, TableHeader, TableRow, TableHead } from "@/components/ui/table";
 
 export const TaskTableHeader: React.FC = () => {
   return (
-    <div className="  transition-colors border rounded-lg overflow-hidden mb-6">
+    <div className="   rounded-lg overflow-hidden mb-6">
       <Table>
         <TableHeader>
           <TableRow className="">
