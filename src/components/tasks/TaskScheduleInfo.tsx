@@ -64,7 +64,7 @@ const TaskScheduleInfo = ({
               </div>
             )}
             {/* Aligned Timeline */}
-            <div className="flex items-center w-full justify-between px-4" style={{ height: 28 }}>
+            <div className="flex items-center w-full justify-between " style={{ height: 28 }}>
               {/* Vertical bar at start */}
               <span className="text-blue-500 text-xl font-bold flex items-center justify-center" style={{height: '20px', lineHeight: '18px'}}>|</span>
               {/* Horizontal line */}
