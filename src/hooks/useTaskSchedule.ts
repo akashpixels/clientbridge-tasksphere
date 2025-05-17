@@ -147,9 +147,13 @@ export function useTaskSchedule() {
         return `${hours}h`;
       }
       
-      // If it's a simpler format
+      // If it's a simpler format with colon like "2:30"
       if (durationString.includes(':')) {
-        const [hours, minutes] = durationString.split(':').map(part => parseInt(part, 10));
+        const parts = durationString.split(':');
+        // Ensure we parse the parts as integers
+        const hours = parseInt(parts[0], 10);
+        const minutes = parts.length > 1 ? parseInt(parts[1], 10) : 0;
+        
         if (minutes > 0) {
           return `${hours}h ${minutes}m`;
         }
