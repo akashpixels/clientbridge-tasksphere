@@ -68,7 +68,7 @@ const TaskScheduleInfo = ({
               {/* Vertical bar at start */}
               <span className="text-blue-500 text-xl font-bold flex items-center justify-center" style={{height: '20px', lineHeight: '18px'}}>|</span>
               {/* Horizontal line */}
-              <div className="flex-1 h-0.5 bg-blue-200 mx-2 relative" />
+              <div className="flex-1 h-0.5 bg-blue-200  relative" />
               {/* Clock icon at end */}
               <Clock className="h-5 w-5 text-blue-500 flex-shrink-0" style={{marginBottom: '2px'}} />
             </div>
