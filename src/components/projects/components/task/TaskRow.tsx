@@ -34,7 +34,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({
   return (
     <TableRow 
       key={task.id} 
-      className={`cursor-pointer ${isSelected ? 'bg-white' : 'hover:bg-muted/30'}`} 
+      className={`cursor-pointer ${isSelected ? 'bg-white' : 'hover:bg-white/30'}`} 
       onClick={handleRowClick}
     >
       <TableCell className="w-[8%] px-4">
