@@ -106,7 +106,23 @@ export function useTaskSchedule() {
     if (!dateString) return 'Not available';
     
     try {
-      return format(new Date(dateString), 'MMM d, yyyy h:mm a');
+      // Format like "10am, May 28" without year
+      const date = new Date(dateString);
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+      
+      // Format time (10am, 2:30pm)
+      let timeStr = hours % 12 || 12; // Convert 0 to 12 for 12am
+      if (minutes > 0) {
+        timeStr = `${timeStr}:${minutes.toString().padStart(2, '0')}`;
+      }
+      timeStr += hours >= 12 ? 'pm' : 'am';
+      
+      // Format date (May 28)
+      const monthName = date.toLocaleString('en-US', { month: 'short' });
+      const day = date.getDate();
+      
+      return `${timeStr}, ${monthName} ${day}`;
     } catch (error) {
       console.error('Error formatting date:', error);
       return 'Invalid date';

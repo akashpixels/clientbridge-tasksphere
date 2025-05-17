@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -391,6 +392,17 @@ const TaskForm = ({ projectId, onClose }: TaskFormProps) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
           <ScrollArea className="flex-1">
+            {/* TaskScheduleInfo moved to the top of the form */}
+            <div className="p-4">
+              <TaskScheduleInfo
+                estStart={scheduleData ? formatScheduleDate(scheduleData.est_start) : undefined}
+                estEnd={scheduleData ? formatScheduleDate(scheduleData.est_end) : undefined}
+                duration={scheduleData ? formatDuration(scheduleData.calculated_est_duration) : undefined}
+                loading={scheduleLoading}
+                error={scheduleError}
+              />
+            </div>
+            
             <div className="space-y-5 p-4">
               <FormField
                 control={form.control}
