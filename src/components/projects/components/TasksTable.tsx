@@ -413,10 +413,10 @@ const TasksTable = ({
     </h3>;
 
   const RegularHeader = () => (
-    <div className="bg-white border rounded-lg overflow-hidden mb-6">
+    <div className="bg-white border-t border-l border-r rounded-lg overflow-hidden mb-6">
       <Table>
         <TableHeader>
-          <TableRow className="">
+          <TableRow className="bg-white">
             <TableHead className="w-[8%] px-4">Task Code</TableHead>
             <TableHead className="w-[10%] px-4">Status</TableHead>
             <TableHead className="w-[30%] px-4">Details</TableHead>
