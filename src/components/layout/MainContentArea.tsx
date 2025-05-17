@@ -43,7 +43,7 @@ const MainContentArea = ({ isLeftSidebarOpen }: MainContentAreaProps) => {
       )}
     >
       <ScrollArea className="h-screen w-full">
-        <div className="p-8">
+        <div className="">
           <Outlet />
         </div>
       </ScrollArea>
