@@ -18,9 +18,7 @@ const TaskScheduleInfo = ({
   loading,
   error,
 }: TaskScheduleInfoProps) => {
-  // Memoize content for performance
   const content = useMemo(() => {
-    // Loading state
     if (loading && !estStart && !estEnd && !duration) {
       return (
         <Card className="mt-4">
@@ -34,8 +32,6 @@ const TaskScheduleInfo = ({
         </Card>
       );
     }
-
-    // Error state
     if (error) {
       return (
         <Card className="mt-4 border-amber-200 bg-amber-50">
@@ -51,57 +47,39 @@ const TaskScheduleInfo = ({
         </Card>
       );
     }
-
-    // No data
     if (!estStart && !estEnd && !duration) {
       return null;
     }
-
-    // Main content
     return (
       <Card className="mt-4 border-blue-100 bg-blue-50">
         <CardContent className="pt-4 pb-4">
           <h3 className="text-xs font-semibold mb-2">Estimated Schedule</h3>
-
           {/* Timeline visualization */}
           <div className="relative flex flex-col items-center w-full">
-            {/* Timeline bar with vertical, horizontal, clock */}
-            <div className="flex items-center justify-between w-full relative" style={{ minHeight: 40 }}>
+            {/* Duration above */}
+            {duration && (
+              <div className="mb-1">
+                <span className="text-xs font-semibold bg-blue-50 px-2 rounded">{duration}</span>
+              </div>
+            )}
+            {/* Aligned Timeline */}
+            <div className="flex items-center w-full justify-between px-4" style={{ height: 28 }}>
               {/* Vertical bar at start */}
-              <div className="flex flex-col items-center" style={{ width: "26px" }}>
-                <span className="text-blue-500 text-xl font-bold" style={{ lineHeight: "20px" }}>|</span>
-              </div>
-              {/* Duration above line, centered */}
-              {duration && (
-                <div
-                  className="absolute left-1/2 transform -translate-x-1/2 -top-4 z-10"
-                  style={{ minWidth: 32 }}
-                >
-                  <span className="text-xs font-semibold bg-blue-50 px-2 rounded">{duration}</span>
-                </div>
-              )}
+              <span className="text-blue-500 text-xl font-bold flex items-center justify-center" style={{height: '20px', lineHeight: '18px'}}>|</span>
               {/* Horizontal line */}
-              <div className="flex-1 h-0.5 bg-blue-200" style={{ marginTop: "16px" }} />
+              <div className="flex-1 h-0.5 bg-blue-200 mx-2 relative" />
               {/* Clock icon at end */}
-              <div className="flex flex-col items-center" style={{ width: "26px" }}>
-                <Clock className="h-5 w-5 text-blue-500" />
-              </div>
+              <Clock className="h-5 w-5 text-blue-500 flex-shrink-0" style={{marginBottom: '2px'}} />
             </div>
-
-            {/* Labels and time values below */}
-            <div className="flex justify-between w-full mt-2 px-2">
+            {/* Start/ETA below */}
+            <div className="flex justify-between w-full mt-2 px-4">
               <div className="flex flex-col items-center min-w-[70px]">
                 <span className="text-[11px] font-medium">Start</span>
-                <span className="text-[11px] text-gray-700 text-center whitespace-nowrap" style={{ maxWidth: 90 }}>
-                  {estStart || "N/A"}
-                </span>
+                <span className="text-[11px] text-gray-700 text-center whitespace-nowrap">{estStart || "N/A"}</span>
               </div>
-              <div className="flex-1" />
               <div className="flex flex-col items-center min-w-[70px]">
                 <span className="text-[11px] font-medium">ETA</span>
-                <span className="text-[11px] text-gray-700 text-center whitespace-nowrap" style={{ maxWidth: 90 }}>
-                  {estEnd || "N/A"}
-                </span>
+                <span className="text-[11px] text-gray-700 text-center whitespace-nowrap">{estEnd || "N/A"}</span>
               </div>
             </div>
           </div>
