@@ -90,7 +90,7 @@ const TaskScheduleInfo = ({
     const endDate = formatDateMonthDay(estEnd);
 
     return (
-      <Card className="mt-4 border-blue-100 bg-blue-50">
+      <Card className="mt-2 border-blue-100 bg-blue-50">
         <CardContent className="py-1">
           {/*  <h3 className="text-xs font-semibold mb-2">Estimated Schedule</h3> */}
          
