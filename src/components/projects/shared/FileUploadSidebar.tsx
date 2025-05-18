@@ -160,127 +160,130 @@ export const FileUploadSidebar = () => {
     }
   };
   
+  // Add this function to close the right sidebar
+  const closeRightSidebar = () => {
+    setRightSidebarContent(null);
+  };
+  
   return (
-    <div className=" h-full flex flex-col">
-      <div className=" flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
-        <h2 className="text-sm text-gray-500 ">Upload File</h2>
+    <div className="h-full flex flex-col">
+      <div className="flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
+        <h2 className="text-sm text-gray-500">Upload File</h2>
         <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
-  <X size={18} />
-</Button>
-
+          <X size={18} />
+        </Button>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4 flex-1 overflow-y-auto">
 
-          <div className=" h-full w-full rounded-[inherit] hide-scrollbar">
-           <div className=" space-y-5 p-4">
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          className="hidden"
-        />
-        
-        <div 
-          onClick={triggerFileInput}
-          className={`
-            border-2 border-dashed rounded-lg p-6 text-center cursor-pointer
-            ${formData.file ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-primary'}
-          `}
-        >
-          {formData.file ? (
-            <div className="space-y-2">
-              <div className="text-green-600 flex justify-center">
-                <UploadCloud className="h-10 w-10" />
-              </div>
-              <p className="font-medium">Selected File:</p>
-              <p className="truncate text-sm">{formData.file.name}</p>
-              <p className="text-xs text-gray-500">
-                {(formData.file.size / 1024 / 1024).toFixed(2)} MB
-              </p>
-              <Button 
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setFormData(prev => ({ ...prev, file: null }));
-                }}
-              >
-                Select a different file
-              </Button>
+        <div className="h-full w-full rounded-[inherit] hide-scrollbar">
+          <div className="space-y-5 p-4">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            
+            <div 
+              onClick={triggerFileInput}
+              className={`
+                border-2 border-dashed rounded-lg p-6 text-center cursor-pointer
+                ${formData.file ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-primary'}
+              `}
+            >
+              {formData.file ? (
+                <div className="space-y-2">
+                  <div className="text-green-600 flex justify-center">
+                    <UploadCloud className="h-10 w-10" />
+                  </div>
+                  <p className="font-medium">Selected File:</p>
+                  <p className="truncate text-sm">{formData.file.name}</p>
+                  <p className="text-xs text-gray-500">
+                    {(formData.file.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFormData(prev => ({ ...prev, file: null }));
+                    }}
+                  >
+                    Select a different file
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="text-gray-400 flex justify-center">
+                    <UploadCloud className="h-10 w-10" />
+                  </div>
+                  <p className="font-medium">Click to select a file</p>
+                  <p className="text-xs text-gray-500">
+                    or drag and drop (max: 200MB)
+                  </p>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="text-gray-400 flex justify-center">
-                <UploadCloud className="h-10 w-10" />
-              </div>
-              <p className="font-medium">Click to select a file</p>
-              <p className="text-xs text-gray-500">
-                or drag and drop (max: 200MB)
-              </p>
-            </div>
-          )}
-        </div>
 
-        {uploadProgress > 0 && (
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div
-              className="bg-primary h-2.5 rounded-full"
-              style={{ width: `${uploadProgress}%` }}
-            ></div>
-          </div>
-        )}
-        
-        <div>
-          <Label htmlFor="fileType">File Type</Label>
-          <Select value={formData.fileType} onValueChange={handleFileTypeChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select file type" />
-            </SelectTrigger>
-            <SelectContent>
-              {fileTypes.map(type => (
-                <SelectItem key={type.id} value={String(type.id)}>
-                  {type.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div>
-          <Label htmlFor="description">Description (optional)</Label>
-          <Textarea
-            id="description"
-            name="description"
-            placeholder="Brief description of this file"
-            value={formData.description}
-            onChange={handleTextChange}
-            rows={3}
-          />
-        </div>
-             </div>
+            {uploadProgress > 0 && (
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div
+                  className="bg-primary h-2.5 rounded-full"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
+            )}
+            
+            <div>
+              <Label htmlFor="fileType">File Type</Label>
+              <Select value={formData.fileType} onValueChange={handleFileTypeChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select file type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {fileTypes.map(type => (
+                    <SelectItem key={type.id} value={String(type.id)}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+            
+            <div>
+              <Label htmlFor="description">Description (optional)</Label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Brief description of this file"
+                value={formData.description}
+                onChange={handleTextChange}
+                rows={3}
+              />
+            </div>
+          </div>
+        </div>
         
         <div className="border-t p-4 bg-background sticky bottom-0 z-10">
-         <Button 
-  type="submit" 
-  disabled={isLoading || !formData.file}
-  className="flex items-center gap-2 w-full"  // Add w-full here
->
-  {isLoading ? (
-    <>
-      <Loader2 className="h-4 w-4 animate-spin" /> 
-      Uploading...
-    </>
-  ) : (
-    <>
-      <UploadCloud className="h-4 w-4" /> 
-      Upload File
-    </>
-  )}
-</Button>
-
+          <Button 
+            type="submit" 
+            disabled={isLoading || !formData.file}
+            className="flex items-center gap-2 w-full"  // Add w-full here
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> 
+                Uploading...
+              </>
+            ) : (
+              <>
+                <UploadCloud className="h-4 w-4" /> 
+                Upload File
+              </>
+            )}
+          </Button>
         </div>
       </form>
     </div>
