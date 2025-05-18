@@ -1,9 +1,9 @@
 
 import { cn } from '@/lib/utils';
 import { ChevronLeft } from 'lucide-react';
-import LeftSidebarHeader from './left-sidebar/LeftSidebarHeader';
-import LeftSidebarBody from './left-sidebar/LeftSidebarBody';
-import LeftSidebarFooter from './left-sidebar/LeftSidebarFooter';
+import SidebarHeader from './left-sidebar/SidebarHeader';
+import SidebarNavigation from './left-sidebar/SidebarNavigation';
+import SidebarFooter from './left-sidebar/SidebarFooter';
 
 interface LeftSidebarProps {
   isOpen: boolean;
@@ -29,11 +29,11 @@ const LeftSidebar = ({ isOpen, onToggle }: LeftSidebarProps) => {
         )} />
       </button>
       <div className="h-full flex flex-col px-4 py-6">
-        <LeftSidebarHeader isOpen={isOpen} />
+        <SidebarHeader isOpen={isOpen} />
         <div className="flex-1 overflow-y-auto">
-          <LeftSidebarBody isOpen={isOpen} />
+          <SidebarNavigation isOpen={isOpen} />
         </div>
-        <LeftSidebarFooter isOpen={isOpen} />
+        <SidebarFooter isOpen={isOpen} />
       </div>
     </aside>
   );
