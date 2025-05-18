@@ -32,6 +32,10 @@ export const CredentialCreationSidebar = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
+  const closeRightSidebar = () => {
+    setRightSidebarContent(null);
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
