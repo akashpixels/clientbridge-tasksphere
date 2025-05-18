@@ -313,9 +313,11 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3 border-b">
-        <h3 className="font-medium">{task?.task_code || taskCode} Comments</h3>
-        <p className="text-sm text-gray-500 mt-1 truncate">{task?.details}</p>
+      <div className="flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
+        <h3 className="text-sm text-gray-500">{task?.task_code || taskCode} Comments</h3>
+    <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
+          <X size={18} />
+        </Button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
