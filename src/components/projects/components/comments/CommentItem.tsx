@@ -71,7 +71,7 @@ const CommentItem = ({ comment, onFileClick }: CommentItemProps) => {
           {/* Name and Timestamp */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500">{userName}</span>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-300/50">
               {format(new Date(comment.created_at), 'MMM d, h:mmaaa')}
             </span>
           </div>
