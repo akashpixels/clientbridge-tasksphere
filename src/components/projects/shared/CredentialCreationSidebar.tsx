@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -112,9 +111,9 @@ export const CredentialCreationSidebar = () => {
   return (
     <div className="h-full flex flex-col">
      
-      <div className=" flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
-        <h2 className="text-sm text-gray-500 ">Add Credential</h2>
-         <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
+      <div className="flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
+        <h2 className="text-sm text-gray-500">Add Credential</h2>
+        <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
           <X size={18} />
         </Button>
       </div>
@@ -192,7 +191,6 @@ export const CredentialCreationSidebar = () => {
           />
         </div>
 
-        
         <div className="border-t p-4 bg-background sticky bottom-0 z-10">
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Adding..." : "Add Credential"}
