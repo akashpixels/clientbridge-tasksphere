@@ -268,23 +268,24 @@ export const FileUploadSidebar = () => {
             </div>
         
         <div className="border-t p-4 bg-background sticky bottom-0 z-10">
-          <Button 
-            type="submit" 
-            disabled={isLoading || !formData.file}
-            className="flex items-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" /> 
-                Uploading...
-              </>
-            ) : (
-              <>
-                <UploadCloud className="h-4 w-4" /> 
-                Upload File
-              </>
-            )}
-          </Button>
+         <Button 
+  type="submit" 
+  disabled={isLoading || !formData.file}
+  className="flex items-center gap-2 w-full"  // Add w-full here
+>
+  {isLoading ? (
+    <>
+      <Loader2 className="h-4 w-4 animate-spin" /> 
+      Uploading...
+    </>
+  ) : (
+    <>
+      <UploadCloud className="h-4 w-4" /> 
+      Upload File
+    </>
+  )}
+</Button>
+
         </div>
       </form>
     </div>
