@@ -44,7 +44,7 @@ const CommentItem = ({ comment, onFileClick }: CommentItemProps) => {
   ));
 
   return (
-    <div className={`p-3 rounded-lg ${comment.is_input_request ? 'bg-muted border' : ''} ${comment.is_input_response ? 'bg-muted border' : ''}`}>
+    <div className={`p-3 rounded-lg ${comment.is_input_request ? ' border' : ''} ${comment.is_input_response ? ' border' : ''}`}>
       
       {/* New Row for Badges - Now Above Avatar */}
       {(comment.is_input_request || comment.is_input_response) && (
