@@ -110,14 +110,8 @@ export const CredentialCreationSidebar = () => {
      
       <div className=" flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
         <h2 className="text-sm text-gray-500 ">Add Credential</h2>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => setRightSidebarContent(null)}
-          className="h-8 w-8 p-0"
-        >
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
+         <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
+          <X size={18} />
         </Button>
       </div>
       

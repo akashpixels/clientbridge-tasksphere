@@ -161,9 +161,9 @@ export const FileUploadSidebar = () => {
   };
   
   return (
-    <div className=" h-full flex flex-col">
-      <div className="flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
-        <h2 className="text-sm text-gray-500">Upload File</h2>
+    <div className="p-4 h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-medium">Upload File</h2>
         <Button 
           variant="ghost" 
           size="sm" 
