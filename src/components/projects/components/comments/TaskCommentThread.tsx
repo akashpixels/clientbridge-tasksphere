@@ -349,7 +349,7 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
           className="resize-none"
         />
         
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center space-x-2">
           <AttachmentHandler
             selectedFiles={selectedFiles}
             setSelectedFiles={setSelectedFiles}
