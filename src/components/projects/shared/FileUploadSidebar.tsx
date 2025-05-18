@@ -176,6 +176,9 @@ export const FileUploadSidebar = () => {
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4 flex-1 overflow-y-auto">
+
+          <div className=" h-full w-full rounded-[inherit] hide-scrollbar">
+           <div className=" space-y-5 p-4">
         <input
           type="file"
           ref={fileInputRef}
@@ -261,8 +264,10 @@ export const FileUploadSidebar = () => {
             rows={3}
           />
         </div>
+             </div>
+            </div>
         
-        <div className="flex flex-col pt-4">
+        <div className="border-t p-4 bg-background sticky bottom-0 z-10">
           <Button 
             type="submit" 
             disabled={isLoading || !formData.file}
