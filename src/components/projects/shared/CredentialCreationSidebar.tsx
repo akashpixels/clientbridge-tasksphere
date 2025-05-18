@@ -108,21 +108,18 @@ export const CredentialCreationSidebar = () => {
   return (
     <div className="h-full flex flex-col">
      
-     <div className="flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
-  <h2 className="text-sm text-gray-500 ">
-    {taskCreated 
-      ? "Task Created Successfully" 
-      : activeTaskCount > 0 
-        ? `${activeTaskCount.toString().padStart(2, '0')} Task${activeTaskCount > 1 ? 's' : ''} ahead` 
-        : 'No active tasks'
-    }
-  </h2>
-  <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
-    <X size={18} />
-    <span className="sr-only">Close</span>
-  </Button>
-</div>
-
+      <div className=" flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
+        <h2 className="text-sm text-gray-500 ">Add Credential</h2>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => setRightSidebarContent(null)}
+          className="h-8 w-8 p-0"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </Button>
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-4 flex-1 overflow-y-auto">
         <div>
