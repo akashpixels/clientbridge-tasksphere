@@ -104,11 +104,12 @@ export const CredentialCreationSidebar = () => {
       setIsLoading(false);
     }
   };
-  
+ 
   return (
-    <div className="p-4 h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-medium">Add Project Credential</h2>
+    <div className="h-full flex flex-col">
+     
+      <div className=" flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
+        <h2 className="text-xl font-medium">Add Credential</h2>
         <Button 
           variant="ghost" 
           size="sm" 
