@@ -193,7 +193,7 @@ export const CredentialCreationSidebar = () => {
         </div>
 
         
-        <div className="flex flex-col pt-4">
+        <div className="border-t p-4 bg-background sticky bottom-0 z-10"">
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Adding..." : "Add Credential"}
           </Button>
