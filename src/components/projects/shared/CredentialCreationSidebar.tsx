@@ -121,6 +121,7 @@ export const CredentialCreationSidebar = () => {
       <form onSubmit={handleSubmit} className="space-y-4 flex-1 overflow-y-auto">
         
         <div className=" h-full w-full rounded-[inherit] hide-scrollbar">
+           <div className=" space-y-5 p-4">
         <div>
           <Label htmlFor="type">Credential Type</Label>
           <Input
@@ -193,6 +194,7 @@ export const CredentialCreationSidebar = () => {
           />
         </div>
           </div>
+             </div>
 
         <div className="border-t p-4 bg-background sticky bottom-0 z-10">
           <Button type="submit" disabled={isLoading}>
