@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, PaperclipIcon, Send } from "lucide-react";
+import { Loader2, PaperclipIcon, Send, X } from "lucide-react";
 import { format } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
 import { getInitials } from '@/lib/utils';
@@ -15,6 +15,7 @@ import PreviewDialog from './PreviewDialog';
 import CommentInputRequest from './CommentInputRequest';
 import AttachmentHandler from './AttachmentHandler';
 import FilePreview from './FilePreview';
+import { useLayout } from '@/context/layout';
 
 interface TaskCommentThreadProps {
   taskId: string;
@@ -51,6 +52,7 @@ interface Task {
 const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode }) => {
   const { toast } = useToast();
   const { session } = useAuth();
+  const { closeRightSidebar } = useLayout();
   const [message, setMessage] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -315,7 +317,7 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center px-4 border-b sticky top-0 z-20 py-2 bg-background">
         <h3 className="text-sm text-gray-500">{task?.task_code || taskCode} Comments</h3>
-    <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
+        <Button variant="ghost" size="icon" onClick={closeRightSidebar}>
           <X size={18} />
         </Button>
       </div>
