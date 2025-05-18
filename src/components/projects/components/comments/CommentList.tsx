@@ -28,17 +28,16 @@ interface CommentListProps {
 
 const CommentList = ({ comments, onFileClick }: CommentListProps) => {
   return (
-    <ScrollArea className="flex-1 p-4 space-y-2">
+    <ScrollArea className="flex-1 p-4 space-y-5 hide-scrollbar">
       {comments?.map((comment, index) => (
-        <div key={comment.id} className="flex flex-col">
-
+        <div key={comment.id}>
           {/* Add a subtle divider when the user changes or after 10 minutes */}
           {index > 0 && (
             (comment.user_profiles?.first_name !== comments[index - 1]?.user_profiles?.first_name || 
              comment.user?.first_name !== comments[index - 1]?.user?.first_name ||
              new Date(comment.created_at).getTime() - new Date(comments[index - 1].created_at).getTime() > 600000)
           ) && (
-            <div className="border-t border-gray-300 my-2 opacity-50"></div>
+            <div className="border-t border-gray-300 my-3 opacity-50"></div>
           )}
 
           {/* Render the comment item */}

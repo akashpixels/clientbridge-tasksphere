@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/auth';
@@ -322,53 +321,52 @@ const TaskCommentThread: React.FC<TaskCommentThreadProps> = ({ taskId, taskCode 
         </Button>
       </div>
 
-      <div className="h-full w-full rounded-[inherit] hide-scrollbar">
+      <div className="h-full w-full rounded-[inherit]">
         <CommentList 
           comments={comments} 
           onFileClick={handleFileClick} 
         />
       </div>
 
-      <div className="p-4 border-t">
-        <div className="flex flex-col space-y-2">
-          <CommentInputRequest 
-            isInputResponse={!!pendingInputRequest}
-            isRequestingInput={isRequestingInput}
-            setIsRequestingInput={setIsRequestingInput}
-          />
+      <div className="p-4 border-t space-y-3">
+        <CommentInputRequest 
+          isInputResponse={!!pendingInputRequest}
+          isRequestingInput={isRequestingInput}
+          setIsRequestingInput={setIsRequestingInput}
+        />
           
-          <Textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder={
-              pendingInputRequest 
-                ? "Type your response to the input request..." 
-                : "Type your comment here..."
-            }
-            rows={isLargeTextarea ? 4 : 1}
-            onFocus={() => setIsLargeTextarea(true)}
-            onBlur={() => message.length === 0 && setIsLargeTextarea(false)}
-            className="resize-none"
+        <Textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder={
+            pendingInputRequest 
+              ? "Type your response to the input request..." 
+              : "Type your comment here..."
+          }
+          rows={isLargeTextarea ? 4 : 1}
+          onFocus={() => setIsLargeTextarea(true)}
+          onBlur={() => message.length === 0 && setIsLargeTextarea(false)}
+          className="resize-none"
+        />
+        
+        <div className="flex justify-between items-center">
+          <AttachmentHandler
+            selectedFiles={selectedFiles}
+            setSelectedFiles={setSelectedFiles}
           />
-          <div className="flex justify-between items-center">
-            <AttachmentHandler
-              selectedFiles={selectedFiles}
-              setSelectedFiles={setSelectedFiles}
-            />
-            <Button 
-              onClick={handleSendMessage} 
-              size="sm" 
-              className="flex items-center gap-1"
-              disabled={sendingMessage || (message.trim() === '' && selectedFiles.length === 0)}
-            >
-              {sendingMessage ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />} 
-              {pendingInputRequest 
-                ? "Submit Input"
-                : isRequestingInput 
-                  ? "Request Input" 
-                  : "Send"}
-            </Button>
-          </div>
+          <Button 
+            onClick={handleSendMessage} 
+            size="sm" 
+            className="flex items-center gap-1"
+            disabled={sendingMessage || (message.trim() === '' && selectedFiles.length === 0)}
+          >
+            {sendingMessage ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />} 
+            {pendingInputRequest 
+              ? "Submit Input"
+              : isRequestingInput 
+                ? "Request Input" 
+                : "Send"}
+          </Button>
         </div>
       </div>
       
