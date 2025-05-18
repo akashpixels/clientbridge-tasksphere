@@ -197,9 +197,10 @@ export const CredentialCreationSidebar = () => {
              </div>
 
         <div className="border-t p-4 bg-background sticky bottom-0 z-10">
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Adding..." : "Add Credential"}
-          </Button>
+          <Button type="submit" disabled={isLoading} className="w-full">
+  {isLoading ? "Adding..." : "Add Credential"}
+</Button>
+
         </div>
       </form>
     </div>
