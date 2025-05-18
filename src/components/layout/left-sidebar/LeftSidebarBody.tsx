@@ -9,7 +9,7 @@ interface NavItem {
   href: string;
 }
 
-interface SidebarNavigationProps {
+interface LeftSidebarBodyProps {
   isOpen: boolean;
 }
 
@@ -20,7 +20,7 @@ const navItems: NavItem[] = [
   { label: 'Clients', icon: <FileText size={20} />, href: '/clients' },
 ];
 
-const SidebarNavigation = ({ isOpen }: SidebarNavigationProps) => {
+const LeftSidebarBody = ({ isOpen }: LeftSidebarBodyProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -53,4 +53,4 @@ const SidebarNavigation = ({ isOpen }: SidebarNavigationProps) => {
   );
 };
 
-export default SidebarNavigation;
+export default LeftSidebarBody;

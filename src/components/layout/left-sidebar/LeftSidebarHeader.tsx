@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { supabase } from "@/integrations/supabase/client";
 
-interface SidebarHeaderProps {
+interface LeftSidebarHeaderProps {
   isOpen: boolean;
 }
 
-const SidebarHeader = ({ isOpen }: SidebarHeaderProps) => {
+const LeftSidebarHeader = ({ isOpen }: LeftSidebarHeaderProps) => {
   const [agencyLogo, setAgencyLogo] = useState('');
   const [agencyName, setAgencyName] = useState('');
 
@@ -63,4 +63,4 @@ const SidebarHeader = ({ isOpen }: SidebarHeaderProps) => {
   );
 };
 
-export default SidebarHeader;
+export default LeftSidebarHeader;

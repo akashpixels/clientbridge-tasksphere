@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import { Separator } from '@/components/ui/separator';
 
-interface SidebarFooterProps {
+interface LeftSidebarFooterProps {
   isOpen: boolean;
 }
 
@@ -18,7 +18,7 @@ interface UserDetails {
   jobRole?: string;
 }
 
-const SidebarFooter = ({ isOpen }: SidebarFooterProps) => {
+const LeftSidebarFooter = ({ isOpen }: LeftSidebarFooterProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
@@ -143,4 +143,4 @@ const SidebarFooter = ({ isOpen }: SidebarFooterProps) => {
   );
 };
 
-export default SidebarFooter;
+export default LeftSidebarFooter;
