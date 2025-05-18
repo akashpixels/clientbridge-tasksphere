@@ -29,6 +29,7 @@ interface CommentListProps {
 const CommentList = ({ comments, onFileClick }: CommentListProps) => {
   return (
     <ScrollArea className="flex-1 p-4 space-y-5 hide-scrollbar">
+      <div className="space-y-5">
       {comments?.map((comment, index) => (
         <div key={comment.id}>
           {/* Add a subtle divider when the user changes or after 10 minutes */}
@@ -47,6 +48,7 @@ const CommentList = ({ comments, onFileClick }: CommentListProps) => {
           />
         </div>
       ))}
+          </div>
     </ScrollArea>
   );
 };
