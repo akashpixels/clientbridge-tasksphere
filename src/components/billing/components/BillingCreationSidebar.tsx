@@ -79,15 +79,13 @@ export const BillingCreationSidebar = () => {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <BillingSidebar
-        isOpen={true}
-        onClose={closeRightSidebar}
-        formData={formData}
-        onFormChange={handleFormChange}
-        onSave={handleSave}
-        isLoading={createBilling.isPending}
-      />
-    </div>
+    <BillingSidebar
+      isOpen={true}
+      onClose={closeRightSidebar}
+      formData={formData}
+      onFormChange={handleFormChange}
+      onSave={handleSave}
+      isLoading={createBilling.isPending}
+    />
   );
 };

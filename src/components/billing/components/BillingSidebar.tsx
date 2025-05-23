@@ -45,7 +45,7 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed right-0 top-0 h-full w-96 bg-white shadow-lg border-l z-50 overflow-y-auto">
+    <div className="h-full">
       <Card className="h-full rounded-none border-0">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle>Billing Details</CardTitle>
