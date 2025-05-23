@@ -34,7 +34,7 @@ export const InvoiceHeader: React.FC<InvoiceHeaderProps> = ({
           />
         )}
         
-        <div className="space-x-1 flex">
+        <div className="space-x-4 flex">
           {/* Document Number */}
           {documentNumber && (
             <h2 className="font-semibold text-lg">{documentNumber}</h2>
