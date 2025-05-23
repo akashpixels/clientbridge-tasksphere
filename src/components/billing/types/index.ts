@@ -54,4 +54,6 @@ export interface BillingFormData {
   tds_rate: number;
   items: LineItem[];
   notes?: string;
+  due_date?: Date;
+  billing_number?: string;
 }

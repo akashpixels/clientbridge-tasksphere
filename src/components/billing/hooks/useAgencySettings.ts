@@ -23,7 +23,10 @@ export const useAgencySettings = () => {
           'bank_details',
           'qr_code',
           'stamp',
-          'signature'
+          'signature',
+          'icon_url',
+          'contact_email',
+          'contact_phone'
         ]);
 
       if (error) throw error;
@@ -41,8 +44,9 @@ export const useAgencySettings = () => {
         agencyDetails: {
           name: settings.agency_name || 'Your Agency',
           address: settings.agency_address || 'Agency Address',
-          email: settings.agency_email || '',
-          phone: settings.agency_phone || ''
+          email: settings.contact_email || settings.agency_email || '',
+          phone: settings.contact_phone || settings.agency_phone || '',
+          iconUrl: settings.icon_url || '',
         },
         footerDetails: {
           upiAddress: settings.upi_address || '',

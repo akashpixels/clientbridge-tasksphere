@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +8,11 @@ import { X } from "lucide-react";
 import { useAgencySettings, useClientAdmins } from "../hooks/useAgencySettings";
 import { BillingFormData } from "../types";
 import { detectStateFromAddress } from "../utils/gstCalculations";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 
 interface BillingSidebarProps {
   isOpen: boolean;
@@ -28,8 +33,18 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
 }) => {
   const { data: settings } = useAgencySettings();
   const { data: clients } = useClientAdmins();
+  const [billingNumber, setBillingNumber] = useState<string>("");
 
   const selectedClient = clients?.find(client => client.id === formData.client_id);
+
+  // Set default due date (7 days from now) if not already set
+  useEffect(() => {
+    if (!formData.due_date) {
+      const defaultDueDate = new Date();
+      defaultDueDate.setDate(defaultDueDate.getDate() + 7);
+      onFormChange({ due_date: defaultDueDate });
+    }
+  }, [formData.due_date, onFormChange]);
 
   useEffect(() => {
     if (selectedClient && settings?.indianStates) {
@@ -46,6 +61,21 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
       onFormChange({ notes: "Payment must be cleared within due date" });
     }
   }, [formData.notes, onFormChange]);
+
+  // Generate billing number when billing type changes
+  useEffect(() => {
+    if (formData.billing_type && settings?.billingSequences) {
+      const sequences = settings.billingSequences;
+      const prefix = sequences?.[formData.billing_type]?.prefix || '';
+      const currentNum = sequences?.[formData.billing_type]?.current || 0;
+      const newNumber = `${prefix}${String(currentNum + 1).padStart(4, '0')}`;
+      
+      if (newNumber !== billingNumber) {
+        setBillingNumber(newNumber);
+        onFormChange({ billing_number: newNumber });
+      }
+    }
+  }, [formData.billing_type, settings?.billingSequences, onFormChange]);
 
   if (!isOpen) return null;
 
@@ -80,6 +110,15 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
               </Select>
             </div>
 
+            {/* Billing Number Display */}
+            {formData.billing_type && billingNumber && (
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm font-medium">
+                  {formData.billing_type.charAt(0).toUpperCase() + formData.billing_type.slice(1)} Number: {billingNumber}
+                </p>
+              </div>
+            )}
+
             {/* Client Selection */}
             <div className="space-y-2">
               <Label htmlFor="client_id">Client</Label>
@@ -110,6 +149,35 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
                 )}
               </div>
             )}
+
+            {/* Due Date */}
+            <div className="space-y-2">
+              <Label htmlFor="due_date">Due Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="due_date"
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.due_date ? (
+                      format(new Date(formData.due_date), "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={formData.due_date ? new Date(formData.due_date) : undefined}
+                    onSelect={(date) => onFormChange({ due_date: date || undefined })}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
 
             {/* Place of Supply */}
             <div className="space-y-2">

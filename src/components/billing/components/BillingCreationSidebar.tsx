@@ -21,6 +21,8 @@ export const BillingCreationSidebar = () => {
     tds_rate: 0,
     items: [],
     notes: '',
+    billing_number: undefined,
+    due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default 7 days from now
   };
 
   const handleSave = async () => {
@@ -52,6 +54,7 @@ export const BillingCreationSidebar = () => {
       gst_details: gstDetails as any,
       agency_gstin: settings.agencyGSTDetails?.gstin || '',
       client_gstin: selectedClient.gstin || '',
+      billing_number: formData.billing_number,
       snapshot_data: {
         client: selectedClient,
         agency: settings.agencyGSTDetails,
@@ -63,6 +66,7 @@ export const BillingCreationSidebar = () => {
         },
         place_of_supply: formData.place_of_supply,
         notes: formData.notes,
+        due_date: formData.due_date,
         created_at: new Date().toISOString(),
       } as any,
     };

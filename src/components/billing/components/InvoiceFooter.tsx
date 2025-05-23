@@ -1,0 +1,108 @@
+
+import React from 'react';
+
+interface InvoiceFooterProps {
+  notes?: string;
+  upiAddress?: string;
+  bankDetails?: Record<string, string> | string;
+  qrCode?: string;
+  signature?: string;
+  stamp?: string;
+}
+
+export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
+  notes,
+  upiAddress,
+  bankDetails,
+  qrCode,
+  signature,
+  stamp
+}) => {
+  // Format bank details if it's an object
+  const formatBankDetails = (details: Record<string, string> | string): string => {
+    if (typeof details === 'string') return details;
+    if (!details || typeof details !== 'object') return '';
+    
+    const formattedLines = [];
+    if (details.bank_name) formattedLines.push(`Bank: ${details.bank_name}`);
+    if (details.account_holder) formattedLines.push(`A/c Holder: ${details.account_holder}`);
+    if (details.account_number) formattedLines.push(`A/c No: ${details.account_number}`);
+    if (details.ifsc) formattedLines.push(`IFSC: ${details.ifsc}`);
+    if (details.pan) formattedLines.push(`PAN: ${details.pan}`);
+    
+    return formattedLines.join('\n');
+  };
+
+  return (
+    <div className="mt-8 pt-6 border-t">
+      {/* Notes Section */}
+      {notes && (
+        <div className="mb-6">
+          <h4 className="font-semibold text-sm mb-2">Notes:</h4>
+          <p className="text-sm text-gray-600 whitespace-pre-line">{notes}</p>
+        </div>
+      )}
+      
+      {/* Two Column Footer */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        {/* Left Column - Signature and Stamp */}
+        <div className="flex flex-col items-center md:items-start justify-end space-y-4">
+          {signature && (
+            <div className="text-center">
+              <img 
+                src={signature} 
+                alt="Authorized Signature" 
+                className="w-32 h-16 object-contain"
+              />
+              <p className="text-xs text-gray-500 mt-1">Authorized Signature</p>
+            </div>
+          )}
+          
+          {stamp && (
+            <div className="text-center">
+              <img 
+                src={stamp} 
+                alt="Company Stamp" 
+                className="w-20 h-20 object-contain"
+              />
+              <p className="text-xs text-gray-500 mt-1">Company Stamp</p>
+            </div>
+          )}
+        </div>
+        
+        {/* Right Column - Payment Info */}
+        <div className="space-y-4">
+          {/* UPI Address */}
+          {upiAddress && (
+            <div className="text-sm">
+              <h4 className="font-medium mb-1">UPI Address:</h4>
+              <p className="text-gray-600">{upiAddress}</p>
+            </div>
+          )}
+          
+          {/* Bank Details */}
+          {bankDetails && (
+            <div className="text-sm">
+              <h4 className="font-medium mb-1">Bank Details:</h4>
+              <p className="text-gray-600 whitespace-pre-line">
+                {formatBankDetails(bankDetails)}
+              </p>
+            </div>
+          )}
+          
+          {/* QR Code */}
+          {qrCode && (
+            <div className="text-center md:text-right">
+              <h4 className="font-medium mb-2 text-sm">Scan to Pay</h4>
+              <img 
+                src={qrCode} 
+                alt="QR Code" 
+                className="w-32 h-32 mx-auto md:ml-auto md:mr-0 border rounded"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
