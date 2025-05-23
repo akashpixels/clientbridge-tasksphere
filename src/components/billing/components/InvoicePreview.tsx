@@ -89,6 +89,12 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
         issueDate={new Date()}
       />
 
+       {/* Place of Supply */}
+      <div className="text-sm mb-6">
+        <span className="font-medium">Place of Supply: </span>
+        {formData.place_of_supply || 'Not selected'}
+      </div>
+
       {/* Three-Column Info */}
       <InvoiceInfoColumns 
         agencyName={settings?.agencyDetails?.name}
@@ -101,11 +107,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
         dueDate={formData.due_date}
       />
 
-      {/* Place of Supply */}
-      <div className="text-sm mb-6">
-        <span className="font-medium">Place of Supply: </span>
-        {formData.place_of_supply || 'Not selected'}
-      </div>
+     
 
       {/* Line Items */}
       <div>
