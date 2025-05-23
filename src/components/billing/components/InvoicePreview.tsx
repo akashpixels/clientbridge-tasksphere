@@ -90,7 +90,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
       />
 
        {/* Place of Supply */}
-      <div className="text-sm mb-6">
+      <div className="text-sm mb-6 text-end">
         <span className="font-medium">Place of Supply: </span>
         {formData.place_of_supply || 'Not selected'}
       </div>
