@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { X } from "lucide-react";
 import { useAgencySettings, useClientAdmins } from "../hooks/useAgencySettings";
-import { BillingFormData } from "../types";
+import { BillingFormData, BillingType } from "../types";
 import { detectStateFromAddress } from "../utils/gstCalculations";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -33,7 +33,13 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
 }) => {
   const { data: settings } = useAgencySettings();
   const { data: clients } = useClientAdmins();
-  const { billingNumber } = useNextBillingNumber(formData.billing_type);
+  
+  // Only pass billing_type if it's a valid BillingType, otherwise pass null
+  const billingTypeForHook = formData.billing_type && formData.billing_type !== '' 
+    ? formData.billing_type as BillingType 
+    : null;
+  
+  const { billingNumber } = useNextBillingNumber(billingTypeForHook);
 
   const selectedClient = clients?.find(client => client.id === formData.client_id);
 
@@ -88,7 +94,7 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
               <Label htmlFor="billing_type">Billing Type</Label>
               <Select
                 value={formData.billing_type}
-                onValueChange={(value) => onFormChange({ billing_type: value })}
+                onValueChange={(value) => onFormChange({ billing_type: value as BillingType })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select billing type" />

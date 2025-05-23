@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { BillingSidebar } from './BillingSidebar';
 import { InvoicePreview } from './InvoicePreview';
-import { BillingFormData, LineItem } from '../types';
+import { BillingFormData, LineItem, BillingType } from '../types';
 import { useCreateBilling } from '../hooks/useBillingData';
 import { useAgencySettings, useClientAdmins } from '../hooks/useAgencySettings';
 import { calculateGST, calculateTDS } from '../utils/gstCalculations';
@@ -13,7 +12,7 @@ interface BillingCreatePageProps {
 
 export const BillingCreatePage: React.FC<BillingCreatePageProps> = ({ onClose }) => {
   const [formData, setFormData] = useState<BillingFormData>({
-    billing_type: '',
+    billing_type: '' as BillingType,
     client_id: '',
     place_of_supply: '',
     tds_rate: 0,

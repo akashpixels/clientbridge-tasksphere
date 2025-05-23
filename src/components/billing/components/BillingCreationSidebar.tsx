@@ -1,7 +1,6 @@
-
 import React, { useEffect } from 'react';
 import { useLayout } from '@/context/layout';
-import { BillingFormData } from '../types';
+import { BillingFormData, BillingType } from '../types';
 import { useCreateBilling } from '../hooks/useBillingData';
 import { BillingSidebar } from './BillingSidebar';
 import { calculateGST, calculateTDS } from '../utils/gstCalculations';
@@ -15,7 +14,7 @@ export const BillingCreationSidebar = () => {
   const createBilling = useCreateBilling();
 
   const formData = billingFormData || {
-    billing_type: '',
+    billing_type: '' as BillingType,
     client_id: '',
     place_of_supply: '',
     tds_rate: 0,

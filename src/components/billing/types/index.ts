@@ -1,8 +1,11 @@
+
 import { Database } from "@/integrations/supabase/types";
 
 export type BillingRow = Database["public"]["Tables"]["billing"]["Row"];
 export type BillingInsert = Database["public"]["Tables"]["billing"]["Insert"];
 export type BillingUpdate = Database["public"]["Tables"]["billing"]["Update"];
+
+export type BillingType = "estimate" | "invoice" | "credit_note" | "debit_note";
 
 export interface LineItem {
   id: string;
@@ -48,7 +51,7 @@ export interface TDSRate {
 }
 
 export interface BillingFormData {
-  billing_type: string;
+  billing_type: BillingType;
   client_id: string;
   place_of_supply: string;
   tds_rate: number;

@@ -1,8 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-type BillingType = "estimate" | "invoice" | "credit_note" | "debit_note";
+import { BillingType } from '../types';
 
 /**
  * Custom hook to fetch the next billing number for a specified billing type
