@@ -21,7 +21,7 @@ export const useAgencySettings = () => {
           'agency_phone',
           'upi_address',
           'bank_details',
-          'qr_code',
+          'qr-code',
           'stamp',
           'signature',
           'icon_url',
