@@ -38,7 +38,7 @@ export const InvoiceHeader: React.FC<InvoiceHeaderProps> = ({
           {/* Document Number */}
             <div className=" flex-col">
           
-          <h2 className=" text-sm">Invoice No</h2>
+          <h2 className=" text-sm">Serial No</h2>
           {documentNumber && (
             <h2 className=" text-sm">{documentNumber}</h2>
           )}
@@ -55,7 +55,7 @@ export const InvoiceHeader: React.FC<InvoiceHeaderProps> = ({
       <div className="text-right">
         <h1 className="text-2xl font-bold text-gray-800">{capitalizedType}</h1>
         <p className="text-sm text-gray-500">
-          Issue Date: {format(new Date(issueDate), 'dd MMM yyyy')}
+          {format(new Date(issueDate), 'dd MMM yyyy')}
         </p>
       </div>
     </div>
