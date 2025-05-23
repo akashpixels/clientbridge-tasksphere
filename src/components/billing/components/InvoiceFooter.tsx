@@ -74,7 +74,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
         <div className="space-y-4">
           {/* UPI Address */}
           {upiAddress && (
-            <div className="text-sm">
+            <div className="text-sm pl-6">
               <p className="text-gray-600">{upiAddress}</p>
             </div>
           )}
