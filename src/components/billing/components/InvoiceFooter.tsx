@@ -74,7 +74,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
       <div className="border rounded-lg item-center flex">
         <div className="flex-col item-center ">
           {upiAddress && (
-            <div className="text-sm pl-6">
+            <div className="text-sm pl-6 -mt-6 pb-[14px] leading-[10px]">
               <p className="text-gray-600">{upiAddress}</p>
             </div>
           )}
