@@ -21,35 +21,39 @@ export const router = createBrowserRouter([
     path: "/",
     element: (
       <AuthProvider>
-        <ProtectedRoute>
-          <Layout />
-        </ProtectedRoute>
+        <ProtectedRoute />
       </AuthProvider>
     ),
     children: [
       {
-        index: true,
-        element: <Index />,
-      },
-      {
-        path: "projects",
-        element: <Projects />,
-      },
-      {
-        path: "projects/:id",
-        element: <ProjectDetails />,
-      },
-      {
-        path: "clients",
-        element: <Clients />,
-      },
-      {
-        path: "team",
-        element: <Team />,
-      },
-      {
-        path: "billing",
-        element: <Billing />,
+        path: "/",
+        element: <Layout />,
+        children: [
+          {
+            index: true,
+            element: <Index />,
+          },
+          {
+            path: "projects",
+            element: <Projects />,
+          },
+          {
+            path: "projects/:id",
+            element: <ProjectDetails />,
+          },
+          {
+            path: "clients",
+            element: <Clients />,
+          },
+          {
+            path: "team",
+            element: <Team />,
+          },
+          {
+            path: "billing",
+            element: <Billing />,
+          },
+        ],
       },
     ],
   },
