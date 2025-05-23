@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BillingInsert, BillingRow, GSTDetails } from "../types";
@@ -12,7 +11,7 @@ export const useBillingData = () => {
         .from('billing')
         .select(`
           *,
-          client_admins!inner(
+          client_admins (
             business_name,
             address,
             gstin
@@ -34,7 +33,7 @@ export const useBillingById = (id: string) => {
         .from('billing')
         .select(`
           *,
-          client_admins!inner(
+          client_admins (
             business_name,
             address,
             gstin

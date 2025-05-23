@@ -103,7 +103,15 @@ export type Database = {
           tds_rate?: number | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "billing_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_admins"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       client_admins: {
         Row: {
