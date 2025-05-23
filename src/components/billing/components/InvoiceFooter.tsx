@@ -87,7 +87,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
   {/* QR Code */}
     <div className="border rounded-lg">
           {qrCode && (
-            <div className="text-center md:text-right">
+            <div className="text-center md:text-right p-4">
               <h4 className="font-medium mb-2 text-sm">Scan to Pay</h4>
               <img 
                 src={qrCode} 
