@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Trash2 } from "lucide-react";
 import { BillingFormData, LineItem } from "../types";
 import { calculateGST, calculateTDS, calculateLineItemTotal } from "../utils/gstCalculations";
-import { useAgencySettings } from "../hooks/useAgencySettings";
+import { useAgencySettings, useClientDetails } from "../hooks/useAgencySettings";
 
 interface InvoicePreviewProps {
   formData: BillingFormData;
@@ -16,7 +16,8 @@ interface InvoicePreviewProps {
 }
 
 export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onFormChange }) => {
-  const { data: settings } = useAgencySettings();
+  const { data: settings, isLoading: isLoadingSettings } = useAgencySettings();
+  const { data: clientDetails, isLoading: isLoadingClient } = useClientDetails(formData.client_id);
   const [editingItem, setEditingItem] = useState<string | null>(null);
 
   const gstDetails = calculateGST(
@@ -84,10 +85,16 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
             <div>
               <h3 className="font-semibold mb-2">From:</h3>
               <div className="text-sm space-y-1">
-                <p className="font-medium">Your Agency Name</p>
-                <p>Agency Address</p>
-                {settings?.agencyGSTDetails?.gstin && (
-                  <p>GSTIN: {settings.agencyGSTDetails.gstin}</p>
+                {isLoadingSettings ? (
+                  <p className="text-gray-400">Loading agency details...</p>
+                ) : (
+                  <>
+                    <p className="font-medium">{settings?.agencyDetails?.name || 'Your Agency'}</p>
+                    <p>{settings?.agencyDetails?.address || 'Agency Address'}</p>
+                    {settings?.agencyGSTDetails?.gstin && (
+                      <p>GSTIN: {settings.agencyGSTDetails.gstin}</p>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -95,9 +102,17 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
             <div>
               <h3 className="font-semibold mb-2">To:</h3>
               <div className="text-sm space-y-1">
-                <p className="font-medium">Client Business Name</p>
-                <p>Client Address</p>
-                <p>GSTIN: Client GSTIN</p>
+                {isLoadingClient || !formData.client_id ? (
+                  <p className="text-gray-400">{formData.client_id ? 'Loading client details...' : 'Select a client'}</p>
+                ) : (
+                  <>
+                    <p className="font-medium">{clientDetails?.business_name || 'Client Business Name'}</p>
+                    <p>{clientDetails?.address || 'Client Address'}</p>
+                    {clientDetails?.gstin && (
+                      <p>GSTIN: {clientDetails.gstin}</p>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           </div>

@@ -10,7 +10,7 @@ export const useAgencySettings = () => {
       const { data, error } = await supabase
         .from('agency_settings')
         .select('*')
-        .in('key', ['indian_states', 'agency_gst_details', 'tds_rates', 'billing_sequences']);
+        .in('key', ['indian_states', 'agency_gst_details', 'tds_rates', 'billing_sequences', 'agency_details']);
 
       if (error) throw error;
 
@@ -24,8 +24,37 @@ export const useAgencySettings = () => {
         agencyGSTDetails: settings.agency_gst_details as AgencyGSTDetails,
         tdsRates: settings.tds_rates as TDSRate[],
         billingSequences: settings.billing_sequences,
+        agencyDetails: settings.agency_details || {
+          name: 'Your Agency',
+          address: 'Agency Address',
+          email: '',
+          phone: ''
+        }
       };
     },
+  });
+};
+
+export const useClientDetails = (clientId: string | undefined) => {
+  return useQuery({
+    queryKey: ['client-details', clientId],
+    queryFn: async () => {
+      if (!clientId) return null;
+      
+      const { data, error } = await supabase
+        .from('client_admins')
+        .select('*')
+        .eq('id', clientId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching client details:', error);
+        throw error;
+      }
+      
+      return data;
+    },
+    enabled: !!clientId, // Only run query if clientId is available
   });
 };
 
