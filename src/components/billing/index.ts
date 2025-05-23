@@ -1,6 +1,6 @@
 
 export { BillingListPage } from './components/BillingListPage';
-export { BillingCreatePage } from './components/BillingCreatePage';
+export { BillingCreationSidebar } from './components/BillingCreationSidebar';
 export { BillingSidebar } from './components/BillingSidebar';
 export { InvoicePreview } from './components/InvoicePreview';
 

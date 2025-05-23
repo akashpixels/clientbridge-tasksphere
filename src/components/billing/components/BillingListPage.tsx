@@ -8,18 +8,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useBillingData } from "../hooks/useBillingData";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useLayout } from "@/context/layout";
+import { BillingCreationSidebar } from "./BillingCreationSidebar";
+import { InvoicePreview } from "./InvoicePreview";
 
-interface BillingListPageProps {
-  onCreateNew: () => void;
-}
-
-export const BillingListPage: React.FC<BillingListPageProps> = ({ onCreateNew }) => {
+export const BillingListPage = () => {
   const { data: billingData, isLoading } = useBillingData();
   const [filterType, setFilterType] = useState<string>('all');
+  const { setRightSidebarContent } = useLayout();
 
   const filteredData = billingData?.filter(item => 
     filterType === 'all' || item.billing_type === filterType
   );
+
+  const handleCreateNew = () => {
+    setRightSidebarContent(<BillingCreationSidebar />);
+  };
 
   const handleCopyUrl = (billingId: string) => {
     const url = `${window.location.origin}/billing/share/${billingId}`;
@@ -54,7 +58,7 @@ export const BillingListPage: React.FC<BillingListPageProps> = ({ onCreateNew })
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Billing</h1>
-        <Button onClick={onCreateNew} className="flex items-center gap-2">
+        <Button onClick={handleCreateNew} className="flex items-center gap-2">
           <Plus size={16} />
           Create New Billing
         </Button>
