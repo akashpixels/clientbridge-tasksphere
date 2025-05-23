@@ -80,6 +80,20 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
               <p className="text-gray-600">{upiAddress}</p>
             </div>
           )}
+
+<div className="">
+  {/* QR Code */}
+          {qrCode && (
+            <div className="text-center md:text-right">
+              <h4 className="font-medium mb-2 text-sm">Scan to Pay</h4>
+              <img 
+                src={qrCode} 
+                alt="QR Code" 
+                className="w-32 h-32 mx-auto md:ml-auto md:mr-0 border rounded"
+              />
+            </div>
+          )}
+
           
           {/* Bank Details */}
           {bankDetails && (
@@ -91,17 +105,8 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
             </div>
           )}
           
-          {/* QR Code */}
-          {qrCode && (
-            <div className="text-center md:text-right">
-              <h4 className="font-medium mb-2 text-sm">Scan to Pay</h4>
-              <img 
-                src={qrCode} 
-                alt="QR Code" 
-                className="w-32 h-32 mx-auto md:ml-auto md:mr-0 border rounded"
-              />
-            </div>
-          )}
+         
+        </div>
         </div>
       </div>
     </div>
