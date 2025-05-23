@@ -22,7 +22,7 @@ export const InvoiceHeader: React.FC<InvoiceHeaderProps> = ({
   const capitalizedType = documentType.charAt(0).toUpperCase() + documentType.slice(1);
   
   return (
-    <div className="flex justify-between items-start mb-16 ">
+    <div className="flex justify-between items-start ">
       {/* Left side - Logo, Doc Number, Contact Info */}
       <div className="flex items-start space-x-4">
         {/* Logo */}
