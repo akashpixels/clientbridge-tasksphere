@@ -2,13 +2,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+type BillingType = "estimate" | "invoice" | "credit_note" | "debit_note";
+
 /**
  * Custom hook to fetch the next billing number for a specified billing type
  * 
  * @param billingType - The type of billing (invoice, estimate, credit_note, debit_note)
  * @returns The next billing number in the format XXX25-0001
  */
-export const useNextBillingNumber = (billingType: string | null) => {
+export const useNextBillingNumber = (billingType: BillingType | null) => {
   const [billingNumber, setBillingNumber] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +28,7 @@ export const useNextBillingNumber = (billingType: string | null) => {
       try {
         // Using the new database function to get the next billing number
         const { data, error } = await supabase.rpc('get_next_billing_number', { 
-          billing_type_param: billingType
+          billing_type_param: billingType as BillingType
         });
 
         if (error) throw error;
