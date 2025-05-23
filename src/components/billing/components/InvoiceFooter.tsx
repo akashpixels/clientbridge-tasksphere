@@ -36,29 +36,26 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
   return (
     <div className="mt-8 pt-6 border-t">
       {/* Notes Section */}
-     <div className="relative w-32 h-24 mx-auto">
-       {signature && (
-            <div className="text-center">
-              <img 
-                src={signature} 
-                alt="Authorized Signature" 
-                className="w-32 h-16 object-contain"
-              />
-             
-            </div>
-          )}
-          
-          {stamp && (
-            <div className="text-center">
-              <img 
-                src={stamp} 
-                alt="Company Stamp" 
-                className="w-20 h-20 object-contain"
-              />
-             
-            </div>
-          )}
-        </div>
+    <div className="relative w-32 h-24 mx-auto">
+  {signature && (
+    <img
+      src={signature}
+      alt="Authorized Signature"
+      className="w-32 h-16 object-contain absolute left-6 top-0 z-10"
+      // left-6 moves it to right, top-0 puts at top, z-10 keeps above stamp
+    />
+  )}
+
+  {stamp && (
+    <img
+      src={stamp}
+      alt="Company Stamp"
+      className="w-20 h-20 object-contain absolute left-0 top-8 z-0"
+      // top-8 moves it down, left-0 aligns to left
+    />
+  )}
+</div>
+
       {/* Two Column Footer */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         
