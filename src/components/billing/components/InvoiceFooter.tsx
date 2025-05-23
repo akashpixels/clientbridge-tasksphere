@@ -100,7 +100,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
           
           {/* Bank Details */}
           {bankDetails && (
-            <div className="text-sm">
+            <div className="text-sm border-l p-4">
               <h4 className="font-medium mb-1">Bank Details:</h4>
               <p className="text-gray-600 whitespace-pre-line">
                 {formatBankDetails(bankDetails)}
