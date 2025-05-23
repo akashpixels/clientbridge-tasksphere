@@ -73,15 +73,16 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
         {/* Right Column - Payment Info */}
         <div className="space-y-4">
           {/* UPI Address */}
-          {upiAddress && (
-            <div className="text-sm pl-6">
-              <p className="text-gray-600">{upiAddress}</p>
-            </div>
-          )}
+         
 
           <div className="flex ">
             {/* QR Code */}
             <div className="border rounded-lg item-center">
+               {upiAddress && (
+            <div className="text-sm pl-6">
+              <p className="text-gray-600">{upiAddress}</p>
+            </div>
+          )}
               {qrCode && (
                 <div className="text-center md:text-right p-4">
                   {/* <h4 className="font-medium mb-2 text-sm">Scan to Pay</h4>*/}
