@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,6 +12,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
+import { useNextBillingNumber } from "../hooks/useNextBillingNumber";
 
 interface BillingSidebarProps {
   isOpen: boolean;
@@ -33,7 +33,7 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
 }) => {
   const { data: settings } = useAgencySettings();
   const { data: clients } = useClientAdmins();
-  const [billingNumber, setBillingNumber] = useState<string>("");
+  const { billingNumber } = useNextBillingNumber(formData.billing_type);
 
   const selectedClient = clients?.find(client => client.id === formData.client_id);
 
@@ -62,20 +62,12 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
     }
   }, [formData.notes, onFormChange]);
 
-  // Generate billing number when billing type changes
+  // Update billing number whenever it changes
   useEffect(() => {
-    if (formData.billing_type && settings?.billingSequences) {
-      const sequences = settings.billingSequences;
-      const prefix = sequences?.[formData.billing_type]?.prefix || '';
-      const currentNum = sequences?.[formData.billing_type]?.current || 0;
-      const newNumber = `${prefix}${String(currentNum + 1).padStart(4, '0')}`;
-      
-      if (newNumber !== billingNumber) {
-        setBillingNumber(newNumber);
-        onFormChange({ billing_number: newNumber });
-      }
+    if (billingNumber && billingNumber !== formData.billing_number) {
+      onFormChange({ billing_number: billingNumber });
     }
-  }, [formData.billing_type, settings?.billingSequences, onFormChange]);
+  }, [billingNumber, formData.billing_number, onFormChange]);
 
   if (!isOpen) return null;
 

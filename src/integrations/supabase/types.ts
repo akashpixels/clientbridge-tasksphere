@@ -1357,6 +1357,12 @@ export type Database = {
         }
         Returns: string
       }
+      get_next_billing_number: {
+        Args: {
+          billing_type_param: Database["public"]["Enums"]["billing_type"]
+        }
+        Returns: string
+      }
       get_task_schedule: {
         Args: {
           p_project_id: string

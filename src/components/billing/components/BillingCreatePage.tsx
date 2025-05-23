@@ -58,6 +58,7 @@ export const BillingCreatePage: React.FC<BillingCreatePageProps> = ({ onClose })
       gst_details: gstDetails as any, // Cast to satisfy TypeScript
       agency_gstin: settings.agencyGSTDetails?.gstin || '',
       client_gstin: selectedClient.gstin || '',
+      billing_number: formData.billing_number,
       snapshot_data: {
         client: selectedClient,
         agency: settings.agencyGSTDetails,
@@ -69,6 +70,7 @@ export const BillingCreatePage: React.FC<BillingCreatePageProps> = ({ onClose })
         },
         place_of_supply: formData.place_of_supply,
         notes: formData.notes,
+        due_date: formData.due_date,
         created_at: new Date().toISOString(),
       } as any, // Cast to satisfy TypeScript
     };

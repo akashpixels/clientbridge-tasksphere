@@ -8,4 +8,5 @@ export { BillingCreationPage } from './components/BillingCreationPage';
 export * from './types';
 export * from './hooks/useBillingData';
 export * from './hooks/useAgencySettings';
+export * from './hooks/useNextBillingNumber';
 export * from './utils/gstCalculations';
