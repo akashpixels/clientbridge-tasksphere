@@ -26,7 +26,7 @@ export const InvoiceInfoColumns: React.FC<InvoiceInfoColumnsProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 border">
       {/* Column 1 - Agency Details */}
-      <div className="space-y-2">
+      <div className="space-y-2 border-r">
         <h3 className="font-semibold text-gray-700">From:</h3>
         <div className="text-sm space-y-1">
           {agencyName && <p className="font-medium">{agencyName}</p>}
@@ -36,7 +36,7 @@ export const InvoiceInfoColumns: React.FC<InvoiceInfoColumnsProps> = ({
       </div>
       
       {/* Column 2 - Client Details */}
-      <div className="space-y-2">
+      <div className="space-y-2 border-r">
         <h3 className="font-semibold text-gray-700">Billed To:</h3>
         <div className="text-sm space-y-1">
           {clientName && <p className="font-medium">{clientName}</p>}
