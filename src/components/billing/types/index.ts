@@ -1,4 +1,3 @@
-
 import { Database } from "@/integrations/supabase/types";
 
 export type BillingRow = Database["public"]["Tables"]["billing"]["Row"];
@@ -14,6 +13,7 @@ export interface LineItem {
   gst_rate: number;
   gst_amount: number;
   total_amount: number;
+  sac_code: string;
 }
 
 export interface GSTDetails {

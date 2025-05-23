@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Trash2 } from "lucide-react";
 import { BillingFormData, LineItem } from "../types";
@@ -20,6 +21,13 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
   const { data: settings, isLoading: isLoadingSettings } = useAgencySettings();
   const { data: clientDetails, isLoading: isLoadingClient } = useClientDetails(formData.client_id);
   const [editingItem, setEditingItem] = useState<string | null>(null);
+
+  const sacCodes = [
+    { value: '998314', label: '998314' },
+    { value: '998313', label: '998313' },
+    { value: '998319', label: '998319' },
+    { value: '998315', label: '998315' },
+  ];
 
   const gstDetails = calculateGST(
     formData.items,
@@ -40,6 +48,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
       gst_rate: 18,
       gst_amount: 0,
       total_amount: 0,
+      sac_code: '998314', // Default SAC code
     };
     onFormChange({ items: [...formData.items, newItem] });
     setEditingItem(newItem.id);
@@ -107,8 +116,6 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
         dueDate={formData.due_date}
       />
 
-     
-
       {/* Line Items */}
       <div>
         <div className="flex items-center justify-between mb-3">
@@ -134,21 +141,42 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
             {formData.items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>
-                  {editingItem === item.id ? (
-                    <Input
-                      value={item.description}
-                      onChange={(e) => updateItem(item.id, { description: e.target.value })}
-                      onBlur={() => setEditingItem(null)}
-                      autoFocus
-                    />
-                  ) : (
-                    <div
-                      onClick={() => setEditingItem(item.id)}
-                      className="cursor-pointer hover:bg-gray-50 p-1 rounded"
-                    >
-                      {item.description || 'Click to edit'}
+                  <div className="space-y-1">
+                    {editingItem === item.id ? (
+                      <Input
+                        value={item.description}
+                        onChange={(e) => updateItem(item.id, { description: e.target.value })}
+                        onBlur={() => setEditingItem(null)}
+                        autoFocus
+                      />
+                    ) : (
+                      <div
+                        onClick={() => setEditingItem(item.id)}
+                        className="cursor-pointer hover:bg-gray-50 p-1 rounded"
+                      >
+                        {item.description || 'Click to edit'}
+                      </div>
+                    )}
+                    
+                    {/* SAC Code Dropdown */}
+                    <div className="text-xs">
+                      <Select
+                        value={item.sac_code || '998314'}
+                        onValueChange={(value) => updateItem(item.id, { sac_code: value })}
+                      >
+                        <SelectTrigger className="h-6 text-xs border-gray-200">
+                          <SelectValue placeholder="SAC Code" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {sacCodes.map((code) => (
+                            <SelectItem key={code.value} value={code.value} className="text-xs">
+                              SAC: {code.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  )}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <Input
