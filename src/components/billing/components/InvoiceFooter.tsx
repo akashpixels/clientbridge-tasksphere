@@ -42,7 +42,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         
         {/* Left Column - Signature and Stamp */}
-        <div className="flex flex-col items-center md:items-start justify-end space-y-4">
+        <div className="flex flex-col  md:items-start justify-end ">
             <div className="relative w-24 h-24">
   {signature && (
     <img
