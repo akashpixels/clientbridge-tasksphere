@@ -224,7 +224,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
         </Table>
       </div>
 
-      {/* GST Summary */}
+      {/* GST Summary
       {!isInternational && gstDetails.total_gst > 0 && (
         <div className="border-t pt-4">
           <h3 className="font-semibold mb-3">GST Breakdown</h3>
@@ -256,7 +256,8 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
             </div>
           </div>
         </div>
-      )}
+      )} 
+       */}
 
       {/* Total Summary */}
       <div className="border-t pt-4">
