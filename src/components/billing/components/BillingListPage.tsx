@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,18 +9,28 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { useLayout } from "@/context/layout";
 import { BillingCreationSidebar } from "./BillingCreationSidebar";
-import { InvoicePreview } from "./InvoicePreview";
+import { BillingFormData } from "../types";
 
 export const BillingListPage = () => {
   const { data: billingData, isLoading } = useBillingData();
   const [filterType, setFilterType] = useState<string>('all');
-  const { setRightSidebarContent } = useLayout();
+  const { setRightSidebarContent, setBillingCreationActive } = useLayout();
 
   const filteredData = billingData?.filter(item => 
     filterType === 'all' || item.billing_type === filterType
   );
 
   const handleCreateNew = () => {
+    const initialFormData: BillingFormData = {
+      billing_type: '',
+      client_id: '',
+      place_of_supply: '',
+      tds_rate: 0,
+      items: [],
+      notes: '',
+    };
+
+    setBillingCreationActive(true, initialFormData);
     setRightSidebarContent(<BillingCreationSidebar />);
   };
 

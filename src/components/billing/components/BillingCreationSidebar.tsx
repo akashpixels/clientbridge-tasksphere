@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useLayout } from '@/context/layout';
 import { BillingFormData } from '../types';
 import { useCreateBilling } from '../hooks/useBillingData';
@@ -8,22 +8,19 @@ import { calculateGST, calculateTDS } from '../utils/gstCalculations';
 import { useAgencySettings, useClientAdmins } from '../hooks/useAgencySettings';
 
 export const BillingCreationSidebar = () => {
-  const { closeRightSidebar } = useLayout();
-  const [formData, setFormData] = useState<BillingFormData>({
+  const { closeRightSidebar, billingFormData, updateBillingFormData } = useLayout();
+  
+  const { data: settings } = useAgencySettings();
+  const { data: clients } = useClientAdmins();
+  const createBilling = useCreateBilling();
+
+  const formData = billingFormData || {
     billing_type: '',
     client_id: '',
     place_of_supply: '',
     tds_rate: 0,
     items: [],
     notes: '',
-  });
-  
-  const { data: settings } = useAgencySettings();
-  const { data: clients } = useClientAdmins();
-  const createBilling = useCreateBilling();
-
-  const handleFormChange = (updates: Partial<BillingFormData>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
   };
 
   const handleSave = async () => {
@@ -83,7 +80,7 @@ export const BillingCreationSidebar = () => {
       isOpen={true}
       onClose={closeRightSidebar}
       formData={formData}
-      onFormChange={handleFormChange}
+      onFormChange={updateBillingFormData}
       onSave={handleSave}
       isLoading={createBilling.isPending}
     />

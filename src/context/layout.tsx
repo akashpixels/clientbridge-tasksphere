@@ -1,5 +1,6 @@
 
 import { createContext, useContext, ReactNode, useState, useCallback } from 'react';
+import { BillingFormData } from '@/components/billing/types';
 
 interface LayoutContextType {
   rightSidebarContent: ReactNode | null;
@@ -7,6 +8,10 @@ interface LayoutContextType {
   closeRightSidebar: () => void;
   currentTab: string;
   setCurrentTab: (tab: string) => void;
+  isBillingCreationActive: boolean;
+  billingFormData: BillingFormData | null;
+  setBillingCreationActive: (active: boolean, formData?: BillingFormData) => void;
+  updateBillingFormData: (updates: Partial<BillingFormData>) => void;
 }
 
 export const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
@@ -26,14 +31,29 @@ interface LayoutProviderProps {
 export function LayoutProvider({ children }: LayoutProviderProps) {
   const [rightSidebarContent, setRightSidebarContent] = useState<ReactNode | null>(null);
   const [currentTab, setCurrentTab] = useState('tasks');
+  const [isBillingCreationActive, setIsBillingCreationActive] = useState(false);
+  const [billingFormData, setBillingFormDataState] = useState<BillingFormData | null>(null);
 
   const closeRightSidebar = useCallback(() => {
     console.log('Closing right sidebar');
     setRightSidebarContent(null);
+    setIsBillingCreationActive(false);
+    setBillingFormDataState(null);
   }, []);
 
-  // Effect to close right sidebar on tab change has been kept
-  // but route change effect has been moved to MainContentArea
+  const setBillingCreationActive = useCallback((active: boolean, formData?: BillingFormData) => {
+    setIsBillingCreationActive(active);
+    if (active && formData) {
+      setBillingFormDataState(formData);
+    } else if (!active) {
+      setBillingFormDataState(null);
+    }
+  }, []);
+
+  const updateBillingFormData = useCallback((updates: Partial<BillingFormData>) => {
+    setBillingFormDataState(prev => prev ? { ...prev, ...updates } : null);
+  }, []);
+
   console.log('LayoutProvider rendering');
 
   return (
@@ -43,7 +63,11 @@ export function LayoutProvider({ children }: LayoutProviderProps) {
         setRightSidebarContent,
         closeRightSidebar,
         currentTab,
-        setCurrentTab
+        setCurrentTab,
+        isBillingCreationActive,
+        billingFormData,
+        setBillingCreationActive,
+        updateBillingFormData
       }}
     >
       {children}
