@@ -66,6 +66,20 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
   // Custom input style to hide number spinners/arrows
   const numberInputStyle = "appearance-none";
 
+  // Helper function to format bank details
+  const formatBankDetails = (bankDetails: any) => {
+    if (!bankDetails || typeof bankDetails !== 'object') return '';
+    
+    const details = [];
+    if (bankDetails.bank_name) details.push(`Bank: ${bankDetails.bank_name}`);
+    if (bankDetails.account_holder) details.push(`A/c Holder: ${bankDetails.account_holder}`);
+    if (bankDetails.account_number) details.push(`A/c No: ${bankDetails.account_number}`);
+    if (bankDetails.ifsc) details.push(`IFSC: ${bankDetails.ifsc}`);
+    if (bankDetails.pan) details.push(`PAN: ${bankDetails.pan}`);
+    
+    return details.join('\n');
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -295,7 +309,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                     <div className="text-sm">
                       <h4 className="font-medium mb-1">Bank Details:</h4>
                       <div className="text-gray-700 whitespace-pre-line">
-                        {settings.footerDetails.bankDetails}
+                        {formatBankDetails(settings.footerDetails.bankDetails)}
                       </div>
                     </div>
                   )}
