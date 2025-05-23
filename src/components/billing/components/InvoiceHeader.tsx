@@ -36,11 +36,13 @@ export const InvoiceHeader: React.FC<InvoiceHeaderProps> = ({
         
         <div className="space-x-2 flex">
           {/* Document Number */}
-          <h2 className=" text-lg">Invoice No</h2>
-          {documentNumber && (
-            <h2 className=" text-lg">{documentNumber}</h2>
-          )}
+            <div className="space-y-1 flex-col">
           
+          <h2 className=" text-sm">Invoice No</h2>
+          {documentNumber && (
+            <h2 className=" text-sm">{documentNumber}</h2>
+          )}
+          </div>
           {/* Contact Info */}
           <div className="text-sm text-gray-600 border-l pl-2">
             {agencyEmail && <p>{agencyEmail}</p>}
