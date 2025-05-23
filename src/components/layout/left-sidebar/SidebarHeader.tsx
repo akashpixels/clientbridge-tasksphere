@@ -18,7 +18,7 @@ const SidebarHeader = ({ isOpen }: SidebarHeaderProps) => {
         const { data: logoData, error: logoError } = await supabase
           .from('agency_settings')
           .select('value')
-          .eq('key', 'logo_url')
+          .eq('key', 'icon_url')
           .single();
 
         const { data: nameData, error: nameError } = await supabase
