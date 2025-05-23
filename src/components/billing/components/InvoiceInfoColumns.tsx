@@ -24,7 +24,7 @@ export const InvoiceInfoColumns: React.FC<InvoiceInfoColumnsProps> = ({
   dueDate
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 border">
       {/* Column 1 - Agency Details */}
       <div className="space-y-2">
         <h3 className="font-semibold text-gray-700">From:</h3>
