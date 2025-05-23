@@ -30,6 +30,8 @@ export const useAgencySettings = () => {
         ]);
 
       if (error) throw error;
+      
+      console.log('Agency settings data:', data); // Debug log to see what's coming from the database
 
       const settings = data.reduce((acc, setting) => {
         acc[setting.key] = setting.value;
@@ -51,7 +53,7 @@ export const useAgencySettings = () => {
         footerDetails: {
           upiAddress: settings.upi_address || '',
           bankDetails: settings.bank_details || '',
-          qrCode: settings.qr_code || '',
+          qrCode: settings['qr-code'] || '', // Fix: Using the correct key 'qr-code' with bracket notation
           stamp: settings.stamp || '',
           signature: settings.signature || ''
         }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +20,9 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
   const { data: settings, isLoading: isLoadingSettings } = useAgencySettings();
   const { data: clientDetails, isLoading: isLoadingClient } = useClientDetails(formData.client_id);
   const [editingItem, setEditingItem] = useState<string | null>(null);
+
+  // Debug log to see what settings are available
+  console.log('Agency settings in InvoicePreview:', settings?.footerDetails);
 
   const sacCodes = [
     { value: '998314', label: '998314' },
