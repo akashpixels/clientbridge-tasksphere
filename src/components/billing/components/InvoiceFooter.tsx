@@ -71,7 +71,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
       </div>
 
       {/* Right Column - Payment Info */}
-      <div className="border rounded-lg item-center">
+      <div className="border rounded-lg item-center flex">
         <div className="flex-col item-center ">
           {upiAddress && (
             <div className="text-sm pl-6">
