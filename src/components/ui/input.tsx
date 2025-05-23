@@ -15,6 +15,8 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
     // Replace with a simple border color change on focus:
     "focus:outline-none focus:border-blue-500",
     "disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+    // Hide number input spinners
+    type === 'number' && "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
     className
   )}
   ref={ref}

@@ -62,6 +62,9 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
   const isIntraState = formData.place_of_supply === settings?.agencyGSTDetails?.state;
   const isInternational = formData.place_of_supply === 'International';
 
+  // Custom input style to hide number spinners/arrows
+  const numberInputStyle = "appearance-none";
+
   return (
     <div className="space-y-6">
       <Card>
@@ -144,7 +147,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                         type="number"
                         value={item.quantity}
                         onChange={(e) => updateItem(item.id, { quantity: parseFloat(e.target.value) || 0 })}
-                        className="w-full"
+                        className={`w-full ${numberInputStyle}`}
                       />
                     </TableCell>
                     <TableCell>
@@ -152,7 +155,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                         type="number"
                         value={item.rate}
                         onChange={(e) => updateItem(item.id, { rate: parseFloat(e.target.value) || 0 })}
-                        className="w-full"
+                        className={`w-full ${numberInputStyle}`}
                       />
                     </TableCell>
                     <TableCell>
@@ -160,7 +163,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                         type="number"
                         value={item.gst_rate}
                         onChange={(e) => updateItem(item.id, { gst_rate: parseFloat(e.target.value) || 0 })}
-                        className="w-full"
+                        className={`w-full ${numberInputStyle}`}
                         disabled={isInternational}
                       />
                     </TableCell>
