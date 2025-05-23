@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { BillingInsert, BillingRow } from "../types";
+import { BillingInsert, BillingRow, GSTDetails } from "../types";
 import { toast } from "sonner";
 
 export const useBillingData = () => {
@@ -12,7 +12,7 @@ export const useBillingData = () => {
         .from('billing')
         .select(`
           *,
-          client_admins:client_id (
+          client_admins!inner(
             business_name,
             address,
             gstin
@@ -34,7 +34,7 @@ export const useBillingById = (id: string) => {
         .from('billing')
         .select(`
           *,
-          client_admins:client_id (
+          client_admins!inner(
             business_name,
             address,
             gstin
@@ -55,9 +55,15 @@ export const useCreateBilling = () => {
 
   return useMutation({
     mutationFn: async (billingData: BillingInsert) => {
+      // Ensure gst_details is properly serialized as JSON
+      const processedData = {
+        ...billingData,
+        gst_details: billingData.gst_details as any, // Cast to satisfy TypeScript
+      };
+
       const { data, error } = await supabase
         .from('billing')
-        .insert(billingData)
+        .insert(processedData)
         .select()
         .single();
 

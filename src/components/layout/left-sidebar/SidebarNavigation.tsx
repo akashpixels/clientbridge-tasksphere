@@ -11,7 +11,11 @@ const navigation = [
   { name: 'Billing', href: '/billing', icon: Receipt },
 ];
 
-export const SidebarNavigation = () => {
+interface SidebarNavigationProps {
+  isOpen: boolean;
+}
+
+export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isOpen }) => {
   const location = useLocation();
 
   return (
@@ -31,12 +35,12 @@ export const SidebarNavigation = () => {
             }`}
           >
             <item.icon
-              className={`mr-3 h-5 w-5 flex-shrink-0 ${
+              className={`${isOpen ? 'mr-3' : 'mx-auto'} h-5 w-5 flex-shrink-0 ${
                 isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
               }`}
               aria-hidden="true"
             />
-            {item.name}
+            {isOpen && <span>{item.name}</span>}
           </Link>
         );
       })}

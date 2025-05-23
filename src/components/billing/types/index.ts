@@ -23,6 +23,7 @@ export interface GSTDetails {
   total_gst: number;
   taxable_amount: number;
   total_amount: number;
+  [key: string]: number; // Add index signature for JSON compatibility
 }
 
 export interface ClientDetails {
@@ -38,6 +39,7 @@ export interface AgencyGSTDetails {
   state: string;
   pan: string;
   state_code: string;
+  [key: string]: string; // Add index signature for JSON compatibility
 }
 
 export interface TDSRate {
