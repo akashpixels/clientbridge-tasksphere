@@ -1,7 +1,7 @@
 
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Layout } from "@/components/layout";
-import { AuthProvider } from "@/components/auth/AuthProvider";
+import { AuthProvider } from "@/context/auth";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "@/pages/Index";
 import Projects from "@/pages/Projects";

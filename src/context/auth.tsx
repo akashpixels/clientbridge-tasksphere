@@ -23,26 +23,45 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AuthProvider: Initializing');
+    console.log('AuthProvider: Initializing auth state');
     
+    let mounted = true;
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('AuthProvider: Auth state changed', { event, sessionExists: !!session });
-        setSession(session);
-        setLoading(false);
+        if (mounted) {
+          setSession(session);
+          setLoading(false);
+        }
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('AuthProvider: Initial session check', { sessionExists: !!session });
-      setSession(session);
-      setLoading(false);
-    });
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('AuthProvider: Initial session check', { sessionExists: !!session, error });
+        
+        if (mounted) {
+          setSession(session);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('AuthProvider: Error getting initial session', error);
+        if (mounted) {
+          setSession(null);
+          setLoading(false);
+        }
+      }
+    };
+
+    getInitialSession();
 
     return () => {
       console.log('AuthProvider: Cleaning up');
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
