@@ -12,7 +12,7 @@ interface BillingCreatePageProps {
 
 export const BillingCreatePage: React.FC<BillingCreatePageProps> = ({ onClose }) => {
   const [formData, setFormData] = useState<BillingFormData>({
-    billing_type: '' as BillingType,
+    billing_type: undefined,
     client_id: '',
     place_of_supply: '',
     tds_rate: 0,

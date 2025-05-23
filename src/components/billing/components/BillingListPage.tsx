@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ export const BillingListPage = () => {
 
   const handleCreateNew = () => {
     const initialFormData: BillingFormData = {
-      billing_type: '',
+      billing_type: undefined,
       client_id: '',
       place_of_supply: '',
       tds_rate: 0,

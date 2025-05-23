@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -35,7 +36,8 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
   const { data: clients } = useClientAdmins();
   
   // Only pass billing_type if it's a valid BillingType, otherwise pass null
-  const billingTypeForHook = formData.billing_type && formData.billing_type !== '' 
+  const billingTypeForHook = formData.billing_type && 
+    ['estimate', 'invoice', 'credit_note', 'debit_note'].includes(formData.billing_type)
     ? formData.billing_type as BillingType 
     : null;
   
@@ -93,7 +95,7 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
             <div className="space-y-2">
               <Label htmlFor="billing_type">Billing Type</Label>
               <Select
-                value={formData.billing_type}
+                value={formData.billing_type || ''}
                 onValueChange={(value) => onFormChange({ billing_type: value as BillingType })}
               >
                 <SelectTrigger>

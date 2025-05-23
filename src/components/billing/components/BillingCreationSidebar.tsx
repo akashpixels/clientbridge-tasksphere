@@ -14,7 +14,7 @@ export const BillingCreationSidebar = () => {
   const createBilling = useCreateBilling();
 
   const formData = billingFormData || {
-    billing_type: '' as BillingType,
+    billing_type: undefined,
     client_id: '',
     place_of_supply: '',
     tds_rate: 0,

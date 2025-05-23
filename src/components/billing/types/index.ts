@@ -51,7 +51,7 @@ export interface TDSRate {
 }
 
 export interface BillingFormData {
-  billing_type: BillingType;
+  billing_type: BillingType | undefined;
   client_id: string;
   place_of_supply: string;
   tds_rate: number;
