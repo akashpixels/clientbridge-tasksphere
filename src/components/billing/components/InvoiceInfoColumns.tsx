@@ -46,7 +46,7 @@ export const InvoiceInfoColumns: React.FC<InvoiceInfoColumnsProps> = ({
       </div>
       
       {/* Column 3 - Total Due & Due Date */}
-      <div className="space-y-2 p-4">
+      <div className=" p-4">
         <div className="bg-gray-50 p-4 rounded-lg">
           
           <div className="text-sm flex flex-col justify-between">
