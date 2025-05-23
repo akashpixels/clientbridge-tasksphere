@@ -34,14 +34,14 @@ export const InvoiceHeader: React.FC<InvoiceHeaderProps> = ({
           />
         )}
         
-        <div className="space-x-4 flex">
+        <div className="space-x-2 flex">
           {/* Document Number */}
           {documentNumber && (
             <h2 className="font-semibold text-lg">{documentNumber}</h2>
           )}
           
           {/* Contact Info */}
-          <div className="text-sm text-gray-600 border-l">
+          <div className="text-sm text-gray-600 border-l pl-2">
             {agencyEmail && <p>{agencyEmail}</p>}
             {agencyPhone && <p>{agencyPhone}</p>}
           </div>
