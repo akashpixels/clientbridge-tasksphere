@@ -49,7 +49,7 @@ export const InvoiceInfoColumns: React.FC<InvoiceInfoColumnsProps> = ({
       <div className="space-y-2 p-4">
         <div className="bg-gray-50 p-4 rounded-lg">
           
-          <div className="text-sm space-y-3">
+          <div className="text-sm flex flex-col justify-between">
             <div className="flex justify-between flex-col items-center">
               <span>Total Due:</span>
               <span className="font-bold text-base">₹{totalAmount.toFixed(2)}</span>
