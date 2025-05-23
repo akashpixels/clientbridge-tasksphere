@@ -36,7 +36,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
   };
 
   return (
-  <div className="mt-48 pb-6 border-b">
+  <div className="!mt-48 pb-6 border-b">
     {/* Notes Section */}
 
     {/* Two Column Footer */}
