@@ -36,79 +36,71 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
   };
 
   return (
-    <div className="mt-8 pb-6 border-b">
-      {/* Notes Section */}
-  
-      {/* Two Column Footer */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        
-        {/* Left Column - Signature and Stamp */}
-        <div className="flex flex-col md:items-start justify-end">
-          <div className="relative w-24 h-24">
-            {signature && (
-              <img
-                src={signature}
-                alt="Authorized Signature"
-                className="w-32 h-16 object-contain absolute left-6 top-0 z-10"
-              />
-            )}
+  <div className="mt-8 pb-6 border-b">
+    {/* Notes Section */}
 
-            {stamp && (
-              <img
-                src={stamp}
-                alt="Company Stamp"
-                className="w-20 h-20 object-contain absolute left-0 top-0 z-0"
-              />
-            )}
-          </div>
-          
-          {notes && (
-            <div className="">
-              <h4 className="font-semibold text-sm mb-2">Notes:</h4>
-              <p className="text-sm text-gray-600 whitespace-pre-line">{notes}</p>
-            </div>
+    {/* Two Column Footer */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+
+      {/* Left Column - Signature and Stamp */}
+      <div className="flex flex-col md:items-start justify-end">
+        <div className="relative w-24 h-24">
+          {signature && (
+            <img
+              src={signature}
+              alt="Authorized Signature"
+              className="w-32 h-16 object-contain absolute left-6 top-0 z-10"
+            />
+          )}
+
+          {stamp && (
+            <img
+              src={stamp}
+              alt="Company Stamp"
+              className="w-20 h-20 object-contain absolute left-0 top-0 z-0"
+            />
           )}
         </div>
         
-        {/* Right Column - Payment Info */}
-        <div className="space-y-4">
-          {/* UPI Address */}
-          
+        {notes && (
+          <div className="">
+            <h4 className="font-semibold text-sm mb-2">Notes:</h4>
+            <p className="text-sm text-gray-600 whitespace-pre-line">{notes}</p>
+          </div>
+        )}
+      </div>
 
-          <div className="flex ">
-            {/* QR Code */}
-            <div className="border rounded-lg item-center">
-              
-          <div className="flex-col item-center ">
-               {upiAddress && (
+      {/* Right Column - Payment Info */}
+      <div className="border rounded-lg item-center">
+        <div className="flex-col item-center ">
+          {upiAddress && (
             <div className="text-sm pl-6">
               <p className="text-gray-600">{upiAddress}</p>
             </div>
           )}
-              {qrCode && (
-                <div className="text-center md:text-right p-4">
-                  {/* <h4 className="font-medium mb-2 text-sm">Scan to Pay</h4>*/}
-                  <img 
-                    src={qrCode} 
-                    alt="QR Code" 
-                    className="w-32 h-32 mx-auto md:ml-auto md:mr-0 border rounded"
-                  />
-                </div>
-              )}
-                </div>
-              {/* Bank Details */}
-              {bankDetails && (
-                <div className="text-sm border-l p-4">
-                  <h4 className="font-medium mb-1">Bank Details:</h4>
-                  <p className="text-gray-600 whitespace-pre-line">
-                    {formatBankDetails(bankDetails)}
-                  </p>
-                </div>
-              )}
+          {qrCode && (
+            <div className="text-center md:text-right p-4">
+              {/* <h4 className="font-medium mb-2 text-sm">Scan to Pay</h4>*/}
+              <img 
+                src={qrCode} 
+                alt="QR Code" 
+                className="w-32 h-32 mx-auto md:ml-auto md:mr-0 border rounded"
+              />
             </div>
-          </div>
+          )}
         </div>
+        {/* Bank Details */}
+        {bankDetails && (
+          <div className="text-sm border-l p-4">
+            <h4 className="font-medium mb-1">Bank Details:</h4>
+            <p className="text-gray-600 whitespace-pre-line">
+              {formatBankDetails(bankDetails)}
+            </p>
+          </div>
+        )}
       </div>
     </div>
-  );
+  </div>
+);
+
 };
