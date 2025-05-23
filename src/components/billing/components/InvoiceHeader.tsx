@@ -36,7 +36,7 @@ export const InvoiceHeader: React.FC<InvoiceHeaderProps> = ({
         
         <div className="space-x-2 flex">
           {/* Document Number */}
-            <div className="space-y-1 flex-col">
+            <div className=" flex-col">
           
           <h2 className=" text-sm">Invoice No</h2>
           {documentNumber && (
