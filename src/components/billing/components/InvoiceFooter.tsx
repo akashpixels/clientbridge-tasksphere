@@ -44,7 +44,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
                 alt="Authorized Signature" 
                 className="w-32 h-16 object-contain"
               />
-              <p className="text-xs text-gray-500 mt-1">Authorized Signature</p>
+             
             </div>
           )}
           
@@ -55,7 +55,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
                 alt="Company Stamp" 
                 className="w-20 h-20 object-contain"
               />
-              <p className="text-xs text-gray-500 mt-1">Company Stamp</p>
+             
             </div>
           )}
       {/* Two Column Footer */}
