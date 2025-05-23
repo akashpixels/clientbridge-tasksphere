@@ -50,12 +50,12 @@ export const InvoiceInfoColumns: React.FC<InvoiceInfoColumnsProps> = ({
         <div className="bg-gray-50 p-4 rounded-lg">
           
           <div className="text-sm space-y-3">
-            <div className="flex justify-between flex-col">
+            <div className="flex justify-between flex-col items-center">
               <span>Total Due:</span>
               <span className="font-bold text-base">₹{totalAmount.toFixed(2)}</span>
             </div>
             {dueDate && (
-              <div className="flex justify-between flex-col">
+              <div className="flex justify-between flex-col items-center">
                 <span>Due Date:</span>
                 <span>{format(new Date(dueDate), 'dd MMM yyyy')}</span>
               </div>
