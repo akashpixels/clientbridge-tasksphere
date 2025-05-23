@@ -1,56 +1,45 @@
 
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Briefcase, Users, FileText } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Home, FolderOpen, Users, UserCheck, Receipt } from 'lucide-react';
 
-interface NavItem {
-  label: string;
-  icon: React.ReactNode;
-  href: string;
-}
-
-interface SidebarNavigationProps {
-  isOpen: boolean;
-}
-
-const navItems: NavItem[] = [
-  { label: 'Dashboard', icon: <Home size={20} />, href: '/' },
-  { label: 'Projects', icon: <Briefcase size={20} />, href: '/projects' },
-  { label: 'Team', icon: <Users size={20} />, href: '/team' },
-  { label: 'Clients', icon: <FileText size={20} />, href: '/clients' },
+const navigation = [
+  { name: 'Dashboard', href: '/', icon: Home },
+  { name: 'Projects', href: '/projects', icon: FolderOpen },
+  { name: 'Clients', href: '/clients', icon: Users },
+  { name: 'Team', href: '/team', icon: UserCheck },
+  { name: 'Billing', href: '/billing', icon: Receipt },
 ];
 
-const SidebarNavigation = ({ isOpen }: SidebarNavigationProps) => {
-  const navigate = useNavigate();
+export const SidebarNavigation = () => {
   const location = useLocation();
 
   return (
-    <nav className="space-y-2">
-      {navItems.map((item) => {
-        const isActive = location.pathname === item.href;
+    <nav className="flex-1 space-y-1 px-2 py-4">
+      {navigation.map((item) => {
+        const isActive = location.pathname === item.href || 
+          (item.href !== '/' && location.pathname.startsWith(item.href));
+        
         return (
-          <button
-            key={item.href}
-            onClick={() => navigate(item.href)}
-            className={cn(
-              'w-full flex items-center gap-3 p-3 rounded-[6px] transition-all',
-              'text-gray-700 hover:text-gray-900 hover:bg-muted',
-              isActive && 'bg-muted text-gray-900'
-            )}
+          <Link
+            key={item.name}
+            to={item.href}
+            className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
+              isActive
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+            }`}
           >
-            <div className="min-w-[20px]">
-              {item.icon}
-            </div>
-            {isOpen && (
-              <span className="text-sm font-medium truncate">
-                {item.label}
-              </span>
-            )}
-          </button>
+            <item.icon
+              className={`mr-3 h-5 w-5 flex-shrink-0 ${
+                isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
+              }`}
+              aria-hidden="true"
+            />
+            {item.name}
+          </Link>
         );
       })}
     </nav>
   );
 };
-
-export default SidebarNavigation;

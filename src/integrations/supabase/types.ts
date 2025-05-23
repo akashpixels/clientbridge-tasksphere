@@ -9,53 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      activity_log: {
-        Row: {
-          action: string
-          created_at: string
-          description: string | null
-          entity_id: string | null
-          entity_name: string | null
-          entity_type: string | null
-          id: string
-          updated_at: string
-          updated_fields: Json | null
-          user_id: string
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          description?: string | null
-          entity_id?: string | null
-          entity_name?: string | null
-          entity_type?: string | null
-          id?: string
-          updated_at?: string
-          updated_fields?: Json | null
-          user_id: string
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          description?: string | null
-          entity_id?: string | null
-          entity_name?: string | null
-          entity_type?: string | null
-          id?: string
-          updated_at?: string
-          updated_fields?: Json | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "activity_log_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       agency_settings: {
         Row: {
           created_at: string
@@ -80,11 +33,85 @@ export type Database = {
         }
         Relationships: []
       }
+      billing: {
+        Row: {
+          agency_gstin: string | null
+          amount_due: number | null
+          amount_payable: number | null
+          amount_total: number | null
+          bill_status: Database["public"]["Enums"]["doc_status"]
+          billing_number: string | null
+          billing_type: Database["public"]["Enums"]["billing_type"]
+          client_gstin: string | null
+          client_id: string
+          created_at: string | null
+          gst_details: Json | null
+          id: string
+          items: Json | null
+          linked_billing_id: string | null
+          payment_status: Database["public"]["Enums"]["billing_payment_status"]
+          place_of_supply: string | null
+          reason: string | null
+          snapshot_data: Json | null
+          tds_amount: number | null
+          tds_rate: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          agency_gstin?: string | null
+          amount_due?: number | null
+          amount_payable?: number | null
+          amount_total?: number | null
+          bill_status?: Database["public"]["Enums"]["doc_status"]
+          billing_number?: string | null
+          billing_type: Database["public"]["Enums"]["billing_type"]
+          client_gstin?: string | null
+          client_id: string
+          created_at?: string | null
+          gst_details?: Json | null
+          id?: string
+          items?: Json | null
+          linked_billing_id?: string | null
+          payment_status?: Database["public"]["Enums"]["billing_payment_status"]
+          place_of_supply?: string | null
+          reason?: string | null
+          snapshot_data?: Json | null
+          tds_amount?: number | null
+          tds_rate?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          agency_gstin?: string | null
+          amount_due?: number | null
+          amount_payable?: number | null
+          amount_total?: number | null
+          bill_status?: Database["public"]["Enums"]["doc_status"]
+          billing_number?: string | null
+          billing_type?: Database["public"]["Enums"]["billing_type"]
+          client_gstin?: string | null
+          client_id?: string
+          created_at?: string | null
+          gst_details?: Json | null
+          id?: string
+          items?: Json | null
+          linked_billing_id?: string | null
+          payment_status?: Database["public"]["Enums"]["billing_payment_status"]
+          place_of_supply?: string | null
+          reason?: string | null
+          snapshot_data?: Json | null
+          tds_amount?: number | null
+          tds_rate?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       client_admins: {
         Row: {
+          address: string | null
           business_name: string
           created_at: string
           description: string | null
+          gstin: string | null
           id: string
           logo_url: string | null
           primary_color_hex: string | null
@@ -92,9 +119,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
           business_name: string
           created_at?: string
           description?: string | null
+          gstin?: string | null
           id?: string
           logo_url?: string | null
           primary_color_hex?: string | null
@@ -102,9 +131,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
           business_name?: string
           created_at?: string
           description?: string | null
+          gstin?: string | null
           id?: string
           logo_url?: string | null
           primary_color_hex?: string | null
@@ -148,6 +179,30 @@ export type Database = {
           multiplier?: number
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      document_templates: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: number
+          title: string | null
+          type: Database["public"]["Enums"]["doc_type"] | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          id?: number
+          title?: string | null
+          type?: Database["public"]["Enums"]["doc_type"] | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          id?: number
+          title?: string | null
+          type?: Database["public"]["Enums"]["doc_type"] | null
         }
         Relationships: []
       }
@@ -665,6 +720,44 @@ export type Database = {
           },
         ]
       }
+      proposal_templates: {
+        Row: {
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          template_html: string
+          thumbnail_url: string | null
+        }
+        Insert: {
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          template_html: string
+          thumbnail_url?: string | null
+        }
+        Update: {
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          template_html?: string
+          thumbnail_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_usage: {
         Row: {
           allocated_duration: unknown | null
@@ -1067,6 +1160,56 @@ export type Database = {
           },
         ]
       }
+      transactions: {
+        Row: {
+          amount: number
+          billing_id: string | null
+          created_at: string | null
+          id: string
+          linked_billing_id: string | null
+          receipt_number: number | null
+          reference_number: string | null
+          tds_deducted: number | null
+          transaction_date: string | null
+          transaction_status: Database["public"]["Enums"]["transaction_status"]
+          transaction_type: Database["public"]["Enums"]["transaction_type"]
+        }
+        Insert: {
+          amount: number
+          billing_id?: string | null
+          created_at?: string | null
+          id?: string
+          linked_billing_id?: string | null
+          receipt_number?: number | null
+          reference_number?: string | null
+          tds_deducted?: number | null
+          transaction_date?: string | null
+          transaction_status?: Database["public"]["Enums"]["transaction_status"]
+          transaction_type?: Database["public"]["Enums"]["transaction_type"]
+        }
+        Update: {
+          amount?: number
+          billing_id?: string | null
+          created_at?: string | null
+          id?: string
+          linked_billing_id?: string | null
+          receipt_number?: number | null
+          reference_number?: string | null
+          tds_deducted?: number | null
+          transaction_date?: string | null
+          transaction_status?: Database["public"]["Enums"]["transaction_status"]
+          transaction_type?: Database["public"]["Enums"]["transaction_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_billing_id_fkey"
+            columns: ["billing_id"]
+            isOneToOne: false
+            referencedRelation: "billing"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           client_admin_id: string | null
@@ -1200,6 +1343,12 @@ export type Database = {
         }
         Returns: string
       }
+      generate_billing_number: {
+        Args: {
+          billing_type_param: Database["public"]["Enums"]["billing_type"]
+        }
+        Returns: string
+      }
       get_task_schedule: {
         Args: {
           p_project_id: string
@@ -1216,9 +1365,14 @@ export type Database = {
       }
     }
     Enums: {
+      access_type: "public" | "private"
       attachment_type: "image" | "document" | "other"
       billing_cycle: "monthly" | "quarterly" | "yearly" | "half yearly"
+      billing_payment_status: "unpaid" | "paid" | "partially_paid"
+      billing_type: "estimate" | "invoice" | "credit_note" | "debit_note"
       device_type: "mobile" | "desktop" | "both"
+      doc_status: "draft" | "final" | "sent" | "cancelled"
+      doc_type: "proposal" | "contract" | "nda"
       gender_enum: "male" | "female" | "other"
       input_status: "requested" | "submitted" | "approved" | "re-requested"
       layout_type: "RETAINER" | "REGULAR" | "FUSION"
@@ -1231,6 +1385,13 @@ export type Database = {
         | "marketing"
         | "general"
       task_status_type: "scheduled" | "active" | "completed" | "specialcase"
+      transaction_status:
+        | "pending"
+        | "success"
+        | "failed"
+        | "reversed"
+        | "cancelled"
+      transaction_type: "receipt" | "refund" | "adjustment"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1346,9 +1507,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      access_type: ["public", "private"],
       attachment_type: ["image", "document", "other"],
       billing_cycle: ["monthly", "quarterly", "yearly", "half yearly"],
+      billing_payment_status: ["unpaid", "paid", "partially_paid"],
+      billing_type: ["estimate", "invoice", "credit_note", "debit_note"],
       device_type: ["mobile", "desktop", "both"],
+      doc_status: ["draft", "final", "sent", "cancelled"],
+      doc_type: ["proposal", "contract", "nda"],
       gender_enum: ["male", "female", "other"],
       input_status: ["requested", "submitted", "approved", "re-requested"],
       layout_type: ["RETAINER", "REGULAR", "FUSION"],
@@ -1356,6 +1522,14 @@ export const Constants = {
       subscription_status: ["active", "inactive"],
       task_categories: ["design", "development", "seo", "marketing", "general"],
       task_status_type: ["scheduled", "active", "completed", "specialcase"],
+      transaction_status: [
+        "pending",
+        "success",
+        "failed",
+        "reversed",
+        "cancelled",
+      ],
+      transaction_type: ["receipt", "refund", "adjustment"],
     },
   },
 } as const
