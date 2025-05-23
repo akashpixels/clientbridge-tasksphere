@@ -36,7 +36,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
   return (
     <div className="mt-8 pt-6 border-t">
       {/* Notes Section */}
-    <div className="relative w-24 h-24 mx-auto">
+    <div className="relative w-24 h-24">
   {signature && (
     <img
       src={signature}
