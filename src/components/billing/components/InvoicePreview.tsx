@@ -78,7 +78,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
   };
 
   return (
-    <div className="max-w-5xl mx-auto bg-white p-8 shadow-sm rounded-lg space-y-6">
+    <div className="max-w-5xl mx-auto bg-white p-16 shadow-sm rounded-lg space-y-6">
       {/* Header */}
       <InvoiceHeader 
         agencyLogo={settings?.agencyDetails?.iconUrl}
