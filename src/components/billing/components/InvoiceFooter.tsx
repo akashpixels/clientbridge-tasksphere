@@ -64,7 +64,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
 </div>
           
           {notes && (
-        <div className="mb-6">
+        <div className="">
           <h4 className="font-semibold text-sm mb-2">Notes:</h4>
           <p className="text-sm text-gray-600 whitespace-pre-line">{notes}</p>
         </div>
