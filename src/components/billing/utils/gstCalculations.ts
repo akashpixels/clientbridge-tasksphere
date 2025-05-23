@@ -68,6 +68,7 @@ export const calculateLineItemTotal = (item: Partial<LineItem>): LineItem => {
     gst_rate: gstRate,
     gst_amount: Math.round(gstAmount * 100) / 100,
     total_amount: Math.round(totalAmount * 100) / 100,
+    sac_code: item.sac_code || '998314', // Add the missing sac_code property with default value
   };
 };
 
