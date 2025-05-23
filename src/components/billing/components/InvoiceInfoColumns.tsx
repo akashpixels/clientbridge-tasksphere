@@ -26,7 +26,7 @@ export const InvoiceInfoColumns: React.FC<InvoiceInfoColumnsProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 border">
       {/* Column 1 - Agency Details */}
-      <div className="space-y-2 border-r">
+      <div className="space-y-2 border-r p-4">
         <h3 className="font-semibold text-gray-700">From:</h3>
         <div className="text-sm space-y-1">
           {agencyName && <p className="font-medium">{agencyName}</p>}
@@ -36,7 +36,7 @@ export const InvoiceInfoColumns: React.FC<InvoiceInfoColumnsProps> = ({
       </div>
       
       {/* Column 2 - Client Details */}
-      <div className="space-y-2 border-r">
+      <div className="space-y-2 border-r p-4">
         <h3 className="font-semibold text-gray-700">Billed To:</h3>
         <div className="text-sm space-y-1">
           {clientName && <p className="font-medium">{clientName}</p>}
@@ -46,8 +46,8 @@ export const InvoiceInfoColumns: React.FC<InvoiceInfoColumnsProps> = ({
       </div>
       
       {/* Column 3 - Total Due & Due Date */}
-      <div className="space-y-2">
-        <div className="bg-gray-50 p-4 rounded-lg">
+      <div className="space-y-2 p-4">
+       
           <h3 className="font-semibold text-gray-700 mb-2">Payment Information</h3>
           <div className="text-sm space-y-3">
             <div className="flex justify-between">
@@ -61,7 +61,7 @@ export const InvoiceInfoColumns: React.FC<InvoiceInfoColumnsProps> = ({
               </div>
             )}
           </div>
-        </div>
+        
       </div>
     </div>
   );
