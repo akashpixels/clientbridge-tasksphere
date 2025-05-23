@@ -266,6 +266,85 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
               )}
             </div>
           </div>
+
+          {/* Footer Section */}
+          <div className="border-t pt-6 mt-8">
+            <div className="space-y-4">
+              {/* Notes */}
+              <div className="text-sm">
+                <h4 className="font-medium mb-2">Notes:</h4>
+                <p className="text-gray-700">
+                  {formData.notes || "Payment must be cleared within due date"}
+                </p>
+              </div>
+
+              {/* Payment Details Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Payment Information */}
+                <div className="space-y-4">
+                  {/* UPI Address */}
+                  {settings?.footerDetails?.upiAddress && (
+                    <div className="text-sm">
+                      <h4 className="font-medium mb-1">UPI Address:</h4>
+                      <p className="text-gray-700">{settings.footerDetails.upiAddress}</p>
+                    </div>
+                  )}
+
+                  {/* Bank Details */}
+                  {settings?.footerDetails?.bankDetails && (
+                    <div className="text-sm">
+                      <h4 className="font-medium mb-1">Bank Details:</h4>
+                      <div className="text-gray-700 whitespace-pre-line">
+                        {settings.footerDetails.bankDetails}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* QR Code and Images */}
+                <div className="space-y-4">
+                  {/* QR Code */}
+                  {settings?.footerDetails?.qrCode && (
+                    <div className="text-center">
+                      <h4 className="font-medium mb-2 text-sm">Scan to Pay</h4>
+                      <img 
+                        src={settings.footerDetails.qrCode} 
+                        alt="QR Code" 
+                        className="w-32 h-32 mx-auto border rounded"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Stamp and Signature */}
+              <div className="flex justify-between items-end pt-4">
+                {/* Stamp */}
+                {settings?.footerDetails?.stamp && (
+                  <div className="text-center">
+                    <img 
+                      src={settings.footerDetails.stamp} 
+                      alt="Company Stamp" 
+                      className="w-20 h-20 mx-auto"
+                    />
+                    <p className="text-xs text-gray-600 mt-1">Company Stamp</p>
+                  </div>
+                )}
+
+                {/* Signature */}
+                {settings?.footerDetails?.signature && (
+                  <div className="text-center">
+                    <img 
+                      src={settings.footerDetails.signature} 
+                      alt="Authorized Signature" 
+                      className="w-32 h-16 mx-auto"
+                    />
+                    <p className="text-xs text-gray-600 mt-1">Authorized Signature</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -10,7 +10,21 @@ export const useAgencySettings = () => {
       const { data, error } = await supabase
         .from('agency_settings')
         .select('*')
-        .in('key', ['indian_states', 'agency_gst_details', 'tds_rates', 'billing_sequences', 'agency_name', 'agency_address', 'agency_email', 'agency_phone']);
+        .in('key', [
+          'indian_states', 
+          'agency_gst_details', 
+          'tds_rates', 
+          'billing_sequences', 
+          'agency_name', 
+          'agency_address', 
+          'agency_email', 
+          'agency_phone',
+          'upi_address',
+          'bank_details',
+          'qr_code',
+          'stamp',
+          'signature'
+        ]);
 
       if (error) throw error;
 
@@ -29,6 +43,13 @@ export const useAgencySettings = () => {
           address: settings.agency_address || 'Agency Address',
           email: settings.agency_email || '',
           phone: settings.agency_phone || ''
+        },
+        footerDetails: {
+          upiAddress: settings.upi_address || '',
+          bankDetails: settings.bank_details || '',
+          qrCode: settings.qr_code || '',
+          stamp: settings.stamp || '',
+          signature: settings.signature || ''
         }
       };
     },

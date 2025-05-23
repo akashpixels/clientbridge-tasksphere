@@ -40,6 +40,13 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
     }
   }, [selectedClient, settings?.indianStates, formData.place_of_supply, onFormChange]);
 
+  // Set default notes if not already set
+  useEffect(() => {
+    if (!formData.notes) {
+      onFormChange({ notes: "Payment must be cleared within due date" });
+    }
+  }, [formData.notes, onFormChange]);
+
   if (!isOpen) return null;
 
   return (
@@ -147,12 +154,12 @@ export const BillingSidebar: React.FC<BillingSidebarProps> = ({
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Label htmlFor="notes">Notes</Label>
               <Textarea
                 id="notes"
                 value={formData.notes || ''}
                 onChange={(e) => onFormChange({ notes: e.target.value })}
-                placeholder="Additional notes..."
+                placeholder="Payment must be cleared within due date"
                 rows={3}
               />
             </div>
