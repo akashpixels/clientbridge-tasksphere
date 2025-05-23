@@ -36,7 +36,14 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
   return (
     <div className="mt-8 pt-6 border-t">
       {/* Notes Section */}
-    <div className="relative w-24 h-24">
+  
+
+      {/* Two Column Footer */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        
+        {/* Left Column - Signature and Stamp */}
+        <div className="flex flex-col items-center md:items-start justify-end space-y-4">
+            <div className="relative w-24 h-24">
   {signature && (
     <img
       src={signature}
@@ -55,18 +62,15 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
     />
   )}
 </div>
-
-      {/* Two Column Footer */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        
-        {/* Left Column - Signature and Stamp */}
-        <div className="flex flex-col items-center md:items-start justify-end space-y-4">
+          
           {notes && (
         <div className="mb-6">
           <h4 className="font-semibold text-sm mb-2">Notes:</h4>
           <p className="text-sm text-gray-600 whitespace-pre-line">{notes}</p>
         </div>
       )}
+
+          
         </div>
         
         {/* Right Column - Payment Info */}
@@ -81,6 +85,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
 
 <div className="">
   {/* QR Code */}
+    <div className="">
           {qrCode && (
             <div className="text-center md:text-right">
               <h4 className="font-medium mb-2 text-sm">Scan to Pay</h4>
@@ -102,7 +107,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
               </p>
             </div>
           )}
-          
+          </div>
          
         </div>
         </div>
