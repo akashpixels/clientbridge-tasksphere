@@ -10,7 +10,7 @@ export const useAgencySettings = () => {
       const { data, error } = await supabase
         .from('agency_settings')
         .select('*')
-        .in('key', ['indian_states', 'agency_gst_details', 'tds_rates', 'billing_sequences', 'agency_details']);
+        .in('key', ['indian_states', 'agency_gst_details', 'tds_rates', 'billing_sequences', 'agency_name', 'agency_address', 'agency_email', 'agency_phone']);
 
       if (error) throw error;
 
@@ -24,11 +24,11 @@ export const useAgencySettings = () => {
         agencyGSTDetails: settings.agency_gst_details as AgencyGSTDetails,
         tdsRates: settings.tds_rates as TDSRate[],
         billingSequences: settings.billing_sequences,
-        agencyDetails: settings.agency_details || {
-          name: 'Your Agency',
-          address: 'Agency Address',
-          email: '',
-          phone: ''
+        agencyDetails: {
+          name: settings.agency_name || 'Your Agency',
+          address: settings.agency_address || 'Agency Address',
+          email: settings.agency_email || '',
+          phone: settings.agency_phone || ''
         }
       };
     },
