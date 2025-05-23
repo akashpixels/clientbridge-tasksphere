@@ -78,14 +78,14 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
           {/* UPI Address */}
           {upiAddress && (
             <div className="text-sm">
-              <h4 className="font-medium mb-1">UPI Address:</h4>
+              
               <p className="text-gray-600">{upiAddress}</p>
             </div>
           )}
 
 <div className="">
   {/* QR Code */}
-    <div className="border">
+    <div className="border rounded-lg">
           {qrCode && (
             <div className="text-center md:text-right">
               <h4 className="font-medium mb-2 text-sm">Scan to Pay</h4>
