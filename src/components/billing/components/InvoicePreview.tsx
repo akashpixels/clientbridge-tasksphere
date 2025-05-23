@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,9 +76,6 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
   const isIntraState = formData.place_of_supply === settings?.agencyGSTDetails?.state;
   const isInternational = formData.place_of_supply === 'International';
 
-  // Custom input style to hide number spinners/arrows
-  const numberInputStyle = "appearance-none";
-
   const getDocumentType = () => {
     switch (formData.billing_type) {
       case 'invoice': return 'Invoice';
@@ -146,6 +144,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                   <div className="space-y-1">
                     {editingItem === item.id ? (
                       <Input
+                        variant="minimal"
                         value={item.description}
                         onChange={(e) => updateItem(item.id, { description: e.target.value })}
                         onBlur={() => setEditingItem(null)}
@@ -182,26 +181,29 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                 </TableCell>
                 <TableCell>
                   <Input
+                    variant="minimal"
                     type="number"
                     value={item.quantity}
                     onChange={(e) => updateItem(item.id, { quantity: parseFloat(e.target.value) || 0 })}
-                    className={`w-full ${numberInputStyle}`}
+                    className="w-full text-center"
                   />
                 </TableCell>
                 <TableCell>
                   <Input
+                    variant="minimal"
                     type="number"
                     value={item.rate}
                     onChange={(e) => updateItem(item.id, { rate: parseFloat(e.target.value) || 0 })}
-                    className={`w-full ${numberInputStyle}`}
+                    className="w-full text-right"
                   />
                 </TableCell>
                 <TableCell>
                   <Input
+                    variant="minimal"
                     type="number"
                     value={item.gst_rate}
                     onChange={(e) => updateItem(item.id, { gst_rate: parseFloat(e.target.value) || 0 })}
-                    className={`w-full ${numberInputStyle}`}
+                    className="w-full text-center"
                     disabled={isInternational}
                   />
                 </TableCell>
@@ -223,41 +225,6 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
           </TableBody>
         </Table>
       </div>
-
-      {/* GST Summary
-      {!isInternational && gstDetails.total_gst > 0 && (
-        <div className="border-t pt-4">
-          <h3 className="font-semibold mb-3">GST Breakdown</h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span>Taxable Amount:</span>
-              <span>₹{gstDetails.taxable_amount.toFixed(2)}</span>
-            </div>
-            {isIntraState ? (
-              <>
-                <div className="flex justify-between">
-                  <span>CGST:</span>
-                  <span>₹{gstDetails.cgst.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>SGST:</span>
-                  <span>₹{gstDetails.sgst.toFixed(2)}</span>
-                </div>
-              </>
-            ) : (
-              <div className="flex justify-between">
-                <span>IGST:</span>
-                <span>₹{gstDetails.igst.toFixed(2)}</span>
-              </div>
-            )}
-            <div className="flex justify-between font-semibold">
-              <span>Total GST:</span>
-              <span>₹{gstDetails.total_gst.toFixed(2)}</span>
-            </div>
-          </div>
-        </div>
-      )} 
-       */}
 
       {/* Total Summary */}
       <div className="border-t pt-4">
