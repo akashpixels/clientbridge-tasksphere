@@ -36,24 +36,14 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
     return formattedLines.join('\n');
   };
 
-  return (
+ return (
   <div className="!mt-48 pb-6 border-b">
-    {/* Notes Section */}
-
     {/* Two Column Footer */}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-
-      {/* Left Column - Signature and Stamp */}
-      <div className="flex flex-col md:items-start justify-end">
-        <div className="relative w-24 h-24">
-          {signature && (
-            <img
-              src={signature}
-              alt="Authorized Signature"
-              className="w-32 h-16 object-contain absolute left-6 top-0 z-10"
-            />
-          )}
-
+      {/* Left Column - Signature and Notes */}
+      <div className="flex flex-col md:items-start justify-end min-h-[150px]">
+        {/* Signature and Stamp */}
+        <div className="relative w-24 h-24 mb-4">
           {stamp && (
             <img
               src={stamp}
@@ -61,46 +51,53 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
               className="w-20 h-20 object-contain absolute left-0 top-0 z-0"
             />
           )}
+          {signature && (
+            <img
+              src={signature}
+              alt="Authorized Signature"
+              className="w-32 h-16 object-contain absolute left-6 top-0 z-10"
+            />
+          )}
         </div>
-        
+        {/* Notes */}
         {notes && (
-          <div className="">
-            <h4 className="font-semibold text-sm mb-2">Notes:</h4>
+          <div className="pt-2">
+            <h4 className="font-semibold text-sm mb-1">Notes:</h4>
             <p className="text-sm text-gray-600 whitespace-pre-line">{notes}</p>
           </div>
         )}
       </div>
 
       {/* Right Column - Payment Info */}
-      <div className="border rounded-lg item-center flex">
-        <div className="flex-col item-center ">
-          {upiAddress && (
-            <div className="text-sm pl-6 -mt-6 pb-[10px] leading-[10px]">
-              <p className="text-gray-600 text-xs">{upiAddress}</p>
-            </div>
-          )}
-          {qrCode && (
-            <div className="text-center md:text-right p-4">
-              {/* <h4 className="font-medium mb-2 text-sm">Scan to Pay</h4>*/}
-              <img 
-                src={qrCode} 
-                alt="QR Code" 
-                className="w-24 h-24 mx-auto md:ml-auto md:mr-0 border rounded"
+      <div className="flex flex-col items-end">
+        {/* UPI Address */}
+        {upiAddress && (
+          <div className="pr-2 pb-1 w-full text-right">
+            <span className="text-xs text-gray-600">{upiAddress}</span>
+          </div>
+        )}
+        {/* QR + Bank Details Box */}
+        <div className="flex border rounded-lg overflow-hidden bg-white min-w-[330px]">
+          {/* QR Code */}
+          <div className="flex flex-col justify-center items-center p-4">
+            {qrCode && (
+              <img
+                src={qrCode}
+                alt="QR Code"
+                className="w-24 h-24 border rounded"
               />
+            )}
+          </div>
+          {/* Bank Details */}
+          {bankDetails && (
+            <div className="text-xs border-l p-4 flex flex-col justify-center min-w-[170px]">
+              <pre className="text-gray-700 leading-snug font-sans whitespace-pre-line">
+                {formatBankDetails(bankDetails)}
+              </pre>
             </div>
           )}
         </div>
-        {/* Bank Details */}
-        {bankDetails && (
-          <div className="text-xs border-l p-4">
-            <p className="text-gray-600 whitespace-pre-line">
-              {formatBankDetails(bankDetails)}
-            </p>
-          </div>
-        )}
       </div>
     </div>
   </div>
 );
-
-};
