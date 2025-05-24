@@ -124,7 +124,7 @@ export const PaymentBlock: React.FC<PaymentBlockProps> = ({
                     <span>-₹{paymentCalculation.discountAmount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between font-semibold text-lg border-t pt-2">
+                <div className="flex justify-between   border-t pt-2">
                   <span>Final Amount:</span>
                   <span>₹{paymentCalculation.finalAmount.toFixed(2)}</span>
                 </div>
