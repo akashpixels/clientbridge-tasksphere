@@ -137,6 +137,24 @@
     grid-template-columns: repeat(3, 1fr) !important;
   }
   
+  /* Force 2-column layout for invoice footer section */
+  .grid.grid-cols-1.md\\:grid-cols-2 {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-rows: auto !important;
+  }
+  
+  /* Ensure all footer grid items display properly */
+  .grid.grid-cols-1.md\\:grid-cols-2 > div {
+    display: block !important;
+  }
+  
+  /* Alternative selector for the footer columns */
+  [class*="grid"][class*="grid-cols-1"][class*="md:grid-cols-2"] {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
   /* Remove shadows and rounded corners for better print quality */
   * {
     box-shadow: none !important;
