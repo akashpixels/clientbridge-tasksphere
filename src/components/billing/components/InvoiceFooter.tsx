@@ -101,3 +101,6 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
     </div>
   </div>
 );
+
+
+};
