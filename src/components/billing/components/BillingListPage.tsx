@@ -72,7 +72,7 @@ export const BillingListPage = () => {
   }
 
   return (
-    <div className="space-y-6 container mx-auto p-6">
+    <div className="space-y-6  p-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Billing</h1>
         <Button onClick={handleCreateNew} className="flex items-center gap-2">
@@ -81,7 +81,7 @@ export const BillingListPage = () => {
         </Button>
       </div>
 
-      <Card>
+     
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Billing Records</CardTitle>
@@ -155,7 +155,7 @@ export const BillingListPage = () => {
             )}
           </div>
         </CardContent>
-      </Card>
+      
     </div>
   );
 };
