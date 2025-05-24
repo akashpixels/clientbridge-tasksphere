@@ -85,14 +85,14 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
               <img 
                 src={qrCode} 
                 alt="QR Code" 
-                className="w-32 h-32 mx-auto md:ml-auto md:mr-0 border rounded"
+                className="w-24 h-24 mx-auto md:ml-auto md:mr-0 border rounded"
               />
             </div>
           )}
         </div>
         {/* Bank Details */}
         {bankDetails && (
-          <div className="text-sm border-l p-4">
+          <div className="text-[11px] border-l p-4">
             <p className="text-gray-600 whitespace-pre-line">
               {formatBankDetails(bankDetails)}
             </p>
