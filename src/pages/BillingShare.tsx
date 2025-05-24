@@ -33,6 +33,9 @@ const BillingShare: React.FC = () => {
     );
   }
 
+  // Safely parse snapshot_data
+  const snapshotData = billing.snapshot_data as any;
+
   // Convert billing data to form data format for InvoicePreview
   const formData: BillingFormData = {
     billing_type: billing.billing_type,
@@ -40,8 +43,8 @@ const BillingShare: React.FC = () => {
     place_of_supply: billing.place_of_supply || '',
     tds_rate: Number(billing.tds_rate) || 0,
     items: billing.items as any[] || [],
-    notes: billing.snapshot_data?.notes || '',
-    due_date: billing.snapshot_data?.due_date ? new Date(billing.snapshot_data.due_date) : undefined,
+    notes: snapshotData?.notes || '',
+    due_date: snapshotData?.due_date ? new Date(snapshotData.due_date) : undefined,
     billing_number: billing.billing_number || '',
   };
 
