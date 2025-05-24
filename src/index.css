@@ -69,7 +69,7 @@
   }
 }
 
-/* Print Styles - Optimized for Desktop Layout */
+/* Print Styles */
 @media print {
   /* Hide everything by default */
   body * {
@@ -81,7 +81,7 @@
     visibility: visible;
   }
   
-  /* Position the printable content to fill page with proper margins */
+  /* Position the printable content to fill entire page */
   .print-content {
     position: absolute !important;
     left: 0 !important;
@@ -90,13 +90,12 @@
     height: 100% !important;
     max-width: none !important;
     margin: 0 !important;
-    padding: 15mm !important;
+    padding: 5mm !important;
     background: white !important;
     box-shadow: none !important;
     border-radius: 0 !important;
-    font-size: 14px !important;
+    font-size: 11px !important;
     overflow: visible !important;
-    line-height: 1.4 !important;
   }
   
   /* Hide print buttons and navigation */
@@ -105,13 +104,16 @@
     visibility: hidden !important;
   }
   
-  /* Preserve backgrounds and colors for professional look */
+  /* Remove backgrounds and shadows for print */
   * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
   
-  /* Ensure proper text color and background */
+  /* Ensure black text on white background */
   body {
     background: white !important;
     color: black !important;
@@ -119,11 +121,12 @@
     padding: 0 !important;
   }
   
-  /* Remove browser headers and footers */
+  /* Remove browser headers and footers completely */
   @page {
     margin: 0 !important;
     padding: 0 !important;
     size: A4 portrait;
+    /* Remove browser header/footer */
     @top-left { content: none !important; }
     @top-center { content: none !important; }
     @top-right { content: none !important; }
@@ -132,60 +135,30 @@
     @bottom-right { content: none !important; }
   }
   
-  /* Force desktop grid layouts for print */
-  .print-content .grid {
-    display: grid !important;
-    gap: 8px !important;
+  /* Alternative approach to suppress headers/footers */
+  @page :first {
+    margin: 0 !important;
   }
   
-  /* Force 3-column layout for InvoiceInfoColumns */
-  .print-content .grid-cols-1.md\\:grid-cols-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  @page :left {
+    margin: 0 !important;
   }
   
-  /* Force 2-column layout for InvoiceFooter */
-  .print-content .grid-cols-1.md\\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  @page :right {
+    margin: 0 !important;
   }
   
-  /* Preserve borders and backgrounds */
-  .print-content .border {
-    border: 1px solid #d1d5db !important;
-  }
-  
-  .print-content .border-r {
-    border-right: 1px solid #d1d5db !important;
-  }
-  
-  .print-content .border-l {
-    border-left: 1px solid #d1d5db !important;
-  }
-  
-  .print-content .border-t {
-    border-top: 1px solid #d1d5db !important;
-  }
-  
-  .print-content .bg-gray-50 {
-    background-color: #f9fafb !important;
-  }
-  
-  .print-content .rounded-lg,
-  .print-content .rounded-xl {
-    border-radius: 0.5rem !important;
-  }
-  
-  /* Optimize table printing */
+  /* Optimize table printing for full width */
   table {
     border-collapse: collapse !important;
     width: 100% !important;
-    font-size: 12px !important;
+    font-size: 10px !important;
     margin: 0 !important;
   }
   
   th, td {
-    padding: 4px 6px !important;
-    font-size: 12px !important;
-    border: 1px solid #d1d5db !important;
+    padding: 3px 4px !important;
+    font-size: 10px !important;
   }
   
   /* Page break settings */
@@ -194,111 +167,48 @@
     break-inside: avoid;
   }
   
-  /* Proper spacing for sections */
+  /* Print specific spacing - minimal for full width usage */
   .print-content > * {
-    margin-bottom: 8px !important;
+    margin-bottom: 4px !important;
   }
   
-  /* Optimize headers for print */
+  /* Optimize headers and text for print */
   h1 {
-    font-size: 20px !important;
-    margin: 0 0 4px 0 !important;
-    font-weight: bold !important;
+    font-size: 16px !important;
+    margin: 0 !important;
   }
   
   h2 {
-    font-size: 16px !important;
-    margin: 0 0 4px 0 !important;
-    font-weight: 600 !important;
+    font-size: 14px !important;
+    margin: 0 !important;
   }
   
   h3 {
-    font-size: 14px !important;
-    margin: 0 0 4px 0 !important;
-    font-weight: 600 !important;
-  }
-  
-  /* Preserve padding and spacing */
-  .print-content .p-4 {
-    padding: 12px !important;
-  }
-  
-  .print-content .p-6 {
-    padding: 16px !important;
-  }
-  
-  .print-content .p-12 {
-    padding: 20px !important;
-  }
-  
-  .print-content .space-y-2 > * + * {
-    margin-top: 6px !important;
-  }
-  
-  .print-content .space-y-4 > * + * {
-    margin-top: 12px !important;
-  }
-  
-  .print-content .mb-3 {
-    margin-bottom: 8px !important;
-  }
-  
-  .print-content .mb-4 {
-    margin-bottom: 12px !important;
-  }
-  
-  .print-content .mb-8 {
-    margin-bottom: 20px !important;
-  }
-  
-  /* Ensure text sizes are readable */
-  .print-content .text-sm {
     font-size: 12px !important;
+    margin: 0 !important;
   }
   
-  .print-content .text-xs {
-    font-size: 10px !important;
+  /* Grid adjustments for print - minimal gaps */
+  .print-content .grid {
+    gap: 4px !important;
   }
   
-  .print-content .text-2xl {
-    font-size: 20px !important;
-  }
-  
-  /* Preserve flex layouts where needed */
+  /* Ensure full width usage */
+  .print-content div,
+  .print-content table,
   .print-content .flex {
-    display: flex !important;
+    width: 100% !important;
+    max-width: none !important;
   }
   
-  .print-content .justify-between {
-    justify-content: space-between !important;
-  }
-  
-  .print-content .items-center {
-    align-items: center !important;
-  }
-  
-  .print-content .items-start {
-    align-items: flex-start !important;
-  }
-  
-  .print-content .text-right {
-    text-align: right !important;
-  }
-  
-  .print-content .text-center {
-    text-align: center !important;
-  }
-  
-  .print-content .font-bold {
-    font-weight: bold !important;
-  }
-  
-  .print-content .font-semibold {
-    font-weight: 600 !important;
-  }
-  
-  .print-content .font-medium {
-    font-weight: 500 !important;
+  /* Hide any remaining browser print elements */
+  @media print {
+    html, body {
+      height: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: visible !important;
+    }
   }
 }
 
