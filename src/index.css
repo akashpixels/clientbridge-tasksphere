@@ -143,17 +143,12 @@
    
   }
   
-  /* Ensure text is black for better print quality */
+  /* Ensure text is black for better print quality 
   * {
     color: black !important;
   }
-  
+  */
  
-  /* Override any background colors except white */
-  * {
-    background-color: white !important;
-  }
-  
   /* Ensure proper spacing for invoice elements */
   .space-y-6 > * + * {
     margin-top: 1.5rem !important;
