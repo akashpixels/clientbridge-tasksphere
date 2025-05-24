@@ -72,7 +72,7 @@ export const BillingListPage = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 container mx-auto p-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Billing</h1>
         <Button onClick={handleCreateNew} className="flex items-center gap-2">
