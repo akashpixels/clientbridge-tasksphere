@@ -8,7 +8,10 @@ export { BillingCreationPage } from './components/BillingCreationPage';
 // Payment components
 export { PaymentBlock } from './components/PaymentBlock';
 export { PaymentPercentageSelector } from './components/PaymentPercentageSelector';
+export { PaymentPercentageDropdown } from './components/PaymentPercentageDropdown';
 export { PaymentMethodTabs } from './components/PaymentMethodTabs';
+export { PaymentMethodSelector } from './components/PaymentMethodSelector';
+export { PaymentDetailsModal } from './components/PaymentDetailsModal';
 export { UpiPaymentSection } from './components/UpiPaymentSection';
 export { BankPaymentSection } from './components/BankPaymentSection';
 export { OnlinePaymentSection } from './components/OnlinePaymentSection';
