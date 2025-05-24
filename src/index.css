@@ -69,6 +69,59 @@
   }
 }
 
+/* Print-specific CSS */
+@media print {
+  /* Remove browser headers and footers */
+  @page {
+    margin: 0;
+    size: A4;
+  }
+  
+  /* Hide all elements that shouldn't be printed */
+  .print\\:hidden {
+    display: none !important;
+  }
+  
+  /* Hide navigation, sidebars, and other UI elements */
+  nav,
+  header,
+  aside,
+  .print\\:hidden,
+  [class*="sidebar"],
+  [class*="navigation"],
+  button:not(.print\\:block),
+  .bg-white.border-b {
+    display: none !important;
+  }
+  
+  /* Ensure the page uses full width and height */
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Remove shadows and rounded corners for better print quality */
+  * {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background-color: transparent !important;
+  }
+  
+  /* Ensure text is black for better print quality */
+  * {
+    color: black !important;
+  }
+  
+  /* Keep borders for tables and important structure */
+  table, th, td {
+    border-color: black !important;
+  }
+}
+
 /* Hide scrollbar while maintaining scroll functionality */
 @layer utilities {
   .hide-scrollbar {
