@@ -72,7 +72,7 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
       <div className="flex flex-col ">
         {/* UPI Address */}
         {upiAddress && (
-          <div className="pl-4 pb-1 w-full text-right">
+          <div className="pl-4 pb-1 w-full ">
             <span className="text-xs text-gray-600">{upiAddress}</span>
           </div>
         )}
