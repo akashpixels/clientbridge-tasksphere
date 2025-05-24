@@ -73,14 +73,12 @@ const BillingDetails: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-3 print:p-0">
-        <div className="print-content">
-          <InvoicePreview 
-            formData={formData}
-            onFormChange={() => {}} // Read-only mode
-            readOnly={true}
-          />
-        </div>
+      <div className="p-6">
+        <InvoicePreview 
+          formData={formData}
+          onFormChange={() => {}} // Read-only mode
+          readOnly={true}
+        />
       </div>
     </div>
   );
