@@ -119,13 +119,7 @@
     padding: 0 !important;
   }
   
-  /* Show only the invoice content */
-  .max-w-5xl {
-    max-width: none !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 20px !important;
-  }
+ 
   
   /* Remove shadows and rounded corners for better print quality */
   * {
