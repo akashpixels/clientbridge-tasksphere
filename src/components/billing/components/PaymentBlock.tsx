@@ -62,14 +62,7 @@ export const PaymentBlock: React.FC<PaymentBlockProps> = ({
     <>
       <Card className="border-2 border-blue-100 bg-white shadow-lg">
         <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            💳 Payment Options
-            {paymentCalculation.discountAmount > 0 && (
-              <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
-                Save ₹{paymentCalculation.discountAmount.toFixed(2)}
-              </Badge>
-            )}
-          </CardTitle>
+          
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Payment Type Selection with Radio Buttons */}
