@@ -11,11 +11,17 @@ import Team from "@/pages/Team";
 import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
 import Billing from "@/pages/Billing";
+import BillingDetails from "@/pages/BillingDetails";
+import BillingShare from "@/pages/BillingShare";
 
 export const router = createBrowserRouter([
   {
     path: "/auth",
     element: <Auth />,
+  },
+  {
+    path: "/billing/share/:id",
+    element: <BillingShare />,
   },
   {
     path: "/",
@@ -52,6 +58,10 @@ export const router = createBrowserRouter([
           {
             path: "billing",
             element: <Billing />,
+          },
+          {
+            path: "billing/:id",
+            element: <BillingDetails />,
           },
         ],
       },

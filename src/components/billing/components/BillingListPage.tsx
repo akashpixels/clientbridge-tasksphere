@@ -9,6 +9,7 @@ import { useBillingData } from "../hooks/useBillingData";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useLayout } from "@/context/layout";
+import { useNavigate } from "react-router-dom";
 import { BillingCreationSidebar } from "./BillingCreationSidebar";
 import { BillingFormData } from "../types";
 
@@ -16,6 +17,7 @@ export const BillingListPage = () => {
   const { data: billingData, isLoading } = useBillingData();
   const [filterType, setFilterType] = useState<string>('all');
   const { setRightSidebarContent, setBillingCreationActive } = useLayout();
+  const navigate = useNavigate();
 
   const filteredData = billingData?.filter(item => 
     filterType === 'all' || item.billing_type === filterType
@@ -35,7 +37,12 @@ export const BillingListPage = () => {
     setRightSidebarContent(<BillingCreationSidebar />);
   };
 
-  const handleCopyUrl = (billingId: string) => {
+  const handleBillingClick = (billingId: string) => {
+    navigate(`/billing/${billingId}`);
+  };
+
+  const handleCopyUrl = (billingId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent navigation when clicking copy button
     const url = `${window.location.origin}/billing/share/${billingId}`;
     navigator.clipboard.writeText(url);
     toast.success('Billing URL copied to clipboard');
@@ -100,7 +107,8 @@ export const BillingListPage = () => {
             {filteredData?.map((billing) => (
               <div
                 key={billing.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                onClick={() => handleBillingClick(billing.id)}
               >
                 <div className="flex items-center space-x-4">
                   <div>
@@ -130,7 +138,7 @@ export const BillingListPage = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleCopyUrl(billing.id)}
+                    onClick={(e) => handleCopyUrl(billing.id, e)}
                     className="flex items-center gap-1"
                   >
                     <Copy size={14} />

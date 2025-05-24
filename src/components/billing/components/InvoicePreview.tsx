@@ -15,9 +15,10 @@ import { InvoiceFooter } from './InvoiceFooter';
 interface InvoicePreviewProps {
   formData: BillingFormData;
   onFormChange: (data: Partial<BillingFormData>) => void;
+  readOnly?: boolean;
 }
 
-export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onFormChange }) => {
+export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onFormChange, readOnly = false }) => {
   const { data: settings, isLoading: isLoadingSettings } = useAgencySettings();
   const { data: clientDetails, isLoading: isLoadingClient } = useClientDetails(formData.client_id);
   const [editingItem, setEditingItem] = useState<string | null>(null);
@@ -42,6 +43,8 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
   const finalAmount = gstDetails.total_amount - tdsAmount;
 
   const addNewItem = () => {
+    if (readOnly) return;
+    
     const newItem: LineItem = {
       id: crypto.randomUUID(),
       description: '',
@@ -58,6 +61,8 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
   };
 
   const updateItem = (itemId: string, updates: Partial<LineItem>) => {
+    if (readOnly) return;
+    
     const updatedItems = formData.items.map(item => {
       if (item.id === itemId) {
         const updatedItem = { ...item, ...updates };
@@ -69,6 +74,8 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
   };
 
   const removeItem = (itemId: string) => {
+    if (readOnly) return;
+    
     const updatedItems = formData.items.filter(item => item.id !== itemId);
     onFormChange({ items: updatedItems });
   };
@@ -120,10 +127,12 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold">Items</h3>
-          <Button onClick={addNewItem} size="sm" variant="outline">
-            <Plus size={16} className="mr-1" />
-            Add Item
-          </Button>
+          {!readOnly && (
+            <Button onClick={addNewItem} size="sm" variant="outline">
+              <Plus size={16} className="mr-1" />
+              Add Item
+            </Button>
+          )}
         </div>
         
         <Table>
@@ -134,7 +143,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
               <TableHead className="w-24">Rate</TableHead>
               <TableHead className="w-20">GST %</TableHead>
               <TableHead className="w-24">Amount</TableHead>
-              <TableHead className="w-10"></TableHead>
+              {!readOnly && <TableHead className="w-10"></TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -142,7 +151,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
               <TableRow key={item.id}>
                 <TableCell>
                   <div className="space-y-1">
-                    {editingItem === item.id ? (
+                    {editingItem === item.id && !readOnly ? (
                       <Input
                         variant="minimal"
                         value={item.description}
@@ -152,74 +161,92 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                       />
                     ) : (
                       <div
-                        onClick={() => setEditingItem(item.id)}
-                        className="cursor-pointer hover:bg-gray-50 p-1 rounded"
+                        onClick={() => !readOnly && setEditingItem(item.id)}
+                        className={readOnly ? "" : "cursor-pointer hover:bg-gray-50 p-1 rounded"}
                       >
-                        {item.description || 'Click to edit'}
+                        {item.description || (readOnly ? '-' : 'Click to edit')}
                       </div>
                     )}
                     
                     {/* SAC Code Dropdown */}
                     <div className="text-xs">
-                      <Select
-                        value={item.sac_code || '998314'}
-                        onValueChange={(value) => updateItem(item.id, { sac_code: value })}
-                      >
-                        <SelectTrigger className="h-6 text-xs border-gray-200">
-                          <SelectValue placeholder="SAC Code" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {sacCodes.map((code) => (
-                            <SelectItem key={code.value} value={code.value} className="text-xs">
-                              SAC: {code.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {readOnly ? (
+                        <span className="text-gray-500">SAC: {item.sac_code || '998314'}</span>
+                      ) : (
+                        <Select
+                          value={item.sac_code || '998314'}
+                          onValueChange={(value) => updateItem(item.id, { sac_code: value })}
+                        >
+                          <SelectTrigger className="h-6 text-xs border-gray-200">
+                            <SelectValue placeholder="SAC Code" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {sacCodes.map((code) => (
+                              <SelectItem key={code.value} value={code.value} className="text-xs">
+                                SAC: {code.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Input
-                    variant="minimal"
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) => updateItem(item.id, { quantity: parseFloat(e.target.value) || 0 })}
-                    className="w-full text-center"
-                  />
+                  {readOnly ? (
+                    <span>{item.quantity}</span>
+                  ) : (
+                    <Input
+                      variant="minimal"
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) => updateItem(item.id, { quantity: parseFloat(e.target.value) || 0 })}
+                      className="w-full text-center"
+                    />
+                  )}
                 </TableCell>
                 <TableCell>
-                  <Input
-                    variant="minimal"
-                    type="number"
-                    value={item.rate}
-                    onChange={(e) => updateItem(item.id, { rate: parseFloat(e.target.value) || 0 })}
-                    className="w-full text-right"
-                  />
+                  {readOnly ? (
+                    <span>₹{item.rate.toFixed(2)}</span>
+                  ) : (
+                    <Input
+                      variant="minimal"
+                      type="number"
+                      value={item.rate}
+                      onChange={(e) => updateItem(item.id, { rate: parseFloat(e.target.value) || 0 })}
+                      className="w-full text-right"
+                    />
+                  )}
                 </TableCell>
                 <TableCell>
-                  <Input
-                    variant="minimal"
-                    type="number"
-                    value={item.gst_rate}
-                    onChange={(e) => updateItem(item.id, { gst_rate: parseFloat(e.target.value) || 0 })}
-                    className="w-full text-center"
-                    disabled={isInternational}
-                  />
+                  {readOnly ? (
+                    <span>{item.gst_rate}%</span>
+                  ) : (
+                    <Input
+                      variant="minimal"
+                      type="number"
+                      value={item.gst_rate}
+                      onChange={(e) => updateItem(item.id, { gst_rate: parseFloat(e.target.value) || 0 })}
+                      className="w-full text-center"
+                      disabled={isInternational}
+                    />
+                  )}
                 </TableCell>
                 <TableCell className="text-right">
                   ₹{item.total_amount.toFixed(2)}
                 </TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeItem(item.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 size={14} />
-                  </Button>
-                </TableCell>
+                {!readOnly && (
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeItem(item.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
