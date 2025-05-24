@@ -121,10 +121,10 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({
     }
   };
 
-  // Show payment block only for invoices that are not estimates and in read-only mode with billing ID
+  // Show payment block for invoices, estimates, and debit notes in read-only mode with billing ID
   const showPaymentBlock = readOnly && 
                           billingId && 
-                          formData.billing_type === 'invoice' && 
+                          ['invoice', 'estimate', 'debit_note'].includes(formData.billing_type) && 
                           finalAmount > 0;
 
   return (
@@ -319,7 +319,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         </div>
       </div>
 
-      {/* Payment Block - Only show for invoices in read-only mode */}
+      {/* Payment Block - Show for invoices, estimates, and debit notes in read-only mode */}
       {showPaymentBlock && (
         <div className="print:hidden">
           <PaymentBlock
