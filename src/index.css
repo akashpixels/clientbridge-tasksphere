@@ -119,7 +119,23 @@
     padding: 0 !important;
   }
   
- 
+  /* Force 3-column layout for invoice info section */
+  .grid.grid-cols-1.md\\:grid-cols-3 {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-rows: auto !important;
+  }
+  
+  /* Ensure all grid items display properly */
+  .grid.grid-cols-1.md\\:grid-cols-3 > div {
+    display: block !important;
+  }
+  
+  /* Alternative selector for the invoice info columns */
+  [class*="grid"][class*="grid-cols-1"][class*="md:grid-cols-3"] {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
   
   /* Remove shadows and rounded corners for better print quality */
   * {
