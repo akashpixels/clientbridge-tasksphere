@@ -94,7 +94,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-12 shadow-sm rounded-lg space-y-4 print:max-w-none print:shadow-none print:rounded-none print:p-0 print:m-0 print:space-y-2">
+    <div className="max-w-4xl mx-auto bg-white p-12 shadow-sm rounded-lg space-y-4 print:max-w-none print:shadow-none print:rounded-none print:p-0 print:m-0 print:space-y-1 print:w-full print:h-full">
       {/* Header */}
       <InvoiceHeader 
         agencyLogo={settings?.agencyDetails?.iconUrl}
@@ -106,7 +106,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
       />
 
        {/* Place of Supply */}
-      <div className="text-sm mb-4 text-end print:mb-2">
+      <div className="text-sm mb-4 text-end print:mb-1 print:text-xs">
         <span className="font-medium">Place of Supply: </span>
         {formData.place_of_supply || 'Not selected'}
       </div>
@@ -124,9 +124,9 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
       />
 
       {/* Line Items */}
-      <div className="print:space-y-1">
+      <div className="print:space-y-0">
         <div className="flex items-center justify-between mb-3 print:mb-1">
-          <h3 className="font-semibold">Items</h3>
+          <h3 className="font-semibold print:text-xs print:font-medium">Items</h3>
           {!readOnly && (
             <Button onClick={addNewItem} size="sm" variant="outline" className="print:hidden">
               <Plus size={16} className="mr-1" />
@@ -138,19 +138,19 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Description</TableHead>
-              <TableHead className="w-20">Qty</TableHead>
-              <TableHead className="w-24">Rate</TableHead>
-              <TableHead className="w-20">GST %</TableHead>
-              <TableHead className="w-24">Amount</TableHead>
+              <TableHead className="print:text-xs print:p-2">Description</TableHead>
+              <TableHead className="w-20 print:text-xs print:p-2">Qty</TableHead>
+              <TableHead className="w-24 print:text-xs print:p-2">Rate</TableHead>
+              <TableHead className="w-20 print:text-xs print:p-2">GST %</TableHead>
+              <TableHead className="w-24 print:text-xs print:p-2">Amount</TableHead>
               {!readOnly && <TableHead className="w-10 print:hidden"></TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {formData.items.map((item) => (
               <TableRow key={item.id}>
-                <TableCell>
-                  <div className="space-y-1">
+                <TableCell className="print:text-xs print:p-2">
+                  <div className="space-y-1 print:space-y-0">
                     {editingItem === item.id && !readOnly ? (
                       <Input
                         variant="minimal"
@@ -163,14 +163,14 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                     ) : (
                       <div
                         onClick={() => !readOnly && setEditingItem(item.id)}
-                        className={readOnly ? "" : "cursor-pointer hover:bg-gray-50 p-1 rounded print:hover:bg-transparent"}
+                        className={readOnly ? "" : "cursor-pointer hover:bg-gray-50 p-1 rounded print:hover:bg-transparent print:p-0"}
                       >
                         {item.description || (readOnly ? '-' : 'Click to edit')}
                       </div>
                     )}
                     
                     {/* SAC Code Dropdown */}
-                    <div className="text-xs">
+                    <div className="text-xs print:text-[8px]">
                       {readOnly ? (
                         <span className="text-gray-500">SAC: {item.sac_code || '998314'}</span>
                       ) : (
@@ -193,7 +193,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="print:text-xs print:p-2">
                   {readOnly ? (
                     <span>{item.quantity}</span>
                   ) : (
@@ -206,7 +206,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                     />
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="print:text-xs print:p-2">
                   {readOnly ? (
                     <span>₹{item.rate.toFixed(2)}</span>
                   ) : (
@@ -219,7 +219,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                     />
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="print:text-xs print:p-2">
                   {readOnly ? (
                     <span>{item.gst_rate}%</span>
                   ) : (
@@ -233,7 +233,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                     />
                   )}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right print:text-xs print:p-2">
                   ₹{item.total_amount.toFixed(2)}
                 </TableCell>
                 {!readOnly && (
@@ -255,8 +255,8 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
       </div>
 
       {/* Total Summary */}
-      <div className="border-t pt-4 print:pt-2">
-        <div className="space-y-2 text-sm print:space-y-1">
+      <div className="border-t pt-4 print:pt-1 print:border-t">
+        <div className="space-y-2 text-sm print:space-y-0 print:text-xs">
           <div className="flex justify-between">
             <span>Subtotal:</span>
             <span>₹{gstDetails.taxable_amount.toFixed(2)}</span>
@@ -277,7 +277,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                 <span>TDS ({formData.tds_rate}%):</span>
                 <span>-₹{tdsAmount.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between font-bold text-lg print:text-base">
+              <div className="flex justify-between font-bold text-lg print:text-sm print:font-semibold">
                 <span>Amount Payable:</span>
                 <span>₹{finalAmount.toFixed(2)}</span>
               </div>
