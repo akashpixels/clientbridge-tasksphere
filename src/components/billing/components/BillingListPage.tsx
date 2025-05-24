@@ -81,7 +81,7 @@ export const BillingListPage = () => {
         </Button>
       </div>
 
-     
+     <div className="space-y-6  p-6 container mx-auto ">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Billing Records</CardTitle>
@@ -155,7 +155,7 @@ export const BillingListPage = () => {
             )}
           </div>
         </CardContent>
-      
+      </div>
     </div>
   );
 };
