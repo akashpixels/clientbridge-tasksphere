@@ -69,12 +69,14 @@ const BillingShare: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-6">
-        <InvoicePreview 
-          formData={formData}
-          onFormChange={() => {}} // Read-only mode
-          readOnly={true}
-        />
+      <div className="p-6 print:p-0">
+        <div className="print-content">
+          <InvoicePreview 
+            formData={formData}
+            onFormChange={() => {}} // Read-only mode
+            readOnly={true}
+          />
+        </div>
       </div>
     </div>
   );

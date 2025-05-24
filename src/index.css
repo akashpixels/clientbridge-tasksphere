@@ -69,6 +69,68 @@
   }
 }
 
+/* Print Styles */
+@media print {
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Show only the printable content */
+  .print-content, .print-content * {
+    visibility: visible;
+  }
+  
+  /* Position the printable content */
+  .print-content {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    background: white !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  
+  /* Hide print buttons and navigation */
+  .print\\:hidden {
+    display: none !important;
+  }
+  
+  /* Remove backgrounds and shadows for print */
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  /* Ensure black text on white background */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  /* Optimize table printing */
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  
+  /* Page break settings */
+  .print-content {
+    page-break-inside: avoid;
+  }
+  
+  /* Ensure proper margins for printing */
+  @page {
+    margin: 0.5in;
+    size: A4;
+  }
+}
+
 /* Hide scrollbar while maintaining scroll functionality */
 @layer utilities {
   .hide-scrollbar {

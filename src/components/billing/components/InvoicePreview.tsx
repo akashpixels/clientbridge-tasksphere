@@ -94,7 +94,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
   };
 
   return (
-    <div className="max-w-5xl mx-auto bg-white p-16 shadow-sm rounded-lg space-y-6">
+    <div className="max-w-5xl mx-auto bg-white p-16 shadow-sm rounded-lg space-y-6 print:max-w-none print:shadow-none print:rounded-none print:p-8 print:m-0">
       {/* Header */}
       <InvoiceHeader 
         agencyLogo={settings?.agencyDetails?.iconUrl}
@@ -128,7 +128,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold">Items</h3>
           {!readOnly && (
-            <Button onClick={addNewItem} size="sm" variant="outline">
+            <Button onClick={addNewItem} size="sm" variant="outline" className="print:hidden">
               <Plus size={16} className="mr-1" />
               Add Item
             </Button>
@@ -143,7 +143,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
               <TableHead className="w-24">Rate</TableHead>
               <TableHead className="w-20">GST %</TableHead>
               <TableHead className="w-24">Amount</TableHead>
-              {!readOnly && <TableHead className="w-10"></TableHead>}
+              {!readOnly && <TableHead className="w-10 print:hidden"></TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -158,11 +158,12 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                         onChange={(e) => updateItem(item.id, { description: e.target.value })}
                         onBlur={() => setEditingItem(null)}
                         autoFocus
+                        className="print:border-none print:p-0"
                       />
                     ) : (
                       <div
                         onClick={() => !readOnly && setEditingItem(item.id)}
-                        className={readOnly ? "" : "cursor-pointer hover:bg-gray-50 p-1 rounded"}
+                        className={readOnly ? "" : "cursor-pointer hover:bg-gray-50 p-1 rounded print:hover:bg-transparent"}
                       >
                         {item.description || (readOnly ? '-' : 'Click to edit')}
                       </div>
@@ -177,7 +178,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                           value={item.sac_code || '998314'}
                           onValueChange={(value) => updateItem(item.id, { sac_code: value })}
                         >
-                          <SelectTrigger className="h-6 text-xs border-gray-200">
+                          <SelectTrigger className="h-6 text-xs border-gray-200 print:hidden">
                             <SelectValue placeholder="SAC Code" />
                           </SelectTrigger>
                           <SelectContent>
@@ -201,7 +202,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                       type="number"
                       value={item.quantity}
                       onChange={(e) => updateItem(item.id, { quantity: parseFloat(e.target.value) || 0 })}
-                      className="w-full text-center"
+                      className="w-full text-center print:border-none print:p-0"
                     />
                   )}
                 </TableCell>
@@ -214,7 +215,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                       type="number"
                       value={item.rate}
                       onChange={(e) => updateItem(item.id, { rate: parseFloat(e.target.value) || 0 })}
-                      className="w-full text-right"
+                      className="w-full text-right print:border-none print:p-0"
                     />
                   )}
                 </TableCell>
@@ -227,7 +228,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                       type="number"
                       value={item.gst_rate}
                       onChange={(e) => updateItem(item.id, { gst_rate: parseFloat(e.target.value) || 0 })}
-                      className="w-full text-center"
+                      className="w-full text-center print:border-none print:p-0"
                       disabled={isInternational}
                     />
                   )}
@@ -236,7 +237,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                   ₹{item.total_amount.toFixed(2)}
                 </TableCell>
                 {!readOnly && (
-                  <TableCell>
+                  <TableCell className="print:hidden">
                     <Button
                       variant="ghost"
                       size="sm"
