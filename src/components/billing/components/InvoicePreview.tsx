@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +12,7 @@ import { InvoiceInfoColumns } from './InvoiceInfoColumns';
 import { InvoiceFooter } from './InvoiceFooter';
 import { PaymentBlock } from './PaymentBlock';
 import { useCreatePaymentTransaction } from '../hooks/usePaymentTransactions';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface InvoicePreviewProps {
   formData: BillingFormData;
@@ -31,6 +31,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({
   const { data: clientDetails, isLoading: isLoadingClient } = useClientDetails(formData.client_id);
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const createPaymentTransaction = useCreatePaymentTransaction();
+  const isMobile = useIsMobile();
 
   // Debug log to see what settings are available
   console.log('Agency settings in InvoicePreview:', settings?.footerDetails);
@@ -127,8 +128,9 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                           ['invoice', 'estimate', 'debit_note'].includes(formData.billing_type) && 
                           finalAmount > 0;
 
-  return (
-    <div className="max-w-[794px] mx-auto bg-white p-16 shadow-sm rounded-lg space-y-6">
+  // Invoice Content Component
+  const InvoiceContent = () => (
+    <div className="bg-white p-8 md:p-16 shadow-sm rounded-lg space-y-6">
       {/* Header */}
       <InvoiceHeader 
         agencyLogo={settings?.agencyDetails?.iconUrl}
@@ -139,7 +141,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         issueDate={new Date()}
       />
 
-       {/* Place of Supply */}
+      {/* Place of Supply */}
       <div className="text-sm mb-6 text-end">
         <span className="font-medium">Place of Supply: </span>
         {formData.place_of_supply || 'Not selected'}
@@ -319,18 +321,6 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         </div>
       </div>
 
-      {/* Payment Block - Show for invoices, estimates, and debit notes in read-only mode */}
-      {showPaymentBlock && (
-        <div className="print:hidden">
-          <PaymentBlock
-            totalAmount={gstDetails.total_amount}
-            billingId={billingId}
-            remainingAmount={finalAmount}
-            onPaymentSubmit={handlePaymentSubmit}
-          />
-        </div>
-      )}
-
       {/* Footer */}
       <InvoiceFooter 
         notes={formData.notes}
@@ -340,6 +330,54 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         signature={settings?.footerDetails?.signature}
         stamp={settings?.footerDetails?.stamp}
       />
+    </div>
+  );
+
+  return (
+    <div className="bg-gray-50 min-h-screen">
+      {showPaymentBlock ? (
+        isMobile ? (
+          // Mobile Layout: Stacked
+          <div className="max-w-4xl mx-auto p-4 space-y-6">
+            <InvoiceContent />
+            <div className="print:hidden">
+              <PaymentBlock
+                totalAmount={gstDetails.total_amount}
+                billingId={billingId}
+                remainingAmount={finalAmount}
+                onPaymentSubmit={handlePaymentSubmit}
+              />
+            </div>
+          </div>
+        ) : (
+          // Desktop Layout: Side by side
+          <div className="max-w-7xl mx-auto p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Invoice Content - 8 columns */}
+              <div className="lg:col-span-8">
+                <InvoiceContent />
+              </div>
+              
+              {/* Payment Block - 4 columns */}
+              <div className="lg:col-span-4 print:hidden">
+                <div className="sticky top-6">
+                  <PaymentBlock
+                    totalAmount={gstDetails.total_amount}
+                    billingId={billingId}
+                    remainingAmount={finalAmount}
+                    onPaymentSubmit={handlePaymentSubmit}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      ) : (
+        // No Payment Block: Original layout
+        <div className="max-w-[794px] mx-auto p-6">
+          <InvoiceContent />
+        </div>
+      )}
     </div>
   );
 };
