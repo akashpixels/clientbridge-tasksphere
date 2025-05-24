@@ -26,9 +26,10 @@ export const InvoiceFooter: React.FC<InvoiceFooterProps> = ({
     if (!details || typeof details !== 'object') return '';
     
     const formattedLines = [];
-    if (details.bank_name) formattedLines.push(` ${details.bank_name}`);
+   
     if (details.account_holder) formattedLines.push(`${details.account_holder}`);
     if (details.account_number) formattedLines.push(`A/c: ${details.account_number}`);
+     if (details.bank_name) formattedLines.push(` ${details.bank_name}`);
     if (details.ifsc) formattedLines.push(`IFSC: ${details.ifsc}`);
     if (details.pan) formattedLines.push(`PAN: ${details.pan}`);
     
