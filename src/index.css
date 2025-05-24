@@ -77,21 +77,36 @@
     size: A4;
   }
   
-  /* Hide all elements that shouldn't be printed */
-  .print\\:hidden {
-    display: none !important;
-  }
-  
-  /* Hide navigation, sidebars, and other UI elements */
+  /* Hide all elements that shouldn't be printed - be more specific */
+  .print\\:hidden,
   nav,
   header,
   aside,
-  .print\\:hidden,
   [class*="sidebar"],
   [class*="navigation"],
+  [role="navigation"],
   button:not(.print\\:block),
-  .bg-white.border-b {
+  .bg-white.border-b,
+  /* Hide layout components */
+  [class*="LeftSidebar"],
+  [class*="RightSidebar"],
+  [class*="Layout"] > div:first-child,
+  /* Hide any fixed positioned elements */
+  [class*="fixed"],
+  /* Hide elements with z-index that might be overlays */
+  [style*="z-index"] {
     display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Force main content to take full space */
+  main,
+  [class*="MainContentArea"],
+  [class*="main"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
   }
   
   /* Ensure the page uses full width and height */
@@ -104,11 +119,18 @@
     padding: 0 !important;
   }
   
+  /* Show only the invoice content */
+  .max-w-5xl {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+  }
+  
   /* Remove shadows and rounded corners for better print quality */
   * {
     box-shadow: none !important;
     border-radius: 0 !important;
-    background-color: transparent !important;
   }
   
   /* Ensure text is black for better print quality */
@@ -119,6 +141,16 @@
   /* Keep borders for tables and important structure */
   table, th, td {
     border-color: black !important;
+  }
+  
+  /* Override any background colors except white */
+  * {
+    background-color: white !important;
+  }
+  
+  /* Ensure proper spacing for invoice elements */
+  .space-y-6 > * + * {
+    margin-top: 1.5rem !important;
   }
 }
 
