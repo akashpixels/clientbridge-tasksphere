@@ -86,9 +86,7 @@ export const PaymentBlock: React.FC<PaymentBlockProps> = ({
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-medium">Pay in Full</div>
-                        <div className="text-sm text-gray-500">
-                          ₹{(remainingAmount * 0.95).toFixed(2)}
-                        </div>
+                       
                       </div>
                       <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
                         5% OFF
@@ -102,7 +100,7 @@ export const PaymentBlock: React.FC<PaymentBlockProps> = ({
                   <Label htmlFor="partial" className="flex-1 cursor-pointer">
                     <div>
                       <div className="font-medium">Pay in Part</div>
-                      <div className="text-sm text-gray-500">Choose percentage</div>
+                    
                     </div>
                   </Label>
                 </div>
