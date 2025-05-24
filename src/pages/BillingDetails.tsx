@@ -73,7 +73,7 @@ const BillingDetails: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-6 print:p-0">
+      <div className="p-3 print:p-0">
         <div className="print-content">
           <InvoicePreview 
             formData={formData}

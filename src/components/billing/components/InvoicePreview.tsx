@@ -94,7 +94,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
   };
 
   return (
-    <div className="max-w-5xl mx-auto bg-white p-16 shadow-sm rounded-lg space-y-6 print:max-w-none print:shadow-none print:rounded-none print:p-8 print:m-0">
+    <div className="max-w-4xl mx-auto bg-white p-12 shadow-sm rounded-lg space-y-4 print:max-w-none print:shadow-none print:rounded-none print:p-0 print:m-0 print:space-y-2">
       {/* Header */}
       <InvoiceHeader 
         agencyLogo={settings?.agencyDetails?.iconUrl}
@@ -106,7 +106,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
       />
 
        {/* Place of Supply */}
-      <div className="text-sm mb-6 text-end">
+      <div className="text-sm mb-4 text-end print:mb-2">
         <span className="font-medium">Place of Supply: </span>
         {formData.place_of_supply || 'Not selected'}
       </div>
@@ -124,8 +124,8 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
       />
 
       {/* Line Items */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
+      <div className="print:space-y-1">
+        <div className="flex items-center justify-between mb-3 print:mb-1">
           <h3 className="font-semibold">Items</h3>
           {!readOnly && (
             <Button onClick={addNewItem} size="sm" variant="outline" className="print:hidden">
@@ -255,8 +255,8 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
       </div>
 
       {/* Total Summary */}
-      <div className="border-t pt-4">
-        <div className="space-y-2 text-sm">
+      <div className="border-t pt-4 print:pt-2">
+        <div className="space-y-2 text-sm print:space-y-1">
           <div className="flex justify-between">
             <span>Subtotal:</span>
             <span>₹{gstDetails.taxable_amount.toFixed(2)}</span>
@@ -277,7 +277,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
                 <span>TDS ({formData.tds_rate}%):</span>
                 <span>-₹{tdsAmount.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between font-bold text-lg">
+              <div className="flex justify-between font-bold text-lg print:text-base">
                 <span>Amount Payable:</span>
                 <span>₹{finalAmount.toFixed(2)}</span>
               </div>

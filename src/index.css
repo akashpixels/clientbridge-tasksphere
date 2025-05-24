@@ -89,10 +89,11 @@
     width: 100% !important;
     max-width: none !important;
     margin: 0 !important;
-    padding: 20px !important;
+    padding: 10mm !important;
     background: white !important;
     box-shadow: none !important;
     border-radius: 0 !important;
+    font-size: 12px !important;
   }
   
   /* Hide print buttons and navigation */
@@ -117,6 +118,11 @@
   table {
     border-collapse: collapse !important;
     width: 100% !important;
+    font-size: 11px !important;
+  }
+  
+  th, td {
+    padding: 4px 6px !important;
   }
   
   /* Page break settings */
@@ -126,8 +132,31 @@
   
   /* Ensure proper margins for printing */
   @page {
-    margin: 0.5in;
+    margin: 10mm;
     size: A4;
+  }
+  
+  /* Print specific spacing */
+  .print-content > * {
+    margin-bottom: 8px !important;
+  }
+  
+  /* Optimize headers and text for print */
+  h1 {
+    font-size: 18px !important;
+  }
+  
+  h2 {
+    font-size: 16px !important;
+  }
+  
+  h3 {
+    font-size: 14px !important;
+  }
+  
+  /* Grid adjustments for print */
+  .print-content .grid {
+    gap: 8px !important;
   }
 }
 
