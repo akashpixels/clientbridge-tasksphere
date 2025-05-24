@@ -111,8 +111,8 @@ export const PaymentBlock: React.FC<PaymentBlockProps> = ({
           )}
 
           {/* Payment Calculation Display */}
-          <Card className="border-t">
-            <CardContent className="p-4">
+         
+            <CardContent className="p-4 border-t mt-6">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>Base Amount ({paymentPercentage}%):</span>
@@ -130,7 +130,7 @@ export const PaymentBlock: React.FC<PaymentBlockProps> = ({
                 </div>
               </div>
             </CardContent>
-          </Card>
+          
 
           {/* Payment Method Selection */}
           <PaymentMethodSelector
