@@ -140,7 +140,7 @@
   /* Remove shadows and rounded corners for better print quality */
   * {
     box-shadow: none !important;
-    border-radius: 0 !important;
+   
   }
   
   /* Ensure text is black for better print quality */
@@ -148,11 +148,7 @@
     color: black !important;
   }
   
-  /* Keep borders for tables and important structure */
-  table, th, td {
-    border-color: black !important;
-  }
-  
+ 
   /* Override any background colors except white */
   * {
     background-color: white !important;
