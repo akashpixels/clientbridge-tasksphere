@@ -334,7 +334,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({
   );
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className=" min-h-screen">
       {showPaymentBlock ? (
         isMobile ? (
           // Mobile Layout: Stacked
@@ -351,7 +351,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           </div>
         ) : (
           // Desktop Layout: Side by side
-          <div className="max-w-7xl mx-auto p-6">
+          <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Invoice Content - 8 columns */}
               <div className="lg:col-span-8">
