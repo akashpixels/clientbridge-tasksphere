@@ -74,6 +74,7 @@ const BillingShare: React.FC = () => {
           formData={formData}
           onFormChange={() => {}} // Read-only mode
           readOnly={true}
+          billingId={id} // Pass the billing ID for payment functionality
         />
       </div>
     </div>

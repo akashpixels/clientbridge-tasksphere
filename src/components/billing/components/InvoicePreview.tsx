@@ -11,17 +11,26 @@ import { useAgencySettings, useClientDetails } from "../hooks/useAgencySettings"
 import { InvoiceHeader } from './InvoiceHeader';
 import { InvoiceInfoColumns } from './InvoiceInfoColumns';
 import { InvoiceFooter } from './InvoiceFooter';
+import { PaymentBlock } from './PaymentBlock';
+import { useCreatePaymentTransaction } from '../hooks/usePaymentTransactions';
 
 interface InvoicePreviewProps {
   formData: BillingFormData;
   onFormChange: (data: Partial<BillingFormData>) => void;
   readOnly?: boolean;
+  billingId?: string;
 }
 
-export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onFormChange, readOnly = false }) => {
+export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ 
+  formData, 
+  onFormChange, 
+  readOnly = false,
+  billingId 
+}) => {
   const { data: settings, isLoading: isLoadingSettings } = useAgencySettings();
   const { data: clientDetails, isLoading: isLoadingClient } = useClientDetails(formData.client_id);
   const [editingItem, setEditingItem] = useState<string | null>(null);
+  const createPaymentTransaction = useCreatePaymentTransaction();
 
   // Debug log to see what settings are available
   console.log('Agency settings in InvoicePreview:', settings?.footerDetails);
@@ -80,6 +89,25 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
     onFormChange({ items: updatedItems });
   };
 
+  const handlePaymentSubmit = async (paymentData: any) => {
+    if (!billingId) {
+      console.error('Billing ID is required for payment submission');
+      return;
+    }
+
+    try {
+      await createPaymentTransaction.mutateAsync({
+        ...paymentData,
+        billing_id: billingId,
+        transaction_type: 'receipt',
+        transaction_status: 'pending',
+        transaction_date: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Payment submission failed:', error);
+    }
+  };
+
   const isIntraState = formData.place_of_supply === settings?.agencyGSTDetails?.state;
   const isInternational = formData.place_of_supply === 'International';
 
@@ -92,6 +120,12 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
       default: return 'Document';
     }
   };
+
+  // Show payment block only for invoices that are not estimates and in read-only mode with billing ID
+  const showPaymentBlock = readOnly && 
+                          billingId && 
+                          formData.billing_type === 'invoice' && 
+                          finalAmount > 0;
 
   return (
     <div className="max-w-[794px] mx-auto bg-white p-16 shadow-sm rounded-lg space-y-6">
@@ -284,6 +318,18 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ formData, onForm
           )}
         </div>
       </div>
+
+      {/* Payment Block - Only show for invoices in read-only mode */}
+      {showPaymentBlock && (
+        <div className="print:hidden">
+          <PaymentBlock
+            totalAmount={gstDetails.total_amount}
+            billingId={billingId}
+            remainingAmount={finalAmount}
+            onPaymentSubmit={handlePaymentSubmit}
+          />
+        </div>
+      )}
 
       {/* Footer */}
       <InvoiceFooter 

@@ -1173,40 +1173,67 @@ export type Database = {
           amount: number
           billing_id: string | null
           created_at: string | null
+          discount_amount: number | null
           id: string
           linked_billing_id: string | null
+          payment_method: string | null
+          payment_percentage: number | null
+          payment_type: string | null
           receipt_number: number | null
           reference_number: string | null
           tds_deducted: number | null
           transaction_date: string | null
+          transaction_proof_url: string | null
           transaction_status: Database["public"]["Enums"]["transaction_status"]
           transaction_type: Database["public"]["Enums"]["transaction_type"]
+          verification_notes: string | null
+          verification_status: string | null
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           amount: number
           billing_id?: string | null
           created_at?: string | null
+          discount_amount?: number | null
           id?: string
           linked_billing_id?: string | null
+          payment_method?: string | null
+          payment_percentage?: number | null
+          payment_type?: string | null
           receipt_number?: number | null
           reference_number?: string | null
           tds_deducted?: number | null
           transaction_date?: string | null
+          transaction_proof_url?: string | null
           transaction_status?: Database["public"]["Enums"]["transaction_status"]
           transaction_type?: Database["public"]["Enums"]["transaction_type"]
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           amount?: number
           billing_id?: string | null
           created_at?: string | null
+          discount_amount?: number | null
           id?: string
           linked_billing_id?: string | null
+          payment_method?: string | null
+          payment_percentage?: number | null
+          payment_type?: string | null
           receipt_number?: number | null
           reference_number?: string | null
           tds_deducted?: number | null
           transaction_date?: string | null
+          transaction_proof_url?: string | null
           transaction_status?: Database["public"]["Enums"]["transaction_status"]
           transaction_type?: Database["public"]["Enums"]["transaction_type"]
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: [
           {
