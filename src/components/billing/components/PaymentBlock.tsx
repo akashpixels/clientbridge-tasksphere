@@ -111,7 +111,7 @@ export const PaymentBlock: React.FC<PaymentBlockProps> = ({
           )}
 
           {/* Payment Calculation Display */}
-          <Card className="bg-gray-50 border-gray-200">
+          <Card className="border-t">
             <CardContent className="p-4">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
