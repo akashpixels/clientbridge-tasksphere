@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -19,21 +18,18 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       id: 'upi',
       label: 'UPI',
       icon: Smartphone,
-      description: 'Pay with UPI apps',
       disabled: false
     },
     {
       id: 'bank',
-      label: 'Bank Transfer',
+      label: 'Bank',
       icon: CreditCard,
-      description: 'Direct bank transfer',
       disabled: false
     },
     {
       id: 'card',
-      label: 'Card Payment',
+      label: 'Card',
       icon: CreditCard,
-      description: 'Coming soon',
       disabled: true
     }
   ];
@@ -42,31 +38,30 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     <div className="space-y-3">
       <h4 className="font-medium text-sm text-gray-700">Payment Method</h4>
       <RadioGroup value={selectedMethod} onValueChange={onMethodChange}>
-        <div className="grid gap-3">
+        <div className="flex gap-4">
           {paymentMethods.map((method) => (
-            <div key={method.id}>
-              <Label htmlFor={method.id} className="cursor-pointer">
-                <Card className={`relative p-4 border-2 transition-all hover:border-blue-200 ${
-                  selectedMethod === method.id 
-                    ? 'border-blue-500 bg-blue-50/50' 
-                    : 'border-gray-200'
-                } ${method.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-                  <div className="flex items-center space-x-3">
-                    <RadioGroupItem 
-                      value={method.id} 
-                      id={method.id}
-                      disabled={method.disabled}
-                      className="mt-0.5"
-                    />
-                    <method.icon className="h-5 w-5 text-gray-600" />
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">{method.label}</div>
-                      <div className="text-xs text-gray-500">{method.description}</div>
-                    </div>
-                  </div>
-                </Card>
-              </Label>
-            </div>
+            <Label
+              key={method.id}
+              htmlFor={method.id}
+              className={`cursor-pointer w-28`}
+            >
+              <Card
+                className={`relative p-3 flex flex-col items-center border-2 transition-all hover:border-blue-200 ${
+                  selectedMethod === method.id
+                    ? "border-blue-500 bg-blue-50/50"
+                    : "border-gray-200"
+                } ${method.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+              >
+                <RadioGroupItem
+                  value={method.id}
+                  id={method.id}
+                  disabled={method.disabled}
+                  className="mb-2"
+                />
+                <method.icon className="h-6 w-6 text-gray-700 mb-1" />
+                <div className="font-medium text-sm">{method.label}</div>
+              </Card>
+            </Label>
           ))}
         </div>
       </RadioGroup>
